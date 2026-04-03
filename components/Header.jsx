@@ -40,8 +40,8 @@ export default function Header() {
         padding: '4px 0',
       }}>
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', color: 'rgba(255,255,255,0.9)', textTransform: 'capitalize' }}>
-            {currentDate}
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.05em', color: 'rgba(255,255,255,0.9)' }}>
+            {currentDate.charAt(0).toUpperCase() + currentDate.slice(1)}
           </span>
           <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
             {/* El Panel de Admin ahora está oculto al público. Acceso manual a /admin */}
