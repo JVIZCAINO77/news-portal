@@ -11,16 +11,18 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-// Categorías del sistema y sus palabras clave enfocadas en local
+// Filtro estricto de fuentes dominicanas confiables
+const DR_SOURCES = '(site:listindiario.com OR site:diariolibre.com OR site:eldia.com.do OR site:elnacional.com.do OR site:somospueblo.com)';
+
 const CATEGORIES = {
-  noticias: { query: 'Republica Dominicana noticias hoy', slug: 'noticias', emoji: '📰', image: 'https://images.unsplash.com/photo-1495020689067-958852a7765e' },
-  entretenimiento: { query: 'Republica Dominicana farandula', slug: 'entretenimiento', emoji: '🎬', image: 'https://images.unsplash.com/photo-1603190287605-e6ade32fa852' },
-  deportes: { query: 'Republica Dominicana beisbol deportes', slug: 'deportes', emoji: '⚽', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211' },
-  tecnologia: { query: 'tecnologia IA', slug: 'tecnologia', emoji: '💻', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475' },
-  economia: { query: 'Republica Dominicana economia', slug: 'economia', emoji: '📈', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3' },
-  salud: { query: 'Republica Dominicana salud', slug: 'salud', emoji: '🏥', image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528' },
-  opinion: { query: 'Republica Dominicana editorial opinion', slug: 'opinion', emoji: '💬', image: 'https://images.unsplash.com/photo-1455390582262-044cdead2708' },
-  cultura: { query: 'Republica Dominicana cultura arte', slug: 'cultura', emoji: '🎨', image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b' }
+  noticias: { query: `Republica Dominicana noticias ${DR_SOURCES}`, slug: 'noticias', emoji: '📰', image: 'https://images.unsplash.com/photo-1495020689067-958852a7765e' },
+  entretenimiento: { query: `Republica Dominicana farandula ${DR_SOURCES}`, slug: 'entretenimiento', emoji: '🎬', image: 'https://images.unsplash.com/photo-1603190287605-e6ade32fa852' },
+  deportes: { query: `Republica Dominicana beisbol deportes ${DR_SOURCES}`, slug: 'deportes', emoji: '⚽', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211' },
+  tecnologia: { query: `tecnologia Republica Dominicana ${DR_SOURCES}`, slug: 'tecnologia', emoji: '💻', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475' },
+  economia: { query: `Republica Dominicana economia ${DR_SOURCES}`, slug: 'economia', emoji: '📈', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3' },
+  salud: { query: `Republica Dominicana salud ${DR_SOURCES}`, slug: 'salud', emoji: '🏥', image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528' },
+  opinion: { query: `Republica Dominicana editorial opinion ${DR_SOURCES}`, slug: 'opinion', emoji: '💬', image: 'https://images.unsplash.com/photo-1455390582262-044cdead2708' },
+  cultura: { query: `Republica Dominicana cultura arte ${DR_SOURCES}`, slug: 'cultura', emoji: '🎨', image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b' }
 };
 
 async function runAutoBlogger(categoryKey) {
