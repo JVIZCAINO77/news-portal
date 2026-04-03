@@ -1,13 +1,8 @@
 // app/actions.js
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 /**
  * Sincroniza un array de artículos al servidor (Supabase).
@@ -15,6 +10,15 @@ const supabase = createClient(
  */
 export async function syncArticlesToServer(articles) {
   try {
+    const supabase = createClient();
+    
+    // Verificar sesión (Protección contra intrusos)
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('[actions] Intento no autorizado de publicar un artículo');
+      return { success: false, error: 'No autorizado. Debes iniciar sesión como administrador.' };
+    }
+
     const { error } = await supabase
       .from('articles')
       .upsert(articles, { onConflict: 'id' });
@@ -39,6 +43,15 @@ export async function syncArticlesToServer(articles) {
  */
 export async function deleteArticleFromServer(id) {
   try {
+    const supabase = createClient();
+    
+    // Verificar sesión (Protección contra intrusos)
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('[actions] Intento no autorizado de borrar un artículo');
+      return { success: false, error: 'No autorizado. Debes iniciar sesión como administrador.' };
+    }
+
     const { error } = await supabase
       .from('articles')
       .delete()
@@ -50,10 +63,9 @@ export async function deleteArticleFromServer(id) {
     
     // Forzar recarga de caché
     revalidatePath('/', 'layout');
-    
+
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
   }
 }
-

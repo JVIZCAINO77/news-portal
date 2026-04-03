@@ -5,7 +5,11 @@ require('dotenv').config({ path: '.env.local' });
 
 // Configuración de APIs
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+// IMPORTANTE DE SEGURIDAD: El Agente usa la Service Role Key para saltarse el RLS y escribir en la base de datos de forma segura sin estar logueado.
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL, 
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 // Categorías del sistema y sus palabras clave
 const CATEGORIES = {
