@@ -5,6 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import BreakingTicker from '@/components/BreakingTicker';
 import AdSenseScript from '@/components/AdSenseScript';
+import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
@@ -97,6 +98,7 @@ export default function RootLayout({ children }) {
           {children}
         </main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
