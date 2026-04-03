@@ -2,10 +2,12 @@ name: Auto-Blogger Diario
 
 on:
   schedule:
-    # 3 veces al día en horas estratégicas (UTC: 12:00 = 8am EST, 18:00 = 2pm EST, 22:00 = 6pm EST)
-    - cron: '0 12 * * *' # Mañana
-    - cron: '0 18 * * *' # Tarde
-    - cron: '0 22 * * *' # Noche
+    # 5 publicaciones masivas diarias, alineadas a las horas pico en Rep. Dominicana (UTC-4)
+    - cron: '0 10 * * *' # 6:00 AM (Despertar y commuting)
+    - cron: '0 14 * * *' # 10:00 AM (Actualización matutina)
+    - cron: '0 16 * * *' # 12:00 PM (Hora de almuerzo)
+    - cron: '30 20 * * *' # 4:30 PM (Final de la jornada laboral)
+    - cron: '0 1 * * *'   # 9:00 PM (Revista nocturna)
   workflow_dispatch: # Permite ejecutar el bot manualmente desde la página de GitHub
 
 jobs:
