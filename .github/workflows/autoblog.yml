@@ -1,0 +1,45 @@
+name: Auto-Blogger Diario
+
+on:
+  schedule:
+    # 3 veces al día en horas estratégicas (UTC: 12:00 = 8am EST, 18:00 = 2pm EST, 22:00 = 6pm EST)
+    - cron: '0 12 * * *' # Mañana
+    - cron: '0 18 * * *' # Tarde
+    - cron: '0 22 * * *' # Noche
+  workflow_dispatch: # Permite ejecutar el bot manualmente desde la página de GitHub
+
+jobs:
+  publish_article:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar código
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Instalar dependencias del script
+        run: npm install rss-parser @google/genai dotenv @supabase/supabase-js
+
+      - name: Decidir Categoría basada en la hora
+        id: pick_category
+        run: |
+          HOUR=$(date +%H)
+          if [ "$HOUR" -eq "12" ]; then
+            echo "category=tecnologia" >> $GITHUB_OUTPUT
+          elif [ "$HOUR" -eq "18" ]; then
+            echo "category=noticias" >> $GITHUB_OUTPUT
+          else
+            echo "category=deportes" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Ejecutar Agente Redactor (Auto-Blogger)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: "https://news-portal-rosy-kappa.vercel.app" # Reemplazar si el dominio oficial cambia
+          REVALIDATE_SECRET: "mi-secreto-super-seguro"
+        run: node scripts/agent.js ${{ steps.pick_category.outputs.category }}
