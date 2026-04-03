@@ -15,8 +15,8 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   useEffect(() => {
-    const dateStr = new Date().toLocaleDateString('es-ES', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    const dateStr = new Date().toLocaleDateString('es-DO', {
+      timeZone: 'America/Santo_Domingo', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
     });
     // Evitar actualización síncrona según react-hooks/set-state-in-effect
     setTimeout(() => setCurrentDate(dateStr), 0);
