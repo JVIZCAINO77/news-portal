@@ -2,6 +2,7 @@
 'use server';
 
 import { createClient } from '@supabase/supabase-js';
+import { revalidatePath } from 'next/cache';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -22,6 +23,10 @@ export async function syncArticlesToServer(articles) {
       console.error('[actions] Error sincronizando a Supabase:', error.message);
       return { success: false, error: error.message };
     }
+    
+    // Forzar recarga de caché en toda la página web
+    revalidatePath('/', 'layout');
+    
     return { success: true };
   } catch (err) {
     console.error('[actions] Error inesperado:', err);
@@ -42,6 +47,10 @@ export async function deleteArticleFromServer(id) {
     if (error) {
       return { success: false, error: error.message };
     }
+    
+    // Forzar recarga de caché
+    revalidatePath('/', 'layout');
+    
     return { success: true };
   } catch (err) {
     return { success: false, error: err.message };
