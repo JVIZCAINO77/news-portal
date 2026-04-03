@@ -156,11 +156,37 @@ async function runAutoBlogger(categoryKey) {
                     html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
       if (match && match[1]) originalImage = match[1];
     } catch (err) {
-      console.log(`⚠️ No se pudo extraer OG Image, usando fallback dinámico.`);
+      console.log(`⚠️ No se pudo extraer OG Image: ${err.message}`);
     }
 
-    // Imagen dinámica de respaldo si el medio no provee OpenGraph Image válida
-    const dynamicImage = originalImage || `https://picsum.photos/seed/${Date.now().toString()}/1200/630`;
+    let dynamicImage = `https://picsum.photos/seed/${Date.now().toString()}/1200/630`;
+
+    // Si conseguimos la imagen original, la clonamos y modificamos en Cloudinary para evitar huellas de copyright
+    if (originalImage) {
+      try {
+        console.log(`🎨 Clonando y modificando imagen en Cloudinary para evitar penalizaciones...`);
+        const formData = new FormData();
+        formData.append('file', originalImage); // Cloudinary permite enviar una URL para que ellos la descarguen
+        formData.append('upload_preset', 'news_portal'); // Preset del usuario
+        formData.append('folder', 'news-portal/autoblog');
+
+        const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/DKKW77byz/image/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (cloudRes.ok) {
+          const cloudData = await cloudRes.json();
+          // Aplicamos filtros: e_improve (mejora color), e_saturation:10, c_fill,g_auto para garantizar que sea un archivo nuevo a los ojos de Google
+          dynamicImage = cloudData.secure_url.replace('/upload/', '/upload/f_auto,q_auto,w_1200,h_630,c_fill,e_improve,e_saturation:10/');
+          console.log(`✅ Imagen clonada exitosamente: ${dynamicImage}`);
+        } else {
+          console.log(`⚠️ Falló el clonado en Cloudinary, usando imagen genérica.`);
+        }
+      } catch (e) {
+        console.log(`⚠️ Error de red con Cloudinary: ${e.message}`);
+      }
+    }
 
     const newArticle = {
       id: Date.now().toString(),
