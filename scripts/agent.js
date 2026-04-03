@@ -15,14 +15,46 @@ const supabase = createClient(
 const DR_SOURCES = '(site:listindiario.com OR site:diariolibre.com OR site:eldia.com.do OR site:elnacional.com.do OR site:somospueblo.com)';
 
 const CATEGORIES = {
-  noticias: { query: `Republica Dominicana noticias ${DR_SOURCES}`, slug: 'noticias', emoji: '📰', image: 'https://images.unsplash.com/photo-1495020689067-958852a7765e' },
-  entretenimiento: { query: `Republica Dominicana farandula ${DR_SOURCES}`, slug: 'entretenimiento', emoji: '🎬', image: 'https://images.unsplash.com/photo-1603190287605-e6ade32fa852' },
-  deportes: { query: `Republica Dominicana beisbol deportes ${DR_SOURCES}`, slug: 'deportes', emoji: '⚽', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211' },
-  tecnologia: { query: `tecnologia Republica Dominicana ${DR_SOURCES}`, slug: 'tecnologia', emoji: '💻', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475' },
-  economia: { query: `Republica Dominicana economia ${DR_SOURCES}`, slug: 'economia', emoji: '📈', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3' },
-  salud: { query: `Republica Dominicana salud ${DR_SOURCES}`, slug: 'salud', emoji: '🏥', image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528' },
-  opinion: { query: `Republica Dominicana editorial opinion ${DR_SOURCES}`, slug: 'opinion', emoji: '💬', image: 'https://images.unsplash.com/photo-1455390582262-044cdead2708' },
-  cultura: { query: `Republica Dominicana cultura arte ${DR_SOURCES}`, slug: 'cultura', emoji: '🎨', image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b' }
+  noticias: { 
+    query: `Republica Dominicana noticias ${DR_SOURCES}`, slug: 'noticias', emoji: '📰',
+    author: 'Carlos Mendoza', authorBio: 'Corresponsal Senior de Actualidad',
+    style: 'objetivo, directo, riguroso y al estilo periodístico clásico de la prensa escrita dominicana (como Listín Diario o Diario Libre)'
+  },
+  entretenimiento: { 
+    query: `Republica Dominicana farandula ${DR_SOURCES}`, slug: 'entretenimiento', emoji: '🎬',
+    author: 'Valeria Reyes', authorBio: 'Editora de Espectáculos y Cultura',
+    style: 'fresco, envolvente, dinámico y conectado con la farándula nacional'
+  },
+  deportes: { 
+    query: `Republica Dominicana beisbol deportes ${DR_SOURCES}`, slug: 'deportes', emoji: '⚽',
+    author: 'Marcos Alarcón', authorBio: 'Analista Deportivo',
+    style: 'apasionado, rico en contexto estadístico y con narración intensa, como los grandes comentaristas deportivos del país'
+  },
+  tecnologia: { 
+    query: `tecnologia Republica Dominicana ${DR_SOURCES}`, slug: 'tecnologia', emoji: '💻',
+    author: 'Elena Torres', authorBio: 'Periodista de Innovación',
+    style: 'analítico, vanguardista y fácil de entender para el público general'
+  },
+  economia: { 
+    query: `Republica Dominicana economia ${DR_SOURCES}`, slug: 'economia', emoji: '📈',
+    author: 'Roberto Silva', authorBio: 'Analista Financiero',
+    style: 'serio, enfocado en el impacto de mercado y en cómo afecta el bolsillo del ciudadano dominicano'
+  },
+  salud: { 
+    query: `Republica Dominicana salud ${DR_SOURCES}`, slug: 'salud', emoji: '🏥',
+    author: 'Dra. Carmen López', authorBio: 'Corresponsal Médica',
+    style: 'empático, basado estrictamente en ciencia y enfocado en la prevención y el bienestar'
+  },
+  opinion: { 
+    query: `Republica Dominicana editorial opinion ${DR_SOURCES}`, slug: 'opinion', emoji: '💬',
+    author: 'Prof. Arturo Peña', authorBio: 'Editorialista Principal',
+    style: 'argumentativo, profundo, reflexivo y crítico sobre el contexto sociopolítico actual'
+  },
+  cultura: { 
+    query: `Republica Dominicana cultura arte ${DR_SOURCES}`, slug: 'cultura', emoji: '🎨',
+    author: 'Diana Mateo', authorBio: 'Crítica de Arte y Sociedad',
+    style: 'culto, descriptivo, poético y enfocado enaltecer las raíces y el talento dominicano'
+  }
 };
 
 async function runAutoBlogger(categoryKey) {
@@ -41,30 +73,58 @@ async function runAutoBlogger(categoryKey) {
       throw new Error("No se encontraron noticias recientes en Google News.");
     }
 
-    // Tomamos la primera noticia (la más relevante)
-    const rawNews = feed.items[0];
+    // Buscamos la primera noticia que NO hayamos publicado
+    let rawNews = null;
+    for (const item of feed.items) {
+      const sourceId = item.guid || item.link;
+      // Verificamos en DB si ya existe ese ID oculto en el content
+      const { data: existing } = await supabase
+        .from('articles')
+        .select('id')
+        .ilike('content', `%<!-- SOURCE_GUID: ${sourceId} -->%`)
+        .limit(1);
+
+      if (!existing || existing.length === 0) {
+        rawNews = item;
+        break;
+      }
+    }
+
+    if (!rawNews) {
+      throw new Error("No hay noticias nuevas. Todas las recientes de Google News ya fueron publicadas.");
+    }
+
     console.log(`📌 Noticia seleccionada: "${rawNews.title}"`);
 
     // 2. Usar Gemini para redactar el artículo final (Original y SEO friendly)
     const prompt = `
-      Vas a actuar como un periodista profesional de "PulsoNoticias".
-      Se te dará un titular y un fragmento de una noticia real. Tu trabajo es REESCRIBIR la noticia creando un artículo de prensa completo, profesional, de unos 3-4 párrafos.
-      - NO copies el texto original, nárrale a la audiencia los hechos con tus propias palabras.
-      - Incluye un Título atractivo (diferente al original).
-      - El contenido debe estar formateado en Markdown, pudiendo usar **negritas** y listas si ayudan a la lectura.
-      - IMPORTANTE: Tu respuesta debe ser SOLO un objeto JSON válido con la siguiente estructura (sin formato de bloque de código markdown fuera del JSON, solo el JSON puro):
+      Vas a actuar como un periodista profesional altamente reconocido que escribe para el gran portal dominicano "PulsoNoticias".
+      
+      TU IDENTIDAD PERIODÍSTICA:
+      Nombre: ${categoryInfo.author} (${categoryInfo.authorBio})
+      Estilo de redacción obligatorio: ${categoryInfo.style}.
+
+      INSTRUCCIÓN:
+      Se te dará un titular y un fragmento de una noticia real. Tu trabajo es REESCRIBIR la noticia creando un artículo de prensa original, digno de portales líderes como Listín Diario o Diario Libre.
+      - El artículo debe tener entre 3 y 5 párrafos bien desarrollados, introduciendo la noticia, desarrollando el contexto y concluyendo con impacto.
+      - Escribe como si fueras TÚ (${categoryInfo.author}) reportándolo de primera mano. Puedes usar en raras ocasiones la primera persona plural ("nosotros los dominicanos") si el contexto lo amerita.
+      - MANTÉN LA IMPARCIALIDAD SOBRE HECHOS, pero aplica tu "Estilo de redacción obligatorio".
+      - Incluye un Título atractivo y completamente original (jamás copies el original).
+      - El contenido debe estar formateado en Markdown, pudiendo usar **negritas**, listas y subtítulos (##) si ayudan a organizar la lectura.
+      
+      IMPORTANTE: Tu respuesta debe ser SOLO un objeto JSON válido con la siguiente estructura (sin formato de bloque de código markdown fuera del JSON, solo el JSON puro):
       {
         "title": "Un título genial",
-        "excerpt": "Un resumen de 1 línea para atrapar al lector",
+        "excerpt": "Un resumen de 2 líneas para atrapar al lector",
         "content": "El contenido formateado en Markdown..."
       }
 
-      NOTICIA ORIGINAL:
-      Titular: ${rawNews.title}
-      Resumen: ${rawNews.contentSnippet || rawNews.content}
+      NOTICIA ORIGINAL DE REFERENCIA:
+      Titular original: ${rawNews.title}
+      Resumen original: ${rawNews.contentSnippet || rawNews.content}
     `;
 
-    console.log(`🧠 Solicitando redacción a Gemini AI...`);
+    console.log(`🧠 Solicitando redacción a Gemini AI (Persona: ${categoryInfo.author})...`);
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: prompt,
@@ -80,16 +140,22 @@ async function runAutoBlogger(categoryKey) {
       .replace(/[^a-z0-9]+/g, '-') // Convertir espacios y símbolos a guiones
       .replace(/(^-|-$)+/g, ''); // Limpiar bordes
 
+    const sourceId = rawNews.guid || rawNews.link;
+    const finalContent = articleData.content + `\n\n<!-- SOURCE_GUID: ${sourceId} -->`;
+
+    // Imagen dinámica 100% única asegurada por Picsum basada en el ID
+    const dynamicImage = `https://picsum.photos/seed/${Date.now().toString()}/1200/630`;
+
     const newArticle = {
       id: Date.now().toString(),
       title: articleData.title,
       slug: slug,
       excerpt: articleData.excerpt,
-      content: articleData.content,
+      content: finalContent,
       category: categoryInfo.slug,
-      author: 'Redacción PulsoNoticias (IA)',
-      authorBio: 'Periodismo automatizado a la velocidad de los sucesos.',
-      image: categoryInfo.image,
+      author: categoryInfo.author,
+      authorBio: categoryInfo.authorBio,
+      image: dynamicImage,
       imageAlt: articleData.title,
       readTime: Math.max(1, Math.ceil(articleData.content.split(' ').length / 200)),
       tags: [categoryInfo.slug],
@@ -119,8 +185,10 @@ async function runAutoBlogger(categoryKey) {
     console.log(`✅ ¡Artículo publicado con éxito!`);
 
   } catch (error) {
-    console.error(`❌ Error en Auto-Blogger: ${error.message}`);
-    process.exit(1);
+    console.error(`❌ Error en Auto-Blogger (${categoryKey}): ${error.message}`);
+    // No usar process.exit(1) para que la ejecución local pueda continuar
+    // con las catégorías restantes si se encadena externamente.
+    return;
   }
 }
 

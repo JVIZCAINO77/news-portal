@@ -43,7 +43,7 @@ jobs:
             # Ejecutar el script (Ignora errores puntuales para que no detenga el resto)
             node scripts/agent.js $cat || echo "⚠️ Falló la categoría $cat, continuando con la siguiente..."
             
-            echo "⏱️ Pausando 15 segundos para no saturar las APIs..."
-            sleep 15
+            echo "⏱️ Pausando 65 segundos (anti rate-limit de Google Gemini)..."
+            sleep 65
           done
 

@@ -1,8 +1,9 @@
-// app/sitemap.js — Sitemap dinámico para SEO
-import { getAllArticles, CATEGORIES, SITE_CONFIG } from '@/lib/data';
+// app/sitemap.js — Sitemap dinámico para SEO (usa artículos reales de Supabase)
+import { getAllArticles } from '@/lib/serverData';
+import { CATEGORIES, SITE_CONFIG } from '@/lib/data';
 
-export default function sitemap() {
-  const articles = getAllArticles();
+export default async function sitemap() {
+  const articles = await getAllArticles();
   const baseUrl = SITE_CONFIG.url;
 
   const staticPages = [
@@ -19,10 +20,11 @@ export default function sitemap() {
 
   const articlePages = articles.map((article) => ({
     url: `${baseUrl}/articulo/${article.slug}`,
-    lastModified: new Date(article.updatedAt),
+    lastModified: new Date(article.updatedAt || article.publishedAt),
     changeFrequency: 'weekly',
     priority: article.featured ? 0.9 : 0.7,
   }));
 
   return [...staticPages, ...categoryPages, ...articlePages];
 }
+

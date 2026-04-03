@@ -11,6 +11,9 @@ export const metadata = {
   alternates: { canonical: '/' },
 };
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function HomePage() {
   const featured = await getFeaturedArticles(2);
   const trending = await getTrendingArticles(5);

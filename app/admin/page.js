@@ -137,9 +137,18 @@ export default function AdminPage() {
     } catch (e) { console.error(e); }
   };
 
-  const deleteArticle = (id) => {
+  const deleteArticle = async (id) => {
     if (!confirm('¿Eliminar este artículo? Esta acción no se puede deshacer.')) return;
-    saveArticles(articles.filter((a) => a.id !== id));
+    
+    // Optimistic UI update
+    const updated = articles.filter((a) => a.id !== id);
+    setArticles(updated);
+    localStorage.setItem('portal_articles', JSON.stringify(updated));
+    
+    try {
+      const { deleteArticleFromServer } = await import('@/app/actions');
+      await deleteArticleFromServer(id);
+    } catch (e) { console.error('Error borrando en servidor:', e); }
   };
 
   const toggleFeatured = (id) => {
