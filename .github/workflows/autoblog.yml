@@ -23,19 +23,7 @@ jobs:
       - name: Instalar dependencias del script
         run: npm install rss-parser @google/genai dotenv @supabase/supabase-js
 
-      - name: Decidir Categoría basada en la hora
-        id: pick_category
-        run: |
-          HOUR=$(date +%H)
-          if [ "$HOUR" -eq "12" ]; then
-            echo "category=tecnologia" >> $GITHUB_OUTPUT
-          elif [ "$HOUR" -eq "18" ]; then
-            echo "category=noticias" >> $GITHUB_OUTPUT
-          else
-            echo "category=deportes" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Ejecutar Agente Redactor (Auto-Blogger)
+      - name: Ejecutar Agente Redactor (Para todas las categorías)
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -43,4 +31,17 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_SITE_URL: "https://news-portal-rosy-kappa.vercel.app" # Reemplazar si el dominio oficial cambia
           REVALIDATE_SECRET: "mi-secreto-super-seguro"
-        run: node scripts/agent.js ${{ steps.pick_category.outputs.category }}
+        run: |
+          CATEGORIES="noticias entretenimiento deportes tecnologia economia salud opinion cultura"
+          for cat in $CATEGORIES; do
+            echo "====================================="
+            echo "🚀 Lanzando Agente para: $cat"
+            echo "====================================="
+            
+            # Ejecutar el script (Ignora errores puntuales para que no detenga el resto)
+            node scripts/agent.js $cat || echo "⚠️ Falló la categoría $cat, continuando con la siguiente..."
+            
+            echo "⏱️ Pausando 15 segundos para no saturar las APIs..."
+            sleep 15
+          done
+

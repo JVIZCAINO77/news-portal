@@ -18,7 +18,9 @@ const CATEGORIES = {
   deportes: { query: 'Republica Dominicana beisbol deportes', slug: 'deportes', emoji: '⚽', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211' },
   tecnologia: { query: 'tecnologia IA', slug: 'tecnologia', emoji: '💻', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475' },
   economia: { query: 'Republica Dominicana economia', slug: 'economia', emoji: '📈', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3' },
-  salud: { query: ' Republica Dominicana salud', slug: 'salud', emoji: '🏥', image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528' }
+  salud: { query: 'Republica Dominicana salud', slug: 'salud', emoji: '🏥', image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528' },
+  opinion: { query: 'Republica Dominicana editorial opinion', slug: 'opinion', emoji: '💬', image: 'https://images.unsplash.com/photo-1455390582262-044cdead2708' },
+  cultura: { query: 'Republica Dominicana cultura arte', slug: 'cultura', emoji: '🎨', image: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b' }
 };
 
 async function runAutoBlogger(categoryKey) {
