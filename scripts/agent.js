@@ -11,14 +11,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-// Categorías del sistema y sus palabras clave
+// Categorías del sistema y sus palabras clave enfocadas en local
 const CATEGORIES = {
-  noticias: { query: 'noticias ultima hora', slug: 'noticias', emoji: '📰', image: 'https://images.unsplash.com/photo-1495020689067-958852a7765e' },
-  entretenimiento: { query: 'cine musica espectaculos', slug: 'entretenimiento', emoji: '🎬', image: 'https://images.unsplash.com/photo-1603190287605-e6ade32fa852' },
-  deportes: { query: 'deportes futbol tenis', slug: 'deportes', emoji: '⚽', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211' },
-  tecnologia: { query: 'tecnologia IA software', slug: 'tecnologia', emoji: '💻', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475' },
-  economia: { query: 'economia finanzas', slug: 'economia', emoji: '📈', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3' },
-  salud: { query: 'salud medicina bienestar', slug: 'salud', emoji: '🏥', image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528' }
+  noticias: { query: 'Republica Dominicana noticias hoy', slug: 'noticias', emoji: '📰', image: 'https://images.unsplash.com/photo-1495020689067-958852a7765e' },
+  entretenimiento: { query: 'Republica Dominicana farandula', slug: 'entretenimiento', emoji: '🎬', image: 'https://images.unsplash.com/photo-1603190287605-e6ade32fa852' },
+  deportes: { query: 'Republica Dominicana beisbol deportes', slug: 'deportes', emoji: '⚽', image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211' },
+  tecnologia: { query: 'tecnologia IA', slug: 'tecnologia', emoji: '💻', image: 'https://images.unsplash.com/photo-1518770660439-4636190af475' },
+  economia: { query: 'Republica Dominicana economia', slug: 'economia', emoji: '📈', image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3' },
+  salud: { query: ' Republica Dominicana salud', slug: 'salud', emoji: '🏥', image: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528' }
 };
 
 async function runAutoBlogger(categoryKey) {
