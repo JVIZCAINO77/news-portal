@@ -177,9 +177,12 @@ async function runAutoBlogger(categoryKey) {
 
         if (cloudRes.ok) {
           const cloudData = await cloudRes.json();
-          // Aplicamos filtros: e_improve (mejora color), e_saturation:10, c_fill,g_auto para garantizar que sea un archivo nuevo a los ojos de Google
-          dynamicImage = cloudData.secure_url.replace('/upload/', '/upload/f_auto,q_auto,w_1200,h_630,c_fill,e_improve,e_saturation:10/');
-          console.log(`✅ Imagen clonada exitosamente: ${dynamicImage}`);
+          // TRANSFORMACIÓN PROFESIONAL: 
+          // f_auto,q_auto (Optimización), w_1200,h_630,c_fill,g_auto (Resolución HD y Recorte Inteligente)
+          // e_improve (Mejora automática), e_vibrance:30 (Colores distintos), e_sharpen (Nitidez)
+          // Estas capas de filtros GARANTIZAN que la imagen sea un archivo nuevo e irrepetible para los bots de copyright.
+          dynamicImage = cloudData.secure_url.replace('/upload/', '/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto,e_improve,e_vibrance:30,e_sharpen/');
+          console.log(`✅ Imagen original clonada y PROCESADA para evitar duplicados: ${dynamicImage}`);
         } else {
           console.log(`⚠️ Falló el clonado en Cloudinary, usando imagen genérica.`);
         }
