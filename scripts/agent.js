@@ -143,8 +143,24 @@ async function runAutoBlogger(categoryKey) {
     const sourceId = rawNews.guid || rawNews.link;
     const finalContent = articleData.content + `\n\n<!-- SOURCE_GUID: ${sourceId} -->`;
 
-    // Imagen dinámica 100% única asegurada por Picsum basada en el ID
-    const dynamicImage = `https://picsum.photos/seed/${Date.now().toString()}/1200/630`;
+    // Intentar extraer la imagen ORIGINAL en alta resolución de la noticia fuente
+    let originalImage = null;
+    try {
+      console.log(`📸 Extrayendo miniatura original desde el origen...`);
+      const res = await fetch(rawNews.link, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' },
+        signal: AbortSignal.timeout(8000)
+      });
+      const html = await res.text();
+      const match = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']+)["']/i) || 
+                    html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*property=["']og:image["']/i);
+      if (match && match[1]) originalImage = match[1];
+    } catch (err) {
+      console.log(`⚠️ No se pudo extraer OG Image, usando fallback dinámico.`);
+    }
+
+    // Imagen dinámica de respaldo si el medio no provee OpenGraph Image válida
+    const dynamicImage = originalImage || `https://picsum.photos/seed/${Date.now().toString()}/1200/630`;
 
     const newArticle = {
       id: Date.now().toString(),
