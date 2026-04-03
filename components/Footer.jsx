@@ -94,10 +94,7 @@ export default function Footer() {
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8 }}>
               {[
                 { label: 'Política de Privacidad', href: '/privacidad' },
-                { label: 'Términos de Uso', href: '/terminos' },
-                { label: 'Política de Cookies', href: '/cookies' },
-                { label: 'Contacto', href: '/contacto' },
-                { label: 'Aviso Legal', href: '/aviso-legal' },
+                { label: 'Contacto y Publicidad', href: '/contacto' }
               ].map(({ label, href }) => (
                 <li key={href}>
                   <Link href={href} style={{
