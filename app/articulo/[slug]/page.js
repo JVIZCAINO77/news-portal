@@ -1,50 +1,26 @@
-// app/articulo/[slug]/page.js — Página de artículo individual (SSR + SEO completo)
+// app/articulo/[slug]/page.js — Página de Artículo Premium (PulsoNoticias 2.0)
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getArticleBySlug, getAllArticles, getLatestArticles } from '@/lib/serverData';
-import { getCategoryBySlug, formatDate, SITE_CONFIG } from '@/lib/data';
+import { getCategoryBySlug, formatDate } from '@/lib/data';
 import ArticleCard from '@/components/ArticleCard';
 import AdUnit from '@/components/AdUnit';
 
-// Genera rutas estáticas para todos los artículos (SSG)
-export async function generateStaticParams() {
-  const articles = await getAllArticles();
-  return articles.map((a) => ({ slug: a.slug }));
-}
-
-// Metadata dinámica por artículo — crucial para SEO
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const article = await getArticleBySlug(slug);
   if (!article) return { title: 'Artículo no encontrado' };
 
-  const cat = getCategoryBySlug(article.category);
-
   return {
     title: article.title,
     description: article.excerpt,
-    keywords: article.tags,
-    authors: [{ name: article.author }],
     openGraph: {
       type: 'article',
       title: article.title,
       description: article.excerpt,
-      url: `/articulo/${article.slug}`,
-      images: [{ url: article.image, width: 800, alt: article.imageAlt || article.title }],
-      publishedTime: article.publishedAt,
-      modifiedTime: article.updatedAt,
-      authors: [article.author],
-      section: cat?.label,
-      tags: article.tags,
+      images: [{ url: article.image }],
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: article.title,
-      description: article.excerpt,
-      images: [article.image],
-    },
-    alternates: { canonical: `/articulo/${article.slug}` },
   };
 }
 
@@ -55,250 +31,77 @@ export default async function ArticlePage({ params }) {
   if (!article) notFound();
 
   const cat = getCategoryBySlug(article.category);
-  const articlesLatest = await getLatestArticles(3);
-  const related = articlesLatest.filter((a) => a.id !== article.id).slice(0, 3);
+  const latest = await getLatestArticles(5);
+  const related = latest.filter(a => a.id !== article.id).slice(0, 3);
 
-  // JSON-LD NewsArticle — máxima visibilidad en buscadores y motores IA
-  const articleSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
-    headline: article.title,
-    description: article.excerpt,
-    image: [article.image],
-    datePublished: article.publishedAt,
-    dateModified: article.updatedAt,
-    author: {
-      '@type': 'Person',
-      name: article.author,
-      description: article.authorBio,
-    },
-    publisher: {
-      '@type': 'NewsMediaOrganization',
-      name: SITE_CONFIG.name,
-      url: SITE_CONFIG.url,
-      logo: { '@type': 'ImageObject', url: `${SITE_CONFIG.url}/logo.png` },
-    },
-    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_CONFIG.url}/articulo/${article.slug}` },
-    articleSection: cat?.label,
-    keywords: article.tags?.join(', '),
-    wordCount: article.content?.split(' ').length,
-    timeRequired: `PT${article.readTime}M`,
-    inLanguage: 'es',
-    isAccessibleForFree: true,
-  };
-
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_CONFIG.url },
-      { '@type': 'ListItem', position: 2, name: cat?.label, item: `${SITE_CONFIG.url}/categoria/${article.category}` },
-      { '@type': 'ListItem', position: 3, name: article.title, item: `${SITE_CONFIG.url}/articulo/${article.slug}` },
-    ],
-  };
-
-  // Formatear contenido como HTML básico
-  const htmlContent = article.content
-    ?.split('\n\n')
-    .map((para) => {
-      if (para.startsWith('**') && para.endsWith('**')) {
-        return `<h2>${para.slice(2, -2)}</h2>`;
-      }
-      return `<p>${para
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/__(.+?)__/g, '<em>$1</em>')
-      }</p>`;
-    })
-    .join('');
+  const paragraphs = article.content?.split('\n\n') || [];
 
   return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-
-      <div className="max-w-7xl mx-auto px-4 py-6">
-
-        {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" style={{ marginBottom: 20 }}>
-          <ol style={{ display: 'flex', gap: 8, listStyle: 'none', fontSize: 13, color: 'var(--color-text-dim)', flexWrap: 'wrap' }}>
-            <li><Link href="/" style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>Inicio</Link></li>
-            <li style={{ opacity: 0.4 }}>›</li>
-            {cat && <li><Link href={`/categoria/${article.category}`} style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>{cat.label}</Link></li>}
-            <li style={{ opacity: 0.4 }}>›</li>
-            <li style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>{article.title}</li>
-          </ol>
+    <article className="bg-white min-h-screen">
+      <div className="max-w-5xl mx-auto px-6 py-12 md:py-20">
+        <nav className="mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">
+           <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
+           <span className="w-1 h-1 bg-slate-100 rounded-full"></span>
+           <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
         </nav>
-
-        {/* Ad leaderboard */}
-        <div style={{ marginBottom: 24 }}>
-          <AdUnit slot="1234567890" format="leaderboard" />
+        <header className="mb-16">
+           <h1 className="text-5xl md:text-8xl font-black text-black mb-10 leading-none tracking-tighter">
+             {article.title}
+           </h1>
+           <p className="text-xl md:text-3xl text-slate-500 font-serif leading-relaxed mb-12 max-w-4xl italic border-l-8 border-gray-100 pl-8">
+             {article.excerpt}
+           </p>
+           <div className="flex flex-col md:flex-row md:items-center justify-between py-10 border-y border-gray-100 gap-8">
+             <div className="flex items-center gap-5">
+                <div className="w-14 h-14 bg-black flex items-center justify-center text-white font-black text-2xl select-none">{article.author?.[0]}</div>
+                <div className="text-left">
+                   <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Autoría</p>
+                   <p className="text-lg font-black text-black uppercase leading-none">{article.author}</p>
+                </div>
+             </div>
+             <div className="text-left md:text-right">
+                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Publicado el</p>
+                <p className="text-lg font-black text-black uppercase leading-none">{formatDate(article.publishedAt)}</p>
+             </div>
+           </div>
+        </header>
+        <figure className="mb-20">
+           <div className="relative aspect-[16/9] overflow-hidden grayscale-[0.3] hover:grayscale-0 transition-all duration-700 bg-slate-50">
+              <Image src={article.image} alt={article.imageAlt || article.title} fill className="object-cover" priority />
+           </div>
+           {article.imageAlt && <figcaption className="mt-5 text-center text-[10px] text-slate-400 font-black uppercase tracking-[0.3em] font-sans">Créditos: {article.imageAlt}</figcaption>}
+        </figure>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-24">
+           <div className="lg:col-span-8">
+              <div className="prose-news">
+                 {paragraphs.map((p, i) => {
+                    if (p.startsWith('## ')) {
+                      return <h2 key={i} className="text-3xl font-black text-black mt-16 mb-8 uppercase tracking-tighter italic">{p.replace('## ', '')}</h2>;
+                    }
+                    const formattedText = p.replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>');
+                    return ( <p key={i} className="mb-10 text-xl font-serif leading-relaxed text-[#333] tracking-normal" dangerouslySetInnerHTML={{ __html: formattedText }} /> );
+                 })}
+              </div>
+              <div className="flex flex-wrap gap-2 mt-20 pt-10 border-t border-gray-100">
+                 {article.tags?.map(tag => ( <span key={tag} className="text-[10px] font-black uppercase tracking-[0.3em] bg-slate-50 text-slate-400 px-4 py-2 hover:bg-red-600 hover:text-white transition-all cursor-pointer">#{tag}</span> ))}
+              </div>
+              <AdUnit format="in-article" className="mt-16" />
+           </div>
+           <aside className="lg:col-span-4 border-l border-gray-100 pl-0 lg:pl-16">
+              <div className="sticky top-32 space-y-20">
+                 <div className="bg-white p-0">
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 pb-3 border-b border-gray-100">Relacionados</h4>
+                    <div className="space-y-4"> {related.map(a => ( <ArticleCard key={a.id} article={a} variant="minimal" /> ))} </div>
+                 </div>
+                 <AdUnit format="rectangle" />
+              </div>
+           </aside>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* ─ Columna principal del artículo ─ */}
-          <article className="lg:col-span-2" itemScope itemType="https://schema.org/NewsArticle">
-
-            {/* Categoría */}
-            {cat && (
-              <Link href={`/categoria/${article.category}`} style={{ textDecoration: 'none' }}>
-                <span className="cat-badge" style={{ background: cat.color, color: '#fff', marginBottom: 16, display: 'inline-flex' }}>
-                  {cat.emoji} {cat.label}
-                </span>
-              </Link>
-            )}
-
-            {/* Titular */}
-            <h1
-              itemProp="headline"
-              style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)',
-                fontWeight: 900, color: '#fff',
-                lineHeight: 1.2, marginBottom: 16,
-              }}
-            >
-              {article.title}
-            </h1>
-
-            {/* Entradilla */}
-            <p style={{
-              fontSize: '1.15rem', color: '#d1d5db',
-              lineHeight: 1.7, marginBottom: 20,
-              paddingLeft: 14, borderLeft: '3px solid var(--color-primary)',
-              fontFamily: 'var(--font-serif)',
-            }}>
-              {article.excerpt}
-            </p>
-
-            {/* Meta del autor */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 14,
-              padding: '14px 0', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)',
-              marginBottom: 24,
-            }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: '50%',
-                background: 'var(--color-primary)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'var(--font-heading)', fontWeight: 900, fontSize: 18, color: '#fff', flexShrink: 0,
-              }}>
-                {article.author?.[0]}
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }} itemProp="author" itemScope itemType="https://schema.org/Person">
-                  <span itemProp="name">{article.author}</span>
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{article.authorBio}</div>
-              </div>
-              <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                <div style={{ fontSize: 12, color: 'var(--color-text-muted)' }} itemProp="datePublished" content={article.publishedAt}>
-                  {formatDate(article.publishedAt)}
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--color-text-dim)' }}>
-                  {article.readTime} min lectura · 👁 {article.views?.toLocaleString('es')} vistas
-                </div>
-              </div>
-            </div>
-
-            {/* Imagen destacada */}
-            <div style={{ position: 'relative', aspectRatio: '16/9', borderRadius: 8, overflow: 'hidden', marginBottom: 28 }}>
-              <Image
-                src={article.image}
-                alt={article.imageAlt || article.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 66vw"
-                style={{ objectFit: 'cover' }}
-                priority
-                itemProp="image"
-              />
-            </div>
-            {article.imageAlt && (
-              <p style={{ fontSize: 11, color: 'var(--color-text-dim)', marginTop: -20, marginBottom: 24, textAlign: 'center', fontStyle: 'italic' }}>
-                {article.imageAlt}
-              </p>
-            )}
-
-            {/* Contenido */}
-            <div
-              className="prose-article"
-              dangerouslySetInnerHTML={{ __html: htmlContent }}
-              itemProp="articleBody"
-            />
-
-            {/* Ad in-article */}
-            <div style={{ margin: '32px 0' }}>
-              <AdUnit slot="1122334455" format="in-article" />
-            </div>
-
-            {/* Tags */}
-            {article.tags && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 24 }}>
-                {article.tags.map((tag) => (
-                  <span key={tag} style={{
-                    fontSize: 12, fontWeight: 600, color: 'var(--color-text-muted)',
-                    background: 'var(--color-surface-2)', padding: '4px 12px', borderRadius: 4,
-                    border: '1px solid var(--color-border)',
-                  }}>
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* Share */}
-            <div style={{ marginTop: 28, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              {[
-                { label: '🐦 Twitter/X', color: '#1DA1F2' },
-                { label: '👥 Facebook', color: '#4267B2' },
-                { label: '💬 WhatsApp', color: '#25D366' },
-                { label: '📋 Copiar enlace', color: 'var(--color-surface-3)' },
-              ].map(({ label, color }) => (
-                <button
-                  key={label}
-                  style={{
-                    padding: '8px 16px', borderRadius: 6, border: 'none',
-                    background: color, color: '#fff', fontSize: 12, fontWeight: 600,
-                    cursor: 'pointer', transition: 'opacity 0.2s',
-                  }}
-                  className="hover:opacity-80"
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </article>
-
-          {/* ─ Sidebar ─ */}
-          <aside>
-            {/* Ad Rectangle */}
-            <div style={{ marginBottom: 20, position: 'sticky', top: 90 }}>
-              <AdUnit slot="9876543210" format="rectangle" />
-
-              {/* Artículos relacionados */}
-              <div style={{
-                background: 'var(--color-surface)', border: '1px solid var(--color-border)',
-                borderRadius: 8, padding: 16, marginTop: 20,
-              }}>
-                <h3 className="section-title" style={{ marginBottom: 12, fontSize: '0.95rem' }}>También te puede interesar</h3>
-                {related.map((a) => (
-                  <ArticleCard key={a.id} article={a} variant="small" />
-                ))}
-              </div>
-            </div>
-          </aside>
-        </div>
-
-        {/* Noticias relacionadas */}
-        <section style={{ marginTop: 48 }}>
-          <h2 className="section-title" style={{ marginBottom: 20 }}>📰 Más Noticias</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {related.map((a) => (
-              <ArticleCard key={a.id} article={a} variant="medium" />
-            ))}
-          </div>
+        <section className="mt-32 pt-20 border-t-8 border-black">
+           <h2 className="text-5xl font-black uppercase tracking-tighter mb-16 italic">Sigue Leyendo</h2>
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"> {latest.slice(0, 3).map(a => ( <ArticleCard key={a.id} article={a} variant="medium" /> ))} </div>
         </section>
       </div>
-    </>
+    </article>
   );
 }

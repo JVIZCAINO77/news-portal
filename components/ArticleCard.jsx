@@ -1,73 +1,51 @@
-// components/ArticleCard.jsx — Tarjeta de artículo reutilizable
+// components/ArticleCard.jsx — Tarjeta de artículo editorial premium
 import Link from 'next/link';
 import Image from 'next/image';
-import { getCategoryBySlug, formatDateShort } from '@/lib/data';
+import { getCategoryBySlug, formatDate } from '@/lib/data';
 
 /**
- * Variantes:
- *  'hero'    — tarjeta grande con imagen de fondo (página principal)
- *  'medium'  — tarjeta mediana (grids secundarios)
- *  'small'   — tarjeta pequeña horizontal (listas, trending, sidebar)
- *  'list'    — sólo texto, sin imagen (opinión, análisis)
+ * Variants:
+ *  'hero'    — Grande, ocupa ancho completo o gran parte.
+ *  'medium'  — Tarjeta vertical con imagen arriba.
+ *  'small'   — Tarjeta horizontal compacta (estilo lista).
+ *  'minimal' — Solo texto (para sidebars).
  */
 export default function ArticleCard({ article, variant = 'medium', className = '' }) {
+  if (!article) return null;
   const cat = getCategoryBySlug(article.category);
+  const formattedDate = formatDate(article.publishedAt);
 
   if (variant === 'hero') {
     return (
-      <Link href={`/articulo/${article.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-        <article
-          className={`article-card ${className}`}
-          style={{
-            position: 'relative', borderRadius: 10, overflow: 'hidden',
-            background: '#111', cursor: 'pointer',
-            aspectRatio: '16/9', minHeight: 420,
-          }}
-        >
-          <Image
-            src={article.image}
-            alt={article.imageAlt || article.title}
-            fill
-            sizes="(max-width: 768px) 100vw, 70vw"
-            style={{ objectFit: 'cover' }}
-            priority
-          />
-          <div className="img-overlay" style={{ position: 'absolute', inset: 0 }} />
-          {article.trending && (
-            <div style={{
-              position: 'absolute', top: 16, left: 16,
-              background: 'var(--color-primary)', color: '#fff',
-              padding: '4px 10px', borderRadius: 4,
-              fontSize: 11, fontWeight: 800, letterSpacing: '0.06em', textTransform: 'uppercase',
-              display: 'flex', alignItems: 'center', gap: 6,
-            }}>
-              <span className="live-dot" style={{ width: 6, height: 6 }} /> Trending
-            </div>
-          )}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px 24px 20px' }}>
+      <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden ${className}`}>
+        <article className="relative">
+          <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-100">
+            <Image
+              src={article.image}
+              alt={article.imageAlt || article.title}
+              fill
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              priority
+            />
             {cat && (
-              <span className="cat-badge" style={{ background: cat.color, color: '#fff', marginBottom: 8, display: 'inline-flex' }}>
-                {cat.emoji} {cat.label}
-              </span>
+              <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 shadow-2xl">
+                <span className="text-white text-[10px] font-black uppercase tracking-[0.2em]">
+                  {cat.label}
+                </span>
+              </div>
             )}
-            <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', fontWeight: 800, color: '#fff', lineHeight: 1.25, marginBottom: 10 }}>
+          </div>
+          <div className="mt-8">
+            <h2 className="text-4xl md:text-7xl group-hover:text-red-600 transition-colors mb-6 leading-none">
               {article.title}
             </h2>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', lineHeight: 1.5, marginBottom: 12, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            <p className="text-slate-600 text-lg md:text-xl font-serif line-clamp-2 md:line-clamp-3 leading-relaxed mb-8 max-w-4xl">
               {article.excerpt}
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 12, color: 'rgba(255,255,255,0.55)' }}>
-              <span style={{ fontWeight: 600 }}>{article.author}</span>
-              <span>·</span>
-              <span>{formatDateShort(article.publishedAt)}</span>
-              <span>·</span>
-              <span>{article.readTime} min lectura</span>
-              {article.views > 5000 && (
-                <>
-                  <span>·</span>
-                  <span>👁 {(article.views / 1000).toFixed(1)}K</span>
-                </>
-              )}
+            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+               <span className="text-black">{article.author}</span>
+               <span className="w-8 h-px bg-slate-200"></span>
+               <span>{formattedDate}</span>
             </div>
           </div>
         </article>
@@ -77,46 +55,29 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'medium') {
     return (
-      <Link href={`/articulo/${article.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-        <article
-          className={`article-card ${className}`}
-          style={{
-            borderRadius: 8, overflow: 'hidden',
-            background: 'var(--color-surface)',
-            border: '1px solid var(--color-border)',
-            cursor: 'pointer', height: '100%',
-          }}
-        >
-          <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden' }}>
+      <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 pb-10 h-full ${className}`}>
+        <article className="h-full flex flex-col">
+          <div className="relative aspect-[4/3] mb-6 overflow-hidden bg-slate-100">
             <Image
               src={article.image}
               alt={article.imageAlt || article.title}
               fill
-              sizes="(max-width: 768px) 100vw, 33vw"
-              style={{ objectFit: 'cover' }}
+              className="object-cover group-hover:brightness-90 transition-all duration-300"
             />
-            {cat && (
-              <div style={{ position: 'absolute', top: 10, left: 10 }}>
-                <span className="cat-badge" style={{ background: cat.color, color: '#fff' }}>
-                  {cat.emoji} {cat.label}
-                </span>
-              </div>
-            )}
           </div>
-          <div style={{ padding: '16px' }}>
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.05rem', fontWeight: 700, color: '#fff', lineHeight: 1.3, marginBottom: 8, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          <div className="flex-1 flex flex-col">
+            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-red-600 mb-3 block">
+              {cat?.label}
+            </span>
+            <h3 className="text-2xl md:text-3xl text-black group-hover:text-red-600 transition-colors line-clamp-3 leading-none mb-4">
               {article.title}
             </h3>
-            <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: 12, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            <p className="text-slate-600 text-base font-serif line-clamp-2 leading-relaxed mb-6 flex-1">
               {article.excerpt}
             </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--color-text-dim)' }}>
-              <span style={{ fontWeight: 600, color: 'var(--color-text-muted)' }}>{article.author}</span>
-              <span>·</span>
-              <span>{formatDateShort(article.publishedAt)}</span>
-              <span>·</span>
-              <span>{article.readTime} min</span>
-            </div>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-auto">
+              Por {article.author}
+            </p>
           </div>
         </article>
       </Link>
@@ -125,68 +86,42 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'small') {
     return (
-      <Link href={`/articulo/${article.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-        <article
-          className={`article-card ${className}`}
-          style={{
-            display: 'flex', gap: 12, cursor: 'pointer',
-            padding: '12px 0',
-            borderBottom: '1px solid var(--color-border)',
-          }}
-        >
-          <div style={{ position: 'relative', width: 80, height: 60, borderRadius: 6, overflow: 'hidden', flexShrink: 0 }}>
-            <Image
-              src={article.image}
-              alt={article.imageAlt || article.title}
-              fill
-              sizes="80px"
-              style={{ objectFit: 'cover' }}
-            />
+      <Link href={`/articulo/${article.slug}`} className={`group block py-6 border-b border-gray-100 last:border-0 ${className}`}>
+        <article className="flex gap-6 items-start">
+          <div className="flex-1 min-w-0">
+             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-red-600 mb-2 block">{cat?.label}</span>
+             <h4 className="text-lg md:text-xl text-black group-hover:text-red-600 transition-colors line-clamp-2 leading-tight">
+               {article.title}
+             </h4>
+             <p className="text-[9px] font-bold text-slate-400 uppercase mt-3 tracking-widest leading-none">
+               {formattedDate}
+             </p>
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            {cat && (
-              <span style={{ fontSize: 10, fontWeight: 700, color: cat.color, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                {cat.label}
-              </span>
-            )}
-            <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '0.85rem', fontWeight: 700, color: '#fff', lineHeight: 1.3, marginTop: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-              {article.title}
-            </h4>
-            <p style={{ fontSize: 11, color: 'var(--color-text-dim)', marginTop: 4 }}>
-              {formatDateShort(article.publishedAt)} · {article.readTime} min
-            </p>
-          </div>
+          {article.image && (
+            <div className="relative w-24 h-16 md:w-32 md:h-20 flex-shrink-0 overflow-hidden bg-slate-100">
+              <Image
+                src={article.image}
+                alt={article.imageAlt || article.title}
+                fill
+                className="object-cover"
+              />
+            </div>
+          )}
         </article>
       </Link>
     );
   }
 
-  // list variant
+  // Minimal variant (text only)
   return (
-    <Link href={`/articulo/${article.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-      <article
-        className={`article-card ${className}`}
-        style={{
-          padding: '16px 0',
-          borderBottom: '1px solid var(--color-border)',
-          cursor: 'pointer',
-        }}
-      >
-        {cat && (
-          <span style={{ fontSize: 10, fontWeight: 700, color: cat.color, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-            {cat.emoji} {cat.label}
-          </span>
-        )}
-        <h4 style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', fontWeight: 700, color: '#fff', lineHeight: 1.3, margin: '6px 0' }}>
+    <Link href={`/articulo/${article.slug}`} className={`group block py-4 border-b border-gray-100 last:border-0 ${className}`}>
+      <article>
+        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-red-600 mb-1 block">
+          {cat?.label}
+        </span>
+        <h4 className="text-base font-black text-black group-hover:text-red-600 transition-colors leading-tight uppercase tracking-tight">
           {article.title}
         </h4>
-        <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: 8 }}>
-          {article.excerpt}
-        </p>
-        <div style={{ fontSize: 12, color: 'var(--color-text-dim)' }}>
-          <span style={{ fontWeight: 600, color: 'var(--color-text-muted)' }}>{article.author}</span>
-          {' · '}{formatDateShort(article.publishedAt)} · {article.readTime} min lectura
-        </div>
       </article>
     </Link>
   );

@@ -1,30 +1,35 @@
-// app/sitemap.js — Sitemap dinámico para SEO (usa artículos reales de Supabase)
+// app/sitemap.js — Generación dinámica de Sitemap para SEO en PulsoNoticias 2.0
 import { getAllArticles } from '@/lib/serverData';
 import { CATEGORIES, SITE_CONFIG } from '@/lib/data';
 
 export default async function sitemap() {
   const articles = await getAllArticles();
-  const baseUrl = SITE_CONFIG.url;
 
-  const staticPages = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: 'hourly', priority: 1.0 },
-    { url: `${baseUrl}/buscar`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
+  // 1. Home
+  const routes = [
+    {
+      url: SITE_CONFIG.url,
+      lastModified: new Date(),
+      changeFrequency: 'always',
+      priority: 1,
+    },
   ];
 
-  const categoryPages = CATEGORIES.map((cat) => ({
-    url: `${baseUrl}/categoria/${cat.slug}`,
+  // 2. Categorías
+  const categoryRoutes = CATEGORIES.map((cat) => ({
+    url: `${SITE_CONFIG.url}/categoria/${cat.slug}`,
     lastModified: new Date(),
     changeFrequency: 'hourly',
     priority: 0.8,
   }));
 
-  const articlePages = articles.map((article) => ({
-    url: `${baseUrl}/articulo/${article.slug}`,
-    lastModified: new Date(article.updatedAt || article.publishedAt),
+  // 3. Artículos individuales
+  const articleRoutes = articles.map((article) => ({
+    url: `${SITE_CONFIG.url}/articulo/${article.slug}`,
+    lastModified: new Date(article.publishedAt),
     changeFrequency: 'weekly',
-    priority: article.featured ? 0.9 : 0.7,
+    priority: 0.6,
   }));
 
-  return [...staticPages, ...categoryPages, ...articlePages];
+  return [...routes, ...categoryRoutes, ...articleRoutes];
 }
-

@@ -1,13 +1,9 @@
-// app/categoria/[slug]/page.js — Página de categoría
+// app/categoria/[slug]/page.js — Página de Categoría (PulsoNoticias 2.0)
 import { notFound } from 'next/navigation';
 import { getArticlesByCategory } from '@/lib/serverData';
-import { CATEGORIES, getCategoryBySlug, SITE_CONFIG } from '@/lib/data';
+import { getCategoryBySlug } from '@/lib/data';
 import ArticleCard from '@/components/ArticleCard';
 import AdUnit from '@/components/AdUnit';
-
-export async function generateStaticParams() {
-  return CATEGORIES.map((c) => ({ slug: c.slug }));
-}
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -15,109 +11,49 @@ export async function generateMetadata({ params }) {
   if (!cat) return { title: 'Categoría no encontrada' };
 
   return {
-    title: `${cat.emoji} ${cat.label} — ${SITE_CONFIG.name}`,
-    description: `Las últimas noticias de ${cat.label}. Mantente informado con la información más reciente en ${cat.label.toLowerCase()} en ${SITE_CONFIG.name}.`,
-    alternates: { canonical: `/categoria/${slug}` },
-    openGraph: {
-      title: `${cat.label} — ${SITE_CONFIG.name}`,
-      description: `Últimas noticias de ${cat.label}`,
-      type: 'website',
-    },
+    title: `Sección: ${cat.label} — PulsoNoticias`,
+    description: `Explora las últimas noticias sobre ${cat.label} en PulsoNoticias.`,
   };
 }
 
 export default async function CategoryPage({ params }) {
   const { slug } = await params;
+  const articles = await getArticlesByCategory(slug, 20);
   const cat = getCategoryBySlug(slug);
+
   if (!cat) notFound();
 
-  const articles = await getArticlesByCategory(slug, 20);
-
-  const breadcrumb = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Inicio', item: SITE_CONFIG.url },
-      { '@type': 'ListItem', position: 2, name: cat.label, item: `${SITE_CONFIG.url}/categoria/${slug}` },
-    ],
-  };
-
-  const topArticle = articles[0];
-  const rest = articles.slice(1);
+  const heroArticle = articles[0];
+  const gridArticles = articles.slice(1);
 
   return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
-
-      {/* Header de categoría */}
-      <div style={{
-        background: `linear-gradient(135deg, ${cat.color}22, transparent)`,
-        borderBottom: '1px solid var(--color-border)',
-        padding: '40px 16px',
-      }}>
-        <div className="max-w-7xl mx-auto">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <span style={{ fontSize: 48 }}>{cat.emoji}</span>
-            <div>
-              <h1 style={{
-                fontFamily: 'var(--font-heading)',
-                fontSize: 'clamp(2rem, 4vw, 3rem)',
-                fontWeight: 900, color: '#fff', lineHeight: 1,
-              }}>
-                {cat.label}
-              </h1>
-              <p style={{ color: 'var(--color-text-muted)', fontSize: 14, marginTop: 6 }}>
-                {articles.length} artículos · Actualizado al instante
-              </p>
-            </div>
-          </div>
+    <div className="bg-white min-h-screen">
+      <div className="border-b border-gray-100 py-20 mb-20 bg-slate-50/50">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+           <h1 className="text-[12px] font-black uppercase tracking-[0.6em] text-red-600 mb-6 select-none opacity-50">Sección Editorial</h1>
+           <h2 className="text-6xl md:text-9xl font-black text-black leading-none uppercase italic tracking-tighter"> {cat.label} </h2>
         </div>
       </div>
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
-
-        {/* Ad */}
-        <div style={{ marginBottom: 24 }}>
-          <AdUnit slot="1234567890" format="leaderboard" />
-        </div>
-
-        {/* Artículo principal de la categoría */}
-        {topArticle && (
-          <div style={{ marginBottom: 32 }}>
-            <ArticleCard article={topArticle} variant="hero" />
-          </div>
+      <div className="max-w-7xl mx-auto px-6">
+        {heroArticle ? (
+          <div className="mb-24 border-b border-gray-100 pb-20"> <ArticleCard article={heroArticle} variant="hero" /> </div>
+        ) : (
+          <div className="h-96 flex items-center justify-center text-slate-300 font-black uppercase tracking-widest bg-gray-50 border border-dashed border-gray-200"> No hay artículos en esta sección aún. </div>
         )}
-
-        {/* Grid de artículos */}
-        {rest.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {rest.map((article, i) => (
-              <div key={article.id} className="contents">
-                <ArticleCard article={article} variant="medium" />
-                {/* Ad cada 6 artículos */}
-                {(i + 1) % 6 === 0 && (
-                  <div className="md:col-span-2 lg:col-span-3">
-                    <AdUnit slot="1122334455" format="leaderboard" />
-                  </div>
-                )}
-              </div>
-            ))}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-16">
+          <div className="lg:col-span-3">
+             <h3 className="section-title">Más en {cat.label}</h3>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20"> {gridArticles.map(a => ( <ArticleCard key={a.id} article={a} variant="medium" /> ))} </div>
           </div>
-        )}
-
-        {articles.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 80, color: 'var(--color-text-muted)' }}>
-            <p style={{ fontSize: 64, marginBottom: 16 }}>📭</p>
-            <p style={{ fontSize: 18 }}>Aún no hay artículos en esta sección.</p>
-            <p style={{ fontSize: 14, marginTop: 8 }}>¡Vuelve pronto o ve al panel de administración para publicar contenido!</p>
-          </div>
-        )}
-
-        {/* Ad final */}
-        <div style={{ marginTop: 40 }}>
-          <AdUnit slot="5544332211" format="leaderboard" />
+          <aside className="lg:col-span-1 space-y-20 pt-16">
+             <div className="bg-white p-0">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-black mb-8 pb-3 border-b border-gray-100">Tendencias</h4>
+                <div className="space-y-4"> {gridArticles.slice(0, 5).map(a => ( <ArticleCard key={a.id} article={a} variant="minimal" /> ))} </div>
+             </div>
+             <AdUnit format="rectangle" />
+          </aside>
         </div>
       </div>
-    </>
+    </div>
   );
 }
