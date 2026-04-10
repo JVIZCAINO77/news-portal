@@ -2,7 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/bot?category=noticias",
-      "schedule": "0 12 * * *"
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/cron/bot?category=economia",
+      "schedule": "0 13 * * *"
     },
     {
       "path": "/api/cron/bot?category=deportes",

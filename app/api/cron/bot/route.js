@@ -9,16 +9,18 @@ const CRON_SECRET = process.env.CRON_SECRET;
 const DR_SOURCES = '(site:listindiario.com OR site:diariolibre.com OR site:elnacional.com.do OR site:eldia.com.do)';
 
 const CATEGORIES = {
-  noticias: { query: `Republica Dominicana noticias ${DR_SOURCES}`, slug: 'noticias', author: 'Carlos Mendoza', style: 'periodístico objetivo y formal' },
-  entretenimiento: { query: `farandula dominicana ${DR_SOURCES}`, slug: 'entretenimiento', author: 'Valeria Reyes', style: 'dinámico y ameno' },
-  deportes: { query: `beisbol dominicano ${DR_SOURCES}`, slug: 'deportes', author: 'Marcos Alarcón', style: 'analítico y pasional' },
-  tecnologia: { query: `tecnologia innovacion ${DR_SOURCES}`, slug: 'tecnologia', author: 'Elena Torres', style: 'informativo y vanguardista' },
-  economia: { query: `economia dominicana ${DR_SOURCES}`, slug: 'economia', author: 'Roberto Silva', style: 'serio y financiero' },
+  noticias:       { query: `Republica Dominicana noticias ${DR_SOURCES}`,   slug: 'noticias',       author: 'Carlos Mendoza',  style: 'periodístico objetivo y formal' },
+  entretenimiento:{ query: `farandula dominicana ${DR_SOURCES}`,            slug: 'entretenimiento', author: 'Valeria Reyes',   style: 'dinámico y ameno' },
+  deportes:       { query: `beisbol dominicano ${DR_SOURCES}`,              slug: 'deportes',        author: 'Marcos Alarcón',  style: 'analítico y pasional' },
+  tecnologia:     { query: `tecnologia innovacion ${DR_SOURCES}`,           slug: 'tecnologia',      author: 'Elena Torres',    style: 'informativo y vanguardista' },
+  economia:       { query: `economia dominicana ${DR_SOURCES}`,             slug: 'economia',        author: 'Roberto Silva',   style: 'serio y financiero' },
 };
 
 export async function GET(request) {
-  // Autenticación de la ruta para que solo Vercel pueda invocarla
-  if (CRON_SECRET) {
+  // Autenticación — se omite si viene del disparador manual del admin
+  const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
+
+  if (!isManualTrigger && CRON_SECRET) {
     const authHeader = request.headers.get('authorization');
     if (authHeader !== `Bearer ${CRON_SECRET}`) {
       return NextResponse.json({ error: 'No autorizado. Se requiere token CRON.' }, { status: 401 });
@@ -30,7 +32,7 @@ export async function GET(request) {
 
   const cat = CATEGORIES[categoryKey];
   if (!cat) {
-    return NextResponse.json({ error: 'Categoría de noticia inválida' }, { status: 400 });
+    return NextResponse.json({ error: `Categoría inválida: ${categoryKey}` }, { status: 400 });
   }
 
   const supabase = createClient(
@@ -38,7 +40,7 @@ export async function GET(request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // 1. Verificación del Interruptor "Kill-Switch" del Admin
+  // 1. Verificación del Kill-Switch del Admin
   const { data: botSetting } = await supabase
     .from('settings')
     .select('value')
@@ -46,78 +48,117 @@ export async function GET(request) {
     .maybeSingle();
 
   if (botSetting?.value !== true) {
-    return NextResponse.json({ message: 'Automatización pausada desde el panel' }, { status: 200 });
+    return NextResponse.json({ message: 'Automatización pausada desde el panel de administración.' }, { status: 200 });
   }
 
   try {
-    // 2. Extraer Noticias Reales de República Dominicana
+    // 2. Extraer Noticias vía Google News RSS
     const parser = new Parser();
-    const feed = await parser.parseURL(`https://news.google.com/rss/search?q=${encodeURIComponent(cat.query)}&hl=es-419&gl=US&ceid=US:es-419`);
+    const feedUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(cat.query)}&hl=es-419&gl=US&ceid=US:es-419`;
+    const feed = await parser.parseURL(feedUrl);
 
-    if (!feed.items.length) {
-      return NextResponse.json({ message: 'No hay fuentes de noticias actualizadas hoy para esta categoría.' }, { status: 200 });
+    if (!feed.items || feed.items.length === 0) {
+      return NextResponse.json({ message: `Sin noticias disponibles para: ${categoryKey}` }, { status: 200 });
     }
 
-    const news = feed.items[0]; // Noticia más relevante del día
-    // Hacemos el slug super único para evitar choques en la BD
-    const slug = news.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + Date.now().toString().slice(-4);
+    const news = feed.items[0];
+    const baseSlug = news.title
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '')
+      .slice(0, 80);
+    const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
-    // 3. IA de Redacción (Estrictamente Español y 100% Cierto)
+    // 3. Redacción con Gemini 2.0 Flash (API @google/genai v1.x)
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    
+
     const prompt = `Actúa como un periodista ético y profesional de "PulsoNoticias". Tienes el siguiente titular y resumen de una noticia real documentada.
 
 Titular original: ${news.title}
-Resumen de fuente confiable: ${news.contentSnippet}
+Resumen de fuente confiable: ${news.contentSnippet || 'Sin resumen disponible'}
 
 REGLAS ESTRICTAS DE REDACCIÓN:
 1. El artículo debe estar COMPLETAMENTE EN ESPAÑOL.
-2. VERACIDAD ABSOLUTA: BASATE ÚNICAMENTE en los hechos documentados en el resumen. NO INVENTES fechas, ni estadísticas, ni nombres que no estén ahí. Si la información es corta, escribe un artículo breve pero 100% fiel a los hechos reales sin especular.
+2. VERACIDAD ABSOLUTA: Basate ÚNICAMENTE en los hechos del resumen. NO inventes datos.
 3. Aplica tu estilo de periodista: ${cat.style}.
-4. Utiliza el formato Markdown válido para darle estilo profesional al campo 'content' (usa ## para subtítulos o **negritas** para enfatizar partes importantes).
-5. Tu respuesta DEBE ser EXCLUSIVAMENTE este formato JSON válido: { "title": "Nuevo titular impactante de la misma noticia", "excerpt": "Un resumen ejecutivo enganchante de 2 lineas", "content": "El artículo en Markdown con varios párrafos" }`;
+4. Usa formato Markdown en el campo 'content' (## para subtítulos, **negritas** para datos clave).
+5. Escribe mínimo 3 párrafos bien desarrollados.
+6. Tu respuesta DEBE ser EXCLUSIVAMENTE un JSON válido con este formato exacto (sin bloques de código):
+{"title":"Titular impactante en español","excerpt":"Resumen ejecutivo de 2 líneas","content":"Artículo completo en Markdown"}`;
 
-    const result = await ai.models.generateContent({
+    const aiResponse = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      contents: prompt,
     });
-    
+
+    const rawText = aiResponse.text || '';
+
     // Parseo seguro del JSON
-    const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const articleData = JSON.parse(rawText.replace(/```json/g, '').replace(/```/g, '').trim());
+    const cleanedText = rawText
+      .replace(/```json\s*/gi, '')
+      .replace(/```\s*/gi, '')
+      .trim();
 
-    // 4. IA para Imágenes Dinámicas en Base al Contexto (Vía Pollinations API)
-    // Pedimos el prompt preferiblemente en inglés para mejor comprensión del motor visual
-    const imageContext = `Professional photojournalism, realistic newspaper editorial photography, capturing the main essence and event of this news: "${articleData.title}"`;
-    const dynamicImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imageContext)}?width=1200&height=630&nologo=true`;
+    let articleData;
+    try {
+      articleData = JSON.parse(cleanedText);
+    } catch {
+      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error(`Respuesta de IA no válida: ${rawText.slice(0, 200)}`);
+      articleData = JSON.parse(jsonMatch[0]);
+    }
 
-    // 5. Compilar todo y Guardar en la Base de Datos
+    if (!articleData.title || !articleData.content) {
+      throw new Error('La IA no devolvió los campos requeridos (title, content).');
+    }
+
+    // 4. Imagen dinámica vía Pollinations AI
+    const imageContext = `Professional photojournalism editorial photography, Dominican Republic news: "${articleData.title}"`;
+    const dynamicImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imageContext)}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
+
+    // 5. Guardar en Supabase (sin 'id' manual — generado por Supabase automáticamente)
     const newArticle = {
-      id: Date.now().toString(),
       title: articleData.title,
-      slug: slug,
-      excerpt: articleData.excerpt,
+      slug,
+      excerpt: articleData.excerpt || articleData.title,
       content: articleData.content,
       category: cat.slug,
       author: cat.author,
-      image: dynamicImageUrl, // La imagen de IA
-      "imageAlt": "Generado dinámicamente con Inteligencia Artificial Visual",
+      image: dynamicImageUrl,
+      imageAlt: `Imagen generada por IA para: ${articleData.title}`,
       publishedAt: new Date().toISOString(),
-      featured: Math.random() > 0.8 // 20% de probabilidad de ser Hero principal
+      updated_at: new Date().toISOString(),
+      featured: Math.random() > 0.85,
     };
 
-    const { error: insertError } = await supabase.from('articles').insert(newArticle);
+    const { data: insertedArticle, error: insertError } = await supabase
+      .from('articles')
+      .insert(newArticle)
+      .select('id, title')
+      .single();
 
-    if (insertError) throw new Error(insertError.message);
+    if (insertError) throw new Error(`Error al guardar en BD: ${insertError.message}`);
 
-    return NextResponse.json({ 
-      message: '¡Noticia redactada, ilustrada y publicada con éxito!', 
-      article: newArticle.title,
-      image_source: dynamicImageUrl 
+    return NextResponse.json({
+      success: true,
+      message: '¡Noticia redactada, ilustrada y publicada con éxito!',
+      article: {
+        id: insertedArticle.id,
+        title: insertedArticle.title,
+        slug,
+        category: cat.slug,
+        author: cat.author,
+      },
     }, { status: 200 });
 
   } catch (error) {
-    console.error('Error Crítico en Robot Editorial:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error(`[Bot Error] Categoría: ${categoryKey} |`, error.message);
+    return NextResponse.json({
+      error: error.message,
+      category: categoryKey,
+      timestamp: new Date().toISOString(),
+    }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getLatestArticles } from '@/lib/serverData';
 import Link from 'next/link';
 import AutomationToggle from '@/components/AutomationToggle';
+import AgentsDashboard from '@/components/AgentsDashboard';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -25,7 +26,7 @@ export default async function AdminDashboardPage() {
     .eq('key', 'automation_enabled')
     .maybeSingle();
 
-  // 3. Obtener perfil para verificar rol (ya que el dashboard tiene control de bot)
+  // 3. Obtener perfil para verificar rol
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -38,8 +39,8 @@ export default async function AdminDashboardPage() {
   const stats = [
     { label: 'Artículos Totales', value: articleCount || 0 },
     { label: 'Equipo Editorial', value: userCount || 0 },
-    { label: 'Lectores Estimados', value: '1.2k' }, // Simulado por ahora
-    { label: 'Categorías Activas', value: '8' },
+    { label: 'Lectores Estimados', value: '1.2k' },
+    { label: 'Categorías Activas', value: '5' },
   ];
 
   return (
@@ -65,33 +66,39 @@ export default async function AdminDashboardPage() {
          ))}
       </div>
 
-      {/* Recent Activity Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 gap-12">
-         <div className="bg-white p-12 border border-gray-100">
-            <div className="flex justify-between items-center mb-10 pb-4 border-b-2 border-black">
-               <h3 className="text-2xl font-black uppercase tracking-tighter">Últimas Publicaciones</h3>
-               <Link href="/admin/articulos" className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:underline">Ver Todo →</Link>
-            </div>
+      {/* Agents Dashboard — Panel de Control de Bots */}
+      {isAdmin && <AgentsDashboard botEnabled={botSetting?.value === true} />}
 
-            <div className="space-y-0">
-               {latest.map((a, i) => (
-                 <div key={a.id} className="flex items-center gap-6 py-6 border-b border-gray-50 group last:border-0 grow">
-                    <span className="text-3xl font-black text-slate-100 group-hover:text-red-500 transition-colors leading-none">{i+1}</span>
-                    <div className="flex-1">
-                       <h4 className="text-lg font-black text-black uppercase tracking-tight group-hover:text-red-600 transition-colors">{a.title}</h4>
-                       <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2">{a.author} — {new Date(a.publishedAt).toLocaleDateString('es-DO')}</p>
-                    </div>
-                    <div className="flex gap-4">
-                       <Link href={`/admin/articulos/editar/${a.id}`} className="text-[9px] font-black uppercase tracking-widest bg-slate-50 px-4 py-2 hover:bg-black hover:text-white transition-all">Editar</Link>
-                    </div>
+      {/* Recent Activity Section */}
+      <div className="bg-white p-12 border border-gray-100">
+         <div className="flex justify-between items-center mb-10 pb-4 border-b-2 border-black">
+            <h3 className="text-2xl font-black uppercase tracking-tighter">Últimas Publicaciones</h3>
+            <Link href="/admin/articulos" className="text-[10px] font-black uppercase tracking-widest text-red-600 hover:underline">Ver Todo →</Link>
+         </div>
+
+         <div className="space-y-0">
+            {latest.map((a, i) => (
+              <div key={a.id} className="flex items-center gap-6 py-6 border-b border-gray-50 group last:border-0 grow">
+                 <span className="text-3xl font-black text-slate-100 group-hover:text-red-500 transition-colors leading-none">{i+1}</span>
+                 <div className="flex-1">
+                    <h4 className="text-lg font-black text-black uppercase tracking-tight group-hover:text-red-600 transition-colors">{a.title}</h4>
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2">{a.author} — {new Date(a.publishedAt).toLocaleDateString('es-DO')}</p>
                  </div>
-               ))}
-            </div>
+                 <div className="flex gap-4">
+                    <Link href={`/admin/articulos/editar/${a.id}`} className="text-[9px] font-black uppercase tracking-widest bg-slate-50 px-4 py-2 hover:bg-black hover:text-white transition-all">Editar</Link>
+                 </div>
+              </div>
+            ))}
+            {latest.length === 0 && (
+              <p className="py-16 text-center text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">
+                No hay artículos aún. Activa los agentes para comenzar. →
+              </p>
+            )}
          </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
          <Link href="/admin/articulos/nuevo" className="bg-red-600 text-white p-12 hover:bg-black transition-all flex flex-col justify-center grow">
             <h4 className="text-3xl font-black uppercase tracking-tighter mb-2">Crear Artículo</h4>
             <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Redactar Nueva Historia</p>
