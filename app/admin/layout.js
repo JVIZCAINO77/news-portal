@@ -1,13 +1,12 @@
 // app/admin/layout.js — Layout del Panel de Administración (PulsoNoticias 2.0)
 import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import BotControls from '@/components/BotControls';
 
 export default async function AdminLayout({ children }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // El middleware ya redirige a /admin/login si no hay sesión
   if (!user) return <>{children}</>;
 
   const { data: profile } = await supabase
@@ -16,71 +15,69 @@ export default async function AdminLayout({ children }) {
     .eq('id', user.id)
     .single();
 
+  const { data: botSetting } = await supabase
+    .from('settings')
+    .select('value')
+    .eq('key', 'automation_enabled')
+    .maybeSingle();
+
   const isAdmin = profile?.role === 'admin';
+  const botEnabled = botSetting?.value === true;
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       {/* ── Sidebar ── */}
-      <aside className="w-full md:w-72 bg-black text-white flex flex-col justify-between overflow-y-auto shrink-0">
+      <aside className="w-full md:w-64 bg-black text-white flex flex-col justify-between shrink-0">
         <div className="p-8">
-          <Link href="/admin" className="text-2xl font-black uppercase tracking-tighter mb-12 inline-block">
-            Pulso<span className="text-red-500">Admin</span>
+          {/* Logo */}
+          <Link href="/admin" className="block mb-10">
+            <span className="text-xl font-black uppercase tracking-tighter">
+              Pulso<span className="text-red-500">Admin</span>
+            </span>
           </Link>
 
-          <nav className="space-y-1 mt-8">
-            {/* Dashboard — solo admin */}
+          {/* Nav Links */}
+          <nav className="space-y-0">
             {isAdmin && (
-              <Link
-                href="/admin"
-                className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] hover:text-red-500 transition-colors py-3 border-b border-white/5"
-              >
-                <span className="opacity-40">◈</span> Dashboard
+              <Link href="/admin" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] hover:text-red-500 transition-colors py-3 border-b border-white/10">
+                Dashboard
               </Link>
             )}
-
-            {/* Artículos — todos */}
-            <Link
-              href="/admin/articulos"
-              className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] hover:text-red-500 transition-colors py-3 border-b border-white/5"
-            >
-              <span className="opacity-40">◉</span> Artículos
+            <Link href="/admin/articulos" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] hover:text-red-500 transition-colors py-3 border-b border-white/10">
+              • Artículos
             </Link>
-
-            {/* Nuevo Artículo — todos */}
-            <Link
-              href="/admin/articulos/nuevo"
-              className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] text-red-500 hover:text-white transition-colors py-3 border-b border-white/5"
-            >
-              <span>＋</span> Nuevo Artículo
+            <Link href="/admin/articulos/nuevo" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-red-500 hover:text-white transition-colors py-3 border-b border-white/10">
+              + Nuevo Artículo
             </Link>
-
-            {/* Gestión de Usuarios — SOLO ADMIN */}
             {isAdmin && (
-              <Link
-                href="/admin/usuarios"
-                className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em] hover:text-red-500 transition-colors py-3 border-b border-white/5"
-              >
-                <span className="opacity-40">◎</span> Crear Editor
+              <Link href="/admin/usuarios" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] hover:text-red-500 transition-colors py-3 border-b border-white/10">
+                ◎ Crear Usuario
               </Link>
             )}
           </nav>
 
+          {/* Bot Controls — Solo Admin */}
+          {isAdmin && (
+            <div className="mt-8">
+              <p className="text-[8px] font-black uppercase tracking-widest text-white/30 mb-3">Agentes IA</p>
+              <BotControls initialEnabled={botEnabled} />
+            </div>
+          )}
+
           {/* Rol Badge */}
-          <div className={`mt-8 inline-flex items-center gap-2 px-3 py-2 text-[8px] font-black uppercase tracking-widest ${
+          <div className={`mt-8 inline-flex items-center px-3 py-1.5 text-[8px] font-black uppercase tracking-widest ${
             isAdmin ? 'bg-red-600 text-white' : 'bg-white/10 text-white/60'
           }`}>
             {isAdmin ? '★ Administrador' : '● Editor'}
           </div>
         </div>
 
-        {/* Footer del sidebar */}
+        {/* Footer */}
         <div className="p-8 border-t border-white/10">
-          <div className="mb-4">
-            <p className="text-[9px] font-black uppercase tracking-[0.25em] text-white/30 mb-1">Sesión activa</p>
-            <p className="text-xs font-black uppercase truncate text-white/80">{user.email}</p>
-          </div>
+          <p className="text-[8px] font-black uppercase tracking-widest text-white/30 mb-1">Usuario Activo</p>
+          <p className="text-[10px] font-black uppercase truncate text-white/80 mb-4">{user?.email}</p>
           <form action="/auth/sign-out" method="post">
-            <button className="w-full bg-white/5 border border-white/10 text-white py-3 text-[9px] font-black uppercase tracking-[0.25em] hover:bg-red-600 hover:border-red-600 transition-all">
+            <button className="w-full bg-white/5 border border-white/10 text-white py-3 text-[8px] font-black uppercase tracking-[0.25em] hover:bg-red-600 hover:border-red-600 transition-all">
               Cerrar Sesión
             </button>
           </form>

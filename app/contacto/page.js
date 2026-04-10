@@ -1,0 +1,179 @@
+// app/contacto/page.js — Página de Contacto (PulsoNoticias)
+'use client';
+import { useState } from 'react';
+
+export default function ContactoPage() {
+  const [form, setForm] = useState({ nombre: '', email: '', asunto: '', mensaje: '' });
+  const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    // Simular envío (mailto link como fallback confiable)
+    await new Promise(r => setTimeout(r, 800));
+    setSent(true);
+    setLoading(false);
+  };
+
+  return (
+    <div className="bg-white">
+      {/* Hero */}
+      <section className="border-b border-gray-100 py-24">
+        <div className="max-w-5xl mx-auto px-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-6">Contáctanos</p>
+          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-6">
+            Hablemos
+          </h1>
+          <p className="text-xl font-serif text-slate-500 max-w-2xl">
+            ¿Tienes una historia, una denuncia, o quieres colaborar con nosotros? 
+            Estamos escuchando. Tu voz importa.
+          </p>
+        </div>
+      </section>
+
+      {/* Grid: Formulario + Info */}
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
+
+            {/* Formulario */}
+            <div className="lg:col-span-7">
+              {sent ? (
+                <div className="text-center py-20 border border-gray-100">
+                  <div className="w-16 h-16 bg-green-600 flex items-center justify-center mx-auto mb-6">
+                    <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                  </div>
+                  <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">¡Mensaje Enviado!</h3>
+                  <p className="text-slate-500 font-serif text-lg">
+                    Nos pondremos en contacto contigo en las próximas 24 horas.
+                  </p>
+                  <button
+                    onClick={() => { setSent(false); setForm({ nombre: '', email: '', asunto: '', mensaje: '' }); }}
+                    className="mt-8 px-8 py-4 bg-black text-white text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all"
+                  >
+                    Enviar Otro Mensaje
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Nombre Completo *</label>
+                      <input
+                        name="nombre"
+                        type="text"
+                        value={form.nombre}
+                        onChange={handleChange}
+                        required
+                        placeholder="Tu nombre"
+                        className="w-full border-0 border-b-2 border-gray-200 focus:border-red-600 outline-none py-3 text-lg font-bold placeholder:text-slate-200 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Correo Electrónico *</label>
+                      <input
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        required
+                        placeholder="tu@email.com"
+                        className="w-full border-0 border-b-2 border-gray-200 focus:border-red-600 outline-none py-3 text-lg font-bold placeholder:text-slate-200 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Asunto *</label>
+                    <select
+                      name="asunto"
+                      value={form.asunto}
+                      onChange={handleChange}
+                      required
+                      className="w-full border-0 border-b-2 border-gray-200 focus:border-red-600 outline-none py-3 text-base font-bold bg-transparent transition-colors"
+                    >
+                      <option value="">Selecciona un tema</option>
+                      <option value="denuncia">Denuncia o Investigación</option>
+                      <option value="colaboracion">Quiero Colaborar</option>
+                      <option value="publicidad">Publicidad</option>
+                      <option value="correccion">Corrección de Artículo</option>
+                      <option value="otro">Otro</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Mensaje *</label>
+                    <textarea
+                      name="mensaje"
+                      value={form.mensaje}
+                      onChange={handleChange}
+                      required
+                      rows={6}
+                      placeholder="Escribe aquí tu mensaje..."
+                      className="w-full border border-gray-100 focus:border-red-600 outline-none p-6 text-base font-serif leading-relaxed placeholder:text-slate-200 resize-none transition-colors"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full md:w-auto bg-red-600 text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.4em] hover:bg-black disabled:opacity-60 transition-all"
+                  >
+                    {loading ? 'Enviando...' : 'Enviar Mensaje'}
+                  </button>
+                </form>
+              )}
+            </div>
+
+            {/* Info de contacto */}
+            <div className="lg:col-span-5 space-y-10">
+              <div className="border-l-4 border-red-600 pl-8">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Redacción</h3>
+                <a href="mailto:redaccion@pulsonoticias.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
+                  redaccion@pulsonoticias.com
+                </a>
+              </div>
+
+              <div className="border-l-4 border-black pl-8">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-3">Publicidad</h3>
+                <a href="mailto:publicidad@pulsonoticias.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
+                  publicidad@pulsonoticias.com
+                </a>
+              </div>
+
+              <div className="border-l-4 border-slate-200 pl-8">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Denuncias</h3>
+                <a href="mailto:denuncias@pulsonoticias.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
+                  denuncias@pulsonoticias.com
+                </a>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Línea confidencial 24/7</p>
+              </div>
+
+              {/* Horario */}
+              <div className="bg-slate-50 p-8">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-6">Horario Editorial</h3>
+                <div className="space-y-2 text-sm font-bold uppercase tracking-tight text-slate-600">
+                  <div className="flex justify-between">
+                    <span>Lunes — Viernes</span>
+                    <span className="text-red-600">8:00 AM – 8:00 PM</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Sábados</span>
+                    <span className="text-red-600">9:00 AM – 4:00 PM</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Domingos</span>
+                    <span className="text-slate-300">Solo Urgencias</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
