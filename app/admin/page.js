@@ -10,12 +10,19 @@ export default async function AdminDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   const latest = await getLatestArticles(5);
 
+  // Usar service role para ver los perfiles para no caer en RLS recursion
+  const { createClient: createAdminClient } = await import('@supabase/supabase-js');
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
   // 1. Obtener conteos reales
   const { count: articleCount } = await supabase
     .from('articles')
     .select('*', { count: 'exact', head: true });
 
-  const { count: userCount } = await supabase
+  const { count: userCount } = await supabaseAdmin
     .from('profiles')
     .select('*', { count: 'exact', head: true });
 
@@ -27,7 +34,7 @@ export default async function AdminDashboardPage() {
     .maybeSingle();
 
   // 3. Perfil para verificar rol
-  const { data: profile } = await supabase
+  const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('role')
     .eq('id', user.id)
