@@ -2,10 +2,10 @@
 import { getAllArticles } from '@/lib/serverData';
 import { CATEGORIES, SITE_CONFIG } from '@/lib/data';
 
-export default async function sitemap() {
-  const articles = await getAllArticles();
+export const dynamic = 'force-dynamic';
 
-  // 1. Home
+export default async function sitemap() {
+  // Rutas estáticas base
   const routes = [
     {
       url: SITE_CONFIG.url,
@@ -15,7 +15,7 @@ export default async function sitemap() {
     },
   ];
 
-  // 2. Categorías
+  // Categorías
   const categoryRoutes = CATEGORIES.map((cat) => ({
     url: `${SITE_CONFIG.url}/categoria/${cat.slug}`,
     lastModified: new Date(),
@@ -23,13 +23,20 @@ export default async function sitemap() {
     priority: 0.8,
   }));
 
-  // 3. Artículos individuales
-  const articleRoutes = articles.map((article) => ({
-    url: `${SITE_CONFIG.url}/articulo/${article.slug}`,
-    lastModified: new Date(article.publishedAt),
-    changeFrequency: 'weekly',
-    priority: 0.6,
-  }));
+  // Artículos individuales — con fallback seguro si Supabase falla en build
+  let articleRoutes = [];
+  try {
+    const articles = await getAllArticles();
+    articleRoutes = articles.map((article) => ({
+      url: `${SITE_CONFIG.url}/articulo/${article.slug}`,
+      lastModified: new Date(article.publishedAt),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    }));
+  } catch (err) {
+    console.warn('[Sitemap] No se pudieron cargar artículos:', err?.message);
+    // Devolver solo las rutas estáticas — no romper el build
+  }
 
   return [...routes, ...categoryRoutes, ...articleRoutes];
 }
