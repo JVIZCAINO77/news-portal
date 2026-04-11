@@ -114,11 +114,36 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       throw new Error('La IA no devolvió los campos requeridos (title, content).');
     }
 
-    // 4. Imagen dinámica vía Pollinations AI
-    const imageContext = `Professional photojournalism editorial photography, Dominican Republic news: "${articleData.title}"`;
-    const dynamicImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imageContext)}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
+    // 4. Obtener imagen real de la fuente (Scraper ligero)
+    let finalImageUrl = null;
+    try {
+      // Google News redirecciona. Intentamos seguirlo hasta el sitio final.
+      const redirectRes = await fetch(news.link, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0' } });
+      const html = await redirectRes.text();
+      
+      // Intentar encontrar og:image
+      const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) || 
+                          html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+      
+      if (ogImageMatch && ogImageMatch[1]) {
+        finalImageUrl = ogImageMatch[1];
+        // Asegurarse de que sea una URL absoluta
+        if (finalImageUrl.startsWith('/')) {
+          const origin = new URL(redirectRes.url).origin;
+          finalImageUrl = `${origin}${finalImageUrl}`;
+        }
+      }
+    } catch (err) {
+      console.warn('[Scraper Warning] No se pudo extraer imagen real:', err.message);
+    }
 
-    // 5. Guardar en Supabase (sin 'id' manual — generado por Supabase automáticamente)
+    // 5. Fallback a IA si no hay imagen real
+    if (!finalImageUrl) {
+      const imageContext = `Professional photojournalism editorial photography, Dominican Republic news: "${articleData.title}"`;
+      finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imageContext)}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
+    }
+
+    // 6. Guardar en Supabase
     const newArticle = {
       title: articleData.title,
       slug,
@@ -126,8 +151,8 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       content: articleData.content,
       category: cat.slug,
       author: cat.author,
-      image: dynamicImageUrl,
-      imageAlt: `Imagen generada por IA para: ${articleData.title}`,
+      image: finalImageUrl,
+      imageAlt: `Imagen para: ${articleData.title}`,
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       featured: Math.random() > 0.85,

@@ -27,6 +27,15 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               className="object-cover transition-transform duration-700 group-hover:scale-105"
               priority
             />
+            {/* Premium Branding Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+               <div className="flex flex-col gap-1">
+                  <span className="text-white text-[8px] font-black uppercase tracking-[0.4em] opacity-60">Exclusivo</span>
+                  <span className="text-white text-xs font-black uppercase tracking-[0.2em]">{cat?.label}</span>
+               </div>
+               <span className="text-white/40 text-[9px] font-black uppercase tracking-[0.5em] pb-1">PulsoNoticias</span>
+            </div>
             {cat && (
               <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 shadow-2xl">
                 <span className="text-white text-[10px] font-black uppercase tracking-[0.2em]">
@@ -64,6 +73,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               fill
               className="object-cover group-hover:brightness-90 transition-all duration-300"
             />
+            {/* Branding Overlay (Medium) */}
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
+               <span className="text-white text-[8px] font-black uppercase tracking-[0.3em]">PN | {cat?.label}</span>
+               <div className="w-1 h-1 bg-red-600 rounded-full animate-pulse"></div>
+            </div>
           </div>
           <div className="flex-1 flex flex-col">
             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-red-600 mb-3 block">
@@ -105,6 +120,9 @@ export default function ArticleCard({ article, variant = 'medium', className = '
                 fill
                 className="object-cover"
               />
+              {/* Ultra-subtle Branding (Small) */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+              <span className="absolute bottom-1 right-2 text-white/50 text-[6px] font-black uppercase tracking-widest">PN</span>
             </div>
           )}
         </article>
