@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 // Token secreto para evitar ataques externos, manejado por Vercel
 const CRON_SECRET = process.env.CRON_SECRET;
 
-const DR_SOURCES = '(site:listindiario.com OR site:diariolibre.com OR site:elnacional.com.do OR site:eldia.com.do)';
+const DR_SOURCES = '(site:desenredandodr.com OR site:deultimominuto.net OR site:noticiaslatam.lat)';
 
 const CATEGORIES = {
   noticias:       { query: `Republica Dominicana noticias ${DR_SOURCES}`,   slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
@@ -201,13 +201,11 @@ REGLAS ESTRICTAS DE REDACCIÓN:
     try {
       const urlObj = new URL(news.link);
       sourceName = urlObj.hostname.replace('www.', '').split('.')[0].toUpperCase();
-      // Mapeo amigable para medios dominicanos
+      // Mapeo amigable para los medios asignados
       const sourceMap = {
-        'listindiario': 'Listín Diario',
-        'diariolibre': 'Diario Libre',
-        'elnacional': 'El Nacional',
-        'eldia': 'El Día',
-        'hoy': 'Hoy.com.do'
+        'desenredandodr': 'Desenredando RD',
+        'deultimominuto': 'De Último Minuto',
+        'noticiaslatam': 'Noticias Latam'
       };
       sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
     } catch (e) { /* ignore */ }
