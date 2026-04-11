@@ -9,18 +9,18 @@ const CRON_SECRET = process.env.CRON_SECRET;
 // DR_SOURCES ya no es requerido para Google News, usamos los dominios WP directamente
 
 const CATEGORIES = {
-  noticias:       { query: `noticias locales nacionales`, slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
-  entretenimiento:{ query: `farandula espectaculos`,      slug: 'entretenimiento', author: 'Sección Espectáculos',   style: 'dinámico y ameno' },
-  deportes:       { query: `beisbol mlb deportes`,        slug: 'deportes',        author: 'Mesa Deportiva',  style: 'analítico y pasional' },
-  tecnologia:     { query: `tecnologia innovacion`,       slug: 'tecnologia',      author: 'Redacción Tecnológica',    style: 'informativo y vanguardista' },
-  economia:       { query: `economia finanzas`,           slug: 'economia',        author: 'Redacción Económica',   style: 'serio y financiero' },
-  salud:          { query: `salud bienestar medicina`,    slug: 'salud',           author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable' },
-  cultura:        { query: `arte cultura eventos`,        slug: 'cultura',         author: 'Sección Cultural',     style: 'elegante y descriptivo' },
-  opinion:        { query: `editorial opinion columnas`,  slug: 'opinion',         author: 'Dirección Editorial', style: 'reflexivo, analítico y profundo' },
-  sucesos:        { query: `sucesos policia accidentes`,  slug: 'sucesos',         author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso' },
-  tendencias:     { query: `viral redes sociales`,        slug: 'tendencias',      author: 'Mesa de Tendencias', style: 'ágil y moderno' },
-  internacional:  { query: `mundo internacional global`,  slug: 'internacional',   author: 'Redacción Internacional', style: 'global y analítico' },
-  politica:       { query: `politica elecciones gobierno`,slug: 'politica',        author: 'Mesa Política', style: 'neutral y objetivo' },
+  noticias:       { query: `nacionales`,        slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
+  entretenimiento:{ query: `farandula espectaculos`, slug: 'entretenimiento', author: 'Sección Espectáculos', style: 'dinámico y ameno' },
+  deportes:       { query: `deportes beisbol`,  slug: 'deportes',        author: 'Mesa Deportiva',  style: 'analítico y pasional' },
+  tecnologia:     { query: `tecnologia`,        slug: 'tecnologia',      author: 'Redacción Tecnológica', style: 'informativo y vanguardista' },
+  economia:       { query: `economia`,          slug: 'economia',        author: 'Redacción Económica', style: 'serio y financiero' },
+  salud:          { query: `salud medicina`,    slug: 'salud',           author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable' },
+  cultura:        { query: `cultura arte`,      slug: 'cultura',         author: 'Sección Cultural', style: 'elegante y descriptivo' },
+  opinion:        { query: `opinion editorial`, slug: 'opinion',         author: 'Dirección Editorial', style: 'reflexivo, analítico y profundo' },
+  sucesos:        { query: `sucesos policia`,   slug: 'sucesos',         author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso' },
+  tendencias:     { query: `viral redes`,       slug: 'tendencias',      author: 'Mesa de Tendencias', style: 'ágil y moderno' },
+  internacional:  { query: `internacional mundo`, slug: 'internacional', author: 'Redacción Internacional', style: 'global y analítico' },
+  politica:       { query: `politica`,          slug: 'politica',        author: 'Mesa Política', style: 'neutral y objetivo' },
 };
 
 export async function GET(request) {
@@ -115,12 +115,15 @@ export async function GET(request) {
     const selectedKey = keys[Math.floor(Math.random() * keys.length)] || process.env.GEMINI_API_KEY;
     const ai = new GoogleGenAI({ apiKey: selectedKey });
 
-    const prompt = `Actúa como un periodista ético y profesional de "PulsoNoticias". Tienes el siguiente titular y resumen de una noticia real documentada.
+    const prompt = `Actúa como un periodista ético y profesional de "PulsoNoticias". Analiza cuidadosamente esta noticia para la sección "${cat.slug.toUpperCase()}":
 
 Titular original: ${news.title}
 Resumen de fuente confiable: ${news.contentSnippet || 'Sin resumen disponible'}
 
-REGLAS ESTRICTAS DE REDACCIÓN:
+FILTRO ESTRICTO DE CATEGORÍA:
+Debes analizar si los hechos de esta noticia realmente encajan perfectamente y sin forzarse en la categoría de "${cat.slug.toUpperCase()}". Si es otro tema (por ejemplo, si envían algo de Política a Tecnología), tu ÚNICA RESPUESTA debe ser exactamente la palabra: IRRELEVANTE
+
+Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora el filtro anterior y redacta la nota completa cumpliendo estas REGLAS ESTRICTAS:
 1. El artículo debe estar COMPLETAMENTE EN ESPAÑOL.
 2. VERACIDAD ABSOLUTA: Basate ÚNICAMENTE en los hechos del resumen. NO inventes datos.
 3. Aplica tu estilo de periodista: ${cat.style}.
@@ -163,6 +166,11 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       .replace(/```json\s*/gi, '')
       .replace(/```\s*/gi, '')
       .trim();
+
+    // Filtro de irrelevancia emitido por la IA
+    if (cleanedText === 'IRRELEVANTE') {
+      throw new Error(`La Inteligencia Artificial dictaminó que la noticia encontrada (${news.title}) no pertenece estrictamente a la sección de ${cat.slug.toUpperCase()}. Se omite para evitar desorden.`);
+    }
 
     let articleData;
     try {
