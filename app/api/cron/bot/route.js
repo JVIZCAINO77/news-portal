@@ -14,6 +14,8 @@ const CATEGORIES = {
   deportes:       { query: `beisbol dominicano ${DR_SOURCES}`,              slug: 'deportes',        author: 'Marcos Alarcón',  style: 'analítico y pasional' },
   tecnologia:     { query: `tecnologia innovacion ${DR_SOURCES}`,           slug: 'tecnologia',      author: 'Elena Torres',    style: 'informativo y vanguardista' },
   economia:       { query: `economia dominicana ${DR_SOURCES}`,             slug: 'economia',        author: 'Roberto Silva',   style: 'serio y financiero' },
+  salud:          { query: `salud bienestar medicina republica dominicana ${DR_SOURCES}`, slug: 'salud', author: 'Dr. Arnaldo Pérez', style: 'profesional, informativo y confiable' },
+  cultura:        { query: `arte cultura dominicana eventos ${DR_SOURCES}`, slug: 'cultura',        author: 'Sofía Méndez',     style: 'elegante y descriptivo' },
 };
 
 export async function GET(request) {
