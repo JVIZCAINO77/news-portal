@@ -2,12 +2,9 @@ name: Auto-Blogger Diario
 
 on:
   schedule:
-    # 5 publicaciones masivas diarias (Basado en la hora UTC, ajustado a flujo de LATAM)
-    - cron: '0 10 * * *' 
-    - cron: '0 14 * * *' 
-    - cron: '0 16 * * *' 
-    - cron: '30 20 * * *' 
-    - cron: '0 1 * * *'   
+    # Ejecuta el flujo automáticamente cada 3 horas sin excepción para mantener 
+    # una publicación dinámica (8 veces al día x 8 categorías).
+    - cron: '0 */3 * * *'
   workflow_dispatch: # Permite ejecutar el bot manualmente desde la página de GitHub
 
 jobs:
@@ -19,7 +16,7 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
           NEXT_PUBLIC_SITE_URL: "https://news-portal-rosy-kappa.vercel.app" # Reemplazar si usan otro dominio primario
         run: |
-          CATEGORIES="noticias entretenimiento deportes tecnologia economia salud opinion cultura"
+          CATEGORIES="noticias entretenimiento deportes tecnologia economia salud opinion cultura sucesos tendencias internacional politica"
           for cat in $CATEGORIES; do
             echo "====================================="
             echo "🚀 Lanzando Agente Remoto para: $cat"

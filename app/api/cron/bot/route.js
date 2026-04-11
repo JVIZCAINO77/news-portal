@@ -9,14 +9,18 @@ const CRON_SECRET = process.env.CRON_SECRET;
 const DR_SOURCES = '(site:listindiario.com OR site:diariolibre.com OR site:elnacional.com.do OR site:eldia.com.do)';
 
 const CATEGORIES = {
-  noticias:       { query: `Republica Dominicana noticias ${DR_SOURCES}`,   slug: 'noticias',       author: 'Carlos Mendoza',  style: 'periodístico objetivo y formal' },
-  entretenimiento:{ query: `farandula dominicana ${DR_SOURCES}`,            slug: 'entretenimiento', author: 'Valeria Reyes',   style: 'dinámico y ameno' },
-  deportes:       { query: `beisbol dominicano ${DR_SOURCES}`,              slug: 'deportes',        author: 'Marcos Alarcón',  style: 'analítico y pasional' },
-  tecnologia:     { query: `tecnologia innovacion ${DR_SOURCES}`,           slug: 'tecnologia',      author: 'Elena Torres',    style: 'informativo y vanguardista' },
-  economia:       { query: `economia dominicana ${DR_SOURCES}`,             slug: 'economia',        author: 'Roberto Silva',   style: 'serio y financiero' },
-  salud:          { query: `salud bienestar medicina republica dominicana ${DR_SOURCES}`, slug: 'salud', author: 'Dr. Arnaldo Pérez', style: 'profesional, informativo y confiable' },
-  cultura:        { query: `arte cultura dominicana eventos ${DR_SOURCES}`, slug: 'cultura',        author: 'Sofía Méndez',     style: 'elegante y descriptivo' },
-  opinion:        { query: `editorial opinion columnas republica dominicana ${DR_SOURCES}`, slug: 'opinion', author: 'Dr. Héctor Guerrero', style: 'reflexivo, analítico y profundo' },
+  noticias:       { query: `Republica Dominicana noticias ${DR_SOURCES}`,   slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
+  entretenimiento:{ query: `farandula dominicana ${DR_SOURCES}`,            slug: 'entretenimiento', author: 'Sección Espectáculos',   style: 'dinámico y ameno' },
+  deportes:       { query: `beisbol dominicano ${DR_SOURCES}`,              slug: 'deportes',        author: 'Mesa Deportiva',  style: 'analítico y pasional' },
+  tecnologia:     { query: `tecnologia innovacion ${DR_SOURCES}`,           slug: 'tecnologia',      author: 'Redacción Tecnológica',    style: 'informativo y vanguardista' },
+  economia:       { query: `economia dominicana ${DR_SOURCES}`,             slug: 'economia',        author: 'Redacción Económica',   style: 'serio y financiero' },
+  salud:          { query: `salud bienestar medicina republica dominicana ${DR_SOURCES}`, slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable' },
+  cultura:        { query: `arte cultura dominicana eventos ${DR_SOURCES}`, slug: 'cultura',        author: 'Sección Cultural',     style: 'elegante y descriptivo' },
+  opinion:        { query: `editorial opinion columnas republica dominicana ${DR_SOURCES}`, slug: 'opinion', author: 'Dirección Editorial', style: 'reflexivo, analítico y profundo' },
+  sucesos:        { query: `sucesos policia republica dominicana ${DR_SOURCES}`, slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso' },
+  tendencias:     { query: `viral redes sociales republica dominicana ${DR_SOURCES}`, slug: 'tendencias', author: 'Mesa de Tendencias', style: 'ágil y moderno' },
+  internacional:  { query: `mundo internacional noticias globales ${DR_SOURCES}`, slug: 'internacional', author: 'Redacción Internacional', style: 'global y analítico' },
+  politica:       { query: `politica elecciones gobierno republica dominicana ${DR_SOURCES}`, slug: 'politica', author: 'Mesa Política', style: 'neutral y objetivo' },
 };
 
 export async function GET(request) {
@@ -64,7 +68,33 @@ export async function GET(request) {
       return NextResponse.json({ message: `Sin noticias disponibles para: ${categoryKey}` }, { status: 200 });
     }
 
-    const news = feed.items[0];
+    let news = null;
+    for (const item of feed.items) {
+      if (!item.link) continue;
+      
+      // Validar si ese link original ya fue subido a la BD
+      const { data: existingLink } = await supabase
+        .from('articles')
+        .select('id')
+        .eq('source_link', item.link)
+        .maybeSingle();
+
+      // Validar también si el título original ya fue abordado
+      const { data: existingTitle } = await supabase
+        .from('articles')
+        .select('id')
+        .eq('title', item.title)
+        .maybeSingle();
+
+      if (!existingLink && !existingTitle) {
+        news = item; // Encontramos una noticia fresca
+        break;
+      }
+    }
+
+    if (!news) {
+      return NextResponse.json({ message: `No hay noticias frescas que no hayan sido publicadas para: ${categoryKey}` }, { status: 200 });
+    }
     const baseSlug = news.title
       .toLowerCase()
       .normalize('NFD')
@@ -86,10 +116,12 @@ REGLAS ESTRICTAS DE REDACCIÓN:
 1. El artículo debe estar COMPLETAMENTE EN ESPAÑOL.
 2. VERACIDAD ABSOLUTA: Basate ÚNICAMENTE en los hechos del resumen. NO inventes datos.
 3. Aplica tu estilo de periodista: ${cat.style}.
-4. Usa formato Markdown en el campo 'content' (## para subtítulos, **negritas** para datos clave).
-5. Escribe mínimo 3 párrafos bien desarrollados.
-6. Tu respuesta DEBE ser EXCLUSIVAMENTE un JSON válido con este formato exacto (sin bloques de código):
-{"title":"Titular impactante en español","excerpt":"Resumen ejecutivo de 2 líneas","content":"Artículo completo en Markdown"}`;
+4. EL TITULAR DEBE SER MUY LLAMATIVO Y MAGNÉTICO: Reformula el titular original para que capte la atención del lector de inmediato, con un gancho periodístico fuerte que invite a hacer clic.
+5. Usa formato Markdown en el campo 'content' (## para subtítulos, **negritas** para datos clave).
+6. Escribe mínimo 3 párrafos bien desarrollados.
+7. Extrae de 3 a 5 palabras clave de alto tráfico SEO (SEO Tags) enfocadas en este tema y devuélvelas en un arreglo de strings.
+8. Tu respuesta DEBE ser EXCLUSIVAMENTE un JSON válido con este formato exacto (sin bloques de código):
+{"title":"TITULAR LLAMATIVO Y MAGNÉTICO AQUÍ","excerpt":"Resumen en forma de 'gancho' para mantener la retención","content":"Artículo completo en Markdown","tags":["seo1", "seo2", "seo3"]}`;
 
     const aiResponse = await ai.models.generateContent({
       model: 'gemini-2.0-flash',
@@ -131,25 +163,13 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       if (ogImageMatch && ogImageMatch[1]) {
         const foundUrl = ogImageMatch[1];
         
-        // --- NUEVO: Verificación de Duplicados (Foto) ---
-        // Verificamos si esta URL de imagen ya existe en la base de datos
-        const { data: existingPhoto } = await supabase
-          .from('articles')
-          .select('id')
-          .eq('image', foundUrl)
-          .maybeSingle();
-
-        if (!existingPhoto) {
-          finalImageUrl = foundUrl;
-          // Asegurarse de que sea una URL absoluta
-          if (finalImageUrl.startsWith('/')) {
-            const origin = new URL(redirectRes.url).origin;
-            finalImageUrl = `${origin}${finalImageUrl}`;
-          }
-        } else {
-          console.log('[Bot Log] Foto repetida detectada. Activando fallback de IA para exclusividad.');
+        // Tomar siempre la foto original del artículo 
+        finalImageUrl = foundUrl;
+        // Asegurarse de que sea una URL absoluta
+        if (finalImageUrl.startsWith('/')) {
+          const origin = new URL(redirectRes.url).origin;
+          finalImageUrl = `${origin}${finalImageUrl}`;
         }
-        // ------------------------------------------------
       }
     } catch (err) {
       console.warn('[Scraper Warning] No se pudo extraer imagen real:', err.message);
@@ -177,12 +197,17 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
     } catch (e) { /* ignore */ }
 
+    // Preparar el cuerpo del artículo con las etiquetas inyectadas al final de la nota (para que sea robusto en DB)
+    const injectedTagsList = (articleData.tags && articleData.tags.length > 0)
+      ? `\n\n**Etiquetas SEO:** ${articleData.tags.map(t => '#' + t.replace(/\s+/g,'')).join(' ')}`
+      : '';
+
     // 6. Guardar en Supabase
     const newArticle = {
       title: articleData.title,
       slug,
       excerpt: articleData.excerpt || articleData.title,
-      content: `${articleData.content}\n\n---\n*Fuente original: ${sourceName}*`, 
+      content: `${articleData.content}\n\n---\n*Fuente original: ${sourceName}*${injectedTagsList}`, 
       category: cat.slug,
       author: cat.author,
       image: finalImageUrl,
