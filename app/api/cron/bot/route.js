@@ -104,8 +104,10 @@ export async function GET(request) {
       .slice(0, 80);
     const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
-    // 3. Redacción con Gemini 2.0 Flash (API @google/genai v1.x)
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    // 3. Redacción con Inteligencia Artificial (Con Rotación de Keys y Fallback)
+    const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
+    const selectedKey = keys[Math.floor(Math.random() * keys.length)] || process.env.GEMINI_API_KEY;
+    const ai = new GoogleGenAI({ apiKey: selectedKey });
 
     const prompt = `Actúa como un periodista ético y profesional de "PulsoNoticias". Tienes el siguiente titular y resumen de una noticia real documentada.
 
@@ -123,10 +125,23 @@ REGLAS ESTRICTAS DE REDACCIÓN:
 8. Tu respuesta DEBE ser EXCLUSIVAMENTE un JSON válido con este formato exacto (sin bloques de código):
 {"title":"TITULAR LLAMATIVO Y MAGNÉTICO AQUÍ","excerpt":"Resumen en forma de 'gancho' para mantener la retención","content":"Artículo completo en Markdown","tags":["seo1", "seo2", "seo3"]}`;
 
-    const aiResponse = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: prompt,
-    });
+    let aiResponse;
+    try {
+      aiResponse = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: prompt,
+      });
+    } catch (fallbackError) {
+      if (fallbackError.message.includes('Quota') || fallbackError.message.includes('429')) {
+        console.warn(`[Bot Warning] Cuota de gemini-2.0 excedida con la key actual. Redirigiendo a gemini-1.5-flash...`);
+        aiResponse = await ai.models.generateContent({
+          model: 'gemini-1.5-flash',
+          contents: prompt,
+        });
+      } else {
+        throw fallbackError;
+      }
+    }
 
     const rawText = aiResponse.text || '';
 

@@ -49,7 +49,7 @@ export default function Header() {
       {/* Navigation */}
       <nav className={`sticky top-0 z-50 bg-white border-y border-gray-100 transition-shadow ${isScrolled ? 'shadow-md' : ''}`}>
         <div className="max-w-7xl mx-auto px-6">
-          <ul className="flex items-center justify-center overflow-x-auto no-scrollbar py-1">
+          <ul className="flex items-center justify-start lg:justify-center overflow-x-auto no-scrollbar py-1">
             {CATEGORIES.map((cat) => (
               <li key={cat.slug}>
                 <Link
