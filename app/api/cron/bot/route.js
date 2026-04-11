@@ -6,21 +6,21 @@ import { createClient } from '@supabase/supabase-js';
 // Token secreto para evitar ataques externos, manejado por Vercel
 const CRON_SECRET = process.env.CRON_SECRET;
 
-const DR_SOURCES = '(site:desenredandodr.com OR site:deultimominuto.net OR site:noticiaslatam.lat)';
+// DR_SOURCES ya no es requerido para Google News, usamos los dominios WP directamente
 
 const CATEGORIES = {
-  noticias:       { query: `Republica Dominicana noticias ${DR_SOURCES}`,   slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
-  entretenimiento:{ query: `farandula dominicana ${DR_SOURCES}`,            slug: 'entretenimiento', author: 'Sección Espectáculos',   style: 'dinámico y ameno' },
-  deportes:       { query: `beisbol dominicano ${DR_SOURCES}`,              slug: 'deportes',        author: 'Mesa Deportiva',  style: 'analítico y pasional' },
-  tecnologia:     { query: `tecnologia innovacion ${DR_SOURCES}`,           slug: 'tecnologia',      author: 'Redacción Tecnológica',    style: 'informativo y vanguardista' },
-  economia:       { query: `economia dominicana ${DR_SOURCES}`,             slug: 'economia',        author: 'Redacción Económica',   style: 'serio y financiero' },
-  salud:          { query: `salud bienestar medicina republica dominicana ${DR_SOURCES}`, slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable' },
-  cultura:        { query: `arte cultura dominicana eventos ${DR_SOURCES}`, slug: 'cultura',        author: 'Sección Cultural',     style: 'elegante y descriptivo' },
-  opinion:        { query: `editorial opinion columnas republica dominicana ${DR_SOURCES}`, slug: 'opinion', author: 'Dirección Editorial', style: 'reflexivo, analítico y profundo' },
-  sucesos:        { query: `sucesos policia republica dominicana ${DR_SOURCES}`, slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso' },
-  tendencias:     { query: `viral redes sociales republica dominicana ${DR_SOURCES}`, slug: 'tendencias', author: 'Mesa de Tendencias', style: 'ágil y moderno' },
-  internacional:  { query: `mundo internacional noticias globales ${DR_SOURCES}`, slug: 'internacional', author: 'Redacción Internacional', style: 'global y analítico' },
-  politica:       { query: `politica elecciones gobierno republica dominicana ${DR_SOURCES}`, slug: 'politica', author: 'Mesa Política', style: 'neutral y objetivo' },
+  noticias:       { query: `noticias locales nacionales`, slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
+  entretenimiento:{ query: `farandula espectaculos`,      slug: 'entretenimiento', author: 'Sección Espectáculos',   style: 'dinámico y ameno' },
+  deportes:       { query: `beisbol mlb deportes`,        slug: 'deportes',        author: 'Mesa Deportiva',  style: 'analítico y pasional' },
+  tecnologia:     { query: `tecnologia innovacion`,       slug: 'tecnologia',      author: 'Redacción Tecnológica',    style: 'informativo y vanguardista' },
+  economia:       { query: `economia finanzas`,           slug: 'economia',        author: 'Redacción Económica',   style: 'serio y financiero' },
+  salud:          { query: `salud bienestar medicina`,    slug: 'salud',           author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable' },
+  cultura:        { query: `arte cultura eventos`,        slug: 'cultura',         author: 'Sección Cultural',     style: 'elegante y descriptivo' },
+  opinion:        { query: `editorial opinion columnas`,  slug: 'opinion',         author: 'Dirección Editorial', style: 'reflexivo, analítico y profundo' },
+  sucesos:        { query: `sucesos policia accidentes`,  slug: 'sucesos',         author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso' },
+  tendencias:     { query: `viral redes sociales`,        slug: 'tendencias',      author: 'Mesa de Tendencias', style: 'ágil y moderno' },
+  internacional:  { query: `mundo internacional global`,  slug: 'internacional',   author: 'Redacción Internacional', style: 'global y analítico' },
+  politica:       { query: `politica elecciones gobierno`,slug: 'politica',        author: 'Mesa Política', style: 'neutral y objetivo' },
 };
 
 export async function GET(request) {
@@ -59,9 +59,15 @@ export async function GET(request) {
   }
 
   try {
-    // 2. Extraer Noticias vía Google News RSS
+    // 2. Extraer Noticias directamente de los Feeds de WordPress de las fuentes solicitadas
     const parser = new Parser();
-    const feedUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(cat.query)}&hl=es-419&gl=US&ceid=US:es-419`;
+    const wpSources = [
+      'https://desenredandodr.com/feed/?s=',
+      'https://deultimominuto.net/feed/?s='
+    ];
+    // Elegimos una plataforma de forma aleatoria para esta ejecución
+    const selectedSource = wpSources[Math.floor(Math.random() * wpSources.length)];
+    const feedUrl = `${selectedSource}${encodeURIComponent(cat.query)}`;
     const feed = await parser.parseURL(feedUrl);
 
     if (!feed.items || feed.items.length === 0) {
@@ -185,8 +191,10 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       if (ogImageMatch && ogImageMatch[1]) {
         const foundUrl = ogImageMatch[1];
         
-        // Tomar siempre la foto original del artículo 
-        finalImageUrl = foundUrl;
+        // Evitaremos logos genéricos o imágenes dañadas en el caso de que la URL esté rota
+        if (foundUrl.length > 10) {
+          finalImageUrl = foundUrl;
+        }
         // Asegurarse de que sea una URL absoluta
         if (finalImageUrl.startsWith('/')) {
           const origin = new URL(redirectRes.url).origin;
