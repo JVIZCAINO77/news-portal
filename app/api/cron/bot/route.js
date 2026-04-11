@@ -196,10 +196,20 @@ REGLAS ESTRICTAS DE REDACCIÓN:
 
   } catch (error) {
     console.error(`[Bot Error] Categoría: ${categoryKey} |`, error.message);
+    
+    // Humanizar el error para el dashboard
+    let cleanMessage = error.message;
+    if (error.message.includes('Quota exceeded') || error.message.includes('429')) {
+      cleanMessage = 'Límite de cuota de IA alcanzado. Por favor, reintenta en unos minutos.';
+    } else if (error.message.includes('timeout') || error.message.includes('fetch')) {
+      cleanMessage = 'Error de conexión. Reintentando pronto...';
+    }
+
     return NextResponse.json({
-      error: error.message,
+      error: cleanMessage,
       category: categoryKey,
       timestamp: new Date().toISOString(),
+      raw: process.env.NODE_ENV === 'development' ? error.message : undefined
     }, { status: 500 });
   }
 }

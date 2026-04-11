@@ -78,11 +78,26 @@ export default function AgentsDashboard({ botEnabled }) {
           [category]: { ok: true, title: data.result.article?.title || '¡Publicado!' },
         }));
       } else {
-        const errMsg = data.result?.message || data.result?.error || data.error || 'Error desconocido';
-        setResults(prev => ({ ...prev, [category]: { ok: false, msg: errMsg } }));
+        const rawMsg = data.result?.message || data.result?.error || data.error || 'Error desconocido';
+        let cleanMsg = rawMsg;
+        
+        // Limpiar JSON si viene como string
+        if (typeof rawMsg === 'string' && rawMsg.startsWith('{')) {
+          try {
+            const parsed = JSON.parse(rawMsg);
+            cleanMsg = parsed.error?.message || parsed.message || rawMsg;
+          } catch (e) { /* ignore */ }
+        }
+
+        // Más limpieza para errores de cuota de Gemini
+        if (cleanMsg.includes('Quota exceeded') || cleanMsg.includes('429')) {
+          cleanMsg = 'Límite de cuota de IA alcanzado. Intenta de nuevo en un momento.';
+        }
+
+        setResults(prev => ({ ...prev, [category]: { ok: false, msg: cleanMsg } }));
       }
     } catch (err) {
-      setResults(prev => ({ ...prev, [category]: { ok: false, msg: err.message } }));
+      setResults(prev => ({ ...prev, [category]: { ok: false, msg: 'Error de conexión.' } }));
     } finally {
       setLoadingAgent(null);
     }
