@@ -161,17 +161,33 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imageContext)}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
     }
 
+    // --- NUEVO: Extraer nombre de la fuente ---
+    let sourceName = 'Fuente Externa';
+    try {
+      const urlObj = new URL(news.link);
+      sourceName = urlObj.hostname.replace('www.', '').split('.')[0].toUpperCase();
+      // Mapeo amigable para medios dominicanos
+      const sourceMap = {
+        'listindiario': 'Listín Diario',
+        'diariolibre': 'Diario Libre',
+        'elnacional': 'El Nacional',
+        'eldia': 'El Día',
+        'hoy': 'Hoy.com.do'
+      };
+      sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
+    } catch (e) { /* ignore */ }
+
     // 6. Guardar en Supabase
     const newArticle = {
       title: articleData.title,
       slug,
       excerpt: articleData.excerpt || articleData.title,
-      content: articleData.content,
+      content: `${articleData.content}\n\n---\n*Fuente original: ${sourceName}*`, 
       category: cat.slug,
       author: cat.author,
       image: finalImageUrl,
       imageAlt: `Imagen para: ${articleData.title}`,
-      source_link: news.link, // Guardar el link original
+      source_link: news.link, 
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       featured: Math.random() > 0.85,

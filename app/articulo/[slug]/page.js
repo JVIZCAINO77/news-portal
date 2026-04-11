@@ -78,7 +78,13 @@ export default async function ArticlePage({ params }) {
                     if (p.startsWith('## ')) {
                       return <h2 key={i} className="text-3xl font-black text-black mt-16 mb-8 uppercase tracking-tighter italic">{p.replace('## ', '')}</h2>;
                     }
-                    const formattedText = p.replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>');
+                    if (p.trim() === '---') {
+                      return <hr key={i} className="my-12 border-slate-100" />;
+                    }
+
+                    const formattedText = p
+                      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
+                      .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
                     return ( <p key={i} className="mb-10 text-xl font-serif leading-relaxed text-[#333] tracking-normal" dangerouslySetInnerHTML={{ __html: formattedText }} /> );
                  })}
               </div>
