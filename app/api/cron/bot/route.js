@@ -125,25 +125,32 @@ REGLAS ESTRICTAS DE REDACCIÓN:
 8. Tu respuesta DEBE ser EXCLUSIVAMENTE un JSON válido con este formato exacto (sin bloques de código):
 {"title":"TITULAR LLAMATIVO Y MAGNÉTICO AQUÍ","excerpt":"Resumen en forma de 'gancho' para mantener la retención","content":"Artículo completo en Markdown","tags":["seo1", "seo2", "seo3"]}`;
 
-    let aiResponse;
+    let rawText = '';
     try {
-      aiResponse = await ai.models.generateContent({
+      const aiResponse = await ai.models.generateContent({
         model: 'gemini-2.0-flash',
         contents: prompt,
       });
+      rawText = aiResponse.text || '';
     } catch (fallbackError) {
       if (fallbackError.message.includes('Quota') || fallbackError.message.includes('429')) {
-        console.warn(`[Bot Warning] Cuota de gemini-2.0-flash excedida. Redirigiendo a gemini-2.0-flash-lite...`);
-        aiResponse = await ai.models.generateContent({
-          model: 'gemini-2.0-flash-lite',
-          contents: prompt,
-        });
+        try {
+          console.warn(`[Bot Warning] Cuota de gemini-2.0-flash excedida. Probando gemini-2.0-flash-lite...`);
+          const fallbackResponse = await ai.models.generateContent({
+            model: 'gemini-2.0-flash-lite',
+            contents: prompt,
+          });
+          rawText = fallbackResponse.text || '';
+        } catch (superFallbackError) {
+           console.warn(`[Bot Critical] Todos los modelos de Gemini agotados. Rescatando con IA Pollinations (Ilimitada)...`);
+           const textUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?json=true`;
+           const polRes = await fetch(textUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+           rawText = await polRes.text();
+        }
       } else {
         throw fallbackError;
       }
     }
-
-    const rawText = aiResponse.text || '';
 
     // Parseo seguro del JSON
     const cleanedText = rawText
