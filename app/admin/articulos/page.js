@@ -6,25 +6,43 @@ import DeleteArticleButton from '@/components/DeleteArticleButton';
 export default async function AdminArticlesPage() {
   const supabase = await createClient();
   // ... (rest of the server actions for fetching)
-  const { data: { user } } = await supabase.auth.getUser();
+  let articles = [];
+  let isAdmin = false;
 
-  // Obtener perfil para verificar rol
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return <div>Redirigiendo...</div>;
 
-  const isAdmin = profile?.role === 'admin';
+    // Obtener perfil para verificar rol
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
 
-  // Si es admin, ve todos. Si es editor, solo los suyos.
-  let query = supabase.from('articles').select('*').order('publishedAt', { ascending: false });
-  
-  if (!isAdmin) {
-    query = query.eq('author_id', user.id);
+    isAdmin = profile?.role === 'admin';
+
+    // Si es admin, ve todos. Si es editor, solo los suyos.
+    let query = supabase.from('articles').select('*').order('publishedAt', { ascending: false });
+    
+    if (!isAdmin) {
+      query = query.eq('author_id', user.id);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    articles = data || [];
+  } catch (err) {
+    console.error('Error loading articles:', err);
+    return (
+      <div className="p-12 border-2 border-red-500 bg-red-50 text-red-900">
+        <h2 className="text-2xl font-black uppercase mb-4">Error de Base de Datos</h2>
+        <p className="text-sm">No pudimos cargar los artículos. Por favor, verifica que las políticas RLS sean correctas.</p>
+        <pre className="mt-4 text-[10px] bg-white p-4 border border-red-200 overflow-auto">{err.message}</pre>
+      </div>
+    );
   }
 
-  const { data: articles, error } = await query;
 
   return (
     <div className="space-y-12">
@@ -62,7 +80,11 @@ export default async function AdminArticlesPage() {
                           <span className="text-[9px] font-black uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1">{a.category}</span>
                        </td>
                        <td className="px-8 py-6">
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(a.publishedAt).toLocaleDateString('es-DO', {day:'2-digit', month:'short'})}</p>
+                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                            {a.publishedAt 
+                              ? new Date(a.publishedAt).toLocaleDateString('es-DO', {day:'2-digit', month:'short'}) 
+                              : 'Borrador'}
+                          </p>
                        </td>
                        {isAdmin && (
                          <td className="px-8 py-6">
