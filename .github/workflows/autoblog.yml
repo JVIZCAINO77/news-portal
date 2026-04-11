@@ -1,49 +1,39 @@
 name: Auto-Blogger Diario
 
 on:
-#  schedule:
-#    # 5 publicaciones masivas diarias, alineadas a las horas pico en Rep. Dominicana (UTC-4)
-#    - cron: '0 10 * * *' # 6:00 AM (Despertar y commuting)
-#    - cron: '0 14 * * *' # 10:00 AM (Actualización matutina)
-#    - cron: '0 16 * * *' # 12:00 PM (Hora de almuerzo)
-#    - cron: '30 20 * * *' # 4:30 PM (Final de la jornada laboral)
-#    - cron: '0 1 * * *'   # 9:00 PM (Revista nocturna)
+  schedule:
+    # 5 publicaciones masivas diarias (Basado en la hora UTC, ajustado a flujo de LATAM)
+    - cron: '0 10 * * *' 
+    - cron: '0 14 * * *' 
+    - cron: '0 16 * * *' 
+    - cron: '30 20 * * *' 
+    - cron: '0 1 * * *'   
   workflow_dispatch: # Permite ejecutar el bot manualmente desde la página de GitHub
 
 jobs:
   publish_article:
     runs-on: ubuntu-latest
     steps:
-      - name: Clonar código
-        uses: actions/checkout@v3
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Instalar dependencias del script
-        run: npm install rss-parser @google/genai dotenv @supabase/supabase-js
-
-      - name: Ejecutar Agente Redactor (Para todas las categorías)
+      - name: Ejecutar Agente Redactor (Vía API Endpoint para todas las categorías)
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          NEXT_PUBLIC_SITE_URL: "https://news-portal-rosy-kappa.vercel.app" # Reemplazar si el dominio oficial cambia
-          REVALIDATE_SECRET: "mi-secreto-super-seguro"
+          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          NEXT_PUBLIC_SITE_URL: "https://news-portal-rosy-kappa.vercel.app" # Reemplazar si usan otro dominio primario
         run: |
           CATEGORIES="noticias entretenimiento deportes tecnologia economia salud opinion cultura"
           for cat in $CATEGORIES; do
             echo "====================================="
-            echo "🚀 Lanzando Agente para: $cat"
+            echo "🚀 Lanzando Agente Remoto para: $cat"
             echo "====================================="
             
-            # Ejecutar el script (Ignora errores puntuales para que no detenga el resto)
-            node scripts/agent.js $cat || echo "⚠️ Falló la categoría $cat, continuando con la siguiente..."
+            # Ejecutar CURL contra Vercel en la nube
+            HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" -X GET "$NEXT_PUBLIC_SITE_URL/api/cron/bot?category=$cat" -H "Authorization: Bearer $CRON_SECRET")
+            
+            if [ "$HTTP_STATUS" != "200" ]; then
+              echo "⚠️ Falló la categoría $cat con status $HTTP_STATUS, continuando con la siguiente..."
+            else
+              echo "✅ Éxito para $cat"
+            fi
             
             echo "⏱️ Pausando 65 segundos (anti rate-limit de Google Gemini)..."
             sleep 65
           done
-
