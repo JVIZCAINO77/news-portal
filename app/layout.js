@@ -54,6 +54,7 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
           strategy="lazyOnload"
         />
+        <meta name="google-adsense-account" content="ca-pub-9579937391435747" />
       </head>
       <body className="min-h-screen flex flex-col font-sans">
         <Header />
