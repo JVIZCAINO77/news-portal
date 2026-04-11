@@ -29,23 +29,15 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
 
   return (
     <div className={`ad-container my-10 ${className}`} style={{ minHeight: style.minHeight }}>
-      <div className="flex flex-col items-center justify-center bg-gray-50 border-y border-gray-100 py-10 relative overflow-hidden">
+      <div className="flex flex-col items-center justify-center bg-gray-50 border-y border-gray-100 py-6 relative overflow-hidden">
         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 mb-4">Publicidad</span>
         
-        {/* Placeholder visual elegante */}
-        <div className="border border-dashed border-gray-200 p-8 text-center">
-           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{style.label}</p>
-        </div>
-
-        {/* Script Real de AdSense (Comentado hasta producción real) */}
-        {/* 
         <ins className="adsbygoogle"
-             style={{ display: 'block' }}
+             style={{ display: 'block', minWidth: '250px', minHeight: style.minHeight }}
              data-ad-client={SITE_CONFIG.adsenseId}
              data-ad-slot={slot}
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
-        */}
       </div>
     </div>
   );

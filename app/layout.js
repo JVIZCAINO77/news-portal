@@ -4,6 +4,7 @@ import { SITE_CONFIG } from '@/lib/data';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Analytics } from '@vercel/analytics/react';
+import Script from 'next/script';
 
 export const metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
@@ -45,6 +46,14 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Source+Serif+4:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet" />
+        
+        {/* Google AdSense Script */}
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE_CONFIG.adsenseId}`}
+          crossOrigin="anonymous"
+          strategy="lazyOnload"
+        />
       </head>
       <body className="min-h-screen flex flex-col font-sans">
         <Header />
