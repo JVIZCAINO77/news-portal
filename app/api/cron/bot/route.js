@@ -126,18 +126,33 @@ REGLAS ESTRICTAS DE REDACCIÓN:
                           html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
       
       if (ogImageMatch && ogImageMatch[1]) {
-        finalImageUrl = ogImageMatch[1];
-        // Asegurarse de que sea una URL absoluta
-        if (finalImageUrl.startsWith('/')) {
-          const origin = new URL(redirectRes.url).origin;
-          finalImageUrl = `${origin}${finalImageUrl}`;
+        const foundUrl = ogImageMatch[1];
+        
+        // --- NUEVO: Verificación de Duplicados (Foto) ---
+        // Verificamos si esta URL de imagen ya existe en la base de datos
+        const { data: existingPhoto } = await supabase
+          .from('articles')
+          .select('id')
+          .eq('image', foundUrl)
+          .maybeSingle();
+
+        if (!existingPhoto) {
+          finalImageUrl = foundUrl;
+          // Asegurarse de que sea una URL absoluta
+          if (finalImageUrl.startsWith('/')) {
+            const origin = new URL(redirectRes.url).origin;
+            finalImageUrl = `${origin}${finalImageUrl}`;
+          }
+        } else {
+          console.log('[Bot Log] Foto repetida detectada. Activando fallback de IA para exclusividad.');
         }
+        // ------------------------------------------------
       }
     } catch (err) {
       console.warn('[Scraper Warning] No se pudo extraer imagen real:', err.message);
     }
 
-    // 5. Fallback a IA si no hay imagen real
+    // 5. Fallback a IA si no hay imagen real o si la foto estaba repetida
     if (!finalImageUrl) {
       const imageContext = `Professional photojournalism editorial photography, Dominican Republic news: "${articleData.title}"`;
       finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imageContext)}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
@@ -153,6 +168,7 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       author: cat.author,
       image: finalImageUrl,
       imageAlt: `Imagen para: ${articleData.title}`,
+      source_link: news.link, // Guardar el link original
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       featured: Math.random() > 0.85,
