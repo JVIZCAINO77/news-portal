@@ -1,4 +1,4 @@
-// app/admin/layout.js — Layout del Panel de Administración (PulsoNoticias 2.0)
+// app/admin/layout.js — Layout del Panel de Administración (Imperio Público 2.0)
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import BotControls from '@/components/BotControls';

@@ -1,4 +1,4 @@
-// app/contacto/page.js — Página de Contacto (PulsoNoticias)
+// app/contacto/page.js — Página de Contacto (Imperio Público)
 'use client';
 import { useState } from 'react';
 
@@ -132,22 +132,22 @@ export default function ContactoPage() {
             <div className="lg:col-span-5 space-y-10">
               <div className="border-l-4 border-red-600 pl-8">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Redacción</h3>
-                <a href="mailto:redaccion@pulsonoticias.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
-                  redaccion@pulsonoticias.com
+                <a href="mailto:redaccion@imperiopublico.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
+                  redaccion@imperiopublico.com
                 </a>
               </div>
 
               <div className="border-l-4 border-black pl-8">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-3">Publicidad</h3>
-                <a href="mailto:publicidad@pulsonoticias.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
-                  publicidad@pulsonoticias.com
+                <a href="mailto:publicidad@imperiopublico.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
+                  publicidad@imperiopublico.com
                 </a>
               </div>
 
               <div className="border-l-4 border-slate-200 pl-8">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Denuncias</h3>
-                <a href="mailto:denuncias@pulsonoticias.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
-                  denuncias@pulsonoticias.com
+                <a href="mailto:denuncias@imperiopublico.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
+                  denuncias@imperiopublico.com
                 </a>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Línea confidencial 24/7</p>
               </div>

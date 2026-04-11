@@ -1,4 +1,4 @@
-// app/admin/login/page.js — Admin Login for PulsoNoticias 2.0
+// app/admin/login/page.js — Admin Login for Imperio Público 2.0
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
       <div className="max-w-md w-full bg-white shadow-2xl p-10 border-t-8 border-red-600">
         <div className="text-center mb-10">
            <h1 className="text-3xl font-black uppercase tracking-tighter text-black mb-2">
-             Pulso<span className="text-red-600">Admin</span>
+             Imperio<span className="text-red-600">Admin</span>
            </h1>
            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Control de Acceso Editorial</p>
         </div>
@@ -55,7 +55,7 @@ export default function AdminLoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 bg-slate-50 border border-gray-100 focus:outline-none focus:border-red-600 font-bold text-sm"
-              placeholder="admin@pulsonoticias.com"
+              placeholder="admin@imperiopublico.com"
               required
             />
           </div>

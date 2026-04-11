@@ -1,4 +1,4 @@
-// scripts/create-admin.js — Script to create the Initial Admin for PulsoNoticias 2.0
+// scripts/create-admin.js — Script to create the Initial Admin for Imperio Público 2.0
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config({ path: '.env.local' });
 
@@ -55,8 +55,8 @@ async function updateProfile(userId, fullName) {
 }
 
 // Credenciales solicitadas por el usuario
-const ADMIN_EMAIL = 'admin@pulsonoticias.com';
-const ADMIN_PASS = 'PulsoAdmin2026!';
+const ADMIN_EMAIL = 'admin@imperiopublico.com';
+const ADMIN_PASS = 'ImperioAdmin2026!';
 const ADMIN_NAME = 'Director General';
 
 createAdmin(ADMIN_EMAIL, ADMIN_PASS, ADMIN_NAME);

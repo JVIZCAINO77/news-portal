@@ -34,7 +34,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
                   <span className="text-white text-[8px] font-black uppercase tracking-[0.4em] opacity-60">Exclusivo</span>
                   <span className="text-white text-xs font-black uppercase tracking-[0.2em]">{cat?.label}</span>
                </div>
-               <span className="text-white/40 text-[9px] font-black uppercase tracking-[0.5em] pb-1">PulsoNoticias</span>
+               <span className="text-white/40 text-[9px] font-black uppercase tracking-[0.5em] pb-1">Imperio Público</span>
             </div>
             {cat && (
               <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 shadow-2xl">

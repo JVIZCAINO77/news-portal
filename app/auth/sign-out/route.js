@@ -1,4 +1,4 @@
-// app/auth/sign-out/route.js — Logout Handler for PulsoNoticias 2.0
+// app/auth/sign-out/route.js — Logout Handler for Imperio Público 2.0
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 

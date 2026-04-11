@@ -115,7 +115,7 @@ export async function GET(request) {
     const selectedKey = keys[Math.floor(Math.random() * keys.length)] || process.env.GEMINI_API_KEY;
     const ai = new GoogleGenAI({ apiKey: selectedKey });
 
-    const prompt = `Actúa como un periodista ético y profesional de "PulsoNoticias". Analiza cuidadosamente esta noticia para la sección "${cat.slug.toUpperCase()}":
+    const prompt = `Actúa como un periodista ético y profesional de "Imperio Público". Analiza cuidadosamente esta noticia para la sección "${cat.slug.toUpperCase()}":
 
 Titular original: ${news.title}
 Resumen de fuente confiable: ${news.contentSnippet || 'Sin resumen disponible'}

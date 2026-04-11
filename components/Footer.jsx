@@ -11,10 +11,10 @@ export default function Footer() {
           {/* Logo & Info */}
           <div className="md:col-span-1">
             <Link href="/" className="text-3xl font-black tracking-tighter uppercase mb-6 inline-block">
-              Pulso<span className="text-red-500">Noticias</span>
+              Imperio<span className="text-red-500">Público</span>
             </Link>
             <p className="text-sm text-slate-400 font-serif leading-relaxed">
-              El Pulso de la Actualidad Dominicana. Líderes en información verificada, inmediata y de alta calidad editorial.
+              {SITE_CONFIG.tagline}. Líderes en información verificada, inmediata y de alta calidad editorial.
             </p>
           </div>
 
@@ -48,7 +48,7 @@ export default function Footer() {
           {/* Social & Contact */}
           <div className="md:col-span-1 space-y-4">
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Contacto</h4>
-            <p className="text-sm font-serif text-slate-400">redaccion@pulsonoticias.com</p>
+            <p className="text-sm font-serif text-slate-400">redaccion@imperiopublico.com</p>
             <div className="flex gap-4 mt-6">
                <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-red-500 transition-colors cursor-pointer">
                  <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-8.74h-2.94v-3.411h2.94v-2.518c0-2.915 1.779-4.5 4.378-4.5 1.244 0 2.316.091 2.628.133v3.047h-1.803c-1.415 0-1.688.672-1.688 1.658v2.17h3.374l-.439 3.411h-2.935v8.74h6.133c.733 0 1.323-.593 1.323-1.325v-21.35c0-.732-.59-1.325-1.325-1.325z"/></svg>

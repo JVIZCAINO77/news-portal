@@ -1,4 +1,4 @@
-# PulsoNoticias 🗞️
+# Imperio Público 🗞️
 
 Portal de noticias dominicano con CMS de administración, bot de automatización con IA, y diseño editorial premium.
 
@@ -34,7 +34,7 @@ git push origin main
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto en Supabase | ✅ Sí |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anon de Supabase | ✅ Sí |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (solo servidor) | ✅ Sí |
-| `NEXT_PUBLIC_SITE_URL` | Tu dominio, ej: `https://pulsonoticias.vercel.app` | ✅ Sí |
+| `NEXT_PUBLIC_SITE_URL` | Tu dominio, ej: `https://imperiopublico.com` | ✅ Sí |
 | `NEXT_PUBLIC_ADSENSE_ID` | ID de Google AdSense | Opcional |
 | `GEMINI_API_KEY` | Solo para el bot de automatización | Opcional |
 
@@ -114,4 +114,4 @@ news-portal/
 
 ---
 
-© 2025 PulsoNoticias. El Pulso de la Actualidad Dominicana.
+© 2026 Imperio Público. La Autoridad de la Actualidad.

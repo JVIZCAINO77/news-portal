@@ -1,4 +1,4 @@
-// app/admin/articulos/page.js — Gestión de Artículos (PulsoNoticias 2.0)
+// app/admin/articulos/page.js — Gestión de Artículos (Imperio Público 2.0)
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import DeleteArticleButton from '@/components/DeleteArticleButton';

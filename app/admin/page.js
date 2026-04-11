@@ -1,4 +1,4 @@
-// app/admin/page.js — Dashboard Overview (PulsoNoticias 2.0)
+// app/admin/page.js — Dashboard Overview (Imperio Público 2.0)
 import { createClient } from '@/lib/supabase/server';
 import { getLatestArticles } from '@/lib/serverData';
 import Link from 'next/link';
@@ -58,7 +58,7 @@ export default async function AdminDashboardPage() {
             Hola, {user.email.split('@')[0]}
           </h2>
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
-            PulsoNoticias Editorial Control Center
+            Imperio Público Editorial Control Center
             {' · '}
             <span className={isAdmin ? 'text-red-500' : 'text-slate-400'}>
               {isAdmin ? 'Administrador' : 'Editor'}

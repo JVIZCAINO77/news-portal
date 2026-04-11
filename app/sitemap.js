@@ -1,4 +1,4 @@
-// app/sitemap.js — Generación dinámica de Sitemap para SEO en PulsoNoticias 2.0
+// app/sitemap.js — Generación dinámica de Sitemap para SEO en Imperio Público 2.0
 import { getAllArticles } from '@/lib/serverData';
 import { CATEGORIES, SITE_CONFIG } from '@/lib/data';
 

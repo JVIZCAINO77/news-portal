@@ -1,4 +1,4 @@
-// app/admin/articulos/nuevo/page.js — Nueva Publicación (PulsoNoticias 2.0)
+// app/admin/articulos/nuevo/page.js — Nueva Publicación (Imperio Público 2.0)
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -68,7 +68,7 @@ export default function NewArticlePage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-10 border border-gray-100 border-l-8 border-l-red-600 gap-6">
          <div>
             <h2 className="text-4xl font-black uppercase tracking-tighter italic">Redactar Noticia</h2>
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mt-2">PulsoNoticias Editorial Center</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mt-2">Imperio Público Editorial Center</p>
          </div>
          <button 
            type="button"

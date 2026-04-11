@@ -1,4 +1,4 @@
-// app/articulo/[slug]/page.js — Página de Artículo Premium (PulsoNoticias 2.0)
+// app/articulo/[slug]/page.js — Página de Artículo Premium (Imperio Público 2.0)
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';

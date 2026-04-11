@@ -1,5 +1,5 @@
 'use client';
-// components/AutomationToggle.jsx — Control de Automatización (PulsoNoticias 2.0)
+// components/AutomationToggle.jsx — Control de Automatización (Imperio Público 2.0)
 import { useState } from 'react';
 import { toggleAutomation } from '@/app/admin/actions';
 

@@ -1,4 +1,4 @@
-// app/categoria/[slug]/page.js — Página de Categoría (PulsoNoticias 2.0)
+// app/categoria/[slug]/page.js — Página de Categoría (Imperio Público 2.0)
 import { notFound } from 'next/navigation';
 import { getArticlesByCategory } from '@/lib/serverData';
 import { getCategoryBySlug } from '@/lib/data';
@@ -11,8 +11,8 @@ export async function generateMetadata({ params }) {
   if (!cat) return { title: 'Categoría no encontrada' };
 
   return {
-    title: `Sección: ${cat.label} — PulsoNoticias`,
-    description: `Explora las últimas noticias sobre ${cat.label} en PulsoNoticias.`,
+    title: `Sección: ${cat.label} — Imperio Público`,
+    description: `Explora las últimas noticias sobre ${cat.label} en Imperio Público.`,
   };
 }
 

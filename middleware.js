@@ -1,4 +1,4 @@
-// middleware.js — Authentication and Session Refresh for PulsoNoticias 2.0
+// middleware.js — Authentication and Session Refresh for Imperio Público 2.0
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 

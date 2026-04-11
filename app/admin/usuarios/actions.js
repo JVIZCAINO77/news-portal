@@ -1,4 +1,4 @@
-// app/admin/usuarios/actions.js — Server Actions para gestión de usuarios (PulsoNoticias 2.0)
+// app/admin/usuarios/actions.js — Server Actions para gestión de usuarios (Imperio Público 2.0)
 'use server';
 import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';

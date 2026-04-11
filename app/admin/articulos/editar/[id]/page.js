@@ -1,4 +1,4 @@
-// app/admin/articulos/editar/[id]/page.js — Editar Noticia (PulsoNoticias 2.0)
+// app/admin/articulos/editar/[id]/page.js — Editar Noticia (Imperio Público 2.0)
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';

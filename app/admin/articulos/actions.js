@@ -1,4 +1,4 @@
-// app/admin/articulos/actions.js — Gestión de Artículos (PulsoNoticias 2.0)
+// app/admin/articulos/actions.js — Gestión de Artículos (Imperio Público 2.0)
 'use server';
 
 import { createClient } from '@/lib/supabase/server';

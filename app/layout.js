@@ -1,4 +1,4 @@
-// app/layout.js — Root Layout para PulsoNoticias 2.0
+// app/layout.js — Root Layout para Imperio Público 2.0
 import './globals.css';
 import { SITE_CONFIG } from '@/lib/data';
 import Header from '@/components/Header';
@@ -9,11 +9,11 @@ import Script from 'next/script';
 export const metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
   title: {
-    default: `${SITE_CONFIG.name} — El Pulso de la Actualidad`,
+    default: `${SITE_CONFIG.name} — La Autoridad de la Actualidad`,
     template: `%s | ${SITE_CONFIG.name}`,
   },
   description: SITE_CONFIG.description,
-  keywords: ['noticias', 'dominicana', 'actualidad', 'internacionales', 'deportes', 'economía', 'tecnología'],
+  keywords: ['noticias', 'dominicana', 'actualidad', 'internacionales', 'deportes', 'economía', 'tecnología', 'imperio público'],
   authors: [{ name: SITE_CONFIG.name }],
   creator: SITE_CONFIG.name,
   publisher: SITE_CONFIG.name,

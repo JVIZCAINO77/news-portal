@@ -1,5 +1,5 @@
 'use client';
-// components/DeleteArticleButton.jsx — Botón de Borrado Premium (PulsoNoticias 2.0)
+// components/DeleteArticleButton.jsx — Botón de Borrado Premium (Imperio Público 2.0)
 import { useState } from 'react';
 import { deleteArticle } from '@/app/admin/articulos/actions';
 

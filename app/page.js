@@ -1,4 +1,4 @@
-// app/page.js — Portada de PulsoNoticias 2.0 (Diseño Premium Moderno)
+// app/page.js — Portada de Imperio Público 2.0 (Diseño Premium Moderno)
 import Link from 'next/link';
 import { getFeaturedArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
 import { CATEGORIES } from '@/lib/data';

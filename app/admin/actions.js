@@ -1,4 +1,4 @@
-// app/admin/actions.js — Gestión de Configuración Global (PulsoNoticias 2.0)
+// app/admin/actions.js — Gestión de Configuración Global (Imperio Público 2.0)
 'use server';
 
 import { createClient as createServerClient } from '@/lib/supabase/server';

@@ -1,4 +1,4 @@
-// app/admin/usuarios/UserForm.jsx — Formulario de Creación de Usuarios (PulsoNoticias 2.0)
+// app/admin/usuarios/UserForm.jsx — Formulario de Creación de Usuarios (Imperio Público 2.0)
 'use client';
 import { useState } from 'react';
 import { createEditorUser } from './actions';

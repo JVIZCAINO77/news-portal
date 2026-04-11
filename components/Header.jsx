@@ -38,7 +38,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-6 py-6 md:py-10 flex flex-col items-center justify-center">
         <Link href="/" className="group text-center">
           <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-black uppercase leading-none group-hover:text-red-600 transition-colors">
-            Pulso<span className="text-red-600 group-hover:text-black">Noticias</span>
+            Imperio<span className="text-red-600 group-hover:text-black">Público</span>
           </h1>
           <p className="mt-3 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] text-slate-400">
             {SITE_CONFIG.tagline}

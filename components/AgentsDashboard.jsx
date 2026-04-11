@@ -1,5 +1,5 @@
 'use client';
-// components/AgentsDashboard.jsx — Panel de Control de Agentes IA (PulsoNoticias 2.0)
+// components/AgentsDashboard.jsx — Panel de Control de Agentes IA (Imperio Público 2.0)
 import { useState } from 'react';
 
 const AGENTS = [

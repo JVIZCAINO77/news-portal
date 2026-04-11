@@ -1,5 +1,5 @@
 'use client';
-// components/MarkdownPreview.jsx — Previsualización Real (PulsoNoticias 2.0)
+// components/MarkdownPreview.jsx — Previsualización Real (Imperio Público 2.0)
 
 export default function MarkdownPreview({ content, title, excerpt }) {
   // Convertir saltos de línea simples en bloques de texto inteligibles
