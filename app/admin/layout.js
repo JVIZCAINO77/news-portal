@@ -38,7 +38,7 @@ export default async function AdminLayout({ children }) {
           {/* Logo */}
           <Link href="/admin" className="block mb-10">
             <span className="text-xl font-black uppercase tracking-tighter">
-              Pulso<span className="text-red-500">Admin</span>
+              Imperio<span className="text-red-500">Admin</span>
             </span>
           </Link>
 

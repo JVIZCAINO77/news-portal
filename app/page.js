@@ -53,8 +53,8 @@ export default async function HomePage() {
             
             {/* Newsletter Mini-Box */}
             <div className="mt-12 bg-slate-50 p-8 border-t-4 border-red-600">
-               <h3 className="text-xl font-black uppercase tracking-tighter mb-2">El Pulso Diario</h3>
-               <p className="text-xs text-slate-500 font-serif leading-relaxed mb-6">Recibe las noticias más importantes cada mañana directamente en tu correo.</p>
+               <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Resumen Imperial</h3>
+               <p className="text-xs text-slate-500 font-serif leading-relaxed mb-6">Recibe las noticias con autoridad cada mañana directamente en tu correo.</p>
                <div className="flex flex-col gap-2">
                   <input type="email" placeholder="Correo electrónico" className="w-full px-4 py-3 bg-white border border-gray-200 focus:outline-none focus:border-red-600 text-xs font-bold" />
                   <button className="bg-black text-white px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-red-600 transition-colors">Suscribirse</button>
@@ -111,7 +111,7 @@ export default async function HomePage() {
       </section>
 
       <div className="text-center py-20 bg-slate-50 border-t border-gray-100">
-         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-300 mb-6">El Pulso de la Actualidad</p>
+         <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-300 mb-6">La Autoridad de la Actualidad</p>
          <Link href="/categoria/noticias" className="inline-block bg-black text-white px-10 py-5 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-red-600 transition-colors">Volver a empezar</Link>
       </div>
     </div>
