@@ -133,9 +133,9 @@ REGLAS ESTRICTAS DE REDACCIÓN:
       });
     } catch (fallbackError) {
       if (fallbackError.message.includes('Quota') || fallbackError.message.includes('429')) {
-        console.warn(`[Bot Warning] Cuota de gemini-2.0 excedida con la key actual. Redirigiendo a gemini-1.5-flash...`);
+        console.warn(`[Bot Warning] Cuota de gemini-2.0-flash excedida. Redirigiendo a gemini-2.0-flash-lite...`);
         aiResponse = await ai.models.generateContent({
-          model: 'gemini-1.5-flash',
+          model: 'gemini-2.0-flash-lite',
           contents: prompt,
         });
       } else {
