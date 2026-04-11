@@ -16,6 +16,7 @@ const CATEGORIES = {
   economia:       { query: `economia dominicana ${DR_SOURCES}`,             slug: 'economia',        author: 'Roberto Silva',   style: 'serio y financiero' },
   salud:          { query: `salud bienestar medicina republica dominicana ${DR_SOURCES}`, slug: 'salud', author: 'Dr. Arnaldo Pérez', style: 'profesional, informativo y confiable' },
   cultura:        { query: `arte cultura dominicana eventos ${DR_SOURCES}`, slug: 'cultura',        author: 'Sofía Méndez',     style: 'elegante y descriptivo' },
+  opinion:        { query: `editorial opinion columnas republica dominicana ${DR_SOURCES}`, slug: 'opinion', author: 'Dr. Héctor Guerrero', style: 'reflexivo, analítico y profundo' },
 };
 
 export async function GET(request) {
