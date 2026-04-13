@@ -47,23 +47,23 @@ export default function Header() {
 
   return (
     <header className="w-full bg-white transition-all duration-300">
-      {/* 1. Utility Bar: Date & Service Widgets (Now at the very top) */}
-      <div className="border-b border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">
-            {currentDate}
-          </div>
-
-          <div className="flex items-center gap-8">
-            <ServiceWidgets />
-            <div className="h-4 w-px bg-gray-200"></div>
-            <div className="flex gap-4 text-[9px] font-black uppercase tracking-widest text-slate-500">
-              <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
-              <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
-            </div>
-          </div>
+      {/* 1. Primary Navigation (Top - Red Bar) - Vibrant Red */}
+      <nav className="w-full bg-[#d90429] border-b border-black/10 shadow-sm relative z-50 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <ul className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1 py-1">
+            {CATEGORIES.map((cat) => (
+              <li key={cat.slug}>
+                <Link
+                  href={`/categoria/${cat.slug}`}
+                  className="px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-white/90 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap"
+                >
+                  {cat.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      </nav>
 
       {/* 2. Main Branding & Mobile Toggle Row */}
       <div className={`max-w-7xl mx-auto px-4 md:px-6 transition-all duration-500 ${isScrolled ? 'py-2 md:py-3' : 'py-3 md:py-5'}`}>
@@ -96,23 +96,23 @@ export default function Header() {
         </div>
       </div>
 
-      {/* 3. Primary Navigation (Now below branding) - Vibrant Red */}
-      <nav className="w-full bg-[#d90429] border-b border-black/10 shadow-sm relative z-50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
-          <ul className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1 py-1">
-            {CATEGORIES.map((cat) => (
-              <li key={cat.slug}>
-                <Link
-                  href={`/categoria/${cat.slug}`}
-                  className="px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-white/90 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap"
-                >
-                  {cat.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+      {/* 3. Utility Bar: Date & Service Widgets (Below Branding) */}
+      <div className="border-y border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">
+            {currentDate}
+          </div>
+
+          <div className="flex items-center gap-8">
+            <ServiceWidgets />
+            <div className="h-4 w-px bg-gray-200"></div>
+            <div className="flex gap-4 text-[9px] font-black uppercase tracking-widest text-slate-500">
+              <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
+              <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
+            </div>
+          </div>
         </div>
-      </nav>
+      </div>
 
       {/* 4. Breaking Ticker (Always Visible at Bottom of Header) */}
       <BreakingTicker items={tickerItems} />
