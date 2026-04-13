@@ -56,8 +56,11 @@ export default async function HomePage() {
              <div className="pb-8 border-b border-gray-100">
                 <ArticleCard article={sideFeatured[0]} variant="medium" className="border-0 pb-0" />
              </div>
-             <div>
+             <div className="pb-8 border-b border-gray-100">
                 <ArticleCard article={sideFeatured[1]} variant="medium" className="border-0 pb-0" />
+             </div>
+             <div>
+                <ArticleCard article={sideFeatured[2]} variant="medium" className="border-0 pb-0" />
              </div>
           </div>
 
