@@ -87,13 +87,9 @@ export default async function HomePage() {
                 </div>
              </div>
 
-             {/* Re-integrated Newsletter Block to fill the gap */}
+             {/* Optimized Newsletter Block (Sidebar Variant) */}
              <div className="pt-8 border-t border-gray-100">
-                <div className="bg-slate-50 p-6 border-t-2 border-red-600">
-                   <h3 className="text-sm font-black uppercase tracking-tighter mb-2 italic">Newsletter</h3>
-                   <input type="email" placeholder="Email" className="w-full px-3 py-2 bg-white border border-gray-200 focus:outline-none text-[10px] font-bold mb-2" />
-                   <button className="w-full bg-black text-white py-2 text-[9px] font-black uppercase tracking-widest hover:bg-red-600 transition-colors">OK</button>
-                </div>
+                <NewsletterBox variant="compact" />
              </div>
           </div>
 

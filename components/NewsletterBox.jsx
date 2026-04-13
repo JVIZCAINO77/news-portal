@@ -20,7 +20,7 @@ export default function NewsletterBox({ variant = 'default' }) {
 
   if (status === 'success') {
     return (
-      <div className="bg-red-600 p-8 md:p-16 text-center text-white animate-in zoom-in duration-500">
+      <div className="bg-[#bb1b21] p-8 md:p-16 text-center text-white animate-in zoom-in duration-500">
         <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
            <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
@@ -35,7 +35,7 @@ export default function NewsletterBox({ variant = 'default' }) {
   }
 
   return (
-    <section className={`bg-red-600 overflow-hidden relative group ${variant === 'compact' ? 'p-8' : 'p-10 md:p-20'}`}>
+    <section className={`bg-[#bb1b21] overflow-hidden relative group ${variant === 'compact' ? 'p-6' : 'p-10 md:p-20'}`}>
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10 pointer-events-none select-none overflow-hidden">
          <span className="text-[15rem] font-black absolute -bottom-10 -right-10 leading-none tracking-tighter">IMPERIO</span>
