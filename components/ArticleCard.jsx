@@ -28,35 +28,28 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               priority
             />
             {/* Premium Branding Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
             <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
                <div className="flex flex-col gap-1">
-                  <span className="text-white text-[8px] font-black uppercase tracking-[0.4em] opacity-60">
+                  <span className="text-white text-[9px] font-black uppercase tracking-[0.4em] opacity-80">
                     {extraBadge || "Exclusivo"}
                   </span>
-                  <span className="text-white text-xs font-black uppercase tracking-[0.2em]">{cat?.label}</span>
+                  <span className="text-white text-[11px] font-black uppercase tracking-[0.2em]">{cat?.label}</span>
                </div>
                <span className="text-white/40 text-[9px] font-black uppercase tracking-[0.5em] pb-1">Imperio Público</span>
             </div>
-            {cat && (
-              <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 shadow-2xl">
-                <span className="text-white text-[10px] font-black uppercase tracking-[0.2em]">
-                  {extraBadge ? "RECIENTE" : cat.label}
-                </span>
-              </div>
-            )}
           </div>
-          <div className="mt-8">
-            <h2 className="text-4xl md:text-7xl group-hover:text-red-600 transition-colors mb-6 leading-none">
+          <div className="mt-6">
+            <h2 className="text-3xl md:text-5xl group-hover:text-red-600 transition-colors mb-4 leading-tight tracking-tighter">
               {article.title}
             </h2>
-            <p className="text-slate-600 text-lg md:text-xl font-serif line-clamp-2 md:line-clamp-3 leading-relaxed mb-8 max-w-4xl">
+            <p className="text-slate-600 text-base md:text-lg font-serif line-clamp-2 md:line-clamp-2 leading-relaxed mb-6 max-w-3xl italic">
               {article.excerpt}
             </p>
-            <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
-               <span className="text-black">{article.author}</span>
-               <span className="w-8 h-px bg-slate-200"></span>
-               <span>{formattedDate}</span>
+            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+               <span className="text-black group-hover:text-red-600 transition-colors uppercase">{article.author}</span>
+               <span className="w-6 h-px bg-slate-200"></span>
+               <span className="tracking-widest">{formattedDate}</span>
             </div>
           </div>
         </article>

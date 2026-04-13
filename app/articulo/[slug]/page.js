@@ -72,47 +72,68 @@ export default async function ArticlePage({ params }) {
            {article.imageAlt && <figcaption className="mt-5 text-center text-[10px] text-slate-400 font-black uppercase tracking-[0.3em] font-sans">Créditos: {article.imageAlt}</figcaption>}
         </figure>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-24">
+           {/* Main Content Column */}
            <div className="lg:col-span-8">
               <div className="prose-news">
                  {paragraphs.map((p, i) => {
                     if (p.startsWith('## ')) {
-                      return <h2 key={i} className="text-3xl font-black text-black mt-16 mb-8 uppercase tracking-tighter italic">{p.replace('## ', '')}</h2>;
+                      return <h2 key={i} className="text-4xl font-black text-black mt-20 mb-10 uppercase tracking-tighter">{p.replace('## ', '')}</h2>;
                     }
                     if (p.trim() === '---') {
-                      return <hr key={i} className="my-12 border-slate-100" />;
+                      return <hr key={i} className="my-16 border-slate-100" />;
                     }
 
                     const formattedText = p
                       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
                       .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
                     
-                    // Aplicar Drop Cap al primer párrafo
                     const isFirstParagraph = i === 0;
+                    
                     return ( 
-                      <p 
-                        key={i} 
-                        className={`mb-10 text-xl font-serif leading-relaxed text-[#333] tracking-normal ${isFirstParagraph ? 'drop-cap' : ''}`} 
-                        dangerouslySetInnerHTML={{ __html: formattedText }} 
-                      /> 
+                      <div key={i}>
+                         <p 
+                           className={`${isFirstParagraph ? 'drop-cap' : ''}`} 
+                           dangerouslySetInnerHTML={{ __html: formattedText }} 
+                         /> 
+                         {/* Insert Ad after 2nd paragraph */}
+                         {i === 1 && <AdUnit format="in-article" className="my-12" />}
+                      </div>
                     );
                  })}
               </div>
               <div className="flex flex-wrap gap-2 mt-20 pt-10 border-t border-gray-100">
                  {article.tags?.map(tag => ( <span key={tag} className="text-[10px] font-black uppercase tracking-[0.3em] bg-slate-50 text-slate-400 px-4 py-2 hover:bg-red-600 hover:text-white transition-all cursor-pointer">#{tag}</span> ))}
               </div>
-              <AdUnit format="in-article" className="mt-16" />
            </div>
+
+           {/* Sidebar Monetization & Engagement */}
            <aside className="lg:col-span-4 border-l border-gray-100 pl-0 lg:pl-16">
-              <div className="sticky top-32 space-y-20">
-                 <div className="bg-white p-0">
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 pb-3 border-b border-gray-100 italic">Relacionados</h4>
-                    <div className="space-y-4"> 
-                      {related.map(a => ( 
-                        <ArticleCard key={a.id} article={a} variant="small" /> 
+              <div className="sticky top-32 space-y-16">
+                 {/* Sidebar Ad Top */}
+                 <div className="border-b border-gray-50 pb-16">
+                    <AdUnit format="rectangle" slot="sidebar-top" />
+                 </div>
+
+                 {/* Numerical Most Read List */}
+                 <div>
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 pb-3 border-b-2 border-red-600 inline-block italic">Lo más leído</h4>
+                    <div className="space-y-8"> 
+                      {latest.map((a, idx) => ( 
+                        <Link key={a.id} href={`/articulo/${a.slug}`} className="group flex gap-5 items-start">
+                           <span className="text-4xl font-black text-slate-100 group-hover:text-red-600 transition-colors leading-none">{idx + 1}</span>
+                           <div>
+                              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-2">{getCategoryBySlug(a.category)?.label}</span>
+                              <h5 className="text-[13px] font-black uppercase tracking-tight leading-tight group-hover:underline">{a.title}</h5>
+                           </div>
+                        </Link> 
                       ))} 
                     </div>
                  </div>
-                 <AdUnit format="rectangle" />
+
+                 {/* Sidebar Ad Bottom */}
+                 <div className="pt-16 border-t border-gray-50">
+                    <AdUnit format="rectangle" slot="sidebar-bottom" />
+                 </div>
               </div>
            </aside>
         </div>

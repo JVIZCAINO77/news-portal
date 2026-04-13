@@ -67,29 +67,34 @@
   }
 
   .section-title {
-    font-size: 0.7rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--primary);
-    border-top: 1px solid var(--border);
-    padding-top: 0.5rem;
-    margin-bottom: 1.5rem;
-    display: inline-block;
+    @apply text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 pb-3 border-b-2 border-red-600 inline-block italic;
+  }
+
+  .newspaper-divider {
+    @apply border-t border-gray-100 mt-20 mb-12 flex items-center gap-4;
+  }
+
+  .newspaper-divider::before {
+    content: '';
+    @apply h-px bg-slate-100 flex-1;
   }
 }
 
-/* Premium Reading Experience */
+/* Premium Reading Experience (El Nacional Style) */
+.prose-news {
+  @apply font-serif text-[1.2rem] md:text-[1.35rem] leading-[1.85] text-slate-800;
+}
+
 .prose-news p {
-  @apply text-lg md:text-xl font-serif leading-relaxed mb-8 text-slate-800 tracking-tight;
+  @apply mb-8;
+}
+
+.prose-news b, .prose-news strong {
+  @apply font-black text-black;
 }
 
 .prose-news h2 {
   @apply text-3xl md:text-4xl font-black text-black mt-16 mb-8 uppercase tracking-tighter italic;
-}
-
-.prose-news strong {
-  @apply font-black text-black;
 }
 
 /* Drop Cap (Letra Capital) */
