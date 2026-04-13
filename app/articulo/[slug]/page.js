@@ -85,7 +85,16 @@ export default async function ArticlePage({ params }) {
                     const formattedText = p
                       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
                       .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
-                    return ( <p key={i} className="mb-10 text-xl font-serif leading-relaxed text-[#333] tracking-normal" dangerouslySetInnerHTML={{ __html: formattedText }} /> );
+                    
+                    // Aplicar Drop Cap al primer párrafo
+                    const isFirstParagraph = i === 0;
+                    return ( 
+                      <p 
+                        key={i} 
+                        className={`mb-10 text-xl font-serif leading-relaxed text-[#333] tracking-normal ${isFirstParagraph ? 'drop-cap' : ''}`} 
+                        dangerouslySetInnerHTML={{ __html: formattedText }} 
+                      /> 
+                    );
                  })}
               </div>
               <div className="flex flex-wrap gap-2 mt-20 pt-10 border-t border-gray-100">
@@ -96,16 +105,24 @@ export default async function ArticlePage({ params }) {
            <aside className="lg:col-span-4 border-l border-gray-100 pl-0 lg:pl-16">
               <div className="sticky top-32 space-y-20">
                  <div className="bg-white p-0">
-                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 pb-3 border-b border-gray-100">Relacionados</h4>
-                    <div className="space-y-4"> {related.map(a => ( <ArticleCard key={a.id} article={a} variant="minimal" /> ))} </div>
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 pb-3 border-b border-gray-100 italic">Relacionados</h4>
+                    <div className="space-y-4"> 
+                      {related.map(a => ( 
+                        <ArticleCard key={a.id} article={a} variant="small" /> 
+                      ))} 
+                    </div>
                  </div>
                  <AdUnit format="rectangle" />
               </div>
            </aside>
         </div>
         <section className="mt-32 pt-20 border-t-8 border-black">
-           <h2 className="text-5xl font-black uppercase tracking-tighter mb-16 italic">Sigue Leyendo</h2>
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"> {latest.slice(0, 3).map(a => ( <ArticleCard key={a.id} article={a} variant="medium" /> ))} </div>
+           <h2 className="text-5xl font-black uppercase tracking-tighter mb-16 italic">Sigue Leyendo en {cat?.label}</h2>
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12"> 
+             {latest.slice(0, 3).map(a => ( 
+               <ArticleCard key={a.id} article={a} variant="medium" className="bg-slate-50/50 p-6" /> 
+             ))} 
+           </div>
         </section>
       </div>
     </article>

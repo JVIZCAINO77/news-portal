@@ -10,21 +10,22 @@ export default function Footer() {
           
           {/* Logo & Info */}
           <div className="md:col-span-1">
-            <Link href="/" className="text-3xl font-black tracking-tighter uppercase mb-6 inline-block">
-              Imperio<span className="text-red-500">Público</span>
+            <Link href="/" className="text-3xl font-black tracking-tighter uppercase mb-6 inline-block hover:text-red-500 transition-colors">
+              Imperio<span className="text-red-500 hover:text-white">Público</span>
             </Link>
-            <p className="text-sm text-slate-400 font-serif leading-relaxed">
-              {SITE_CONFIG.tagline}. Líderes en información verificada, inmediata y de alta calidad editorial.
+            <p className="text-xs text-slate-400 font-serif leading-relaxed mb-8">
+              {SITE_CONFIG.tagline}. <br/><br/>
+              Comprometidos con la integridad informativa y el periodismo de profundidad en la República Dominicana y el mundo.
             </p>
           </div>
 
           {/* Categories 1 */}
-          <div className="md:col-span-1 space-y-4">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Secciones</h4>
-            <ul className="grid grid-cols-1 gap-2">
-              {CATEGORIES.slice(0, 4).map(cat => (
+          <div className="md:col-span-1 space-y-6">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">Grandes Secciones</h4>
+            <ul className="grid grid-cols-1 gap-3">
+              {CATEGORIES.slice(0, 5).map(cat => (
                 <li key={cat.slug}>
-                  <Link href={`/categoria/${cat.slug}`} className="text-sm font-bold uppercase tracking-wider hover:text-red-500 transition-colors">
+                  <Link href={`/categoria/${cat.slug}`} className="text-[11px] font-black uppercase tracking-widest hover:text-red-500 transition-colors">
                     {cat.label}
                   </Link>
                 </li>
@@ -33,11 +34,12 @@ export default function Footer() {
           </div>
 
           {/* Categories 2 */}
-          <div className="md:col-span-1 space-y-4 pt-8 md:pt-0">
-             <ul className="grid grid-cols-1 gap-2 mt-4 md:mt-10">
-              {CATEGORIES.slice(4).map(cat => (
+          <div className="md:col-span-1 space-y-6">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">Más Información</h4>
+            <ul className="grid grid-cols-1 gap-3">
+              {CATEGORIES.slice(5, 10).map(cat => (
                 <li key={cat.slug}>
-                  <Link href={`/categoria/${cat.slug}`} className="text-sm font-bold uppercase tracking-wider hover:text-red-500 transition-colors">
+                  <Link href={`/categoria/${cat.slug}`} className="text-[11px] font-black uppercase tracking-widest hover:text-red-500 transition-colors">
                     {cat.label}
                   </Link>
                 </li>
@@ -46,16 +48,15 @@ export default function Footer() {
           </div>
 
           {/* Social & Contact */}
-          <div className="md:col-span-1 space-y-4">
-            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Contacto</h4>
-            <p className="text-sm font-serif text-slate-400">redaccion@imperiopublico.com</p>
-            <div className="flex gap-4 mt-6">
-               <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-red-500 transition-colors cursor-pointer">
-                 <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-8.74h-2.94v-3.411h2.94v-2.518c0-2.915 1.779-4.5 4.378-4.5 1.244 0 2.316.091 2.628.133v3.047h-1.803c-1.415 0-1.688.672-1.688 1.658v2.17h3.374l-.439 3.411h-2.935v8.74h6.133c.733 0 1.323-.593 1.323-1.325v-21.35c0-.732-.59-1.325-1.325-1.325z"/></svg>
-               </span>
-               <span className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-red-500 transition-colors cursor-pointer">
-                 <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-               </span>
+          <div className="md:col-span-1 space-y-6">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">Conexión Directa</h4>
+            <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">redaccion@imperiopublico.com</p>
+            <div className="flex gap-3 mt-4">
+               {[1, 2, 3].map(i => (
+                 <span key={i} className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all cursor-pointer">
+                    <span className="text-[10px] font-black uppercase">S{i}</span>
+                 </span>
+               ))}
             </div>
           </div>
         </div>

@@ -35,26 +35,30 @@ export default function Header() {
       </div>
 
       {/* Main Branding */}
-      <div className="max-w-7xl mx-auto px-6 py-6 md:py-10 flex flex-col items-center justify-center">
+      <div className="max-w-7xl mx-auto px-6 py-8 md:py-14 flex flex-col items-center justify-center">
         <Link href="/" className="group text-center">
-          <h1 className="text-5xl md:text-8xl font-black tracking-tighter text-black uppercase leading-none group-hover:text-red-600 transition-colors">
+          <h1 className="text-6xl md:text-[7rem] font-black tracking-tighter text-black uppercase leading-none group-hover:text-red-600 transition-all duration-500">
             Imperio<span className="text-red-600 group-hover:text-black">Público</span>
           </h1>
-          <p className="mt-3 text-[10px] md:text-xs font-black uppercase tracking-[0.5em] text-slate-400">
-            {SITE_CONFIG.tagline}
-          </p>
+          <div className="mt-4 flex items-center justify-center gap-4">
+             <span className="h-px bg-slate-200 w-8 md:w-16"></span>
+             <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.6em] text-slate-400">
+               {SITE_CONFIG.tagline}
+             </p>
+             <span className="h-px bg-slate-200 w-8 md:w-16"></span>
+          </div>
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className={`sticky top-0 z-50 bg-white border-y border-gray-100 transition-shadow ${isScrolled ? 'shadow-md' : ''}`}>
+      <nav className={`sticky top-0 z-50 bg-white/90 backdrop-blur-md border-y border-gray-100 transition-all ${isScrolled ? 'shadow-xl py-0' : 'py-1'}`}>
         <div className="max-w-7xl mx-auto px-6">
-          <ul className="flex items-center justify-start lg:justify-center overflow-x-auto no-scrollbar py-1">
+          <ul className="flex items-center justify-start lg:justify-center overflow-x-auto no-scrollbar gap-2">
             {CATEGORIES.map((cat) => (
               <li key={cat.slug}>
                 <Link
                   href={`/categoria/${cat.slug}`}
-                  className="px-4 py-4 nav-link inline-block whitespace-nowrap"
+                  className="px-4 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-red-600 transition-colors whitespace-nowrap"
                 >
                   {cat.label}
                 </Link>

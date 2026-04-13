@@ -79,6 +79,25 @@
   }
 }
 
+/* Premium Reading Experience */
+.prose-news p {
+  @apply text-lg md:text-xl font-serif leading-relaxed mb-8 text-slate-800 tracking-tight;
+}
+
+.prose-news h2 {
+  @apply text-3xl md:text-4xl font-black text-black mt-16 mb-8 uppercase tracking-tighter italic;
+}
+
+.prose-news strong {
+  @apply font-black text-black;
+}
+
+/* Drop Cap (Letra Capital) */
+.drop-cap::first-letter {
+  @apply float-left text-7xl md:text-8xl font-black mr-3 mt-2 text-red-600 leading-[0.8] uppercase;
+  font-family: inherit;
+}
+
 /* Custom Scrollbar for a premium look */
 ::-webkit-scrollbar {
   width: 6px;

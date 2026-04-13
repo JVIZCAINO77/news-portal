@@ -9,12 +9,30 @@ export const revalidate = 60; // Revalidar cada minuto
 
 export default async function HomePage() {
   const featured = await getFeaturedArticles(4);
-  const latest = await getLatestArticles(12);
+  const latest = await getLatestArticles(15);
   const sports = await getArticlesByCategory('deportes', 4);
+  const entertainment = await getArticlesByCategory('entretenimiento', 4);
+  const tech = await getArticlesByCategory('tecnologia', 4);
+  const opinions = await getArticlesByCategory('opinion', 4);
   
-  const heroArticle = featured[0];
-  const sideFeatured = featured.slice(1, 4);
-  const latestGrid = latest.slice(0, 6);
+  // Logical Distribution
+  let heroArticle = null;
+  let sideFeatured = [];
+  let remainingLatest = [];
+
+  if (featured.length > 0) {
+    heroArticle = featured[0];
+    sideFeatured = featured.slice(1, 4);
+    const featuredIds = featured.map(a => a.id);
+    remainingLatest = latest.filter(a => !featuredIds.includes(a.id));
+  } else {
+    heroArticle = latest[0];
+    sideFeatured = latest.slice(1, 4);
+    remainingLatest = latest.slice(4);
+  }
+
+  const latestGrid = remainingLatest.slice(0, 6);
+  const isJustIn = heroArticle?.id === latest[0]?.id;
 
   return (
     <div className="bg-white">
@@ -37,21 +55,20 @@ export default async function HomePage() {
       {/* ── Hero Section (1 Large + 3 Small) ── */}
       <section className="max-w-7xl mx-auto px-6 mb-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20">
-          {/* Main Hero */}
           <div className="lg:col-span-8">
-            <ArticleCard article={heroArticle} variant="hero" />
+            <ArticleCard 
+              article={heroArticle} 
+              variant="hero" 
+              extraBadge={isJustIn ? "LO ÚLTIMO" : null}
+            />
           </div>
-
-          {/* Side Column */}
           <div className="lg:col-span-4 border-l border-gray-100 pl-0 lg:pl-12">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 mb-8 pb-3 border-b border-gray-100">Destacados</h2>
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 mb-8 pb-3 border-b border-gray-100 italic">Destacados</h2>
             <div className="flex flex-col gap-2">
                {sideFeatured.map(a => (
                  <ArticleCard key={a.id} article={a} variant="small" />
                ))}
             </div>
-            
-            {/* Newsletter Mini-Box */}
             <div className="mt-12 bg-slate-50 p-8 border-t-4 border-red-600">
                <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Resumen Imperial</h3>
                <p className="text-xs text-slate-500 font-serif leading-relaxed mb-6">Recibe las noticias con autoridad cada mañana directamente en tu correo.</p>
@@ -77,6 +94,29 @@ export default async function HomePage() {
          </div>
       </section>
 
+      {/* ── Category Focus: Entretenimiento (Vibrant/Chic) ── */}
+      {entertainment.length > 0 && (
+         <section className="bg-slate-50 py-24 mb-20">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                   <div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 block mb-2">Cultura Pop</span>
+                      <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter italic leading-none">Entretenimiento</h2>
+                   </div>
+                   <Link href="/categoria/entretenimiento" className="text-[10px] font-black uppercase tracking-[0.2em] hover:text-red-600 bg-white px-6 py-3 border border-gray-100">Explorar Más</Link>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                   <ArticleCard article={entertainment[0]} variant="wide" />
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                      {entertainment.slice(1, 3).map(a => (
+                        <ArticleCard key={a.id} article={a} variant="medium" className="bg-white p-6 shadow-sm border-0" />
+                      ))}
+                   </div>
+                </div>
+            </div>
+         </section>
+      )}
+
       {/* ── Category Focus: Deportes (Institutional Dark Section) ── */}
       <section className="bg-black text-white py-24 mb-20 overflow-hidden relative">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
@@ -100,17 +140,43 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Opinion Section (Grid of Text-only cards) ── */}
-      <section className="max-w-7xl mx-auto px-6 py-20 mb-20">
-         <h2 className="section-title">Voces y Opinión</h2>
-         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 bg-white p-10 border border-gray-100">
-            {latest.slice(8, 12).map(a => (
-              <ArticleCard key={a.id} article={a} variant="minimal" />
-            ))}
+      {/* ── Category Focus: Tecnología (Bento Modern) ── */}
+      {tech.length > 0 && (
+         <section className="max-w-7xl mx-auto px-6 py-24 mb-20">
+            <div className="flex items-center gap-4 mb-16">
+                <div className="h-px bg-slate-200 flex-1"></div>
+                <h2 className="text-2xl font-black uppercase tracking-[0.4em] text-slate-800">Tecnología</h2>
+                <div className="h-px bg-slate-200 flex-1"></div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+               <div className="md:col-span-2">
+                  <ArticleCard article={tech[0]} variant="wide" />
+               </div>
+               <div className="flex flex-col gap-8">
+                  {tech.slice(1, 3).map(a => (
+                    <ArticleCard key={a.id} article={a} variant="small" />
+                  ))}
+               </div>
+            </div>
+         </section>
+      )}
+
+      {/* ── Opinion Section (Editorial Premium) ── */}
+      <section className="bg-slate-50 border-y border-gray-100 py-32 mb-20">
+         <div className="max-w-5xl mx-auto px-6">
+            <div className="text-center mb-20">
+               <span className="text-[10px] font-black uppercase tracking-[0.6em] text-slate-400 block mb-4">Columnas & Perspectivas</span>
+               <h2 className="text-5xl md:text-7xl font-serif italic text-black">Voces de Autoridad</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+               {(opinions.length > 0 ? opinions : latest.slice(8, 12)).map(a => (
+                 <ArticleCard key={a.id} article={a} variant="editorial" />
+               ))}
+            </div>
          </div>
       </section>
 
-      <div className="text-center py-20 bg-slate-50 border-t border-gray-100">
+      <div className="text-center py-20 mb-20">
          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-300 mb-6">La Autoridad de la Actualidad</p>
          <Link href="/categoria/noticias" className="inline-block bg-black text-white px-10 py-5 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-red-600 transition-colors">Volver a empezar</Link>
       </div>

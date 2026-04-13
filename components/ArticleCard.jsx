@@ -10,7 +10,7 @@ import { getCategoryBySlug, formatDate } from '@/lib/data';
  *  'small'   — Tarjeta horizontal compacta (estilo lista).
  *  'minimal' — Solo texto (para sidebars).
  */
-export default function ArticleCard({ article, variant = 'medium', className = '' }) {
+export default function ArticleCard({ article, variant = 'medium', className = '', extraBadge = null }) {
   if (!article) return null;
   const cat = getCategoryBySlug(article.category);
   const formattedDate = formatDate(article.publishedAt);
@@ -31,7 +31,9 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
                <div className="flex flex-col gap-1">
-                  <span className="text-white text-[8px] font-black uppercase tracking-[0.4em] opacity-60">Exclusivo</span>
+                  <span className="text-white text-[8px] font-black uppercase tracking-[0.4em] opacity-60">
+                    {extraBadge || "Exclusivo"}
+                  </span>
                   <span className="text-white text-xs font-black uppercase tracking-[0.2em]">{cat?.label}</span>
                </div>
                <span className="text-white/40 text-[9px] font-black uppercase tracking-[0.5em] pb-1">Imperio Público</span>
@@ -39,7 +41,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             {cat && (
               <div className="absolute top-6 left-6 bg-red-600 px-4 py-2 shadow-2xl">
                 <span className="text-white text-[10px] font-black uppercase tracking-[0.2em]">
-                  {cat.label}
+                  {extraBadge ? "RECIENTE" : cat.label}
                 </span>
               </div>
             )}
@@ -125,6 +127,59 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               <span className="absolute bottom-1 right-2 text-white/50 text-[6px] font-black uppercase tracking-widest">PN</span>
             </div>
           )}
+        </article>
+      </Link>
+    );
+  }
+
+  if (variant === 'wide') {
+    return (
+      <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden bg-slate-50 border border-gray-100 ${className}`}>
+        <article className="grid grid-cols-1 md:grid-cols-2 items-center">
+           <div className="relative aspect-[16/10] overflow-hidden">
+              <Image
+                src={article.image}
+                alt={article.imageAlt || article.title}
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+           </div>
+           <div className="p-8 md:p-12">
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>
+              <h3 className="text-3xl md:text-5xl text-black group-hover:text-red-600 transition-colors leading-none mb-6">
+                {article.title}
+              </h3>
+              <p className="text-slate-600 text-lg font-serif line-clamp-3 leading-relaxed mb-8">
+                {article.excerpt}
+              </p>
+              <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">
+                 <span className="text-black">Por {article.author}</span>
+                 <span className="w-6 h-px bg-slate-200"></span>
+                 <span>{formattedDate}</span>
+              </div>
+           </div>
+        </article>
+      </Link>
+    );
+  }
+
+  if (variant === 'editorial') {
+    return (
+      <Link href={`/articulo/${article.slug}`} className={`group block text-center p-8 border border-transparent hover:border-gray-100 hover:bg-slate-50/50 transition-all ${className}`}>
+        <article>
+           <div className="mb-6 mx-auto w-20 h-20 bg-slate-200 rounded-full overflow-hidden border-2 border-white shadow-xl group-hover:scale-110 transition-transform duration-500">
+              {/* Fallback pattern for author if no pic */}
+              <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-400 font-bold text-2xl uppercase">
+                 {article.author?.[0]}
+              </div>
+           </div>
+           <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300 mb-4 block italic">Perspectiva</span>
+           <h3 className="text-2xl font-serif italic text-black group-hover:text-red-600 transition-colors leading-tight mb-4">
+             "{article.title}"
+           </h3>
+           <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
+             {article.author}
+           </p>
         </article>
       </Link>
     );
