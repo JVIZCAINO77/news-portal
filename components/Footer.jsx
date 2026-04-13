@@ -4,8 +4,27 @@ import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 
 export default function Footer() {
   return (
-    <footer className="bg-black text-white py-20 mt-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <footer className="mt-20">
+      {/* Footer Primary Navigation (Red Bar - Now at Top of Footer) */}
+      <nav className="w-full bg-[#d90429] border-t border-black/10 shadow-sm relative z-50 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          <ul className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1 py-2">
+            {CATEGORIES.map((cat) => (
+              <li key={cat.slug}>
+                <Link
+                  href={`/categoria/${cat.slug}`}
+                  className="px-3 md:px-4 py-3 text-[10px] font-black uppercase tracking-[0.15em] text-white/90 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap"
+                >
+                  {cat.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </nav>
+
+      <div className="bg-black text-white py-20">
+        <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16 border-b border-white/10 pb-16">
           
           {/* Logo & Info */}
@@ -69,6 +88,7 @@ export default function Footer() {
            </div>
         </div>
       </div>
-    </footer>
+    </div>
+  </footer>
   );
 }
