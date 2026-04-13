@@ -8,9 +8,9 @@
 :root {
   --background: #ffffff;
   --foreground: #111827;
-  --primary: #d90429; /* Imperio Red */
+  --primary: #bb1b21; /* Imperio Red - Toned down */
   --secondary: #1f2937;
-  --accent: #d90429;
+  --accent: #bb1b21;
   --muted: #6b7280;
   --border: #e5e7eb;
 }

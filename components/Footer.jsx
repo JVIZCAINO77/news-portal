@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="mt-20">
       {/* Footer Primary Navigation (Red Bar - Now at Top of Footer) */}
-      <nav className="w-full bg-[#d90429] border-t border-black/10 shadow-sm relative z-50 overflow-hidden">
+      <nav className="w-full bg-[#bb1b21] border-t border-black/10 shadow-sm relative z-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           <ul className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1 py-2">
             {CATEGORIES.map((cat) => (

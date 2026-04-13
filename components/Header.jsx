@@ -48,7 +48,7 @@ export default function Header() {
   return (
     <header className="w-full bg-white transition-all duration-300">
       {/* 1. Primary Navigation (Top - Red Bar) - Vibrant Red */}
-      <nav className="w-full bg-[#d90429] border-b border-black/10 shadow-sm relative z-50 overflow-hidden">
+      <nav className="w-full bg-[#bb1b21] border-b border-black/10 shadow-sm relative z-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           <ul className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1 py-1">
             {CATEGORIES.map((cat) => (
