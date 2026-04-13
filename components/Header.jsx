@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 import BreakingTicker from './BreakingTicker';
+import ServiceWidgets from './ServiceWidgets';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -34,16 +35,25 @@ export default function Header() {
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
+  
   return (
     <header className="w-full bg-white transition-all duration-300">
-      {/* Top Bar: Date & Info */}
-      <div className="border-b border-gray-100 py-2 hidden md:block">
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-          <span>{currentDate}</span>
-          <div className="flex gap-4">
-            <Link href="/nosotros" className="hover:text-red-600">Nosotros</Link>
-            <Link href="/contacto" className="hover:text-red-600">Contacto</Link>
+      {/* Top Bar: Date, Utility & Service Widgets */}
+      <div className="border-b border-gray-100 py-1.5 hidden md:block bg-white relative z-[60]">
+        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+          {/* Left: Date */}
+          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">
+            {currentDate}
+          </div>
+
+          {/* Right: Service Widgets (Weather & Currency) */}
+          <div className="flex items-center gap-8">
+            <ServiceWidgets />
+            <div className="h-4 w-px bg-gray-100"></div>
+            <div className="flex gap-4 text-[9px] font-black uppercase tracking-widest text-slate-400">
+              <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
+              <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
+            </div>
           </div>
         </div>
       </div>
