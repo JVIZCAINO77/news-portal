@@ -65,32 +65,44 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main Branding & Mobile Toggle */}
-      <div className={`max-w-7xl mx-auto px-6 transition-all duration-500 relative flex items-center justify-center ${isScrolled ? 'py-4' : 'py-4 md:py-8'}`}>
-        {/* Hamburger Mobile Toggle (Left) */}
-        <button 
-          onClick={() => setIsMenuOpen(true)}
-          className="absolute left-6 lg:hidden w-10 h-10 flex items-center justify-center text-black hover:bg-slate-50 border border-gray-100"
-        >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-          </svg>
-        </button>
+      {/* Main Branding & Mobile Toggle Row */}
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 transition-all duration-500 ${isScrolled ? 'py-2 md:py-4' : 'py-4 md:py-8'}`}>
+        <div className="flex items-center justify-between md:justify-center gap-4">
+          
+          {/* Hamburger (Left - Only Mobile) */}
+          <div className="md:hidden w-12 flex justify-start">
+            <button 
+              onClick={() => setIsMenuOpen(true)}
+              className="w-10 h-10 flex items-center justify-center text-black border border-gray-100 bg-white hover:bg-slate-50 transition-colors shadow-sm"
+              aria-label="Abrir menú"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+            </button>
+          </div>
 
-        <Link href="/" className="group text-center">
-          <h1 className={`font-black tracking-tighter text-black uppercase leading-none transition-all duration-500 ${isScrolled ? 'text-3xl md:text-4xl' : 'text-5xl md:text-[7rem]'}`}>
-            Imperio<span className="text-red-600">Público</span>
-          </h1>
-          {!isScrolled && (
-            <div className="mt-2 hidden md:flex items-center justify-center gap-4 transition-opacity duration-500">
-               <span className="h-px bg-slate-200 w-8 md:w-16"></span>
-               <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.6em] text-slate-400">
-                 {SITE_CONFIG.tagline}
-               </p>
-               <span className="h-px bg-slate-200 w-8 md:w-16"></span>
-            </div>
-          )}
-        </Link>
+          {/* Logo (Centered) */}
+          <div className="flex-1 text-center">
+            <Link href="/" className="inline-block group">
+              <h1 className={`font-black tracking-tighter text-black uppercase leading-none transition-all duration-500 ${isScrolled ? 'text-xl md:text-3xl' : 'text-2xl sm:text-3xl md:text-[6rem] lg:text-[7rem]'}`}>
+                Imperio<span className="text-red-600">Público</span>
+              </h1>
+              {!isScrolled && (
+                <div className="mt-2 hidden md:flex items-center justify-center gap-4 transition-opacity duration-500">
+                   <span className="h-px bg-slate-200 w-8 md:w-16"></span>
+                   <p className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.6em] text-slate-400">
+                     {SITE_CONFIG.tagline}
+                   </p>
+                   <span className="h-px bg-slate-200 w-8 md:w-16"></span>
+                </div>
+              )}
+            </Link>
+          </div>
+
+          {/* Spacer (Right - Only Mobile to balance) */}
+          <div className="md:hidden w-12"></div>
+        </div>
       </div>
 
       {/* Main Desktop Navigation */}
