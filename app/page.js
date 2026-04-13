@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getFeaturedArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
 import { CATEGORIES } from '@/lib/data';
 import ArticleCard from '@/components/ArticleCard';
+import NewsletterBox from '@/components/NewsletterBox';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60; // Revalidar cada minuto
@@ -196,6 +197,9 @@ export default async function HomePage() {
          <p className="text-[10px] font-black uppercase tracking-[1em] text-slate-300 mb-8 italic">Imperio Público</p>
          <Link href="/categoria/noticias" className="inline-block bg-black text-white px-12 py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-red-600 transition-all shadow-xl">Ver Archivo Completo</Link>
       </div>
+      <section className="bg-gray-50 py-20 border-t border-gray-100">
+        <NewsletterBox />
+      </section>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { getArticleBySlug, getAllArticles, getLatestArticles } from '@/lib/serve
 import { getCategoryBySlug, formatDate } from '@/lib/data';
 import ArticleCard from '@/components/ArticleCard';
 import AdUnit from '@/components/AdUnit';
+import NewsletterBox from '@/components/NewsletterBox';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -103,6 +104,34 @@ export default async function ArticlePage({ params }) {
               </div>
               <div className="flex flex-wrap gap-2 mt-20 pt-10 border-t border-gray-100">
                  {article.tags?.map(tag => ( <span key={tag} className="text-[10px] font-black uppercase tracking-[0.3em] bg-slate-50 text-slate-400 px-4 py-2 hover:bg-red-600 hover:text-white transition-all cursor-pointer">#{tag}</span> ))}
+              </div>
+
+              {/* Etiquetas y Newsletter */}
+              <div className="mt-12 pt-8 border-t border-gray-100">
+                <div className="flex flex-wrap gap-2 mb-16">
+                  {['#Política', '#Economía', '#Impacto', '#Nacional'].map(tag => (
+                    <span key={tag} className="px-3 py-1 bg-gray-50 text-[10px] font-black uppercase text-slate-400 tracking-widest border border-gray-100 italic">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                
+                <NewsletterBox />
+              </div>
+
+              <div className="mt-20">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 border-b border-gray-100 pb-4 italic">Lo más reciente</h3>
+                <div className="space-y-8"> 
+                  {latest.map((a, idx) => ( 
+                    <Link key={a.id} href={`/articulo/${a.slug}`} className="group flex gap-5 items-start">
+                       <span className="text-4xl font-black text-slate-100 group-hover:text-red-600 transition-colors leading-none">{idx + 1}</span>
+                       <div>
+                          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-2">{getCategoryBySlug(a.category)?.label}</span>
+                          <h5 className="text-[13px] font-black uppercase tracking-tight leading-tight group-hover:underline">{a.title}</h5>
+                       </div>
+                    </Link> 
+                  ))} 
+                </div>
               </div>
            </div>
 
