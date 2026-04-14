@@ -24,34 +24,23 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               src={article.image}
               alt={article.imageAlt || article.title}
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              className="object-cover"
               priority
             />
-            {/* Premium Branding Overlay */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div className="absolute bottom-6 left-6 right-6 flex justify-between items-end">
-               <div className="flex flex-col gap-1">
-                  <span className="text-white text-[9px] font-black uppercase tracking-[0.4em] opacity-80">
-                    {extraBadge || "Exclusivo"}
-                  </span>
-                  <span className="text-white text-[11px] font-black uppercase tracking-[0.2em]">{cat?.label}</span>
-               </div>
-               <span className="text-white/40 text-[9px] font-black uppercase tracking-[0.5em] pb-1">Imperio Público</span>
-            </div>
           </div>
-          <div className="mt-6">
-            <h2 className="text-3xl md:text-5xl group-hover:text-red-600 transition-colors mb-4 md:mb-6 leading-[0.95] tracking-[ -0.04em]">
+          <header className="mb-24">
+            <h1 className="text-4xl md:text-[6rem] lg:text-[7.5rem] font-black text-foreground mb-16 leading-[0.8] tracking-[-0.07em]">
                {article.title}
-             </h2>
-            <p className="text-slate-600 text-base md:text-xl font-serif line-clamp-3 leading-[1.6] mb-8 max-w-4xl italic border-l-4 border-gray-100 pl-6">
+             </h1>
+            <p className="text-slate-600 dark:text-zinc-400 text-lg md:text-3xl font-serif line-clamp-3 leading-[1.5] mb-10 max-w-5xl italic border-l-8 border-gray-100 dark:border-zinc-800 pl-10">
                {article.excerpt}
              </p>
-            <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-               <span className="text-black group-hover:text-red-600 transition-colors uppercase">{article.author}</span>
-               <span className="w-6 h-px bg-slate-200"></span>
-               <span className="tracking-widest">{formattedDate}</span>
+            <div className="flex items-center gap-6">
+               <span className="text-black dark:text-white group-hover:text-red-700 transition-colors metadata-text !font-black !tracking-widest uppercase !text-[10px]">{article.author}</span>
+               <span className="w-12 h-px bg-slate-200 dark:bg-zinc-800"></span>
+               <span className="metadata-text italic !tracking-normal !text-[10px] text-slate-500 dark:text-zinc-500">{formattedDate}</span>
             </div>
-          </div>
+          </header>
         </article>
       </Link>
     );
@@ -59,33 +48,27 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'medium') {
     return (
-      <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 pb-10 h-full ${className}`}>
+      <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 dark:border-zinc-800 pb-12 h-full ${className}`}>
         <article className="h-full flex flex-col">
-          <div className="relative aspect-[4/3] mb-6 overflow-hidden bg-slate-100">
+          <div className="relative aspect-[4/3] mb-8 overflow-hidden bg-slate-100 dark:bg-zinc-800">
             <Image
               src={article.image}
               alt={article.imageAlt || article.title}
               fill
-              className="object-cover group-hover:brightness-90 transition-all duration-300"
+              className="object-cover"
             />
-            {/* Branding Overlay (Medium) */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-500">
-               <span className="text-white text-[8px] font-black uppercase tracking-[0.3em]">PN | {cat?.label}</span>
-               <div className="w-1 h-1 bg-red-600 rounded-full animate-pulse"></div>
-            </div>
           </div>
           <div className="flex-1 flex flex-col">
-            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-red-600 mb-3 block">
+            <span className="overline-label mb-4 block">
               {cat?.label}
             </span>
-            <h3 className="text-2xl md:text-3xl font-black text-black group-hover:text-red-600 transition-colors line-clamp-3 leading-[1.1] mb-4 tracking-tighter">
+            <h3 className="text-3xl md:text-5xl font-black text-foreground group-hover:text-red-700 transition-colors line-clamp-3 leading-[0.95] mb-6 tracking-tighter">
                {article.title}
              </h3>
-            <p className="text-slate-500 text-[15px] font-serif line-clamp-3 leading-[1.5] mb-6 flex-1 italic">
+            <p className="text-slate-500 dark:text-zinc-400 text-lg font-serif line-clamp-3 leading-[1.6] mb-8 flex-1 italic font-medium">
                {article.excerpt}
              </p>
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-auto">
+            <p className="metadata-text uppercase tracking-widest mt-auto border-t border-gray-50 dark:border-zinc-900 pt-6 !text-[9px] text-slate-400 dark:text-zinc-500">
               Por {article.author}
             </p>
           </div>
@@ -96,28 +79,25 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'small') {
     return (
-      <Link href={`/articulo/${article.slug}`} className={`group block py-6 border-b border-gray-100 last:border-0 ${className}`}>
-        <article className="flex gap-6 items-start">
+      <Link href={`/articulo/${article.slug}`} className={`group block py-10 border-b border-gray-100 dark:border-zinc-800 last:border-0 ${className}`}>
+        <article className="flex gap-10 items-start">
           <div className="flex-1 min-w-0">
-             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-red-600 mb-2 block">{cat?.label}</span>
-             <h4 className="text-lg md:text-xl text-black group-hover:text-red-600 transition-colors line-clamp-2 leading-tight">
+             <span className="overline-label text-red-700 mb-2 block">{cat?.label}</span>
+             <h4 className="text-xl md:text-[2.5rem] text-black dark:text-white group-hover:text-red-700 transition-colors line-clamp-2 leading-[0.9] tracking-tighter hover:underline underline-offset-8 decoration-1 decoration-red-600/30">
                {article.title}
              </h4>
-             <p className="text-[9px] font-bold text-slate-400 uppercase mt-3 tracking-widest leading-none">
+             <p className="metadata-text mt-8 opacity-60 !text-[8px] dark:text-zinc-500">
                {formattedDate}
              </p>
           </div>
           {article.image && (
-            <div className="relative w-24 h-16 md:w-32 md:h-20 flex-shrink-0 overflow-hidden bg-slate-100">
+            <div className="relative w-32 h-20 md:w-56 md:h-36 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-zinc-800">
               <Image
                 src={article.image}
                 alt={article.imageAlt || article.title}
                 fill
                 className="object-cover"
               />
-              {/* Ultra-subtle Branding (Small) */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-              <span className="absolute bottom-1 right-2 text-white/50 text-[6px] font-black uppercase tracking-widest">PN</span>
             </div>
           )}
         </article>
@@ -127,7 +107,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'wide') {
     return (
-      <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden bg-slate-50 border border-gray-100 ${className}`}>
+      <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden bg-slate-50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800 ${className}`}>
         <article className="grid grid-cols-1 md:grid-cols-2 items-center">
            <div className="relative aspect-[16/10] overflow-hidden">
               <Image
@@ -139,15 +119,15 @@ export default function ArticleCard({ article, variant = 'medium', className = '
            </div>
            <div className="p-8 md:p-12">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>
-              <h3 className="text-3xl md:text-5xl text-black group-hover:text-red-600 transition-colors leading-none mb-6">
+              <h3 className="text-3xl md:text-5xl text-black dark:text-white group-hover:text-red-600 transition-colors leading-none mb-6">
                 {article.title}
               </h3>
-              <p className="text-slate-600 text-lg font-serif line-clamp-3 leading-relaxed mb-8">
+              <p className="text-slate-600 dark:text-zinc-400 text-lg font-serif line-clamp-3 leading-relaxed mb-8">
                 {article.excerpt}
               </p>
-              <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">
-                 <span className="text-black">Por {article.author}</span>
-                 <span className="w-6 h-px bg-slate-200"></span>
+              <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-zinc-500">
+                 <span className="text-black dark:text-white">Por {article.author}</span>
+                 <span className="w-6 h-px bg-slate-200 dark:bg-zinc-800"></span>
                  <span>{formattedDate}</span>
               </div>
            </div>

@@ -1,9 +1,11 @@
 // app/admin/page.js — Dashboard Overview (Imperio Público 2.0)
 import { createClient } from '@/lib/supabase/server';
 import { getLatestArticles } from '@/lib/serverData';
+import { SITE_CONFIG } from '@/lib/data';
 import Link from 'next/link';
 import AutomationToggle from '@/components/AutomationToggle';
 import AgentsDashboard from '@/components/AgentsDashboard';
+import TrafficDashboard from '@/components/TrafficDashboard';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -41,6 +43,7 @@ export default async function AdminDashboardPage() {
     .single();
 
   const isAdmin = profile?.role === 'admin';
+  const gaId = SITE_CONFIG.gaId;
 
   const stats = [
     { label: 'Artículos Totales', value: articleCount || 0 },
@@ -71,6 +74,11 @@ export default async function AdminDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* TRÁFICO — SOLO ADMIN */}
+      {isAdmin && (
+        <TrafficDashboard gaId={gaId} />
+      )}
 
       {/* Stats Grid — solo admin ve todos los stats */}
       {isAdmin && (

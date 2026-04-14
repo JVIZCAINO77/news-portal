@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 import BreakingTicker from './BreakingTicker';
 import ServiceWidgets from './ServiceWidgets';
+import ThemeToggle from './ThemeToggle';
 import MobileMenu from './MobileMenu';
 
 export default function Header() {
@@ -27,9 +28,15 @@ export default function Header() {
     setCurrentDate(dateStr.charAt(0).toUpperCase() + dateStr.slice(1));
 
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      const scrollY = window.scrollY;
+      // High-Gap Hysteresis for maximum stability
+      if (scrollY > 150) {
+        setIsScrolled(true);
+      } else if (scrollY < 40) {
+        setIsScrolled(false);
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     const fetchTicker = async () => {
       try {
@@ -46,7 +53,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full bg-white/95 backdrop-blur-md sticky top-0 z-[100] transition-all duration-300 border-b border-gray-100">
+    <header className="w-full bg-background/95 backdrop-blur-md sticky top-0 z-[100] transition-all duration-500 border-b border-border-base will-change-[height,padding]">
       {/* 1. Primary Navigation (Top - Red Bar) - Vibrant Red */}
       <nav className="w-full bg-[#bb1b21] border-b border-black/10 shadow-sm relative z-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
@@ -82,17 +89,26 @@ export default function Header() {
             </button>
           </div>
 
-          {/* Logo (Centered) - More Compact */}
+          {/* Logo (Centered) - Editorial Master Title */}
           <div className="flex-1 flex justify-center py-4">
-            <Link href="/" className="flex items-center gap-2 md:gap-4 group">
+            <Link href="/" className="flex items-center gap-4 md:gap-12 group no-underline">
               <img 
                 src="/icon.png" 
                 alt="Logo IP" 
-                className={`transition-all duration-500 transform object-contain ${isScrolled ? 'h-8 md:h-10' : 'h-12 md:h-24 lg:h-28'}`} 
+                className={`transition-all duration-700 transform object-contain will-change-transform ${isScrolled ? 'h-10 md:h-12 border-r border-gray-100 pr-4' : 'h-16 md:h-28 lg:h-40'}`} 
               />
-              <h1 className={`font-black tracking-tighter text-black uppercase leading-none transition-all duration-500 ${isScrolled ? 'text-xl md:text-3xl' : 'text-2xl sm:text-3xl md:text-[5rem] lg:text-[6rem]'}`}>
-                Imperio<span className="text-red-600">Público</span>
-              </h1>
+              <div className="flex flex-col items-center">
+                <h1 className={`font-black tracking-[-0.07em] text-black dark:text-white uppercase leading-[0.75] transition-all duration-700 will-change-transform ${isScrolled ? 'text-2xl md:text-[3.5rem]' : 'text-3xl sm:text-5xl md:text-[6.5rem] lg:text-[8.5rem]'}`}>
+                  Imperio<span className="text-red-700">Público</span>
+                </h1>
+                {!isScrolled && (
+                  <div className="flex items-center gap-4 w-full mt-4">
+                    <div className="h-[2px] flex-1 bg-black dark:bg-white"></div>
+                    <span className="metadata-text !text-black dark:!text-white italic tracking-[0.4em] whitespace-nowrap">La Autoridad de la Actualidad</span>
+                    <div className="h-[2px] flex-1 bg-black dark:bg-white"></div>
+                  </div>
+                )}
+              </div>
             </Link>
           </div>
 
@@ -102,16 +118,19 @@ export default function Header() {
       </div>
 
       {/* 3. Utility Bar: Date & Service Widgets (Below Branding) */}
-      <div className="border-y border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
+      <div className="border-y border-gray-100 dark:border-zinc-900 py-1.5 hidden md:block bg-slate-50 dark:bg-zinc-900 relative z-40">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 italic">
+          <div className="metadata-text uppercase italic">
             {currentDate}
           </div>
 
           <div className="flex items-center gap-8">
-            <ServiceWidgets />
-            <div className="h-4 w-px bg-gray-200"></div>
-            <div className="flex gap-4 text-[9px] font-black uppercase tracking-widest text-slate-500">
+            <div className="flex items-center gap-4">
+               <ServiceWidgets />
+               <ThemeToggle />
+            </div>
+            <div className="h-4 w-px bg-gray-200 dark:bg-zinc-800"></div>
+            <div className="flex gap-4 metadata-text uppercase">
               <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
               <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
             </div>

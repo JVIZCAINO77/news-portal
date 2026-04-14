@@ -8,6 +8,8 @@ import ArticleCard from '@/components/ArticleCard';
 import AdUnit from '@/components/AdUnit';
 import NewsletterBox from '@/components/NewsletterBox';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
+import AudioReader from '@/components/AudioReader';
+import SocialShare from '@/components/SocialShare';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -39,56 +41,69 @@ export default async function ArticlePage({ params }) {
   const paragraphs = article.content?.split('\n\n') || [];
 
   return (
-    <article className="bg-white min-h-screen">
+    <article className="bg-background min-h-screen transition-colors duration-500">
       <ReadingProgressBar />
+      <SocialShare title={article.title} />
       <div className="max-w-5xl mx-auto px-6 py-12 md:py-20">
-        <nav className="mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">
+        <nav className="mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-muted-base">
            <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
            <span className="w-1 h-1 bg-slate-100 rounded-full"></span>
            <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
         </nav>
-        <header className="mb-16">
-           <h1 className="text-5xl md:text-8xl font-black text-black mb-10 leading-[0.9] tracking-[-0.05em]">
+        <header className="mb-24">
+           <h1 className="text-4xl md:text-[6rem] lg:text-[7.5rem] font-black text-black dark:text-white mb-16 leading-[0.8] tracking-[-0.07em]">
               {article.title}
             </h1>
-            <p className="text-xl md:text-3xl text-slate-500 font-serif leading-[1.5] mb-12 max-w-4xl italic border-l-8 border-gray-100 pl-8">
+            <p className="text-xl md:text-4xl text-slate-500 dark:text-zinc-400 font-serif leading-[1.4] mb-16 max-w-6xl italic border-l-[12px] border-red-600/10 dark:border-red-600/20 pl-12">
               {article.excerpt}
             </p>
-           <div className="flex flex-col md:flex-row md:items-center justify-between py-10 border-y border-gray-100 gap-8">
-             <div className="flex items-center gap-5">
-                <div className="w-14 h-14 bg-black flex items-center justify-center text-white font-black text-2xl select-none">{article.author?.[0]}</div>
+           <div className="flex flex-col md:flex-row md:items-center justify-between py-16 border-y border-black/10 dark:border-zinc-800 gap-10">
+             <div className="flex items-center gap-8">
+                <div className="w-20 h-20 bg-black dark:bg-zinc-800 flex items-center justify-center text-white font-black text-4xl select-none">{article.author?.[0]}</div>
                 <div className="text-left">
-                   <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Autoría</p>
-                   <p className="text-lg font-black text-black uppercase leading-none">{article.author}</p>
+                   <p className="overline-label !text-slate-400 dark:text-zinc-600 mb-2">Autoría</p>
+                   <p className="text-2xl font-black text-black dark:text-white uppercase leading-none tracking-tighter">{article.author}</p>
                 </div>
              </div>
              <div className="text-left md:text-right">
-                <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">Publicado el</p>
-                <p className="text-lg font-black text-black uppercase leading-none">{formatDate(article.publishedAt)}</p>
+                <p className="overline-label !text-slate-400 dark:text-zinc-600 mb-2">Publicado el</p>
+                <div className="flex items-center md:justify-end gap-3 text-2xl font-black text-foreground uppercase leading-none tracking-tighter">
+                   <span>{formatDate(article.publishedAt)}</span>
+                   <span className="w-2 h-2 rounded-full bg-red-600"></span>
+                   <span className="flex items-center gap-2 text-slate-400 lowercase italic font-serif tracking-normal text-xl">
+                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                     </svg>
+                     {Math.max(1, Math.ceil((article.content?.split(/\s+/).length || 0) / 200))} min
+                   </span>
+                </div>
              </div>
            </div>
         </header>
-        <figure className="mb-20">
-           <div className="relative aspect-[16/9] overflow-hidden grayscale-[0.3] hover:grayscale-0 transition-all duration-700 bg-slate-50">
+        <figure className="mb-24">
+           <div className="relative aspect-[16/9] overflow-hidden bg-slate-50">
               <Image src={article.image} alt={article.imageAlt || article.title} fill className="object-cover" priority />
            </div>
-           {article.imageAlt && <figcaption className="mt-5 text-center text-[10px] text-slate-400 font-black uppercase tracking-[0.3em] font-sans">Créditos: {article.imageAlt}</figcaption>}
+           {article.imageAlt && <figcaption className="mt-6 text-center overline-label !text-slate-400">Créditos: {article.imageAlt}</figcaption>}
         </figure>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-24">
+
+        <AudioReader title={article.title} text={article.content} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-32">
            {/* Main Content Column */}
            <div className="lg:col-span-8">
               <div className="prose-news">
                  {paragraphs.map((p, i) => {
                     if (p.startsWith('## ')) {
-                      return <h2 key={i} className="text-4xl font-black text-black mt-20 mb-10 uppercase tracking-tighter">{p.replace('## ', '')}</h2>;
+                      return <h2 key={i} className="text-4xl md:text-6xl font-black text-black mt-28 mb-16 uppercase tracking-tighter italic border-b-8 border-black inline-block pb-4">{p.replace('## ', '')}</h2>;
                     }
                     if (p.trim() === '---') {
-                      return <hr key={i} className="my-16 border-slate-100" />;
+                      return <hr key={i} className="my-24 border-black/10" />;
                     }
 
                     const formattedText = p
                       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
-                      .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
+                      .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
                     
                     const isFirstParagraph = i === 0;
                     
@@ -99,20 +114,20 @@ export default async function ArticlePage({ params }) {
                            dangerouslySetInnerHTML={{ __html: formattedText }} 
                          /> 
                          {/* Insert Ad after 2nd paragraph */}
-                         {i === 1 && <AdUnit format="in-article" className="my-12" />}
+                         {i === 1 && <AdUnit format="in-article" className="my-20" />}
                       </div>
                     );
                  })}
               </div>
-              <div className="flex flex-wrap gap-2 mt-20 pt-10 border-t border-gray-100">
-                 {article.tags?.map(tag => ( <span key={tag} className="text-[10px] font-black uppercase tracking-[0.3em] bg-slate-50 text-slate-400 px-4 py-2 hover:bg-red-600 hover:text-white transition-all cursor-pointer">#{tag}</span> ))}
+              <div className="flex flex-wrap gap-2 mt-20 pt-10 border-t border-border-base">
+                  {article.tags?.map(tag => ( <span key={tag} className="pill-tag text-red-600 border-red-100 hover:border-red-600 uppercase">#{tag}</span> ))}
               </div>
 
               {/* Etiquetas y Newsletter */}
               <div className="mt-12 pt-8 border-t border-gray-100">
-                <div className="flex flex-wrap gap-2 mb-16">
+                 <div className="flex flex-wrap gap-2 mb-16">
                   {['#Política', '#Economía', '#Impacto', '#Nacional'].map(tag => (
-                    <span key={tag} className="px-3 py-1 bg-gray-50 text-[10px] font-black uppercase text-slate-400 tracking-widest border border-gray-100 italic">
+                    <span key={tag} className="pill-tag">
                       {tag}
                     </span>
                   ))}

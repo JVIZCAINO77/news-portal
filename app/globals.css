@@ -1,122 +1,136 @@
 @import "tailwindcss";
 
-@font-face {
-  font-family: 'Newspaper';
-  src: url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@theme {
+  --color-primary: #bb1b21;
+  /* Map Tailwind colors to our switching CSS variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-border-base: var(--border);
+  --color-muted-base: var(--muted);
 }
 
 :root {
   --background: #ffffff;
   --foreground: #111827;
-  --primary: #bb1b21; /* Imperio Red - Toned down */
+  --primary: #bb1b21;
   --secondary: #1f2937;
-  --accent: #bb1b21;
   --muted: #6b7280;
   --border: #e5e7eb;
 }
 
+.dark {
+  --background: #121212;
+  --foreground: #f3f4f6;
+  --secondary: #1f2937;
+  --muted: #9ca3af;
+  --border: #262626;
+}
+
 @layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    border-color: var(--border);
+  }
+
+  html {
+    background-color: var(--background);
+    color: var(--foreground);
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: var(--font-sans);
+    font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.011em;
     line-height: 1.6;
+    transition: background-color 0.5s ease, color 0.5s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: "Playfair Display", serif;
-    font-weight: 800;
+    font-weight: 900;
     line-height: 1.05;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
+    color: var(--foreground);
+    transition: color 0.5s ease;
   }
 }
 
 @layer components {
-  .news-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-  }
-
-  .nav-link {
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+  .prose-news {
+    font-family: "Source Serif 4", serif;
+    font-size: 1.25rem;
+    line-height: 1.8;
     color: var(--foreground);
-    transition: color 0.2s;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    transition: color 0.5s ease;
   }
 
-  .nav-link:hover {
+  .prose-news p {
+    margin-bottom: 2rem;
+  }
+
+  .overline-label {
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
     color: var(--primary);
   }
 
-  /* Newspaper Grid Lines */
-  .grid-divider {
-    position: relative;
-  }
-
-  .grid-divider::after {
-    content: '';
-    position: absolute;
-    right: -1px;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background-color: var(--border);
+  .metadata-text {
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   .section-title {
-    @apply text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 pb-3 border-b-2 border-red-600 inline-block italic;
+    font-family: 'Inter', sans-serif;
+    font-weight: 900;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--primary);
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--primary);
+    display: inline-block;
+    font-style: italic;
   }
 
-  .newspaper-divider {
-    @apply border-t border-gray-100 mt-20 mb-12 flex items-center gap-4;
-  }
-
-  .newspaper-divider::before {
-    content: '';
-    @apply h-px bg-slate-100 flex-1;
+  .pill-tag {
+    @apply px-4 py-1.5 bg-background border border-border-base text-[10px] font-black uppercase tracking-widest text-muted-base transition-all hover:bg-foreground hover:text-background hover:border-foreground italic select-none;
   }
 }
 
-/* Premium Reading Experience (El Nacional Style) */
-.prose-news {
-  @apply font-serif text-[1.2rem] md:text-[1.35rem] leading-[1.85] text-slate-800;
-}
-
-.prose-news p {
-  @apply mb-8;
-}
-
-.prose-news b, .prose-news strong {
-  @apply font-black text-black;
-}
-
-.prose-news h2 {
-  @apply text-3xl md:text-4xl font-black text-black mt-16 mb-8 uppercase tracking-tighter italic;
-}
-
-/* Drop Cap (Letra Capital) */
+/* Letra Capital (Drop Cap) */
 .drop-cap::first-letter {
-  @apply float-left text-7xl md:text-8xl font-black mr-3 mt-2 text-red-600 leading-[0.8] uppercase;
-  font-family: inherit;
+  float: left;
+  font-family: "Playfair Display", serif;
+  font-weight: 900;
+  font-size: 6rem;
+  line-height: 0.7;
+  margin-top: 0.12em;
+  margin-right: 0.12em;
+  color: var(--primary);
 }
 
-/* Custom Scrollbar for a premium look */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--primary);
 }
 
 /* Animations */
@@ -129,13 +143,12 @@
   animation: marquee 30s linear infinite;
 }
 
-/* Utility to hide scrollbars */
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

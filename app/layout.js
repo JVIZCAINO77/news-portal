@@ -38,6 +38,18 @@ export const metadata = {
     creator: SITE_CONFIG.twitterHandle,
   },
   alternates: { canonical: '/' },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: SITE_CONFIG.name,
+  },
+};
+
+export const viewport = {
+  themeColor: '#bb1b21',
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
@@ -57,6 +69,25 @@ export default function RootLayout({ children }) {
           strategy="lazyOnload"
         />
         <meta name="google-adsense-account" content="ca-pub-9579937391435747" />
+        {/* Google Analytics 4 */}
+        {SITE_CONFIG.gaId && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${SITE_CONFIG.gaId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${SITE_CONFIG.gaId}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
+          </>
+        )}
       </head>
       <body className="min-h-screen flex flex-col font-sans">
         <Header />
