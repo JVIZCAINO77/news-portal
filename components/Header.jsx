@@ -84,12 +84,15 @@ export default function Header() {
 
           {/* Logo (Centered) - More Compact */}
           <div className="flex-1 flex justify-center py-4">
-            <Link href="/" className="inline-block group">
+            <Link href="/" className="flex items-center gap-2 md:gap-4 group">
               <img 
-                src="/logo.png" 
-                alt={SITE_CONFIG.name} 
-                className={`transition-all duration-500 transform ${isScrolled ? 'h-10 md:h-12' : 'h-16 md:h-28 lg:h-32'}`} 
+                src="/icon.png" 
+                alt="Logo IP" 
+                className={`transition-all duration-500 transform object-contain ${isScrolled ? 'h-8 md:h-10' : 'h-12 md:h-24 lg:h-28'}`} 
               />
+              <h1 className={`font-black tracking-tighter text-black uppercase leading-none transition-all duration-500 ${isScrolled ? 'text-xl md:text-3xl' : 'text-2xl sm:text-3xl md:text-[5rem] lg:text-[6rem]'}`}>
+                Imperio<span className="text-red-600">Público</span>
+              </h1>
             </Link>
           </div>
 

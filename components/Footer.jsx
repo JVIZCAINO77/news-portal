@@ -29,8 +29,11 @@ export default function Footer() {
           
           {/* Logo & Info */}
           <div className="md:col-span-1">
-            <Link href="/" className="inline-block mb-6 group">
-              <img src="/logo.png" alt={SITE_CONFIG.name} className="h-16 md:h-20 lg:h-24 brightness-0 invert" />
+            <Link href="/" className="flex items-center gap-4 mb-6 group">
+              <img src="/icon.png" alt="Logo IP" className="h-12 brightness-0 invert" />
+              <span className="text-3xl font-black tracking-tighter uppercase text-white">
+                Imperio<span className="text-red-500">Público</span>
+              </span>
             </Link>
             <p className="text-xs text-slate-400 font-serif leading-relaxed mb-8">
               {SITE_CONFIG.tagline}. <br/><br/>
