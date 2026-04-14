@@ -147,7 +147,6 @@ export default function ContactoPage() {
 
               {/* Horario */}
               <div className="bg-slate-50 p-8">
-                </div>
               </div>
 
               {/* Redes Sociales */}
