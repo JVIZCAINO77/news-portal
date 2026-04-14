@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 import BreakingTicker from './BreakingTicker';
 import ServiceWidgets from './ServiceWidgets';
-import ThemeToggle from './ThemeToggle';
+
 import MobileMenu from './MobileMenu';
 
 export default function Header() {
@@ -118,19 +118,18 @@ export default function Header() {
       </div>
 
       {/* 3. Utility Bar: Date & Service Widgets (Below Branding) */}
-      <div className="border-y border-gray-100 dark:border-zinc-900 py-1.5 hidden md:block bg-slate-50 dark:bg-zinc-900 relative z-40">
+      <div className="border-y border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="metadata-text uppercase italic">
+          <div className="text-[10px] font-semibold text-gray-500 uppercase italic tracking-widest">
             {currentDate}
           </div>
 
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4">
                <ServiceWidgets />
-               <ThemeToggle />
             </div>
-            <div className="h-4 w-px bg-gray-200 dark:bg-zinc-800"></div>
-            <div className="flex gap-4 metadata-text uppercase">
+            <div className="h-4 w-px bg-gray-200"></div>
+            <div className="flex gap-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">
               <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
               <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
             </div>

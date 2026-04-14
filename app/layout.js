@@ -56,6 +56,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <head>
+        {/* Forzar modo claro antes de que React hidrate — evita el flash negro */}
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.remove('dark');localStorage.removeItem('theme');` }} />
         <meta name="google-adsense-account" content="ca-pub-9579937391435747" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
