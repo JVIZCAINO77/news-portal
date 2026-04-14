@@ -3,6 +3,7 @@ import './globals.css';
 import { SITE_CONFIG } from '@/lib/data';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import BackToTop from '@/components/BackToTop';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
 
@@ -59,9 +60,10 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen flex flex-col font-sans">
         <Header />
-        <main className="flex-1">
+        <main className="min-h-screen pt-12 md:pt-0">
           {children}
         </main>
+        <BackToTop />
         <Footer />
         <Analytics />
       </body>

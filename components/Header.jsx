@@ -46,7 +46,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full bg-white transition-all duration-300">
+    <header className="w-full bg-white/95 backdrop-blur-md sticky top-0 z-[100] transition-all duration-300 border-b border-gray-100">
       {/* 1. Primary Navigation (Top - Red Bar) - Vibrant Red */}
       <nav className="w-full bg-[#bb1b21] border-b border-black/10 shadow-sm relative z-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
@@ -83,11 +83,13 @@ export default function Header() {
           </div>
 
           {/* Logo (Centered) - More Compact */}
-          <div className="flex-1 text-center">
+          <div className="flex-1 flex justify-center py-4">
             <Link href="/" className="inline-block group">
-              <h1 className={`font-black tracking-tighter text-black uppercase leading-none transition-all duration-500 ${isScrolled ? 'text-xl md:text-3xl' : 'text-2xl sm:text-3xl md:text-[5rem] lg:text-[6rem]'}`}>
-                Imperio<span className="text-red-600">Público</span>
-              </h1>
+              <img 
+                src="/logo.png" 
+                alt={SITE_CONFIG.name} 
+                className={`transition-all duration-500 transform ${isScrolled ? 'h-10 md:h-12' : 'h-16 md:h-28 lg:h-32'}`} 
+              />
             </Link>
           </div>
 

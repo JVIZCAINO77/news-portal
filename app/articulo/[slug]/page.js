@@ -7,6 +7,7 @@ import { getCategoryBySlug, formatDate } from '@/lib/data';
 import ArticleCard from '@/components/ArticleCard';
 import AdUnit from '@/components/AdUnit';
 import NewsletterBox from '@/components/NewsletterBox';
+import ReadingProgressBar from '@/components/ReadingProgressBar';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -39,6 +40,7 @@ export default async function ArticlePage({ params }) {
 
   return (
     <article className="bg-white min-h-screen">
+      <ReadingProgressBar />
       <div className="max-w-5xl mx-auto px-6 py-12 md:py-20">
         <nav className="mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">
            <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
