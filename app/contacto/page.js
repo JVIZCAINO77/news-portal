@@ -147,20 +147,37 @@ export default function ContactoPage() {
 
               {/* Horario */}
               <div className="bg-slate-50 p-8">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-6">Horario Editorial</h3>
-                <div className="space-y-2 text-sm font-bold uppercase tracking-tight text-slate-600">
-                  <div className="flex justify-between">
-                    <span>Lunes — Viernes</span>
-                    <span className="text-red-600">8:00 AM – 8:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Sábados</span>
-                    <span className="text-red-600">9:00 AM – 4:00 PM</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Domingos</span>
-                    <span className="text-slate-300">Solo Urgencias</span>
-                  </div>
+                </div>
+              </div>
+
+              {/* Redes Sociales */}
+              <div className="border-l-4 border-red-600 pl-8 pt-4">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-6">Síguenos en Redes</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <a href="https://www.facebook.com/profile.php?id=61573298082093" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                    <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                      <span className="text-[10px] font-black">FB</span>
+                    </div>
+                    <span className="text-[11px] font-black uppercase tracking-widest">Facebook</span>
+                  </a>
+                  <a href="https://www.instagram.com/imperiopublico/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                    <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                      <span className="text-[10px] font-black">IG</span>
+                    </div>
+                    <span className="text-[11px] font-black uppercase tracking-widest">Instagram</span>
+                  </a>
+                  <a href="https://x.com/imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                    <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                      <span className="text-[10px] font-black">X</span>
+                    </div>
+                    <span className="text-[11px] font-black uppercase tracking-widest">Twitter / X</span>
+                  </a>
+                  <a href="https://www.youtube.com/@Imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                    <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
+                      <span className="text-[10px] font-black">YT</span>
+                    </div>
+                    <span className="text-[11px] font-black uppercase tracking-widest">YouTube</span>
+                  </a>
                 </div>
               </div>
             </div>
