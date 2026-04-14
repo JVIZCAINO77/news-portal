@@ -40,12 +40,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             </div>
           </div>
           <div className="mt-6">
-            <h2 className="text-3xl md:text-5xl group-hover:text-red-600 transition-colors mb-4 leading-tight tracking-tighter">
-              {article.title}
-            </h2>
-            <p className="text-slate-600 text-base md:text-lg font-serif line-clamp-2 md:line-clamp-2 leading-relaxed mb-6 max-w-3xl italic">
-              {article.excerpt}
-            </p>
+            <h2 className="text-3xl md:text-5xl group-hover:text-red-600 transition-colors mb-4 md:mb-6 leading-[0.95] tracking-[ -0.04em]">
+               {article.title}
+             </h2>
+            <p className="text-slate-600 text-base md:text-xl font-serif line-clamp-3 leading-[1.6] mb-8 max-w-4xl italic border-l-4 border-gray-100 pl-6">
+               {article.excerpt}
+             </p>
             <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
                <span className="text-black group-hover:text-red-600 transition-colors uppercase">{article.author}</span>
                <span className="w-6 h-px bg-slate-200"></span>
@@ -79,12 +79,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             <span className="text-[9px] font-black uppercase tracking-[0.4em] text-red-600 mb-3 block">
               {cat?.label}
             </span>
-            <h3 className="text-2xl md:text-3xl text-black group-hover:text-red-600 transition-colors line-clamp-3 leading-none mb-4">
-              {article.title}
-            </h3>
-            <p className="text-slate-600 text-base font-serif line-clamp-2 leading-relaxed mb-6 flex-1">
-              {article.excerpt}
-            </p>
+            <h3 className="text-2xl md:text-3xl font-black text-black group-hover:text-red-600 transition-colors line-clamp-3 leading-[1.1] mb-4 tracking-tighter">
+               {article.title}
+             </h3>
+            <p className="text-slate-500 text-[15px] font-serif line-clamp-3 leading-[1.5] mb-6 flex-1 italic">
+               {article.excerpt}
+             </p>
             <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-auto">
               Por {article.author}
             </p>

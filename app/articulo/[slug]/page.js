@@ -46,12 +46,12 @@ export default async function ArticlePage({ params }) {
            <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
         </nav>
         <header className="mb-16">
-           <h1 className="text-5xl md:text-8xl font-black text-black mb-10 leading-none tracking-tighter">
-             {article.title}
-           </h1>
-           <p className="text-xl md:text-3xl text-slate-500 font-serif leading-relaxed mb-12 max-w-4xl italic border-l-8 border-gray-100 pl-8">
-             {article.excerpt}
-           </p>
+           <h1 className="text-5xl md:text-8xl font-black text-black mb-10 leading-[0.9] tracking-[-0.05em]">
+              {article.title}
+            </h1>
+            <p className="text-xl md:text-3xl text-slate-500 font-serif leading-[1.5] mb-12 max-w-4xl italic border-l-8 border-gray-100 pl-8">
+              {article.excerpt}
+            </p>
            <div className="flex flex-col md:flex-row md:items-center justify-between py-10 border-y border-gray-100 gap-8">
              <div className="flex items-center gap-5">
                 <div className="w-14 h-14 bg-black flex items-center justify-center text-white font-black text-2xl select-none">{article.author?.[0]}</div>
