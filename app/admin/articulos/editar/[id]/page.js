@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { CATEGORIES } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
 import MarkdownPreview from '@/components/MarkdownPreview';
+import ImageUpload from '@/components/ImageUpload';
 
 export default function EditArticlePage() {
   const { id } = useParams();
@@ -153,15 +154,10 @@ export default function EditArticlePage() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Imagen Destacada (URL)</label>
-                  <input
-                    type="text"
-                    value={image}
-                    onChange={(e) => setImage(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
-                  />
-                </div>
+                <ImageUpload 
+                  value={image} 
+                  onChange={setImage} 
+                />
 
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Firma (Autor)</label>
