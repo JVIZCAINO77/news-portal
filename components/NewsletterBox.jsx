@@ -45,10 +45,10 @@ export default function NewsletterBox({ variant = 'default' }) {
         <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/60 mb-6 block italic">
           Imperio Diario · Newsletter
         </span>
-        <h2 className="text-4xl md:text-6xl font-black text-white uppercase leading-none tracking-tighter mb-8 italic">
+        <h2 className={`font-black text-white uppercase tracking-tighter mb-8 italic ${variant === 'compact' ? 'text-2xl leading-tight' : 'text-4xl md:text-6xl leading-[0.9]'}`}>
           Mantente en el centro de la información
         </h2>
-        <p className="text-white/80 text-lg md:text-xl font-serif italic mb-12 max-w-2xl leading-relaxed">
+        <p className={`text-white/80 font-serif italic mb-12 max-w-2xl leading-relaxed ${variant === 'compact' ? 'text-sm' : 'text-lg md:text-xl'}`}>
            Recibe cada mañana el resumen editorial con las 5 noticias que realmente importan hoy.
         </p>
 

@@ -69,7 +69,10 @@ export default function Footer() {
           {/* Social & Contact */}
           <div className="md:col-span-1 space-y-6">
             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 italic">Conexión Directa</h4>
-            <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">redaccion@imperiopublico.com</p>
+            <div className="space-y-1">
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest break-all">vizcainosr29@gmail.com</p>
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest break-all">jvizcaino242@gmail.com</p>
+            </div>
             <div className="flex gap-3 mt-4">
                {[1, 2, 3].map(i => (
                  <span key={i} className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all cursor-pointer">

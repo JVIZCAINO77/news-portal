@@ -131,25 +131,18 @@ export default function ContactoPage() {
             {/* Info de contacto */}
             <div className="lg:col-span-5 space-y-10">
               <div className="border-l-4 border-red-600 pl-8">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Redacción</h3>
-                <a href="mailto:redaccion@imperiopublico.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
-                  redaccion@imperiopublico.com
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Redacción y General</h3>
+                <a href="mailto:vizcainosr29@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
+                  vizcainosr29@gmail.com
                 </a>
               </div>
 
               <div className="border-l-4 border-black pl-8">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-3">Publicidad</h3>
-                <a href="mailto:publicidad@imperiopublico.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
-                  publicidad@imperiopublico.com
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-3">Publicidad y Denuncias</h3>
+                <a href="mailto:jvizcaino242@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
+                  jvizcaino242@gmail.com
                 </a>
-              </div>
-
-              <div className="border-l-4 border-slate-200 pl-8">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Denuncias</h3>
-                <a href="mailto:denuncias@imperiopublico.com" className="text-xl font-black text-black hover:text-red-600 transition-colors">
-                  denuncias@imperiopublico.com
-                </a>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Línea confidencial 24/7</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Atención y Línea Confidencial</p>
               </div>
 
               {/* Horario */}
