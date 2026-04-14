@@ -77,11 +77,15 @@ export default function Footer() {
               <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest break-all">jvizcaino242@gmail.com</p>
             </div>
             <div className="flex gap-3 mt-4">
-               {[1, 2, 3].map(i => (
-                 <span key={i} className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-white hover:text-black transition-all cursor-pointer">
-                    <span className="text-[10px] font-black uppercase">S{i}</span>
-                 </span>
-               ))}
+              <a href={SITE_CONFIG.social.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-[#bb1b21] transition-all">
+                 <span className="text-[10px] font-black uppercase">FB</span>
+              </a>
+              <a href={SITE_CONFIG.social.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-[#bb1b21] transition-all">
+                 <span className="text-[10px] font-black uppercase">IG</span>
+              </a>
+              <a href={SITE_CONFIG.social.twitter} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-[#bb1b21] transition-all">
+                 <span className="text-[10px] font-black uppercase">X</span>
+              </a>
             </div>
           </div>
         </div>

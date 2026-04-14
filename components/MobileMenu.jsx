@@ -75,11 +75,9 @@ export default function MobileMenu({ isOpen, onClose, tickerItems = [] }) {
         <div className="p-6 bg-black text-white">
            <p className="text-[8px] font-black uppercase tracking-[0.5em] text-white/40 mb-4 opacity-50">Conecta con Nosotros</p>
            <div className="flex gap-4">
-             {['fb','tw','ig','yt'].map(sm => (
-               <div key={sm} className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all cursor-pointer">
-                 {sm}
-               </div>
-             ))}
+             <a href={SITE_CONFIG.social.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all">FB</a>
+             <a href={SITE_CONFIG.social.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all">IG</a>
+             <a href={SITE_CONFIG.social.twitter} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all">X</a>
            </div>
         </div>
       </aside>
