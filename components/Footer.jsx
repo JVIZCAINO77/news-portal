@@ -86,6 +86,9 @@ export default function Footer() {
               <a href={SITE_CONFIG.social.twitter} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-[#bb1b21] transition-all">
                  <span className="text-[10px] font-black uppercase">X</span>
               </a>
+              <a href={SITE_CONFIG.social.youtube} target="_blank" rel="noopener noreferrer" className="w-10 h-10 border border-white/10 flex items-center justify-center hover:bg-[#bb1b21] transition-all">
+                 <span className="text-[10px] font-black uppercase">YT</span>
+              </a>
             </div>
           </div>
         </div>

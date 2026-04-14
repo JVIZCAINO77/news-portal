@@ -78,6 +78,7 @@ export default function MobileMenu({ isOpen, onClose, tickerItems = [] }) {
              <a href={SITE_CONFIG.social.facebook} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all">FB</a>
              <a href={SITE_CONFIG.social.instagram} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all">IG</a>
              <a href={SITE_CONFIG.social.twitter} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all">X</a>
+             <a href={SITE_CONFIG.social.youtube} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-black uppercase hover:bg-white hover:text-black transition-all">YT</a>
            </div>
         </div>
       </aside>
