@@ -1,344 +1,256 @@
-// app/page.js — Portada de Imperio Público — Portada + Secciones por Categoría
+// app/page.js — Portada Imperio Público — Diseño Periódico Clásico
 import Link from 'next/link';
+import Image from 'next/image';
 import { getFeaturedArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
-import ArticleCard from '@/components/ArticleCard';
 import NewsletterBox from '@/components/NewsletterBox';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
 
+
+
 export default async function HomePage() {
-  // Fetch all data in parallel
-  const [
-    featured,
-    latest,
-    noticias,
-    politica,
-    deportes,
-    tecnologia,
-    entretenimiento,
-    economia,
-    cultura,
-    salud,
-    opinion,
-  ] = await Promise.all([
-    getFeaturedArticles(4),
-    getLatestArticles(20),
-    getArticlesByCategory('noticias', 6),
-    getArticlesByCategory('politica', 5),
-    getArticlesByCategory('deportes', 5),
-    getArticlesByCategory('tecnologia', 5),
-    getArticlesByCategory('entretenimiento', 5),
-    getArticlesByCategory('economia', 5),
-    getArticlesByCategory('cultura', 5),
-    getArticlesByCategory('salud', 5),
-    getArticlesByCategory('opinion', 4),
+  const [featured, latest] = await Promise.all([
+    getFeaturedArticles(6),
+    getLatestArticles(30),
   ]);
 
-  // Portada distribution
-  let heroArticle = featured[0] || latest[0] || null;
-  let sideFeatured = featured.slice(1, 4);
-  if (sideFeatured.length < 3) {
-    const extras = latest.filter(a => a.id !== heroArticle?.id).slice(0, 3 - sideFeatured.length);
-    sideFeatured = [...sideFeatured, ...extras];
-  }
-  const featuredIds = new Set([heroArticle?.id, ...sideFeatured.map(a => a.id)]);
-  const sidebarLatest = latest.filter(a => !featuredIds.has(a.id)).slice(0, 5);
-
-  return (
-    <div style={{ backgroundColor: '#ffffff', color: '#111827' }}>
-
-      {/* ══════════════════════════════════════════════
-          1 — PORTADA
-      ══════════════════════════════════════════════ */}
-      <section aria-label="Portada Principal" className="max-w-7xl mx-auto px-4 md:px-6 pt-6 pb-16 border-b-2 border-black">
-        {/* Label */}
-        <div className="flex items-center gap-4 mb-8">
-          <span style={{ backgroundColor: '#000', color: '#fff' }} className="text-[9px] font-black uppercase tracking-[0.3em] px-4 py-2 italic">
-            Portada
-          </span>
-          <span className="h-px flex-1 bg-gray-200"></span>
-          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-400 italic">
-            Imperio Público
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
-          {/* Hero (7 cols) */}
-          <div className="lg:col-span-7 lg:border-r lg:border-gray-200 lg:pr-10 mb-10 lg:mb-0">
-            {heroArticle && <ArticleCard article={heroArticle} variant="hero" extraBadge="LO ÚLTIMO" />}
-          </div>
-
-          {/* Secundarios (3 cols) */}
-          <div className="lg:col-span-3 lg:border-r lg:border-gray-200 lg:px-10 space-y-8 mb-10 lg:mb-0">
-            {sideFeatured.map((art, i) => (
-              <div key={art.id} className={i < sideFeatured.length - 1 ? 'pb-8 border-b border-gray-200' : ''}>
-                <ArticleCard article={art} variant="medium" className="border-0 pb-0" />
-              </div>
-            ))}
-          </div>
-
-          {/* Sidebar En Directo (2 cols) */}
-          <div className="lg:col-span-2 space-y-6">
-            <h4 style={{ color: '#bb1b21' }} className="text-[9px] font-black uppercase tracking-[0.35em] pb-2 border-b-2 border-red-600 inline-block italic">
-              En Directo
-            </h4>
-            <div className="space-y-4">
-              {sidebarLatest.map(a => (
-                <ArticleCard key={a.id} article={a} variant="minimal" className="py-0 border-0" />
-              ))}
-            </div>
-            <div className="pt-6 border-t border-gray-200">
-              <NewsletterBox variant="compact" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          2 — NOTICIAS
-      ══════════════════════════════════════════════ */}
-      <CategorySection
-        slug="noticias"
-        label="Noticias"
-        title="Últimas Noticias"
-        articles={noticias.length > 0 ? noticias : latest.slice(0, 6)}
-        layout="grid3"
-        bg="white"
-      />
-
-      {/* ══════════════════════════════════════════════
-          3 — POLÍTICA
-      ══════════════════════════════════════════════ */}
-      <CategorySection
-        slug="politica"
-        label="Política"
-        title="Política Nacional"
-        articles={politica}
-        layout="leadGrid"
-        bg="gray"
-      />
-
-      {/* ══════════════════════════════════════════════
-          4 — DEPORTES
-      ══════════════════════════════════════════════ */}
-      <CategorySection
-        slug="deportes"
-        label="Deportes"
-        title="Deportes"
-        articles={deportes}
-        layout="sportCards"
-        bg="white"
-      />
-
-      {/* ══════════════════════════════════════════════
-          5 — TECNOLOGÍA
-      ══════════════════════════════════════════════ */}
-      <CategorySection
-        slug="tecnologia"
-        label="Tecnología"
-        title="Tecnología"
-        articles={tecnologia}
-        layout="wideFirst"
-        bg="gray"
-      />
-
-      {/* ══════════════════════════════════════════════
-          6 — ENTRETENIMIENTO
-      ══════════════════════════════════════════════ */}
-      <CategorySection
-        slug="entretenimiento"
-        label="Entretenimiento"
-        title="Entretenimiento"
-        articles={entretenimiento}
-        layout="leadGrid"
-        bg="white"
-      />
-
-      {/* ══════════════════════════════════════════════
-          7 — ECONOMÍA
-      ══════════════════════════════════════════════ */}
-      <CategorySection
-        slug="economia"
-        label="Economía"
-        title="Economía"
-        articles={economia}
-        layout="wideFirst"
-        bg="gray"
-      />
-
-      {/* ══════════════════════════════════════════════
-          8 — CULTURA
-      ══════════════════════════════════════════════ */}
-      <CategorySection
-        slug="cultura"
-        label="Cultura"
-        title="Cultura"
-        articles={cultura}
-        layout="grid4"
-        bg="white"
-      />
-
-      {/* ══════════════════════════════════════════════
-          9 — SALUD
-      ══════════════════════════════════════════════ */}
-      <CategorySection
-        slug="salud"
-        label="Salud"
-        title="Salud"
-        articles={salud}
-        layout="leadGrid"
-        bg="gray"
-      />
-
-      {/* ══════════════════════════════════════════════
-          10 — OPINIÓN
-      ══════════════════════════════════════════════ */}
-      <section aria-label="Sección Opinión" className="bg-white py-14 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <SectionHeader slug="opinion" label="Opinión" title="Voces que Definen la Agenda" />
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mt-10">
-            <div className="lg:col-span-4 border-r border-gray-200 pr-12 hidden lg:block">
-              <p style={{ color: '#6b7280' }} className="font-serif text-sm leading-relaxed italic">
-                Análisis de profundidad por los expertos más influyentes del país. Perspectivas únicas sobre los temas que marcan la agenda nacional e internacional.
-              </p>
-            </div>
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-10">
-              {opinion.slice(0, 4).map(a => (
-                <ArticleCard key={a.id} article={a} variant="editorial" />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section style={{ backgroundColor: '#000' }} className="py-20 mt-0">
-        <NewsletterBox />
-      </section>
-
-    </div>
+  // Distribute articles
+  const pool = featured.length >= 6 ? featured : [...featured, ...latest].filter(
+    (a, i, arr) => arr.findIndex(x => x.id === a.id) === i
   );
-}
 
-/* ────────────────────────────────────────────────
-   SectionHeader
-──────────────────────────────────────────────── */
-function SectionHeader({ slug, label, title }) {
-  return (
-    <div className="flex items-end justify-between gap-4 pb-4 border-b-2 border-black">
-      <div className="flex items-baseline gap-4">
-        <span style={{ color: '#bb1b21' }} className="text-[9px] font-black uppercase tracking-[0.4em] italic">
-          {label}
-        </span>
-        <h2 style={{ color: '#111827' }} className="text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none">
-          {title}
-        </h2>
-      </div>
-      <Link
-        href={`/categoria/${slug}`}
-        style={{ color: '#bb1b21', borderColor: '#bb1b21' }}
-        className="flex-shrink-0 text-[9px] font-black uppercase tracking-[0.25em] border px-5 py-2.5 transition-all hover:bg-red-600 hover:text-white hover:border-red-600"
-      >
-        Ver todo →
-      </Link>
-    </div>
-  );
-}
-
-/* ────────────────────────────────────────────────
-   CategorySection
-──────────────────────────────────────────────── */
-function CategorySection({ slug, label, title, articles, layout, bg = 'white' }) {
-  if (!articles || articles.length === 0) return null;
-  const bgStyle = bg === 'gray'
-    ? { backgroundColor: '#f8f9fa' }
-    : { backgroundColor: '#ffffff' };
+  const hero   = pool[0] || null;
+  const col2   = pool.slice(1, 3);   // 2 artículos columna central
+  const col3   = pool.slice(3, 5);   // 2 artículos columna derecha
+  const usedIds = new Set(pool.slice(0, 5).map(a => a.id));
+  const ticker  = latest.filter(a => !usedIds.has(a.id)).slice(0, 6); // Últimas noticias bajo portada
 
   return (
-    <section aria-label={`Sección ${label}`} style={bgStyle} className="py-14 border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <SectionHeader slug={slug} label={label} title={title} />
+    <div style={{ backgroundColor: '#ffffff', color: '#111827', fontFamily: 'Georgia, serif' }}>
 
-        <div className="mt-10">
+      {/* ══════════════════════════════════════════════
+          PORTADA — Diseño Periódico Clásico
+      ══════════════════════════════════════════════ */}
+      <main aria-label="Portada">
 
-          {/* 3-column grid */}
-          {layout === 'grid3' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-14">
-              {articles.slice(0, 6).map(a => (
-                <ArticleCard key={a.id} article={a} variant="medium" />
-              ))}
-            </div>
-          )}
+        {/* ── Línea superior roja ── */}
+        <div style={{ height: '4px', backgroundColor: '#bb1b21' }} />
 
-          {/* 4-column grid */}
-          {layout === 'grid4' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-              {articles.slice(0, 4).map(a => (
-                <ArticleCard key={a.id} article={a} variant="medium" />
-              ))}
-            </div>
-          )}
+        {/* ── Fecha del día ── */}
+        <div style={{ backgroundColor: '#fff', borderBottom: '1px solid #e5e7eb' }} className="py-2 px-4 md:px-8">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <time style={{ fontSize: '0.7rem', color: '#6b7280', fontFamily: 'Inter, sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              {new Date().toLocaleDateString('es-DO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </time>
+            <span style={{ fontSize: '0.7rem', color: '#bb1b21', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
+              Edición Digital
+            </span>
+          </div>
+        </div>
 
-          {/* Lead article + secondary grid */}
-          {layout === 'leadGrid' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-              <div className="lg:col-span-5 lg:border-r lg:border-gray-200 lg:pr-10">
-                {articles[0] && <ArticleCard article={articles[0]} variant="medium" className="border-0 pb-0" />}
-              </div>
-              <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-8 content-start">
-                {articles.slice(1, 5).map(a => (
-                  <ArticleCard key={a.id} article={a} variant="small" className="border-b border-gray-200 pb-8" />
-                ))}
-              </div>
-            </div>
-          )}
+        {/* ── CUERPO DE LA PORTADA — 3 columnas de periódico ── */}
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
 
-          {/* Wide first + list */}
-          {layout === 'wideFirst' && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-              <div className="lg:col-span-7">
-                {articles[0] && <ArticleCard article={articles[0]} variant="wide" />}
-              </div>
-              <div className="lg:col-span-5 flex flex-col gap-6 justify-center">
-                {articles.slice(1, 4).map(a => (
-                  <ArticleCard key={a.id} article={a} variant="small" className="border-b border-gray-200 pb-6" />
-                ))}
-              </div>
-            </div>
-          )}
+            {/* ══ COLUMNA 1 — Historia Principal (6 cols) ══ */}
+            <div style={{ borderRight: '1px solid #d1d5db' }} className="lg:col-span-6 lg:pr-8 pb-8 lg:pb-0">
+              {hero && (
+                <Link href={`/articulo/${hero.slug}`} className="group block">
+                  {/* Etiqueta categoría */}
+                  <div style={{ borderBottom: '3px solid #bb1b21', marginBottom: '1rem', paddingBottom: '0.4rem' }}>
+                    <span style={{ color: '#bb1b21', fontSize: '0.65rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em' }}>
+                      {hero.category?.toUpperCase() || 'PORTADA'}
+                    </span>
+                  </div>
 
-          {/* Sport cards with gradient overlay */}
-          {layout === 'sportCards' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {articles.slice(0, 4).map(a => (
-                <Link key={a.id} href={`/articulo/${a.slug}`} className="group block">
-                  <article>
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-100 mb-5">
-                      {a.image && (
-                        <img
-                          src={a.image}
-                          alt={a.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  {/* Titular grande */}
+                  <h1 style={{
+                    fontSize: 'clamp(1.6rem, 3vw, 2.75rem)',
+                    fontWeight: 700,
+                    lineHeight: 1.2,
+                    letterSpacing: '-0.02em',
+                    color: '#0f0f0f',
+                    marginBottom: '1rem',
+                    fontFamily: 'Lora, Georgia, serif',
+                  }}
+                    className="group-hover:text-red-700 transition-colors"
+                  >
+                    {hero.title}
+                  </h1>
+
+                  {/* Imagen principal */}
+                  {hero.image && (
+                    <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', marginBottom: '1rem', backgroundColor: '#f3f4f6' }}>
+                      <Image
+                        src={hero.image}
+                        alt={hero.imageAlt || hero.title}
+                        fill
+                        className="object-cover"
+                        priority
+                      />
                     </div>
-                    <h3 style={{ color: '#111827' }} className="text-xl font-black uppercase tracking-tight leading-tight group-hover:text-red-600 transition-colors">
-                      {a.title}
+                  )}
+
+                  {/* Epígrafe / bajada */}
+                  {hero.excerpt && (
+                    <p style={{ fontSize: '1.05rem', lineHeight: 1.65, color: '#374151', fontStyle: 'italic', marginBottom: '0.75rem', borderLeft: '4px solid #e5e7eb', paddingLeft: '1rem' }}>
+                      {hero.excerpt}
+                    </p>
+                  )}
+
+                  {/* Firma */}
+                  <p style={{ fontSize: '0.7rem', color: '#9ca3af', fontFamily: 'Inter, sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Por {hero.author} · {formatDate(hero.publishedAt)}
+                  </p>
+                </Link>
+              )}
+            </div>
+
+            {/* ══ COLUMNA 2 — Dos artículos secundarios (3 cols) ══ */}
+            <div style={{ borderRight: '1px solid #d1d5db' }} className="lg:col-span-3 lg:px-6 py-6 lg:py-0 space-y-8">
+              {col2.map((art, i) => (
+                <div key={art.id} style={i < col2.length - 1 ? { borderBottom: '1px solid #e5e7eb', paddingBottom: '2rem' } : {}}>
+                  <Link href={`/articulo/${art.slug}`} className="group block">
+                    <span style={{ color: '#bb1b21', fontSize: '0.6rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.25em', display: 'block', marginBottom: '0.5rem' }}>
+                      {art.category?.toUpperCase()}
+                    </span>
+                    {art.image && (
+                      <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', marginBottom: '0.75rem', backgroundColor: '#f3f4f6' }}>
+                        <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                      </div>
+                    )}
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 900, lineHeight: 1.15, color: '#111827', marginBottom: '0.5rem', fontFamily: 'Georgia, serif' }}
+                      className="group-hover:text-red-700 transition-colors"
+                    >
+                      {art.title}
+                    </h2>
+                    {art.excerpt && (
+                      <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.55, fontStyle: 'italic' }} className="line-clamp-3">
+                        {art.excerpt}
+                      </p>
+                    )}
+                    <p style={{ fontSize: '0.65rem', color: '#9ca3af', fontFamily: 'Inter, sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.5rem' }}>
+                      {formatDate(art.publishedAt)}
+                    </p>
+                  </Link>
+                </div>
+              ))}
+            </div>
+
+            {/* ══ COLUMNA 3 — Breves + últimas (3 cols) ══ */}
+            <div className="lg:col-span-3 lg:pl-6 py-6 lg:py-0 space-y-6">
+              <div style={{ borderBottom: '3px solid #111827', paddingBottom: '0.4rem', marginBottom: '1rem' }}>
+                <span style={{ fontSize: '0.65rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#111827' }}>
+                  Últimas Noticias
+                </span>
+              </div>
+              {col3.map((art, i) => (
+                <div key={art.id} style={i < col3.length - 1 ? { borderBottom: '1px solid #e5e7eb', paddingBottom: '1.25rem' } : {}}>
+                  <Link href={`/articulo/${art.slug}`} className="group flex gap-3 items-start">
+                    {art.image && (
+                      <div style={{ position: 'relative', width: '80px', height: '60px', flexShrink: 0, overflow: 'hidden', backgroundColor: '#f3f4f6' }}>
+                        <Image src={art.image} alt={art.title} fill className="object-cover" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <span style={{ color: '#bb1b21', fontSize: '0.58rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', display: 'block', marginBottom: '0.25rem' }}>
+                        {art.category?.toUpperCase()}
+                      </span>
+                      <h3 style={{ fontSize: '0.9rem', fontWeight: 900, lineHeight: 1.2, color: '#111827', fontFamily: 'Georgia, serif' }}
+                        className="group-hover:text-red-700 transition-colors line-clamp-3"
+                      >
+                        {art.title}
+                      </h3>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+
+              {/* Más artículos como lista */}
+              <div style={{ borderTop: '2px solid #111827', paddingTop: '1rem', marginTop: '1rem' }}>
+                <div style={{ borderBottom: '3px solid #bb1b21', paddingBottom: '0.4rem', marginBottom: '0.75rem', display: 'inline-block' }}>
+                  <span style={{ fontSize: '0.6rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#bb1b21' }}>
+                    En Breve
+                  </span>
+                </div>
+                <ul className="space-y-3">
+                  {ticker.slice(0, 5).map(a => (
+                    <li key={a.id} style={{ borderBottom: '1px solid #f3f4f6', paddingBottom: '0.6rem' }}>
+                      <Link href={`/articulo/${a.slug}`} className="group flex items-start gap-2">
+                        <span style={{ color: '#bb1b21', fontWeight: 900, fontSize: '0.75rem', lineHeight: 1 }}>▶</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.3, color: '#1f2937', fontFamily: 'Georgia, serif' }}
+                          className="group-hover:text-red-700 transition-colors line-clamp-2"
+                        >
+                          {a.title}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+          </div>{/* /grid portada */}
+        </div>
+
+        {/* ── Línea separadora inferior ── */}
+        <div style={{ height: '3px', backgroundColor: '#111827' }} className="max-w-7xl mx-auto" />
+
+      </main>
+
+
+
+      {/* ══════════════════════════════════════════════
+          ÚLTIMAS — Franja de artículos recientes
+      ══════════════════════════════════════════════ */}
+      {ticker.length > 0 && (
+        <section aria-label="Artículos recientes" style={{ backgroundColor: '#ffffff' }} className="py-12">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+
+            <div className="flex items-center gap-4 mb-8">
+              <div style={{ height: '3px', width: '2rem', backgroundColor: '#bb1b21' }} />
+              <h2 style={{ fontSize: '0.7rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#111827' }}>
+                Lo más Reciente
+              </h2>
+              <div style={{ height: '1px', flex: 1, backgroundColor: '#d1d5db' }} />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              {ticker.map(art => (
+                <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
+                  <article>
+                    {art.image && (
+                      <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', marginBottom: '0.75rem', backgroundColor: '#f3f4f6' }}>
+                        <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                      </div>
+                    )}
+                    <span style={{ color: '#bb1b21', fontSize: '0.58rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', display: 'block', marginBottom: '0.3rem' }}>
+                      {art.category}
+                    </span>
+                    <h3 style={{ fontSize: '0.9rem', fontWeight: 900, lineHeight: 1.25, color: '#111827', fontFamily: 'Georgia, serif' }}
+                      className="group-hover:text-red-700 transition-colors line-clamp-3"
+                    >
+                      {art.title}
                     </h3>
-                    <p style={{ color: '#9ca3af' }} className="text-[9px] font-black uppercase tracking-widest mt-3">
-                      {formatDate(a.publishedAt)}
+                    <p style={{ fontSize: '0.62rem', color: '#9ca3af', fontFamily: 'Inter, sans-serif', fontWeight: 700, marginTop: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                      {formatDate(art.publishedAt)}
                     </p>
                   </article>
                 </Link>
               ))}
             </div>
-          )}
 
-        </div>
-      </div>
-    </section>
+          </div>
+        </section>
+      )}
+
+      {/* Newsletter */}
+      <section style={{ backgroundColor: '#111827' }} className="py-16">
+        <NewsletterBox />
+      </section>
+
+    </div>
   );
 }
 

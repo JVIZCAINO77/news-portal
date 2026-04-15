@@ -58,11 +58,20 @@ export default function Header() {
       <nav className="w-full bg-[#bb1b21] border-b border-black/10 shadow-sm relative z-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
           <ul className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1 py-1">
+            {/* Portada siempre primero */}
+            <li>
+              <Link
+                href="/"
+                className="px-3 md:px-4 py-2 text-[11px] font-bold text-white hover:bg-white/10 transition-all whitespace-nowrap"
+              >
+                Portada
+              </Link>
+            </li>
             {CATEGORIES.map((cat) => (
               <li key={cat.slug}>
                 <Link
                   href={`/categoria/${cat.slug}`}
-                  className="px-3 md:px-4 py-2 text-[10px] font-black uppercase tracking-[0.15em] text-white/90 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap"
+                  className="px-3 md:px-4 py-2 text-[11px] font-bold text-white/90 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap"
                 >
                   {cat.label}
                 </Link>
@@ -98,15 +107,15 @@ export default function Header() {
                 className={`transition-all duration-700 transform object-contain will-change-transform ${isScrolled ? 'h-10 md:h-12 border-r border-gray-100 pr-4' : 'h-16 md:h-28 lg:h-40'}`} 
               />
               <div className="flex flex-col items-center">
-                <h1 className={`font-black tracking-[-0.07em] text-black dark:text-white uppercase leading-[0.75] transition-all duration-700 will-change-transform ${isScrolled ? 'text-2xl md:text-[3.5rem]' : 'text-3xl sm:text-5xl md:text-[6.5rem] lg:text-[8.5rem]'}`}>
-                  Imperio<span className="text-red-700">Público</span>
+                <h1 style={{ color: '#0f0f0f' }} className={`font-black tracking-[-0.07em] uppercase leading-[0.75] transition-all duration-700 will-change-transform ${isScrolled ? 'text-2xl md:text-[3.5rem]' : 'text-3xl sm:text-5xl md:text-[6.5rem] lg:text-[8.5rem]'}`}>
+                  Imperio<span style={{ color: '#bb1b21' }}>Público</span>
                 </h1>
                 {!isScrolled && (
-                  <div className="flex items-center gap-4 w-full mt-4">
-                    <div className="h-[2px] flex-1 bg-black dark:bg-white"></div>
-                    <span className="metadata-text !text-black dark:!text-white italic tracking-[0.4em] whitespace-nowrap">La Autoridad de la Actualidad</span>
-                    <div className="h-[2px] flex-1 bg-black dark:bg-white"></div>
-                  </div>
+                   <div className="flex items-center gap-4 w-full mt-4">
+                     <div style={{ height: '2px', flex: 1, backgroundColor: '#111' }}></div>
+                     <span style={{ color: '#111', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.62rem', letterSpacing: '0.4em', textTransform: 'uppercase', fontStyle: 'italic', whiteSpace: 'nowrap' }}>La Autoridad de la Actualidad</span>
+                     <div style={{ height: '2px', flex: 1, backgroundColor: '#111' }}></div>
+                   </div>
                 )}
               </div>
             </Link>

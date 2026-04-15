@@ -28,11 +28,11 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               priority
             />
           </div>
-          <header className="mb-24">
-            <h1 className="text-4xl md:text-[6rem] lg:text-[7.5rem] font-black text-foreground mb-16 leading-[0.8] tracking-[-0.07em]">
+          <header className="mb-12">
+            <h1 style={{ fontFamily: 'Lora, Georgia, serif', fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.15, color: '#111827' }} className="text-2xl md:text-4xl lg:text-5xl mb-8">
                {article.title}
              </h1>
-            <p className="text-slate-600 dark:text-zinc-400 text-lg md:text-3xl font-serif line-clamp-3 leading-[1.5] mb-10 max-w-5xl italic border-l-8 border-gray-100 dark:border-zinc-800 pl-10">
+            <p style={{ color: '#4b5563', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-8 max-w-3xl border-l-4 border-gray-200 pl-6">
                {article.excerpt}
              </p>
             <div className="flex items-center gap-6">
@@ -62,10 +62,10 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             <span className="overline-label mb-4 block">
               {cat?.label}
             </span>
-            <h3 className="text-3xl md:text-5xl font-black text-foreground group-hover:text-red-700 transition-colors line-clamp-3 leading-[0.95] mb-6 tracking-tighter">
+            <h3 style={{ fontFamily: 'Lora, Georgia, serif', fontWeight: 700, letterSpacing: '-0.01em', lineHeight: 1.2, color: '#111827' }} className="text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-4">
                {article.title}
              </h3>
-            <p className="text-slate-500 dark:text-zinc-400 text-lg font-serif line-clamp-3 leading-[1.6] mb-8 flex-1 italic font-medium">
+            <p style={{ color: '#6b7280', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-6 flex-1">
                {article.excerpt}
              </p>
             <p className="metadata-text uppercase tracking-widest mt-auto border-t border-gray-50 dark:border-zinc-900 pt-6 !text-[9px] text-slate-400 dark:text-zinc-500">
@@ -83,9 +83,9 @@ export default function ArticleCard({ article, variant = 'medium', className = '
         <article className="flex gap-10 items-start">
           <div className="flex-1 min-w-0">
              <span className="overline-label text-red-700 mb-2 block">{cat?.label}</span>
-             <h4 className="text-xl md:text-[2.5rem] text-black dark:text-white group-hover:text-red-700 transition-colors line-clamp-2 leading-[0.9] tracking-tighter hover:underline underline-offset-8 decoration-1 decoration-red-600/30">
-               {article.title}
-             </h4>
+             <h4 style={{ fontFamily: 'Lora, Georgia, serif', fontWeight: 700, color: '#111827', lineHeight: 1.25, letterSpacing: '-0.01em' }} className="text-base md:text-lg group-hover:text-red-700 transition-colors line-clamp-2 hover:underline underline-offset-4 decoration-1">
+                {article.title}
+              </h4>
              <p className="metadata-text mt-8 opacity-60 !text-[8px] dark:text-zinc-500">
                {formattedDate}
              </p>
@@ -119,7 +119,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
            </div>
            <div className="p-8 md:p-12">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>
-              <h3 className="text-3xl md:text-5xl text-black dark:text-white group-hover:text-red-600 transition-colors leading-none mb-6">
+              <h3 style={{ fontFamily: 'Lora, Georgia, serif', fontWeight: 700, color: '#111827', lineHeight: 1.2, letterSpacing: '-0.01em' }} className="text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-5">
                 {article.title}
               </h3>
               <p className="text-slate-600 dark:text-zinc-400 text-lg font-serif line-clamp-3 leading-relaxed mb-8">
