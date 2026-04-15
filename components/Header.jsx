@@ -29,10 +29,10 @@ export default function Header() {
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      // High-Gap Hysteresis for maximum stability
-      if (scrollY > 150) {
+      // High-Gap Hysteresis para eliminar el temblor por cambio de altura
+      if (scrollY > 250) {
         setIsScrolled(true);
-      } else if (scrollY < 40) {
+      } else if (scrollY <= 10) {
         setIsScrolled(false);
       }
     };
