@@ -22,8 +22,8 @@ export default async function HomePage() {
 
   const hero   = pool[0] || null;
   const col2   = pool.slice(1, 3);   // 2 artículos columna central
-  const col3   = pool.slice(3, 5);   // 2 artículos columna derecha
-  const usedIds = new Set(pool.slice(0, 5).map(a => a.id));
+  const col3   = pool.slice(3, 7);   // 4 artículos columna derecha (Últimas Noticias)
+  const usedIds = new Set(pool.slice(0, 7).map(a => a.id));
   const ticker  = latest.filter(a => !usedIds.has(a.id)).slice(0, 6); // Últimas noticias bajo portada
 
   return (
@@ -107,7 +107,7 @@ export default async function HomePage() {
               )}
             </div>
 
-            {/* ══ COLUMNA 2 — Dos artículos secundarios (3 cols) ══ */}
+            {/* ══ COLUMNA 2 — Dos artículos (Cuadros 3 y 4) (3 cols) ══ */}
             <div style={{ borderRight: '1px solid #d1d5db' }} className="lg:col-span-3 lg:px-6 py-6 lg:py-0 space-y-8">
               {col2.map((art, i) => (
                 <div key={art.id} style={i < col2.length - 1 ? { borderBottom: '1px solid #e5e7eb', paddingBottom: '2rem' } : {}}>
@@ -138,8 +138,11 @@ export default async function HomePage() {
               ))}
             </div>
 
-            {/* ══ COLUMNA 3 — Breves + últimas (3 cols) ══ */}
+
+            {/* ══ COLUMNA 3 — Breves y AdSense (3 cols) ══ */}
             <div className="lg:col-span-3 lg:pl-6 py-6 lg:py-0 space-y-6">
+              
+              {/* Parte Superior: Últimas Noticias */}
               <div style={{ borderBottom: '3px solid #111827', paddingBottom: '0.4rem', marginBottom: '1rem' }}>
                 <span style={{ fontSize: '0.65rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#111827' }}>
                   Últimas Noticias
@@ -167,27 +170,15 @@ export default async function HomePage() {
                 </div>
               ))}
 
-              {/* Más artículos como lista */}
-              <div style={{ borderTop: '2px solid #111827', paddingTop: '1rem', marginTop: '1rem' }}>
-                <div style={{ borderBottom: '3px solid #bb1b21', paddingBottom: '0.4rem', marginBottom: '0.75rem', display: 'inline-block' }}>
-                  <span style={{ fontSize: '0.6rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#bb1b21' }}>
-                    En Breve
-                  </span>
-                </div>
-                <ul className="space-y-3">
-                  {ticker.slice(0, 5).map(a => (
-                    <li key={a.id} style={{ borderBottom: '1px solid #f3f4f6', paddingBottom: '0.6rem' }}>
-                      <Link href={`/articulo/${a.slug}`} className="group flex items-start gap-2">
-                        <span style={{ color: '#bb1b21', fontWeight: 900, fontSize: '0.75rem', lineHeight: 1 }}>▶</span>
-                        <span style={{ fontSize: '0.8rem', fontWeight: 700, lineHeight: 1.3, color: '#1f2937', fontFamily: 'Georgia, serif' }}
-                          className="group-hover:text-red-700 transition-colors line-clamp-2"
-                        >
-                          {a.title}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+              {/* Parte Inferior: Cuadro 0 - Espacio AdSense */}
+              <div style={{ borderTop: '2px solid #111827', paddingTop: '1.5rem', marginTop: '2rem' }} className="flex justify-center">
+                 <div className="h-[350px] w-full bg-slate-50 border border-dashed border-gray-300 flex flex-col items-center justify-center p-6 text-center">
+                    <svg className="w-8 h-8 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Espacio Publicitario Reservado</p>
+                    <p className="text-xs text-slate-500 italic max-w-[150px]">Google AdSense</p>
+                 </div>
               </div>
             </div>
 

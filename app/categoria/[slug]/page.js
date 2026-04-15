@@ -28,16 +28,21 @@ export default async function CategoryPage({ params }) {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Category Header (Premium Elegant) */}
-      <div className="border-b border-gray-100 py-16 md:py-24 bg-slate-50/30">
-        <div className="max-w-7xl mx-auto px-6">
-           <div className="flex items-center gap-4 mb-6">
-              <span className="h-px bg-red-600 w-12"></span>
-              <span className="text-[10px] font-black uppercase tracking-[0.6em] text-red-600">Sección Editorial</span>
+      {/* Category Header (Premium Left-Aligned) */}
+      <div className="border-y-2 border-black py-16 bg-white relative overflow-hidden">
+        {/* Subtle background element (newspaper dot grid) */}
+        <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "20px 20px" }}></div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-start text-left">
+           <div className="flex items-center justify-start gap-4 mb-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600">Sección Editorial</span>
+              <span className="h-px bg-red-600 w-12 opacity-50"></span>
            </div>
-           <h1 className="text-6xl md:text-9xl font-black text-black leading-none uppercase italic tracking-tighter"> 
+           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-black leading-tight uppercase tracking-[-0.03em] mix-blend-multiply"> 
              {cat.label} 
            </h1>
+           <p className="mt-4 text-[11px] font-semibold text-slate-500 uppercase tracking-[0.2em] italic max-w-lg border-l-2 border-red-600 pl-4 py-1">
+             Archivo completo y reportajes a fondo sobre {cat.label}
+           </p>
         </div>
       </div>
 
