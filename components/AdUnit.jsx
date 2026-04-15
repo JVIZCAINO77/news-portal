@@ -6,6 +6,9 @@ import { SITE_CONFIG } from '@/lib/data';
 export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
   const [adLoaded, setAdLoaded] = useState(false);
 
+  // Si los anuncios globales están apagados, esconder silenciosamente este componente
+  if (!SITE_CONFIG.showAds) return null;
+
   // Dimensiones estándar de anuncios
   const dimensions = {
     leaderboard: { minHeight: '90px', width: '100%', label: '728 x 90' },

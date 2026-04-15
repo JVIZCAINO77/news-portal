@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getFeaturedArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
+import { SITE_CONFIG } from '@/lib/data';
 import NewsletterBox from '@/components/NewsletterBox';
 
 export const dynamic = 'force-dynamic';
@@ -171,15 +172,17 @@ export default async function HomePage() {
               ))}
 
               {/* Parte Inferior: Cuadro 0 - Espacio AdSense */}
-              <div style={{ borderTop: '2px solid #111827', paddingTop: '1.5rem', marginTop: '2rem' }} className="flex justify-center">
-                 <div className="h-[350px] w-full bg-slate-50 border border-dashed border-gray-300 flex flex-col items-center justify-center p-6 text-center">
-                    <svg className="w-8 h-8 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Espacio Publicitario Reservado</p>
-                    <p className="text-xs text-slate-500 italic max-w-[150px]">Google AdSense</p>
-                 </div>
-              </div>
+              {SITE_CONFIG.showAds && (
+                <div style={{ borderTop: '2px solid #111827', paddingTop: '1.5rem', marginTop: '2rem' }} className="flex justify-center">
+                   <div className="h-[350px] w-full bg-slate-50 border border-dashed border-gray-300 flex flex-col items-center justify-center p-6 text-center">
+                      <svg className="w-8 h-8 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Espacio Publicitario Reservado</p>
+                      <p className="text-xs text-slate-500 italic max-w-[150px]">Google AdSense</p>
+                   </div>
+                </div>
+              )}
             </div>
 
           </div>{/* /grid portada */}
