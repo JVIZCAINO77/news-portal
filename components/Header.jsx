@@ -100,18 +100,18 @@ export default function Header() {
 
           {/* Logo (Centered) - Editorial Master Title */}
           <div className="flex-1 flex justify-center py-4">
-            <Link href="/" className="flex items-center gap-4 md:gap-12 group no-underline">
+            <Link href="/" className={`flex items-center group no-underline ${isScrolled ? 'flex-row gap-4 md:gap-6' : 'flex-col gap-4 md:gap-6'}`}>
               <img 
                 src="/icon.png" 
                 alt="Logo IP" 
-                className={`transition-all duration-700 transform object-contain will-change-transform ${isScrolled ? 'h-10 md:h-12 border-r border-gray-100 pr-4' : 'h-16 md:h-28 lg:h-40'}`} 
+                className={`transition-all duration-700 transform object-contain will-change-transform ${isScrolled ? 'h-10 md:h-12 border-r border-gray-100 pr-4' : 'h-16 md:h-24 lg:h-32'}`} 
               />
               <div className="flex flex-col items-center">
-                <h1 style={{ color: '#0f0f0f' }} className={`font-black tracking-[-0.07em] uppercase leading-[0.75] transition-all duration-700 will-change-transform ${isScrolled ? 'text-2xl md:text-[3.5rem]' : 'text-3xl sm:text-5xl md:text-[6.5rem] lg:text-[8.5rem]'}`}>
+                <h1 style={{ color: '#0f0f0f' }} className={`font-black tracking-[-0.07em] uppercase leading-[0.75] transition-all duration-700 will-change-transform text-center ${isScrolled ? 'text-2xl md:text-[3.5rem]' : 'text-3xl sm:text-5xl md:text-[6.5rem] lg:text-[8rem]'}`}>
                   Imperio<span style={{ color: '#bb1b21' }}>Público</span>
                 </h1>
                 {!isScrolled && (
-                   <div className="flex items-center gap-4 w-full mt-4">
+                   <div className="flex items-center justify-center gap-4 w-full max-w-3xl mt-4">
                      <div style={{ height: '2px', flex: 1, backgroundColor: '#111' }}></div>
                      <span style={{ color: '#111', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.62rem', letterSpacing: '0.4em', textTransform: 'uppercase', fontStyle: 'italic', whiteSpace: 'nowrap' }}>La Autoridad de la Actualidad</span>
                      <div style={{ height: '2px', flex: 1, backgroundColor: '#111' }}></div>
