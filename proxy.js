@@ -1,8 +1,8 @@
-// middleware.js — Authentication and Session Refresh for Imperio Público 2.0
+// proxy.js — Authentication and Session Refresh for Imperio Público 2.0
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 
-export async function middleware(request) {
+export async function proxy(request) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
