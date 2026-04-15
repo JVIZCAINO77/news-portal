@@ -100,21 +100,21 @@ export default function Header() {
 
           {/* Logo (Centered) - Editorial Master Title */}
           <div className="flex-1 flex justify-center py-4">
-            <Link href="/" className={`flex items-center group no-underline ${isScrolled ? 'flex-row gap-4 md:gap-6' : 'flex-col gap-4 md:gap-6'}`}>
+            <Link href="/" className={`flex items-center group no-underline ${isScrolled ? 'flex-row gap-4' : 'flex-col gap-2 md:gap-3'}`}>
               <img 
                 src="/icon.png" 
                 alt="Logo IP" 
-                className={`transition-all duration-700 transform object-contain will-change-transform ${isScrolled ? 'h-10 md:h-12 border-r border-gray-100 pr-4' : 'h-16 md:h-24 lg:h-32'}`} 
+                className={`transition-all duration-700 transform object-contain will-change-transform mix-blend-multiply ${isScrolled ? 'h-10 md:h-12 border-r border-gray-100 pr-4' : 'h-20 md:h-28 lg:h-36'}`} 
               />
               <div className="flex flex-col items-center">
-                <h1 style={{ color: '#0f0f0f' }} className={`font-black tracking-[-0.07em] uppercase leading-[0.75] transition-all duration-700 will-change-transform text-center ${isScrolled ? 'text-2xl md:text-[3.5rem]' : 'text-3xl sm:text-5xl md:text-[6.5rem] lg:text-[8rem]'}`}>
+                <h1 style={{ color: '#0f0f0f' }} className={`font-black tracking-[-0.05em] uppercase leading-[0.75] transition-all duration-700 will-change-transform text-center ${isScrolled ? 'text-2xl md:text-[3.5rem]' : 'text-3xl sm:text-5xl md:text-[6.5rem] lg:text-[7.5rem]'}`}>
                   Imperio<span style={{ color: '#bb1b21' }}>Público</span>
                 </h1>
                 {!isScrolled && (
-                   <div className="flex items-center justify-center gap-4 w-full max-w-3xl mt-4">
-                     <div style={{ height: '2px', flex: 1, backgroundColor: '#111' }}></div>
-                     <span style={{ color: '#111', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '0.62rem', letterSpacing: '0.4em', textTransform: 'uppercase', fontStyle: 'italic', whiteSpace: 'nowrap' }}>La Autoridad de la Actualidad</span>
-                     <div style={{ height: '2px', flex: 1, backgroundColor: '#111' }}></div>
+                   <div className="flex items-center justify-center gap-4 w-full max-w-[85%] sm:max-w-3xl mt-5">
+                     <div style={{ height: '2px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.8 }}></div>
+                     <span style={{ color: '#0f0f0f', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.3em', textTransform: 'uppercase', fontStyle: 'italic', whiteSpace: 'nowrap' }}>La Autoridad de la Actualidad</span>
+                     <div style={{ height: '2px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.8 }}></div>
                    </div>
                 )}
               </div>
