@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { getFeaturedArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
 import NewsletterBox from '@/components/NewsletterBox';
+import AdUnit from '@/components/AdUnit';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -34,6 +35,11 @@ export default async function HomePage() {
 
         {/* ── Línea superior roja ── */}
         <div style={{ height: '4px', backgroundColor: '#bb1b21' }} />
+
+        {/* ── Espacio Publicitario Superior ── */}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 mt-10">
+          <AdUnit format="leaderboard" slot="home-top" />
+        </div>
 
 
 
@@ -124,7 +130,7 @@ export default async function HomePage() {
               ))}
             </div>
 
-            {/* Derecha: Sidebar Editorial (Breves) */}
+            {/* Derecha: Sidebar Editorial (Breves + Publicidad) */}
             <div className="lg:col-span-4">
               <div className="border-b-2 border-black mb-6 pb-2">
                 <span className="text-[0.7rem] font-black uppercase tracking-[0.3em] flex items-center gap-2">
@@ -132,6 +138,8 @@ export default async function HomePage() {
                   Breves del Imperio
                 </span>
               </div>
+
+              <AdUnit format="rectangle" slot="home-sidebar-top" className="my-0 mb-10" />
               <div className="space-y-8">
                 {pool.slice(8, 12).map((art, idx) => (
                   <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-5 items-start border-b border-gray-50 pb-6 last:border-0">
@@ -202,14 +210,17 @@ export default async function HomePage() {
         {/* ── Línea separadora inferior ── */}
         <div style={{ height: '3px', backgroundColor: '#111827' }} className="max-w-7xl mx-auto" />
 
+        {/* ── Espacio Publicitario Intermedio ── */}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+          <AdUnit format="leaderboard" slot="home-middle" />
+        </div>
+
       </main>
 
-
-
-      {/* ══════════════════════════════════════════════
-          ÚLTIMAS — Franja de artículos recientes
-      ══════════════════════════════════════════════ */}
-
+      {/* ── Espacio Publicitario Inferior ── */}
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+        <AdUnit format="leaderboard" slot="home-bottom" />
+      </div>
 
       {/* Newsletter */}
       <section style={{ backgroundColor: '#111827' }} className="py-16">
