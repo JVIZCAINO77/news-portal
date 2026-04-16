@@ -63,13 +63,12 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&display=swap" rel="stylesheet" />
         
-        {/* Google AdSense Script */}
-        <Script
-          async
+        {/* Google AdSense Script — Standard verification tag */}
+        <script 
+          async 
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE_CONFIG.adsenseId}`}
           crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
+        ></script>
         <meta name="google-adsense-account" content="ca-pub-9579937391435747" />
         {/* Google Analytics 4 */}
         {SITE_CONFIG.gaId && (
