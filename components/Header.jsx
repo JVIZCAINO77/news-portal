@@ -53,104 +53,67 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="w-full bg-background/95 backdrop-blur-md sticky top-0 z-[100] transition-all duration-500 border-b border-border-base will-change-[height,padding]">
-      {/* 1. Primary Navigation (Top - Red Bar) - Vibrant Red */}
-      <nav className="w-full bg-[#bb1b21] border-b border-black/10 shadow-sm relative z-50 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4">
-          <ul className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1 py-1">
-            {/* Portada siempre primero */}
-            <li>
-              <Link
-                href="/"
-                className="px-3 md:px-4 py-2 text-[11px] font-bold text-white hover:bg-white/10 transition-all whitespace-nowrap"
-              >
-                Portada
-              </Link>
-            </li>
-            {CATEGORIES.map((cat) => (
-              <li key={cat.slug}>
-                <Link
-                  href={`/categoria/${cat.slug}`}
-                  className="px-3 md:px-4 py-2 text-[11px] font-bold text-white/90 hover:text-white hover:bg-white/10 transition-all whitespace-nowrap"
-                >
-                  {cat.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </nav>
-
-      {/* 2. Main Branding & Mobile Toggle Row */}
-      <div className={`max-w-7xl mx-auto px-4 md:px-6 transition-all duration-500 ${isScrolled ? 'py-2 md:py-3' : 'py-3 md:py-5'}`}>
-        <div className="flex items-center justify-between md:justify-center gap-4">
-          
-          {/* Hamburger (Left - Only Mobile) */}
-          <div className="md:hidden w-12 flex justify-start">
-            <button 
-              onClick={() => setIsMenuOpen(true)}
-              className="w-9 h-9 flex items-center justify-center text-black border border-gray-100 bg-white hover:bg-slate-50 transition-colors shadow-sm focus:ring-2 focus:ring-red-600/20"
-              aria-label="Abrir menú"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16m-7 6h7" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Logo (Centered) - Editorial Master Title */}
-          <div className="flex-1 flex justify-center py-4">
-            <Link href="/" className={`flex items-center group no-underline ${isScrolled ? 'flex-row gap-4' : 'flex-col gap-2 md:gap-3'}`}>
-              <img 
-                src="/icon.png" 
-                alt="Logo IP" 
-                className={`transition-all duration-700 transform object-contain will-change-transform mix-blend-multiply ${isScrolled ? 'h-10 md:h-12 border-r border-gray-100 pr-4' : 'h-20 md:h-28 lg:h-36'}`} 
-              />
-              <div className="flex flex-col items-center">
-                <h1 style={{ color: '#0f0f0f' }} className={`font-black tracking-[-0.05em] uppercase leading-[0.75] transition-all duration-700 will-change-transform text-center ${isScrolled ? 'text-2xl md:text-[3.5rem]' : 'text-3xl sm:text-5xl md:text-[6.5rem] lg:text-[7.5rem]'}`}>
-                  Imperio<span style={{ color: '#bb1b21' }}>Público</span>
-                </h1>
-                {!isScrolled && (
-                   <div className="flex items-center justify-center gap-4 w-full max-w-[85%] sm:max-w-3xl mt-5">
-                     <div style={{ height: '2px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.8 }}></div>
-                     <span style={{ color: '#0f0f0f', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '0.65rem', letterSpacing: '0.3em', textTransform: 'uppercase', fontStyle: 'italic', whiteSpace: 'nowrap' }}>La Autoridad de la Actualidad</span>
-                     <div style={{ height: '2px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.8 }}></div>
-                   </div>
-                )}
+    <div className="w-full">
+      {/* 1. Static Branding Section - TOTAL STABILITY, NO MOVEMENT */}
+      <section className="w-full bg-white py-8 md:py-12 border-b border-gray-100 relative">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="flex items-center justify-center flex-row gap-6 md:gap-10">
+            <img 
+              src="/icon.png" 
+              alt="Logo IP" 
+              className="h-20 md:h-36 lg:h-44 object-contain mix-blend-multiply" 
+            />
+            <div className="flex flex-col items-center">
+              <h1 style={{ color: '#0f0f0f' }} className="font-black tracking-[-0.05em] uppercase leading-[0.75] text-4xl sm:text-7xl md:text-[7rem] lg:text-[8.5rem]">
+                Imperio<span style={{ color: '#bb1b21' }}>Público</span>
+              </h1>
+              <div className="flex items-center justify-center gap-4 w-full mt-6">
+                <div style={{ height: '2px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.3 }}></div>
+                <span className="text-[0.65rem] md:text-[0.85rem] font-bold text-gray-900 tracking-[0.45em] uppercase italic whitespace-nowrap">
+                  La Autoridad de la Actualidad
+                </span>
+                <div style={{ height: '2px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.3 }}></div>
               </div>
-            </Link>
-          </div>
-
-          {/* Spacer (Right - Only Mobile to balance) */}
-          <div className="md:hidden w-12"></div>
-        </div>
-      </div>
-
-      {/* 3. Utility Bar: Date & Service Widgets (Below Branding) */}
-      <div className="border-y border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
-        <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
-          <div className="text-[10px] font-semibold text-gray-500 uppercase italic tracking-widest">
-            {currentDate}
-          </div>
-
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-4">
-               <ServiceWidgets />
-            </div>
-            <div className="h-4 w-px bg-gray-200"></div>
-            <div className="flex gap-4 text-[10px] font-semibold text-gray-500 uppercase tracking-widest">
-              <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
-              <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* 4. Breaking Ticker (Always Visible at Bottom of Header) */}
-      <BreakingTicker items={tickerItems} />
+      {/* 2. Sticky Navigation Main Wrapper - ONLY THE MENU FOLLOWS THE USER */}
+      <div className="sticky top-0 z-[100] shadow-md w-full bg-white">
+        {/* Primary Navigation - Red Bar */}
+        <nav className="w-full bg-[#bb1b21] border-b border-black/10 relative z-50">
+          <div className="max-w-7xl mx-auto px-4">
+            <ul className="flex items-center justify-start md:justify-center overflow-x-auto no-scrollbar gap-1 py-1">
+              <li><Link href="/" className="px-3 md:px-5 py-2 text-[13px] font-bold text-white hover:bg-white/10 transition-all">Portada</Link></li>
+              {CATEGORIES.map((cat) => (
+                <li key={cat.slug}><Link href={`/categoria/${cat.slug}`} className="px-3 md:px-5 py-2 text-[13px] font-bold text-white/90 hover:text-white transition-all whitespace-nowrap">{cat.label}</Link></li>
+              ))}
+            </ul>
+          </div>
+        </nav>
+
+        {/* Utility Bar: Hidden on mobile, fixed on desktop sticky view */}
+        <div className="border-b border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
+          <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div className="text-[10px] font-semibold text-gray-400 uppercase italic tracking-widest">{currentDate}</div>
+            <div className="flex items-center gap-8">
+              <ServiceWidgets />
+              <div className="h-4 w-px bg-gray-200"></div>
+              <div className="flex gap-4 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">
+                <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
+                <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Breaking Ticker */}
+        <BreakingTicker items={tickerItems} />
+      </div>
 
       {/* Mobile Menu Drawer */}
       <MobileMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} tickerItems={tickerItems} />
-    </header>
+    </div>
   );
 }

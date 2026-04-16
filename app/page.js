@@ -16,16 +16,13 @@ export default async function HomePage() {
     getLatestArticles(30),
   ]);
 
-  // Distribute articles
-  const pool = featured.length >= 6 ? featured : [...featured, ...latest].filter(
+  const pool = featured.length >= 12 ? featured : [...featured, ...latest].filter(
     (a, i, arr) => arr.findIndex(x => x.id === a.id) === i
   );
 
-  const hero   = pool[0] || null;
-  const col2   = pool.slice(1, 3);   // 2 artículos columna central
-  const col3   = pool.slice(3, 7);   // 4 artículos columna derecha (Últimas Noticias)
-  const usedIds = new Set(pool.slice(0, 7).map(a => a.id));
-  const ticker  = latest.filter(a => !usedIds.has(a.id)).slice(0, 6); // Últimas noticias bajo portada
+  // Mark all articles used in the above sections as unique
+  const usedIds = new Set(pool.slice(0, 12).map(a => a.id));
+  const ticker  = latest.filter(a => !usedIds.has(a.id)).slice(0, 6); // Remaining for "Lo más reciente" grid
 
   return (
     <div style={{ backgroundColor: '#ffffff', color: '#111827', fontFamily: 'Georgia, serif' }}>
@@ -38,154 +35,168 @@ export default async function HomePage() {
         {/* ── Línea superior roja ── */}
         <div style={{ height: '4px', backgroundColor: '#bb1b21' }} />
 
-        {/* ── Fecha del día ── */}
-        <div style={{ backgroundColor: '#fff', borderBottom: '1px solid #e5e7eb' }} className="py-2 px-4 md:px-8">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <time style={{ fontSize: '0.7rem', color: '#6b7280', fontFamily: 'Inter, sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              {new Date().toLocaleDateString('es-DO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-            </time>
-            <span style={{ fontSize: '0.7rem', color: '#bb1b21', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.15em' }}>
-              Edición Digital
-            </span>
-          </div>
-        </div>
 
-        {/* ── CUERPO DE LA PORTADA — 3 columnas de periódico ── */}
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
 
-            {/* ══ COLUMNA 1 — Historia Principal (6 cols) ══ */}
-            <div style={{ borderRight: '1px solid #d1d5db' }} className="lg:col-span-6 lg:pr-8 pb-8 lg:pb-0">
-              {hero && (
-                <Link href={`/articulo/${hero.slug}`} className="group block">
-                  {/* Etiqueta categoría */}
-                  <div style={{ borderBottom: '3px solid #bb1b21', marginBottom: '1rem', paddingBottom: '0.4rem' }}>
-                    <span style={{ color: '#bb1b21', fontSize: '0.65rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em' }}>
-                      {hero.category?.toUpperCase() || 'PORTADA'}
-                    </span>
-                  </div>
-
-                  {/* Titular grande */}
-                  <h1 style={{
-                    fontSize: 'clamp(1.6rem, 3vw, 2.75rem)',
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    letterSpacing: '-0.02em',
-                    color: '#0f0f0f',
-                    marginBottom: '1rem',
-                    fontFamily: 'Lora, Georgia, serif',
-                  }}
-                    className="group-hover:text-red-700 transition-colors"
-                  >
-                    {hero.title}
-                  </h1>
-
-                  {/* Imagen principal */}
-                  {hero.image && (
-                    <div style={{ position: 'relative', aspectRatio: '16/9', overflow: 'hidden', marginBottom: '1rem', backgroundColor: '#f3f4f6' }}>
-                      <Image
-                        src={hero.image}
-                        alt={hero.imageAlt || hero.title}
-                        fill
-                        className="object-cover"
-                        priority
-                      />
+        {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 border-b-4 border-black mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            {/* Artículo Especial (Importancia 1) - 2/3 de ancho */}
+            <div className="lg:col-span-8 border-b lg:border-b-0 lg:border-r border-gray-100 pb-12 lg:pb-0 lg:pr-12">
+              {pool[0] && (
+                <Link href={`/articulo/${pool[0].slug}`} className="group block">
+                  <h2 style={{ 
+                    fontSize: 'clamp(2rem, 5vw, 4rem)', 
+                    fontWeight: 900, 
+                    lineHeight: 1,
+                    letterSpacing: '-0.04em',
+                    marginBottom: '1.5rem'
+                  }} className="font-serif text-[#0f0f0f] group-hover:text-red-700 transition-colors">
+                    {pool[0].title}
+                  </h2>
+                  {pool[0].image && (
+                    <div className="relative aspect-[16/9] overflow-hidden mb-8 bg-slate-50 shadow-sm">
+                      <Image src={pool[0].image} alt={pool[0].title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
                     </div>
                   )}
-
-                  {/* Epígrafe / bajada */}
-                  {hero.excerpt && (
-                    <p style={{ fontSize: '1.05rem', lineHeight: 1.65, color: '#374151', fontStyle: 'italic', marginBottom: '0.75rem', borderLeft: '4px solid #e5e7eb', paddingLeft: '1rem' }}>
-                      {hero.excerpt}
-                    </p>
-                  )}
-
-                  {/* Firma */}
-                  <p style={{ fontSize: '0.7rem', color: '#9ca3af', fontFamily: 'Inter, sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Por {hero.author} · {formatDate(hero.publishedAt)}
+                  <p className="text-xl md:text-2xl leading-relaxed text-gray-700 font-serif line-clamp-3 italic mb-8">
+                    {pool[0].excerpt}
+                  </p>
+                  <p className="text-[0.7rem] font-black text-gray-400 uppercase tracking-[0.2em] pt-6 border-t border-gray-50">
+                    EDICIÓN ESPECIAL · POR {pool[0].author.toUpperCase()} · {formatDate(pool[0].publishedAt)}
                   </p>
                 </Link>
               )}
             </div>
 
-            {/* ══ COLUMNA 2 — Dos artículos (Cuadros 3 y 4) (3 cols) ══ */}
-            <div style={{ borderRight: '1px solid #d1d5db' }} className="lg:col-span-3 lg:px-6 py-6 lg:py-0 space-y-8">
-              {col2.map((art, i) => (
-                <div key={art.id} style={i < col2.length - 1 ? { borderBottom: '1px solid #e5e7eb', paddingBottom: '2rem' } : {}}>
+            {/* Sidebar de Noticias (Importancia 2 y 3) - 1/3 de ancho */}
+            <div className="lg:col-span-4 flex flex-col gap-10">
+              {pool.slice(1, 3).map((art, idx) => (
+                <div key={art.id} className={idx === 0 ? 'pb-10 border-b border-gray-100' : ''}>
                   <Link href={`/articulo/${art.slug}`} className="group block">
-                    <span style={{ color: '#bb1b21', fontSize: '0.6rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.25em', display: 'block', marginBottom: '0.5rem' }}>
-                      {art.category?.toUpperCase()}
-                    </span>
                     {art.image && (
-                      <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', marginBottom: '0.75rem', backgroundColor: '#f3f4f6' }}>
+                      <div className="relative aspect-[16/10] overflow-hidden mb-5 bg-slate-50">
                         <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                       </div>
                     )}
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 900, lineHeight: 1.15, color: '#111827', marginBottom: '0.5rem', fontFamily: 'Georgia, serif' }}
-                      className="group-hover:text-red-700 transition-colors"
-                    >
+                    <h3 className="text-xl md:text-2xl font-black font-serif text-[#0f0f0f] group-hover:text-red-700 leading-tight mb-3">
                       {art.title}
-                    </h2>
-                    {art.excerpt && (
-                      <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.55, fontStyle: 'italic' }} className="line-clamp-3">
-                        {art.excerpt}
-                      </p>
+                    </h3>
+                    <p className="text-sm text-gray-600 line-clamp-2 italic mb-4 text-serif">
+                      {art.excerpt}
+                    </p>
+                    <span className="text-[0.6rem] font-bold text-gray-400 uppercase tracking-widest">
+                       {formatDate(art.publishedAt)}
+                    </span>
+                  </Link>
+                </div>
+              ))}
+            </div>
+
+          </div>
+        </div>
+
+        {/* ── SECCIÓN 2: Historias 4 y 5 + Columna a la Derecha (Sidebar) ── */}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 pb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            {/* Izquierda: 2 noticias principales secundarias */}
+            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-12 border-r border-gray-100 pr-0 lg:pr-12">
+              {pool.slice(3, 5).map((art) => (
+                <div key={art.id}>
+                  <Link href={`/articulo/${art.slug}`} className="group block">
+                    {art.image && (
+                      <div className="relative aspect-[4/3] overflow-hidden mb-5 bg-slate-50">
+                        <Image src={art.image} alt={art.title} fill className="object-cover" />
+                      </div>
                     )}
-                    <p style={{ fontSize: '0.65rem', color: '#9ca3af', fontFamily: 'Inter, sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.5rem' }}>
-                      {formatDate(art.publishedAt)}
+                    <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
+                      {art.category}
+                    </span>
+                    <h3 className="text-xl md:text-2xl font-black font-serif text-[#0f0f0f] group-hover:text-red-700 leading-tight mb-4">
+                      {art.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 line-clamp-3 italic">
+                      {art.excerpt}
                     </p>
                   </Link>
                 </div>
               ))}
             </div>
 
-
-            {/* ══ COLUMNA 3 — Breves y AdSense (3 cols) ══ */}
-            <div className="lg:col-span-3 lg:pl-6 py-6 lg:py-0 space-y-6">
-              
-              {/* Parte Superior: Últimas Noticias */}
-              <div style={{ borderBottom: '3px solid #111827', paddingBottom: '0.4rem', marginBottom: '1rem' }}>
-                <span style={{ fontSize: '0.65rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.3em', color: '#111827' }}>
-                  Últimas Noticias
+            {/* Derecha: Sidebar Editorial (Breves) */}
+            <div className="lg:col-span-4">
+              <div className="border-b-2 border-black mb-6 pb-2">
+                <span className="text-[0.7rem] font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                  <span className="w-2 h-2 bg-red-600 rounded-full"></span>
+                  Breves del Imperio
                 </span>
               </div>
-              {col3.map((art, i) => (
-                <div key={art.id} style={i < col3.length - 1 ? { borderBottom: '1px solid #e5e7eb', paddingBottom: '1.25rem' } : {}}>
-                  <Link href={`/articulo/${art.slug}`} className="group flex gap-3 items-start">
-                    {art.image && (
-                      <div style={{ position: 'relative', width: '80px', height: '60px', flexShrink: 0, overflow: 'hidden', backgroundColor: '#f3f4f6' }}>
-                        <Image src={art.image} alt={art.title} fill className="object-cover" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <span style={{ color: '#bb1b21', fontSize: '0.58rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', display: 'block', marginBottom: '0.25rem' }}>
-                        {art.category?.toUpperCase()}
-                      </span>
-                      <h3 style={{ fontSize: '0.9rem', fontWeight: 900, lineHeight: 1.2, color: '#111827', fontFamily: 'Georgia, serif' }}
-                        className="group-hover:text-red-700 transition-colors line-clamp-3"
-                      >
+              <div className="space-y-8">
+                {pool.slice(8, 12).map((art, idx) => (
+                  <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-5 items-start border-b border-gray-50 pb-6 last:border-0">
+                    <div className="text-3xl font-black text-slate-100 font-serif leading-none">{idx + 1}</div>
+                    <div className="flex-1">
+                      <h4 className="text-[0.95rem] font-black font-serif group-hover:text-red-700 leading-snug">
                         {art.title}
-                      </h3>
+                      </h4>
+                      <span className="text-[0.55rem] text-[#bb1b21] font-bold uppercase tracking-widest mt-2 block">
+                        {art.category}
+                      </span>
                     </div>
                   </Link>
-                </div>
-              ))}
-
-              {/* Parte Inferior: Cuadro 0 - Espacio AdSense */}
-              {SITE_CONFIG.showAds && (
-                <div style={{ borderTop: '2px solid #111827', paddingTop: '1.5rem', marginTop: '2rem' }} className="flex justify-center">
-                   <div className="h-[350px] w-full bg-slate-50 border border-dashed border-gray-300 flex flex-col items-center justify-center p-6 text-center">
-                      <svg className="w-8 h-8 text-slate-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Espacio Publicitario Reservado</p>
-                      <p className="text-xs text-slate-500 italic max-w-[150px]">Google AdSense</p>
-                   </div>
-                </div>
-              )}
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
 
-          </div>{/* /grid portada */}
+        {/* ── SECCIÓN 3: Cintillo de texto + Lo más Reciente ── */}
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 border-t-2 border-slate-100">
+          
+          {/* Fila superior: Texto breve horizontal */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12 pb-8 border-b border-gray-100">
+             {pool.slice(5, 8).map(art => (
+               <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-4 items-start border-l-2 border-red-600 pl-4 hover:bg-slate-50 transition-colors py-2">
+                  {art.image && (
+                    <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden bg-slate-50">
+                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <h4 className="text-sm font-black font-serif group-hover:text-red-700 leading-tight mb-2">{art.title}</h4>
+                    <p className="text-[0.6rem] text-gray-400 font-sans uppercase font-bold">{formatDate(art.publishedAt)}</p>
+                  </div>
+               </Link>
+             ))}
+          </div>
+
+          {/* Fila inferior: Lo más reciente con imágenes */}
+          <div className="mb-8 flex items-center gap-4">
+            <h2 className="text-[0.7rem] font-sans font-black uppercase tracking-[0.4em] text-gray-900">Lo más Reciente</h2>
+            <div className="h-px flex-1 bg-gray-100"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {ticker.map(art => (
+              <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
+                <article>
+                  {art.image && (
+                    <div className="relative aspect-[4/3] overflow-hidden mb-3 bg-slate-50">
+                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                  )}
+                  <span className="text-[0.58rem] font-black text-[#bb1b21] uppercase tracking-[0.1em] mb-1 block">
+                    {art.category}
+                  </span>
+                  <h3 className="text-[0.85rem] font-black leading-snug font-serif text-[#111827] group-hover:text-red-700 transition-colors line-clamp-3">
+                    {art.title}
+                  </h3>
+                  <p className="text-[0.6rem] text-gray-400 font-bold mt-2 uppercase">{formatDate(art.publishedAt)}</p>
+                </article>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* ── Línea separadora inferior ── */}
@@ -198,46 +209,7 @@ export default async function HomePage() {
       {/* ══════════════════════════════════════════════
           ÚLTIMAS — Franja de artículos recientes
       ══════════════════════════════════════════════ */}
-      {ticker.length > 0 && (
-        <section aria-label="Artículos recientes" style={{ backgroundColor: '#ffffff' }} className="py-12">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
 
-            <div className="flex items-center gap-4 mb-8">
-              <div style={{ height: '3px', width: '2rem', backgroundColor: '#bb1b21' }} />
-              <h2 style={{ fontSize: '0.7rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4em', color: '#111827' }}>
-                Lo más Reciente
-              </h2>
-              <div style={{ height: '1px', flex: 1, backgroundColor: '#d1d5db' }} />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-              {ticker.map(art => (
-                <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
-                  <article>
-                    {art.image && (
-                      <div style={{ position: 'relative', aspectRatio: '4/3', overflow: 'hidden', marginBottom: '0.75rem', backgroundColor: '#f3f4f6' }}>
-                        <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                      </div>
-                    )}
-                    <span style={{ color: '#bb1b21', fontSize: '0.58rem', fontFamily: 'Inter, sans-serif', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', display: 'block', marginBottom: '0.3rem' }}>
-                      {art.category}
-                    </span>
-                    <h3 style={{ fontSize: '0.9rem', fontWeight: 900, lineHeight: 1.25, color: '#111827', fontFamily: 'Georgia, serif' }}
-                      className="group-hover:text-red-700 transition-colors line-clamp-3"
-                    >
-                      {art.title}
-                    </h3>
-                    <p style={{ fontSize: '0.62rem', color: '#9ca3af', fontFamily: 'Inter, sans-serif', fontWeight: 700, marginTop: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                      {formatDate(art.publishedAt)}
-                    </p>
-                  </article>
-                </Link>
-              ))}
-            </div>
-
-          </div>
-        </section>
-      )}
 
       {/* Newsletter */}
       <section style={{ backgroundColor: '#111827' }} className="py-16">
