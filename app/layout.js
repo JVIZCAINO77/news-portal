@@ -39,7 +39,7 @@ export const metadata = {
   },
   alternates: { canonical: '/' },
   verification: {
-    google: 'xrqiPZpt_gG6WJPQNoeUdi1puP1ST_nfEh-Z1auCsY',
+    google: 'xrqiPZpt_gG6WjWPQNoeUdi1puP1ST_nfEh-Z1auCsY',
   },
   manifest: '/manifest.json',
   appleWebApp: {
