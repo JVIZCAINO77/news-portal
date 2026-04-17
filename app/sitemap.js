@@ -27,12 +27,17 @@ export default async function sitemap() {
   let articleRoutes = [];
   try {
     const articles = await getAllArticles();
-    articleRoutes = articles.map((article) => ({
-      url: `${SITE_CONFIG.url}/articulo/${article.slug}`,
-      lastModified: new Date(article.publishedAt),
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    }));
+    const now = Date.now();
+    articleRoutes = articles.map((article) => {
+      const ageMs = now - new Date(article.publishedAt).getTime();
+      const isRecent = ageMs < 7 * 24 * 60 * 60 * 1000; // menos de 7 días
+      return {
+        url: `${SITE_CONFIG.url}/articulo/${article.slug}`,
+        lastModified: new Date(article.publishedAt),
+        changeFrequency: isRecent ? 'daily' : 'weekly',
+        priority: isRecent ? 0.9 : 0.6,
+      };
+    });
   } catch (err) {
     console.warn('[Sitemap] No se pudieron cargar artículos:', err?.message);
     // Devolver solo las rutas estáticas — no romper el build

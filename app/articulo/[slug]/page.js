@@ -40,7 +40,42 @@ export default async function ArticlePage({ params }) {
 
   const paragraphs = article.content?.split('\n\n') || [];
 
+  // JSON-LD — Datos Estructurados para Google (NewsArticle)
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    description: article.excerpt,
+    image: article.image ? [article.image] : [],
+    datePublished: article.publishedAt,
+    dateModified: article.updatedAt || article.publishedAt,
+    author: [{
+      '@type': 'Person',
+      name: article.author,
+    }],
+    publisher: {
+      '@type': 'Organization',
+      name: 'Imperio Público',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://imperiopublico.com/icon.png',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://imperiopublico.com/articulo/${article.slug}`,
+    },
+    articleSection: cat?.label || article.category,
+    inLanguage: 'es-DO',
+    isAccessibleForFree: true,
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <article className="bg-background min-h-screen transition-colors duration-500">
       <ReadingProgressBar />
       <SocialShare title={article.title} />
@@ -202,6 +237,7 @@ export default async function ArticlePage({ params }) {
            </div>
         </section>
       </div>
-    </article>
+     </article>
+    </>
   );
 }
