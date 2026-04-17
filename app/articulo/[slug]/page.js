@@ -110,19 +110,22 @@ export default async function ArticlePage({ params }) {
                    <p className="text-2xl font-black text-black dark:text-white uppercase leading-none tracking-tighter">{article.author}</p>
                 </div>
              </div>
-             <div className="text-left md:text-right">
+              <div className="text-left md:text-right">
                 <p className="overline-label !text-slate-400 dark:text-zinc-600 mb-2">Publicado el</p>
-                <div className="flex items-center md:justify-end gap-3 text-2xl font-black text-foreground uppercase leading-none tracking-tighter">
-                   <span>{formatDate(article.publishedAt)}</span>
-                   <span className="w-2 h-2 rounded-full bg-red-600"></span>
-                   <span className="flex items-center gap-2 text-slate-400 lowercase italic font-serif tracking-normal text-xl">
-                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                     </svg>
-                     {Math.max(1, Math.ceil((article.content?.split(/\s+/).length || 0) / 200))} min
-                   </span>
+                <div className="flex flex-col md:items-end gap-2">
+                  <div className="text-2xl font-black text-foreground uppercase leading-none tracking-tighter">
+                    {formatDate(article.publishedAt)}
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 px-3 py-1.5 rounded-full self-start md:self-end">
+                    <svg className="w-3 h-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                      {Math.max(1, Math.ceil((article.content?.split(/\s+/).length || 0) / 200))} min de lectura
+                    </span>
+                  </div>
                 </div>
-             </div>
+              </div>
            </div>
         </header>
         <figure className="mb-24">
