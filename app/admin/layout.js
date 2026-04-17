@@ -55,6 +55,9 @@ export default async function AdminLayout({ children }) {
             <Link href="/admin/articulos/nuevo" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] text-red-500 hover:text-white transition-colors py-3 border-b border-white/10">
               + Nuevo Artículo
             </Link>
+            <Link href="/admin/perfil" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] hover:text-red-500 transition-colors py-3 border-b border-white/10">
+              👤 Mi Perfil
+            </Link>
             {isAdmin && (
               <Link href="/admin/usuarios" className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em] hover:text-red-500 transition-colors py-3 border-b border-white/10">
                 ◎ Crear Usuario

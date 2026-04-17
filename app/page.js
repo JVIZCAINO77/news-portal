@@ -5,6 +5,7 @@ import { getFeaturedArticles, getLatestArticles, getArticlesByCategory } from '@
 import { SITE_CONFIG } from '@/lib/data';
 import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
+import LoadMore from '@/components/LoadMore';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -205,12 +206,8 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* ── Línea separadora inferior ── */}
-        <div style={{ height: '3px', backgroundColor: '#111827' }} className="max-w-6xl mx-auto" />
-
-        {/* ── Espacio Publicitario Intermedio ── */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <AdUnit format="leaderboard" slot="home-middle" />
+        <div className="max-w-6xl mx-auto px-4 md:px-8 mt-16">
+          <LoadMore initialOffset={30} />
         </div>
 
       </main>
