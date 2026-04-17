@@ -38,6 +38,9 @@ export const metadata = {
     creator: SITE_CONFIG.twitterHandle,
   },
   alternates: { canonical: '/' },
+  verification: {
+    google: 'xrqiPZpt_gG6WJPQNoeUdi1puP1ST_nfEh-Z1auCsY',
+  },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
