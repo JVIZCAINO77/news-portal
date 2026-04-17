@@ -53,7 +53,7 @@ export async function createEditorUser(formData) {
     const buffer = Buffer.from(arrayBuffer);
 
     const { error: uploadError } = await supabaseAdmin.storage
-      .from('avatars')
+      .from('avatares')
       .upload(fileName, buffer, {
         contentType: avatarFile.type,
         upsert: true,
@@ -61,7 +61,7 @@ export async function createEditorUser(formData) {
 
     if (!uploadError) {
       const { data: publicUrlData } = supabaseAdmin.storage
-        .from('avatars')
+        .from('avatares')
         .getPublicUrl(fileName);
       avatarUrl = publicUrlData?.publicUrl || null;
     }
