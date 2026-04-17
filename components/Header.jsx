@@ -89,16 +89,16 @@ export default function Header() {
       <div className="sticky top-0 z-[100] shadow-md w-full bg-white">
         {/* Primary Navigation - Red Bar */}
         <nav className="w-full bg-[#bb1b21] border-b border-black/10 relative z-50">
-          <div className="max-w-6xl mx-auto px-2 md:px-4">
-            <ul className="flex items-center justify-start xl:justify-center overflow-x-auto no-scrollbar py-1">
-              <li>
-                <Link href="/" className="px-3 md:px-4 py-2 text-[12px] font-black uppercase text-white hover:bg-white/10 transition-all whitespace-nowrap">
+          <div className="max-w-6xl mx-auto px-4">
+            <ul className="flex items-center justify-center overflow-x-auto no-scrollbar py-0.5">
+              <li className="flex-shrink-0">
+                <Link href="/" className="block px-3 py-2 text-[12px] font-black uppercase text-white hover:bg-white/10 transition-all whitespace-nowrap">
                   Portada
                 </Link>
               </li>
               {CATEGORIES.map((cat) => (
-                <li key={cat.slug}>
-                  <Link href={`/categoria/${cat.slug}`} className="px-3 md:px-4 py-2 text-[12px] font-black uppercase text-white/90 hover:text-white transition-all whitespace-nowrap">
+                <li key={cat.slug} className="flex-shrink-0">
+                  <Link href={`/categoria/${cat.slug}`} className="block px-3 py-2 text-[12px] font-black uppercase text-white/90 hover:text-white transition-all whitespace-nowrap">
                     {cat.label}
                   </Link>
                 </li>
