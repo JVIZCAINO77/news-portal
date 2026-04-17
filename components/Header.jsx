@@ -99,19 +99,21 @@ export default function Header() {
       {/* 1. Static Branding Section */}
       <section className="w-full bg-white py-2 md:py-4 border-b border-gray-100 relative">
         <div className="max-w-6xl mx-auto px-4 md:px-6">
-          {/* Mobile Actions Overlay */}
-          <div className="md:hidden absolute top-1/2 -translate-y-1/2 left-6 right-6 flex justify-between items-center pointer-events-none">
+          {/* Mobile Actions Overlay - REINFORCED CLICKABILITY */}
+          <div className="md:hidden absolute inset-0 flex justify-between items-center px-4 pointer-events-none z-[60]">
             <button 
               onClick={() => setIsMenuOpen(true)}
-              className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-sm pointer-events-auto"
+              className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-sm pointer-events-auto shadow-lg active:scale-95 transition-transform"
+              aria-label="Abrir menú"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
             <button 
               onClick={() => setIsSearchOpen(true)}
-              className="w-10 h-10 flex items-center justify-center bg-slate-50 border border-gray-100 text-black rounded-sm pointer-events-auto shadow-sm"
+              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-100 text-black rounded-sm pointer-events-auto shadow-lg active:scale-95 transition-transform"
+              aria-label="Abrir buscador"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
