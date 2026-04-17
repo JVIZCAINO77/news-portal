@@ -50,8 +50,8 @@ export default async function ArticlePage({ params }) {
            <span className="w-1 h-1 bg-slate-100 rounded-full"></span>
            <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
         </nav>
-        <header className="mb-24">
-           <h1 className="text-4xl md:text-[6rem] lg:text-[7.5rem] font-black text-black dark:text-white mb-16 leading-[0.8] tracking-[-0.07em]">
+        <header className="mb-12">
+           <h1 className="text-3xl md:text-[4rem] lg:text-[5rem] font-black text-black dark:text-white mb-10 leading-[0.9] tracking-[-0.07em]">
               {article.title}
             </h1>
             <p className="text-xl md:text-4xl text-slate-500 dark:text-zinc-400 font-serif leading-[1.4] mb-16 max-w-6xl italic border-l-[12px] border-red-600/10 dark:border-red-600/20 pl-12">

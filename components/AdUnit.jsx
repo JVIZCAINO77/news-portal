@@ -11,9 +11,9 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
 
   // Dimensiones estándar de anuncios
   const dimensions = {
-    leaderboard: { minHeight: '90px', width: '100%', label: '728 x 90' },
-    rectangle: { minHeight: '280px', width: '100%', label: '300 x 250' },
-    'in-article': { minHeight: '280px', width: '100%', label: 'Native / In-Article' },
+    leaderboard: { minHeight: '0px', width: '100%', label: '728 x 90' },
+    rectangle: { minHeight: '0px', width: '100%', label: '300 x 250' },
+    'in-article': { minHeight: '0px', width: '100%', label: 'Native / In-Article' },
   };
 
   const style = dimensions[format] || dimensions.rectangle;
@@ -31,12 +31,12 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
   }, [slot]);
 
   return (
-    <div className={`ad-container my-10 ${className}`} style={{ minHeight: style.minHeight }}>
-      <div className="flex flex-col items-center justify-center bg-gray-50 border-y border-gray-100 py-6 relative overflow-hidden">
-        <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 mb-4">Publicidad</span>
+    <div className={`ad-container ${adLoaded ? 'my-4' : 'my-0'} ${className}`} style={{ minHeight: adLoaded ? style.minHeight : '0px' }}>
+      <div className="flex flex-col items-center justify-center relative overflow-hidden">
+        {/* Visual placeholder removed to improve aesthetic before ad loads */}
         
         <ins className="adsbygoogle"
-             style={{ display: 'block', minWidth: '250px', minHeight: style.minHeight }}
+             style={{ display: adLoaded ? 'block' : 'none', minWidth: '250px', minHeight: adLoaded ? style.minHeight : '0px' }}
              data-ad-client={SITE_CONFIG.adsenseId}
              data-ad-slot={slot}
              data-ad-format="auto"

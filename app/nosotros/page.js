@@ -34,7 +34,7 @@ export default function NosotrosPage() {
 
       {/* Misión, Visión, Valores */}
       <section className="py-24 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="border-l-4 border-red-600 pl-8">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4">Nuestra Misión</h2>
@@ -64,7 +64,7 @@ export default function NosotrosPage() {
 
       {/* Equipo Editorial */}
       <section className="py-24 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-end justify-between mb-16">
             <h2 className="text-5xl font-black uppercase tracking-tighter italic">Equipo Editorial</h2>
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 hidden md:block">5 profesionales</p>

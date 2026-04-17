@@ -32,7 +32,7 @@ export default async function CategoryPage({ params }) {
       <div className="border-y-2 border-black py-16 bg-white relative overflow-hidden">
         {/* Subtle background element (newspaper dot grid) */}
         <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "20px 20px" }}></div>
-        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-start text-left">
+        <div className="max-w-6xl mx-auto px-6 relative z-10 flex flex-col items-start text-left">
            <div className="flex items-center justify-start gap-4 mb-4">
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600">Sección Editorial</span>
               <span className="h-px bg-red-600 w-12 opacity-50"></span>
@@ -46,7 +46,7 @@ export default async function CategoryPage({ params }) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-20">
+      <div className="max-w-6xl mx-auto px-6 py-20">
         {heroArticles.length > 0 ? (
           <div className="flex flex-col gap-20">
              {/* First Highlight */}

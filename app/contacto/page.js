@@ -36,7 +36,7 @@ export default function ContactoPage() {
 
       {/* Grid: Formulario + Info */}
       <section className="py-24">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
 
             {/* Formulario */}

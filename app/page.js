@@ -37,14 +37,13 @@ export default async function HomePage() {
         <div style={{ height: '4px', backgroundColor: '#bb1b21' }} />
 
         {/* ── Espacio Publicitario Superior ── */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 mt-10">
-          <AdUnit format="leaderboard" slot="home-top" />
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <AdUnit format="leaderboard" slot="home-top" className="!my-0" />
         </div>
 
 
-
         {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 border-b-4 border-black mb-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-6 border-b-4 border-black mb-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             {/* Artículo Especial (Importancia 1) - 2/3 de ancho */}
@@ -103,7 +102,7 @@ export default async function HomePage() {
         </div>
 
         {/* ── SECCIÓN 2: Historias 4 y 5 + Columna a la Derecha (Sidebar) ── */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 pb-16">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
             {/* Izquierda: 2 noticias principales secundarias */}
@@ -160,7 +159,7 @@ export default async function HomePage() {
         </div>
 
         {/* ── SECCIÓN 3: Cintillo de texto + Lo más Reciente ── */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10 border-t-2 border-slate-100">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 border-t-2 border-slate-100">
           
           {/* Fila superior: Texto breve horizontal */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12 pb-8 border-b border-gray-100">
@@ -208,17 +207,17 @@ export default async function HomePage() {
         </div>
 
         {/* ── Línea separadora inferior ── */}
-        <div style={{ height: '3px', backgroundColor: '#111827' }} className="max-w-7xl mx-auto" />
+        <div style={{ height: '3px', backgroundColor: '#111827' }} className="max-w-6xl mx-auto" />
 
         {/* ── Espacio Publicitario Intermedio ── */}
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
           <AdUnit format="leaderboard" slot="home-middle" />
         </div>
 
       </main>
 
       {/* ── Espacio Publicitario Inferior ── */}
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
         <AdUnit format="leaderboard" slot="home-bottom" />
       </div>
 
