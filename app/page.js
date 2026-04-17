@@ -55,7 +55,8 @@ export default async function HomePage() {
                     fontWeight: 900, 
                     lineHeight: 1,
                     letterSpacing: '-0.04em',
-                    marginBottom: '1.5rem'
+                    marginBottom: '1.25rem',
+                    marginTop: '0.25rem'
                   }} className="font-serif text-[#0f0f0f] group-hover:text-red-700 transition-colors">
                     {pool[0].title}
                   </h2>
@@ -80,7 +81,7 @@ export default async function HomePage() {
                 <div key={art.id} className={idx === 0 ? 'pb-10 border-b border-gray-100' : ''}>
                   <Link href={`/articulo/${art.slug}`} className="group block">
                     {art.image && (
-                      <div className="relative aspect-[16/10] overflow-hidden mb-5 bg-slate-50">
+                      <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-50">
                         <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                       </div>
                     )}
@@ -111,7 +112,7 @@ export default async function HomePage() {
                 <div key={art.id}>
                   <Link href={`/articulo/${art.slug}`} className="group block">
                     {art.image && (
-                      <div className="relative aspect-[4/3] overflow-hidden mb-5 bg-slate-50">
+                      <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-50 text-center">
                         <Image src={art.image} alt={art.title} fill className="object-cover" />
                       </div>
                     )}
@@ -189,7 +190,7 @@ export default async function HomePage() {
               <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
                 <article>
                   {art.image && (
-                    <div className="relative aspect-[4/3] overflow-hidden mb-3 bg-slate-50">
+                    <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-50">
                       <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
                   )}
