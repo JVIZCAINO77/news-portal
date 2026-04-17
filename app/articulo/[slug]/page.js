@@ -59,7 +59,17 @@ export default async function ArticlePage({ params }) {
             </p>
            <div className="flex flex-col md:flex-row md:items-center justify-between py-16 border-y border-black/10 dark:border-zinc-800 gap-10">
              <div className="flex items-center gap-8">
-                <div className="w-20 h-20 bg-black dark:bg-zinc-800 flex items-center justify-center text-white font-black text-4xl select-none">{article.author?.[0]}</div>
+                {article.author_avatar ? (
+                  <img
+                    src={article.author_avatar}
+                    alt={article.author}
+                    className="w-20 h-20 rounded-full object-cover border-4 border-black"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-black dark:bg-zinc-800 flex items-center justify-center text-white font-black text-4xl select-none rounded-full">
+                    {article.author?.[0]}
+                  </div>
+                )}
                 <div className="text-left">
                    <p className="overline-label !text-slate-400 dark:text-zinc-600 mb-2">Autoría</p>
                    <p className="text-2xl font-black text-black dark:text-white uppercase leading-none tracking-tighter">{article.author}</p>

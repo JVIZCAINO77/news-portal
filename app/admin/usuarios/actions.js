@@ -8,6 +8,7 @@ export async function createEditorUser(formData) {
   const name = formData.get('name');
   const email = formData.get('email');
   const password = formData.get('password');
+  const avatarFile = formData.get('avatar');
 
   // 1. Verificar que el usuario actual tenga permisos de Admin
   const supabaseServer = await createServerClient();
@@ -43,18 +44,42 @@ export async function createEditorUser(formData) {
     return { error: authError.message };
   }
 
-  // 4. Crear perfil en la tabla 'profiles' (El trigger SQL debería hacerlo, pero aseguramos rol)
+  // 4. Subir avatar a Supabase Storage si se proporcionó
+  let avatarUrl = null;
+  if (avatarFile && avatarFile.size > 0) {
+    const fileExt = avatarFile.name.split('.').pop();
+    const fileName = `${authUser.user.id}.${fileExt}`;
+    const arrayBuffer = await avatarFile.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('avatars')
+      .upload(fileName, buffer, {
+        contentType: avatarFile.type,
+        upsert: true,
+      });
+
+    if (!uploadError) {
+      const { data: publicUrlData } = supabaseAdmin.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+      avatarUrl = publicUrlData?.publicUrl || null;
+    }
+  }
+
+  // 5. Crear perfil en la tabla 'profiles' con avatar_url
   const { error: profileError } = await supabaseAdmin
     .from('profiles')
     .upsert({
       id: authUser.user.id,
       full_name: name,
       role: 'editor',
+      avatar_url: avatarUrl,
       updated_at: new Date().toISOString()
     });
 
   if (profileError) {
-     return { error: `Usuario creado pero fallo perfil: ${profileError.message}` };
+     return { error: `Usuario creado pero falló perfil: ${profileError.message}` };
   }
 
   revalidatePath('/admin/usuarios');

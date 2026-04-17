@@ -80,8 +80,23 @@ export default async function AdminLayout({ children }) {
 
         {/* Footer */}
         <div className="p-8 border-t border-white/10">
-          <p className="text-[8px] font-black uppercase tracking-widest text-white/30 mb-1">Usuario Activo</p>
-          <p className="text-[10px] font-black uppercase truncate text-white/80 mb-4">{user?.email}</p>
+          <div className="flex items-center gap-3 mb-4">
+            {profile?.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.full_name}
+                className="w-10 h-10 rounded-full object-cover border-2 border-white/20"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-black text-lg">
+                {(profile?.full_name || user?.email || '?')[0].toUpperCase()}
+              </div>
+            )}
+            <div className="overflow-hidden">
+              <p className="text-[9px] font-black uppercase tracking-widest text-white/30">Usuario Activo</p>
+              <p className="text-[10px] font-black uppercase truncate text-white/80">{profile?.full_name || user?.email}</p>
+            </div>
+          </div>
           <form action="/auth/sign-out" method="post">
             <button className="w-full bg-white/5 border border-white/10 text-white py-3 text-[8px] font-black uppercase tracking-[0.25em] hover:bg-red-600 hover:border-red-600 transition-all">
               Cerrar Sesión

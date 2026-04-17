@@ -1,12 +1,22 @@
 // app/admin/usuarios/UserForm.jsx — Formulario de Creación de Usuarios (Imperio Público 2.0)
 'use client';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { createEditorUser } from './actions';
 
 export default function UserForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setAvatarPreview(ev.target.result);
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -21,6 +31,7 @@ export default function UserForm() {
       setError(result.error);
     } else {
       setSuccess(true);
+      setAvatarPreview(null);
       event.target.reset();
     }
     setLoading(false);
@@ -43,6 +54,36 @@ export default function UserForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* Avatar Upload */}
+        <div className="flex flex-col items-center gap-4">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-dashed border-gray-200 hover:border-red-600 transition-all group bg-slate-50 flex items-center justify-center"
+          >
+            {avatarPreview ? (
+              <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+            ) : (
+              <svg className="w-8 h-8 text-gray-300 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            )}
+            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-white text-[8px] font-black uppercase tracking-widest">Cambiar</span>
+            </div>
+          </button>
+          <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Foto de perfil (opcional)</span>
+          <input
+            ref={fileInputRef}
+            name="avatar"
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleAvatarChange}
+          />
+        </div>
+
         <div>
           <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Nombre Completo</label>
           <input
