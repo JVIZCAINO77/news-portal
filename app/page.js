@@ -51,12 +51,12 @@ export default async function HomePage() {
               {pool[0] && (
                 <Link href={`/articulo/${pool[0].slug}`} className="group block">
                   <h2 style={{ 
-                    fontSize: 'clamp(2rem, 5vw, 4rem)', 
+                    fontSize: 'clamp(1.6rem, 3.5vw, 3rem)', 
                     fontWeight: 900, 
-                    lineHeight: 1,
-                    letterSpacing: '-0.04em',
-                    marginBottom: '1.25rem',
-                    marginTop: '0.25rem'
+                    lineHeight: 1.1,
+                    letterSpacing: '-0.03em',
+                    marginBottom: '1rem',
+                    marginTop: '0'
                   }} className="font-serif text-[#0f0f0f] group-hover:text-red-700 transition-colors">
                     {pool[0].title}
                   </h2>
@@ -163,18 +163,16 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 border-t-2 border-slate-100">
           
           {/* Fila superior: Texto breve horizontal */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12 pb-8 border-b border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 pb-8 border-b border-gray-100">
              {pool.slice(5, 8).map(art => (
-               <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-4 items-start border-l-2 border-red-600 pl-4 hover:bg-slate-50 transition-colors py-2">
+               <Link key={art.id} href={`/articulo/${art.slug}`} className="group block border-l-2 border-red-600 pl-4 hover:bg-slate-50 transition-colors py-2">
                   {art.image && (
-                    <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden bg-slate-50">
+                    <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-50">
                       <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
                   )}
-                  <div className="flex-1">
-                    <h4 className="text-sm font-black font-serif group-hover:text-red-700 leading-tight mb-2">{art.title}</h4>
-                    <p className="text-[0.6rem] text-gray-400 font-sans uppercase font-bold">{formatDate(art.publishedAt)}</p>
-                  </div>
+                  <h4 className="text-sm font-black font-serif group-hover:text-red-700 leading-tight mb-1">{art.title}</h4>
+                  <p className="text-[0.6rem] text-gray-400 font-sans uppercase font-bold">{formatDate(art.publishedAt)}</p>
                </Link>
              ))}
           </div>
@@ -211,14 +209,14 @@ export default async function HomePage() {
         <div style={{ height: '3px', backgroundColor: '#111827' }} className="max-w-6xl mx-auto" />
 
         {/* ── Espacio Publicitario Intermedio ── */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
           <AdUnit format="leaderboard" slot="home-middle" />
         </div>
 
       </main>
 
       {/* ── Espacio Publicitario Inferior ── */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-10">
+      <div className="max-w-6xl mx-auto px-4 md:px-8">
         <AdUnit format="leaderboard" slot="home-bottom" />
       </div>
 
