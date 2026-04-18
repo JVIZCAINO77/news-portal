@@ -94,13 +94,13 @@ export default async function ArticlePage({ params }) {
 
         {/* PARTE 1: EL TITULAR */}
         <header className="mb-0">
-          <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, serif' }} className="text-3xl md:text-6xl lg:text-8xl font-black mb-3 md:mb-8 leading-[1.05] md:leading-[1.0] tracking-[-0.05em]">
+          <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, serif' }} className="text-2xl md:text-4xl lg:text-5xl font-black mb-2 md:mb-4 leading-[1.1] tracking-[-0.04em]">
             {article.title || 'Información en Desarrollo'}
           </h1>
           
           {/* PARTE 2: EL SUB-TEMA (Excerpt) */}
           {article.excerpt?.trim() && (
-            <p style={{ color: '#1a1a1a', fontFamily: 'Georgia, serif' }} className="text-sm md:text-3xl leading-[1.5] md:leading-[1.4] mb-4 md:mb-12 max-w-6xl italic border-l-4 md:border-l-[12px] border-red-600 pl-4 md:pl-12">
+            <p style={{ color: '#4a4a4a', fontFamily: 'Georgia, serif' }} className="text-sm md:text-base leading-[1.5] mb-3 md:mb-6 italic border-l-4 border-red-600 pl-4">
               {article.excerpt}
             </p>
           )}
