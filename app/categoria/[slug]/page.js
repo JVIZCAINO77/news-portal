@@ -28,29 +28,68 @@ export default async function CategoryPage({ params }) {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Category Header (Premium Left-Aligned) */}
-      <div className="border-y-2 border-black py-16 bg-white relative overflow-hidden">
-        {/* Subtle background element (newspaper dot grid) */}
-        <div className="absolute inset-0 opacity-[0.02] pointer-events-none" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "20px 20px" }}></div>
-        <div className="max-w-6xl mx-auto px-6 relative z-10 flex flex-col items-start text-left">
-           <div className="flex items-center justify-start gap-4 mb-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600">Sección Editorial</span>
-              <span className="h-px bg-red-600 w-12 opacity-50"></span>
-           </div>
-           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-black leading-tight uppercase tracking-[-0.03em] mix-blend-multiply"> 
-             {cat.label} 
-           </h1>
-           <p className="mt-4 text-[11px] font-semibold text-slate-500 uppercase tracking-[0.2em] italic max-w-lg border-l-2 border-red-600 pl-4 py-1">
-             Archivo completo y reportajes a fondo sobre {cat.label}
-           </p>
+      
+      {/* Category Header (Only restored for Opinion) */}
+      {slug === 'opinion' && (
+        <div className="border-b border-gray-100 pb-10 pt-16 bg-white relative overflow-hidden">
+          <div className="max-w-6xl mx-auto px-6 relative z-10">
+             <div className="flex items-center justify-start gap-2 mb-2">
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600">Sección Editorial</span>
+                <span className="h-px bg-red-600 w-12 opacity-50"></span>
+             </div>
+             <h1 className="text-6xl md:text-8xl font-black text-black uppercase tracking-tighter leading-none mb-4"> 
+               {cat.label} 
+             </h1>
+          </div>
         </div>
-      </div>
+      )}
+      
+      {/* Editorial Contribution Block (Only for Opinion) */}
+      {slug === 'opinion' && (
+        <section className="bg-slate-50 border-b border-gray-100 py-16 md:py-24">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-6 block">Tribuna Abierta</span>
+                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-tight mb-8">
+                  Tu voz importa en <br/>
+                  <span className="text-red-600">Imperio Público</span>
+                </h2>
+                <p className="text-lg font-serif text-slate-500 leading-relaxed mb-8">
+                  ¿Tienes una reflexión, una denuncia o un análisis que deba ser escuchado? 
+                  Buscamos ciudadanos comprometidos con la verdad. Envía tu artículo de opinión 
+                  y podrías ser nuestro próximo colaborador invitado.
+                </p>
+                <div className="flex gap-4">
+                  <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center text-white font-black">1</div>
+                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest pt-3">Escribe tu análisis con rigor y respeto.</p>
+                </div>
+              </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-20">
+              <div className="bg-white p-10 shadow-2xl border border-gray-100">
+                <h3 className="text-xl font-black uppercase tracking-tight mb-8 border-b border-black pb-4">Envía tu Opinión</h3>
+                <form className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input type="text" placeholder="Nombre" className="w-full border-0 border-b border-gray-200 py-3 outline-none focus:border-red-600 font-bold uppercase text-xs" />
+                    <input type="email" placeholder="Correo" className="w-full border-0 border-b border-gray-200 py-3 outline-none focus:border-red-600 font-bold uppercase text-xs" />
+                  </div>
+                  <input type="text" placeholder="Asunto / Título de tu Opinión" className="w-full border-0 border-b border-gray-200 py-3 outline-none focus:border-red-600 font-bold uppercase text-xs" />
+                  <textarea placeholder="Tu reflexión..." rows={4} className="w-full border border-gray-100 p-4 outline-none focus:border-red-600 font-serif text-lg bg-slate-50/30"></textarea>
+                  <button className="w-full bg-red-600 text-white font-black uppercase tracking-[0.3em] py-5 text-[10px] hover:bg-black transition-all">
+                    Enviar a Consejo Editorial
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <div className="max-w-6xl mx-auto px-6 pt-0 pb-20">
         {heroArticles.length > 0 ? (
           <div className="flex flex-col gap-20">
              {/* First Highlight */}
-             <div className="border-b border-gray-100 pb-20">
+             <div className="border-b border-gray-100 pt-0 pb-20">
                 <ArticleCard article={heroArticles[0]} variant="hero" />
              </div>
 

@@ -17,23 +17,8 @@ const TEAM = [
 export default function NosotrosPage() {
   return (
     <div className="bg-white">
-      {/* Hero */}
-      <section className="border-b border-gray-100 py-24 md:py-32">
-        <div className="max-w-5xl mx-auto px-6 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-6">Quiénes Somos</p>
-          <h1 className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-8">
-            La Autoridad de la<br />
-            <span className="text-red-600">Actualidad</span>
-          </h1>
-          <p className="text-xl font-serif text-slate-500 leading-relaxed max-w-2xl mx-auto">
-            Imperio Público es el portal de noticias dominicano comprometido con la información veraz, 
-            inmediata y de alta calidad editorial. Nacimos para darle voz a la actualidad del país.
-          </p>
-        </div>
-      </section>
 
-      {/* Misión, Visión, Valores */}
-      <section className="py-24 border-b border-gray-100">
+      <section className="pt-0 pb-24 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="border-l-4 border-red-600 pl-8">

@@ -27,20 +27,15 @@ export default async function HomePage() {
   const ticker  = latest.filter(a => !usedIds.has(a.id)).slice(0, 6); // Remaining for "Lo más reciente" grid
 
   return (
-    <div style={{ backgroundColor: '#ffffff', color: '#111827', fontFamily: 'Georgia, serif' }}>
+    <div style={{ backgroundColor: '#ffffff', color: '#111827', fontFamily: "'Public Sans', sans-serif" }}>
 
       {/* ══════════════════════════════════════════════
           PORTADA — Diseño Periódico Clásico
       ══════════════════════════════════════════════ */}
       <main aria-label="Portada">
 
-        {/* ── Línea superior roja ── */}
-        <div style={{ height: '4px', backgroundColor: '#bb1b21' }} />
+        {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
 
-        {/* ── Espacio Publicitario Superior ── */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <AdUnit format="leaderboard" slot="home-top" className="!my-0" />
-        </div>
 
 
         {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
@@ -212,10 +207,6 @@ export default async function HomePage() {
 
       </main>
 
-      {/* ── Espacio Publicitario Inferior ── */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <AdUnit format="leaderboard" slot="home-bottom" />
-      </div>
 
       {/* Newsletter */}
       <section style={{ backgroundColor: '#111827' }} className="py-16">

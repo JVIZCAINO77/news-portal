@@ -64,7 +64,7 @@ export default function RootLayout({ children }) {
         <meta name="google-adsense-account" content="ca-pub-9579937391435747" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..900;1,8..60,300..900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Merriweather:ital,wght@0,300..900;1,300..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
         
         {/* Google AdSense Script — Standard verification tag */}
         <script 
@@ -95,7 +95,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen flex flex-col font-sans">
         <Header />
-        <main className="min-h-screen pt-12 md:pt-0">
+        <main className="min-h-screen pt-[2px] md:pt-[2px]">
           {children}
         </main>
         <BackToTop />

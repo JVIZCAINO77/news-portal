@@ -98,7 +98,7 @@ export default function Header() {
 
       {/* 1. Static Branding Section */}
       <section className="w-full bg-white py-2 md:py-4 border-b border-gray-100 relative">
-        <div className="max-w-6xl mx-auto px-4 md:px-6">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
           {/* Mobile Actions Overlay - REINFORCED CLICKABILITY */}
           <div className="md:hidden absolute inset-0 flex justify-between items-center px-4 pointer-events-none z-[60]">
             <button 
@@ -121,7 +121,7 @@ export default function Header() {
             </button>
           </div>
 
-          <div className="flex items-center justify-center flex-row gap-6 md:gap-10">
+          <Link href="/" className="flex items-center justify-center flex-row gap-6 md:gap-10 hover:opacity-90 transition-opacity">
             <img 
               src="/icon.png" 
               alt="Logo IP" 
@@ -145,7 +145,7 @@ export default function Header() {
                 <div style={{ height: '1.5px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.2 }}></div>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
 
@@ -153,13 +153,8 @@ export default function Header() {
       <div className="sticky top-0 z-[100] shadow-md w-full bg-white">
         {/* Primary Navigation - Red Bar */}
         <nav className="w-full bg-[#bb1b21] border-b border-black/10 relative z-50">
-          <div className="max-w-6xl mx-auto px-4">
+          <div className="max-w-6xl mx-auto px-4 md:px-8">
             <ul className="flex items-center justify-center overflow-x-auto no-scrollbar py-0.5">
-              <li className="flex-shrink-0">
-                <Link href="/" className="block px-3 py-2 text-[12px] font-black uppercase text-white hover:bg-white/10 transition-all whitespace-nowrap">
-                  Portada
-                </Link>
-              </li>
               {CATEGORIES.map((cat) => (
                 <li key={cat.slug} className="flex-shrink-0">
                   <Link href={`/categoria/${cat.slug}`} className="block px-3 py-2 text-[12px] font-black uppercase text-white/90 hover:text-white transition-all whitespace-nowrap">
@@ -173,7 +168,7 @@ export default function Header() {
 
         {/* Utility Bar */}
         <div className="border-b border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
-          <div className="max-w-6xl mx-auto px-6 flex justify-between items-center">
+          <div className="max-w-6xl mx-auto px-4 md:px-8 flex justify-between items-center">
             <div className="text-[10px] font-semibold text-gray-400 uppercase italic tracking-widest">{currentDate}</div>
             <div className="flex items-center gap-8">
               <ServiceWidgets />

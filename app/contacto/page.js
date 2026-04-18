@@ -20,22 +20,9 @@ export default function ContactoPage() {
 
   return (
     <div className="bg-white">
-      {/* Hero */}
-      <section className="border-b border-gray-100 py-24">
-        <div className="max-w-5xl mx-auto px-6">
-          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-6">Contáctanos</p>
-          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-6">
-            Hablemos
-          </h1>
-          <p className="text-xl font-serif text-slate-500 max-w-2xl">
-            ¿Tienes una historia, una denuncia, o quieres colaborar con nosotros? 
-            Estamos escuchando. Tu voz importa.
-          </p>
-        </div>
-      </section>
 
       {/* Grid: Formulario + Info */}
-      <section className="py-24">
+      <section className="pt-0 pb-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
 
