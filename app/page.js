@@ -47,23 +47,28 @@ export default async function HomePage() {
               {pool[0] && (
                 <Link href={`/articulo/${pool[0].slug}`} className="group block">
                   <h2 style={{ 
-                    fontSize: 'clamp(1.6rem, 3.5vw, 3rem)', 
+                    fontSize: 'clamp(1.6rem, 3.5vw, 3.5rem)', 
                     fontWeight: 900, 
-                    lineHeight: 1.1,
-                    letterSpacing: '-0.03em',
-                    marginBottom: '1rem',
+                    lineHeight: 1.0,
+                    letterSpacing: '-0.04em',
+                    marginBottom: '1.5rem',
                     marginTop: '0'
                   }} className="font-serif text-[#0f0f0f] group-hover:text-red-700 transition-colors">
                     {pool[0].title}
                   </h2>
+                  
+                  {/* PARTE 2: SUB-TEMA (Movido arriba de la imagen para consistencia) */}
+                  <p className="text-xl md:text-2xl leading-relaxed text-gray-700 font-serif line-clamp-3 italic mb-8 border-l-8 border-red-600 pl-8">
+                    {pool[0].excerpt}
+                  </p>
+
+                  {/* PARTE 3: IMAGEN */}
                   {pool[0].image && (
-                    <div className="relative aspect-[16/9] overflow-hidden mb-8 bg-slate-50 shadow-sm">
+                    <div className="relative aspect-[16/9] overflow-hidden mb-8 bg-slate-50 shadow-sm border-y-2 border-black">
                       <Image src={pool[0].image} alt={pool[0].title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
                     </div>
                   )}
-                  <p className="text-xl md:text-2xl leading-relaxed text-gray-700 font-serif line-clamp-3 italic mb-8">
-                    {pool[0].excerpt}
-                  </p>
+
                   <p className="text-[0.7rem] font-black text-gray-400 uppercase tracking-[0.2em] pt-6 border-t border-gray-50">
                     EDICIÓN ESPECIAL · POR {pool[0].author.toUpperCase()} · {formatDate(pool[0].publishedAt)}
                   </p>

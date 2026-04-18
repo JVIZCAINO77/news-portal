@@ -32,7 +32,7 @@ export default async function CategoryPage({ params }) {
       
       {/* Editorial Contribution Block (Only for Opinion) */}
       {slug === 'opinion' && (
-        <section className="bg-slate-50 border-b border-gray-100 py-8 md:py-12">
+        <section className="bg-slate-50 border-b border-gray-100 pt-0 pb-12">
           <div className="max-w-6xl mx-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
