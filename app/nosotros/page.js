@@ -23,23 +23,23 @@ export default function NosotrosPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div className="border-l-4 border-red-600 pl-8">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4">Nuestra Misión</h2>
-              <p className="text-lg font-serif text-slate-600 leading-relaxed">
+              <p className="text-lg font-serif text-slate-800 leading-relaxed">
                 Proveer información veraz, oportuna y accesible a todos los dominicanos dentro y fuera del país, 
                 con rigor periodístico y responsabilidad ética.
               </p>
             </div>
             <div className="border-l-4 border-black pl-8">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-black mb-4">Nuestra Visión</h2>
-              <p className="text-lg font-serif text-slate-600 leading-relaxed">
+              <p className="text-lg font-serif text-slate-800 leading-relaxed">
                 Ser el portal de noticias de referencia de la República Dominicana, reconocido por su excelencia 
                 editorial y su compromiso con la verdad.
               </p>
             </div>
             <div className="border-l-4 border-slate-300 pl-8">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400 mb-4">Nuestros Valores</h2>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-800 mb-4">Nuestros Valores</h2>
               <ul className="space-y-2">
                 {['Veracidad', 'Objetividad', 'Independencia editorial', 'Responsabilidad social', 'Innovación'].map(v => (
-                  <li key={v} className="text-base font-bold text-slate-600 uppercase tracking-tight">— {v}</li>
+                  <li key={v} className="text-base font-bold text-slate-800 uppercase tracking-tight">— {v}</li>
                 ))}
               </ul>
             </div>
@@ -62,7 +62,7 @@ export default function NosotrosPage() {
                 </div>
                 <h3 className="text-xl font-black uppercase tracking-tight text-black mb-1">{member.name}</h3>
                 <p className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-4">{member.role}</p>
-                <p className="text-sm font-serif text-slate-500 leading-relaxed">{member.bio}</p>
+                <p className="text-sm font-serif text-slate-800 leading-relaxed">{member.bio}</p>
               </div>
             ))}
           </div>
@@ -73,7 +73,7 @@ export default function NosotrosPage() {
       <section className="py-24 bg-black text-white text-center">
         <div className="max-w-2xl mx-auto px-6">
           <h2 className="text-4xl font-black uppercase tracking-tighter mb-6">¿Quieres unirte a nuestro equipo?</h2>
-          <p className="text-slate-400 font-serif text-lg mb-10">
+          <p className="text-slate-200 font-serif text-lg mb-10">
             Siempre buscamos periodistas apasionados y comprometidos con la verdad.
           </p>
           <a

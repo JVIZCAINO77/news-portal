@@ -55,14 +55,14 @@ export default async function CategoryPage({ params }) {
                   Tu voz importa en <br/>
                   <span className="text-red-600">Imperio Público</span>
                 </h2>
-                <p className="text-lg font-serif text-slate-500 leading-relaxed mb-8">
+                <p className="text-lg font-serif text-slate-800 leading-relaxed mb-8">
                   ¿Tienes una reflexión, una denuncia o un análisis que deba ser escuchado? 
                   Buscamos ciudadanos comprometidos con la verdad. Envía tu artículo de opinión 
                   y podrías ser nuestro próximo colaborador invitado.
                 </p>
                 <div className="flex gap-4">
                   <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center text-white font-black">1</div>
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest pt-3">Escribe tu análisis con rigor y respeto.</p>
+                  <p className="text-sm font-bold text-slate-700 uppercase tracking-widest pt-3">Escribe tu análisis con rigor y respeto.</p>
                 </div>
               </div>
 
