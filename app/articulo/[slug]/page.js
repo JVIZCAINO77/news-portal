@@ -94,16 +94,16 @@ export default async function ArticlePage({ params }) {
 
         {/* PARTE 1: EL TITULAR */}
         <header className="mb-0">
-          <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, serif' }} className="text-2xl md:text-4xl lg:text-5xl font-black mb-2 md:mb-4 leading-[1.1] tracking-[-0.04em]">
-            {article.title || 'Información en Desarrollo'}
+          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '3rem', lineHeight: '1.1' }} className="font-black mb-3 font-serif tracking-tight">
+            {(article.title && article.title.trim() !== "") ? article.title : 'Información en Desarrollo'}
           </h1>
           
           {/* PARTE 2: EL SUB-TEMA (Excerpt) */}
-          {article.excerpt?.trim() && (
-            <p style={{ color: '#4a4a4a', fontFamily: 'Georgia, serif' }} className="text-sm md:text-base leading-[1.5] mb-3 md:mb-6 italic border-l-4 border-red-600 pl-4">
+          {(article.excerpt && article.excerpt.trim() !== "") ? (
+            <p style={{ color: '#222222', fontSize: '1.125rem' }} className="mb-6 italic border-l-4 border-red-600 pl-4 font-serif leading-relaxed">
               {article.excerpt}
             </p>
-          )}
+          ) : null}
         </header>
 
         {/* PARTE 3: LA IMAGEN DEL ARTÍCULO */}
