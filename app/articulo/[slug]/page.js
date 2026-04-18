@@ -94,20 +94,20 @@ export default async function ArticlePage({ params }) {
 
         {/* PARTE 1: EL TITULAR */}
         <header className="mb-0">
-          <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, serif' }} className="text-4xl md:text-6xl lg:text-8xl font-black mb-8 leading-[1.0] tracking-[-0.05em]">
+          <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, serif' }} className="text-3xl md:text-6xl lg:text-8xl font-black mb-3 md:mb-8 leading-[1.05] md:leading-[1.0] tracking-[-0.05em]">
             {article.title || 'Información en Desarrollo'}
           </h1>
           
           {/* PARTE 2: EL SUB-TEMA (Excerpt) */}
-          {article.excerpt && (
-            <p style={{ color: '#1a1a1a', fontFamily: 'Georgia, serif' }} className="text-xl md:text-3xl leading-[1.4] mb-12 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
+          {article.excerpt?.trim() && (
+            <p style={{ color: '#1a1a1a', fontFamily: 'Georgia, serif' }} className="text-sm md:text-3xl leading-[1.5] md:leading-[1.4] mb-4 md:mb-12 max-w-6xl italic border-l-4 md:border-l-[12px] border-red-600 pl-4 md:pl-12">
               {article.excerpt}
             </p>
           )}
         </header>
 
         {/* PARTE 3: LA IMAGEN DEL ARTÍCULO */}
-        <figure className="mb-12">
+        <figure className="mb-6 md:mb-12">
           <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-50 border-y-4 border-black">
             <Image src={article.image} alt={article.imageAlt || article.title} fill className="object-cover" priority />
           </div>
