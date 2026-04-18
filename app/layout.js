@@ -95,7 +95,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen flex flex-col font-sans">
         <Header />
-        <main className="min-h-screen pt-[2px] md:pt-[2px] pb-24 md:pb-0">
+        <main className="min-h-screen pb-24 md:pb-0" style={{ paddingTop: '2px' }}>
           {children}
         </main>
         <BackToTop />

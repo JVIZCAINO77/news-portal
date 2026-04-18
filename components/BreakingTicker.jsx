@@ -7,7 +7,7 @@ export default function BreakingTicker({ items = [] }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white border-y border-gray-100 overflow-hidden select-none">
+    <div className="bg-white border-y-2 border-gray-200 overflow-hidden select-none">
       <div className="max-w-6xl mx-auto px-4 md:px-8 flex items-center h-10 md:h-12">
         {/* Label Fijo */}
         <div className="bg-black text-white px-4 md:px-6 h-full flex items-center justify-center relative z-10 shadow-[8px_0_12px_rgba(0,0,0,0.1)]">

@@ -80,36 +80,23 @@ export default async function ArticlePage({ params }) {
       <article className="bg-background min-h-screen transition-colors duration-500">
       <ReadingProgressBar />
       <SocialShare title={article.title} />
-      <div className="max-w-5xl mx-auto px-6 pt-0 pb-20">
-        <nav className="mb-1 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em]">
-           <div className="flex items-center gap-3 text-muted-base">
-              <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
-              <span className="w-1 h-px bg-slate-200 w-4"></span>
-              <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
-           </div>
-           {/* FECHA ARRIBA (Parte Verde) */}
+      <div className="max-w-5xl mx-auto px-6 pb-20" style={{ paddingTop: '12px' }}>
+        <nav className="mb-[8px] flex items-center justify-end text-[10px] font-black uppercase tracking-[0.3em]">
+           {/* FECHA ARRIBA (Parte Roja en la imagen) */}
            <div className="text-slate-500 italic !tracking-normal">
               Publicado el {formatDate(article.publishedAt)}
            </div>
         </nav>
 
-        {/* REGLA EDITORIAL 3PX: Diseño compacto para siempre entre titular, imagen y audio */}
-        <header className="mb-0">
-          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '2.5rem', lineHeight: '1.1' }} className="font-black mb-[3px] font-serif tracking-tight">
+        <header className="mt-0 mb-[10px]">
+          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '2.5rem', lineHeight: '1.1' }} className="font-black mt-0 mb-0 font-serif tracking-tight">
             {(article.title && article.title.trim() !== "") ? article.title : 'Información en Desarrollo'}
           </h1>
-          
-          {/* PARTE 2: EL SUB-TEMA (Excerpt) */}
-          {(article.excerpt && article.excerpt.trim() !== "") ? (
-            <p style={{ color: '#222222', fontSize: '1rem' }} className="mb-[3px] italic border-l-4 border-red-600 pl-4 font-serif leading-relaxed">
-              {article.excerpt}
-            </p>
-          ) : null}
         </header>
 
-        {/* PARTE 3: LA IMAGEN DEL ARTÍCULO */}
-        <figure className="mb-[3px]">
-          <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-50 border-y-4 border-black">
+        {/* PARTE 2: LA IMAGEN DEL ARTÍCULO */}
+        <figure className="mb-[10px]">
+          <div className="relative w-[95%] md:w-[90%] aspect-[3/2] overflow-hidden bg-slate-50 shadow-md border border-slate-200">
             <Image 
               src={article.image} 
               alt={article.imageAlt || article.title} 
@@ -121,6 +108,15 @@ export default async function ArticlePage({ params }) {
           </div>
           {article.imageAlt && <figcaption className="mt-4 text-left overline-label !text-slate-400">Créditos: {article.imageAlt}</figcaption>}
         </figure>
+
+        {/* PARTE 3: EL SUB-TEMA (Excerpt sin borde) */}
+        {(article.excerpt && article.excerpt.trim() !== "") ? (
+          <div className="mb-[10px]">
+            <p style={{ color: '#222222', fontSize: '1rem' }} className="italic font-serif leading-relaxed">
+              {article.excerpt}
+            </p>
+          </div>
+        ) : null}
 
         <AudioReader title={article.title} text={article.content} />
 

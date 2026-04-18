@@ -39,37 +39,37 @@ export default async function HomePage() {
 
 
         {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-4 border-b border-black mb-6">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-4 border-b border-black mb-6 mt-[7px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* Artículo Especial (Importancia 1) - 2/3 de ancho */}
             <div className="lg:col-span-8 border-b lg:border-b-0 lg:border-r border-gray-100 pb-12 lg:pb-0 lg:pr-12">
               {pool[0] && (
                 <Link href={`/articulo/${pool[0].slug}`} className="group block">
+                  {/* PARTE 1: TÍTULO EN LA SECCIÓN ROJA */}
                   <h1 style={{ 
                     fontSize: 'clamp(1.6rem, 3.5vw, 3.5rem)', 
                     fontWeight: 900, 
                     lineHeight: 1.0,
                     letterSpacing: '-0.04em',
-                    marginBottom: '3px',
-                    marginTop: '0',
+                    marginBottom: '10px',
                     color: '#000'
                   }} className="font-serif group-hover:text-red-700 transition-colors">
                     {(pool[0].title && pool[0].title.trim() !== '') ? pool[0].title : 'Información en Desarrollo'}
                   </h1>
-                  
-                  {/* PARTE 2: SUB-TEMA (Movido arriba de la imagen para consistencia) */}
-                  {(pool[0].excerpt && pool[0].excerpt.trim() !== '') && (
-                    <p style={{ color: '#222' }} className="text-xl md:text-2xl leading-relaxed font-serif line-clamp-3 italic mb-[3px] border-l-8 border-red-600 pl-8">
-                      {pool[0].excerpt}
-                    </p>
-                  )}
 
-                  {/* PARTE 3: IMAGEN */}
+                  {/* PARTE 2: IMAGEN */}
                   {pool[0].image && (
-                    <div className="relative aspect-[16/9] overflow-hidden mb-[3px] bg-slate-50 shadow-sm border-y-2 border-black">
+                    <div className="relative w-[95%] md:w-[90%] aspect-[3/2] overflow-hidden mb-[10px] sm:mb-[16px] bg-slate-50 shadow-md border border-gray-200">
                       <Image src={pool[0].image} alt={pool[0].title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" priority sizes="(max-width: 1200px) 100vw, 800px" />
                     </div>
+                  )}
+                  
+                  {/* PARTE 3: SUBTÍTULO EN LA SECCIÓN VERDE (El amarillo fue eliminado) */}
+                  {(pool[0].excerpt && pool[0].excerpt.trim() !== '') && (
+                    <p style={{ color: '#222' }} className="text-xl md:text-2xl leading-relaxed font-serif line-clamp-3 italic mb-[4px]">
+                      {pool[0].excerpt}
+                    </p>
                   )}
 
                   <p className="text-[0.7rem] font-black text-gray-400 uppercase tracking-[0.2em] pt-6 border-t border-gray-50">

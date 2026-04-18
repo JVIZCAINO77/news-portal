@@ -27,8 +27,14 @@ export default function ArticleCard({ article, variant = 'medium', className = '
   if (variant === 'hero') {
     return (
       <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden ${className}`}>
-        <article className="relative">
-          <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-100">
+        <article className="relative mt-[7px]">
+          <header className="mb-4">
+            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#000' }} className="text-2xl md:text-4xl lg:text-5xl mb-[10px] font-serif">
+               {safeTitle}
+             </h1>
+          </header>
+
+          <div className="relative w-[95%] md:w-[90%] aspect-[3/2] overflow-hidden bg-slate-100 shadow-md border border-slate-200 mb-4">
             <Image
               src={imgSrc}
               alt={article.imageAlt || article.title}
@@ -39,12 +45,10 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
             />
           </div>
-          <header className="mb-4">
-            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#000' }} className="text-2xl md:text-4xl lg:text-5xl mb-[3px] font-serif">
-               {safeTitle}
-             </h1>
+
+          <div>
             {safeExcerpt && (
-              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-[3px] max-w-3xl border-l-4 border-red-600 pl-4">
+              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-4 max-w-3xl">
                  {safeExcerpt}
                </p>
             )}
@@ -53,7 +57,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
                <span className="w-8 h-px bg-slate-200 dark:bg-zinc-800"></span>
                <span className="metadata-text italic !tracking-normal !text-[10px] text-slate-500 dark:text-zinc-500">{formattedDate}</span>
             </div>
-          </header>
+          </div>
         </article>
       </Link>
     );

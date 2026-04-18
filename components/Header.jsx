@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
-import BreakingTicker from './BreakingTicker';
 import ServiceWidgets from './ServiceWidgets';
 import MobileMenu from './MobileMenu';
 
@@ -164,8 +163,6 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Breaking Ticker */}
-        <BreakingTicker items={tickerItems} />
       </div>
 
       {/* Mobile Menu Drawer */}
