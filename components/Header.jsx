@@ -65,36 +65,6 @@ export default function Header() {
 
   return (
     <div className="w-full">
-      {/* Search Overlay */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-xl animate-in fade-in duration-300 flex items-center justify-center p-6">
-          <button 
-            onClick={() => setIsSearchOpen(false)}
-            className="absolute top-10 right-10 text-white/40 hover:text-white transition-colors"
-          >
-            <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          
-          <form onSubmit={handleSearch} className="w-full max-w-4xl space-y-8">
-            <p className="text-red-600 font-black uppercase tracking-[0.4em] text-center italic text-sm">¿Qué estás investigando hoy?</p>
-            <input 
-              autoFocus
-              type="text"
-              placeholder="Escribe y presiona Enter..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent border-b-4 border-white/10 focus:border-red-600 outline-none text-white text-4xl md:text-7xl font-black uppercase tracking-tighter py-6 transition-all placeholder:text-white/10"
-            />
-            <div className="flex justify-center gap-8 text-white/30 text-[10px] font-black uppercase tracking-widest pt-4">
-               {['Economía', 'Justicia', 'Política', 'Actualidad'].map(tag => (
-                 <button key={tag} type="button" onClick={() => setSearchQuery(tag)} className="hover:text-red-600 transition-colors italic">{tag}</button>
-               ))}
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* 1. Static Branding Section */}
       <section className="w-full bg-white py-2 md:py-4 border-b border-gray-100 relative">
@@ -173,15 +143,20 @@ export default function Header() {
             <div className="flex items-center gap-8">
               <ServiceWidgets />
               <div className="h-4 w-px bg-gray-200"></div>
-              <button 
-                onClick={() => setIsSearchOpen(true)}
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-black hover:text-red-600 transition-colors"
-              >
-                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                Buscar
-              </button>
+              <form onSubmit={handleSearch} className="relative group flex items-center">
+                <input 
+                  type="text"
+                  placeholder="BUSCAR..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-gray-100/50 border-b border-gray-200 focus:border-red-600 outline-none px-3 py-1 text-[10px] font-black uppercase tracking-widest w-24 focus:w-48 transition-all duration-500 placeholder:text-gray-400"
+                />
+                <button type="submit" className="ml-2 text-black hover:text-red-600 transition-colors">
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+              </form>
               <div className="flex gap-4 text-[10px] font-semibold text-gray-800 uppercase tracking-widest">
                 <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
                 <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
