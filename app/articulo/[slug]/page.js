@@ -85,16 +85,16 @@ export default async function ArticlePage({ params }) {
            <span className="w-1 h-1 bg-slate-100 rounded-full"></span>
            <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
         </nav>
-        <header className="mb-12">
-           <h1 className="text-3xl md:text-[4rem] lg:text-[5rem] font-black text-black dark:text-white mb-10 leading-[0.9] tracking-[-0.07em]">
+        <header className="mb-0 relative z-10 -mt-8">
+           <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }} className="text-4xl md:text-[4rem] lg:text-[5rem] font-black mb-8 leading-[0.9] tracking-[-0.07em]">
               {article.title || 'Información en Desarrollo'}
             </h1>
             {article.excerpt ? (
-              <p className="text-xl md:text-4xl text-black dark:text-white font-serif leading-[1.4] mb-16 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
+              <p style={{ color: '#1a1a1a', fontFamily: 'Georgia, serif' }} className="text-xl md:text-3xl leading-[1.4] mb-12 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
                 {article.excerpt}
               </p>
             ) : (
-              <div className="mb-16 pt-2 border-t border-gray-100 italic font-serif text-slate-500">
+              <div className="mb-12 pt-2 border-t border-gray-100 italic font-serif text-slate-500">
                 Redacción en proceso. Imperio Público está actualizando esta información.
               </div>
             )}
