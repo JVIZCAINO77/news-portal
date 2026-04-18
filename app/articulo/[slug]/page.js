@@ -87,11 +87,17 @@ export default async function ArticlePage({ params }) {
         </nav>
         <header className="mb-12">
            <h1 className="text-3xl md:text-[4rem] lg:text-[5rem] font-black text-black dark:text-white mb-10 leading-[0.9] tracking-[-0.07em]">
-              {article.title}
+              {article.title || 'Información en Desarrollo'}
             </h1>
-            <p className="text-xl md:text-4xl text-black dark:text-white font-serif leading-[1.4] mb-16 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
-              {article.excerpt}
-            </p>
+            {article.excerpt ? (
+              <p className="text-xl md:text-4xl text-black dark:text-white font-serif leading-[1.4] mb-16 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
+                {article.excerpt}
+              </p>
+            ) : (
+              <div className="mb-16 pt-2 border-t border-gray-100 italic font-serif text-slate-500">
+                Redacción en proceso. Imperio Público está actualizando esta información.
+              </div>
+            )}
            <div className="flex flex-col md:flex-row md:items-center justify-between py-16 border-y border-black/10 dark:border-zinc-800 gap-10">
              <div className="flex items-center gap-8">
                 {article.author_avatar ? (
@@ -106,8 +112,8 @@ export default async function ArticlePage({ params }) {
                   </div>
                 )}
                 <div className="text-left">
-                   <p className="overline-label !text-slate-400 dark:text-zinc-600 mb-2">Autoría</p>
-                   <p className="text-2xl font-black text-black dark:text-white uppercase leading-none tracking-tighter">{article.author}</p>
+                   <p className="overline-label !text-slate-500 dark:text-zinc-600 mb-2">Autoría</p>
+                   <p className="text-2xl font-black text-black dark:text-white uppercase leading-none tracking-tighter">{article.author || 'Redacción Imperio Público'}</p>
                 </div>
              </div>
               <div className="text-left md:text-right">
