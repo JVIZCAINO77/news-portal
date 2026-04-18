@@ -35,14 +35,14 @@ export default function Footer() {
                     Imperio<span className="text-red-600">Público</span>
                   </span>
                 </div>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40 leading-tight">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/70 leading-tight">
                    LA AUTORIDAD DE LA ACTUALIDAD
                 </p>
               </Link>
               
               <div className="w-16 h-px bg-white/10 my-6"></div> {/* Línea Divisora */}
 
-              <div className="space-y-2 text-[11px] font-bold text-white/50 uppercase tracking-widest leading-relaxed">
+              <div className="space-y-2 text-[11px] font-bold text-white/80 uppercase tracking-widest leading-relaxed">
                 <p>Medio Digital Imperio Público.</p>
                 <p>Santo Domingo, R.D.</p>
                 <p>Tel: (829) 637-1008</p>
@@ -50,7 +50,7 @@ export default function Footer() {
 
               <div className="w-16 h-px bg-white/10 my-6"></div> {/* Línea Divisora */}
 
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/40 max-w-[200px] leading-relaxed">
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/70 max-w-[200px] leading-relaxed">
                 Copyright © {new Date().getFullYear()} IMPERIO PÚBLICO | Todos los derechos reservados.
               </p>
 

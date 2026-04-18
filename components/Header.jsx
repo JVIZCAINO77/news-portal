@@ -169,7 +169,7 @@ export default function Header() {
         {/* Utility Bar */}
         <div className="border-b border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
           <div className="max-w-6xl mx-auto px-4 md:px-8 flex justify-between items-center">
-            <div className="text-[10px] font-semibold text-gray-400 uppercase italic tracking-widest">{currentDate}</div>
+            <div className="text-[10px] font-semibold text-gray-800 uppercase italic tracking-widest">{currentDate}</div>
             <div className="flex items-center gap-8">
               <ServiceWidgets />
               <div className="h-4 w-px bg-gray-200"></div>
@@ -182,7 +182,7 @@ export default function Header() {
                 </svg>
                 Buscar
               </button>
-              <div className="flex gap-4 text-[10px] font-semibold text-gray-400 uppercase tracking-widest">
+              <div className="flex gap-4 text-[10px] font-semibold text-gray-800 uppercase tracking-widest">
                 <Link href="/nosotros" className="hover:text-red-600 transition-all">Nosotros</Link>
                 <Link href="/contacto" className="hover:text-red-600 transition-all">Contacto</Link>
               </div>

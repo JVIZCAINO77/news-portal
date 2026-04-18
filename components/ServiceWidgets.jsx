@@ -34,8 +34,8 @@ export default function ServiceWidgets() {
            </svg>
         </div>
         <div className="flex flex-col leading-none">
-           <span className="text-[8px] font-black uppercase text-slate-400 dark:text-zinc-500 tracking-widest mb-0.5">Santo Domingo</span>
-           <span className="text-[11px] font-black text-black dark:text-white uppercase tracking-tight">{data.temp}°C · <span className="text-slate-400 dark:text-zinc-500 font-bold">{data.condition}</span></span>
+           <span className="text-[8px] font-black uppercase text-slate-800 dark:text-zinc-300 tracking-widest mb-0.5">Santo Domingo</span>
+           <span className="text-[11px] font-black text-black dark:text-white uppercase tracking-tight">{data.temp}°C · <span className="text-slate-800 dark:text-zinc-300 font-bold">{data.condition}</span></span>
         </div>
       </div>
 
@@ -43,7 +43,7 @@ export default function ServiceWidgets() {
       <div className="hidden lg:flex items-center gap-6">
         {/* USD */}
         <div className="flex flex-col leading-none text-right">
-           <span className="text-[8px] font-black uppercase text-slate-400 dark:text-zinc-500 tracking-widest mb-1.5 flex items-center gap-1.5 justify-end">
+           <span className="text-[8px] font-black uppercase text-slate-800 dark:text-zinc-300 tracking-widest mb-1.5 flex items-center gap-1.5 justify-end">
              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
              Dólar USD
            </span>
@@ -55,7 +55,7 @@ export default function ServiceWidgets() {
 
         {/* EUR */}
         <div className="flex flex-col leading-none text-right border-l border-gray-100 dark:border-zinc-800 pl-6">
-           <span className="text-[8px] font-black uppercase text-slate-400 dark:text-zinc-500 tracking-widest mb-1.5">Euro EUR</span>
+           <span className="text-[8px] font-black uppercase text-slate-800 dark:text-zinc-300 tracking-widest mb-1.5">Euro EUR</span>
            <div className="flex items-center gap-3">
               <span className="text-[10px] font-black text-black dark:text-zinc-300">C: <span className="text-red-700 italic">{data.eur.buy}</span></span>
               <span className="text-[10px] font-black text-black dark:text-zinc-300">V: <span className="text-red-700 italic">{data.eur.sell}</span></span>
