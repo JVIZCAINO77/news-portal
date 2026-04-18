@@ -1,3 +1,4 @@
+'use client';
 // components/ArticleCard.jsx — Tarjeta de artículo editorial premium
 import { useState } from 'react';
 import Link from 'next/link';

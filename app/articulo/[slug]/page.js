@@ -80,99 +80,82 @@ export default async function ArticlePage({ params }) {
       <ReadingProgressBar />
       <SocialShare title={article.title} />
       <div className="max-w-5xl mx-auto px-6 pt-0 md:pt-4 pb-20 mobile-article-suction">
-        <nav className="mb-4 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-muted-base">
-           <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
-           <span className="w-1 h-px bg-slate-200 w-4"></span>
-           <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
+        <nav className="mb-6 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em]">
+           <div className="flex items-center gap-3 text-muted-base">
+              <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
+              <span className="w-1 h-px bg-slate-200 w-4"></span>
+              <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
+           </div>
+           {/* FECHA ARRIBA (Parte Verde) */}
+           <div className="text-slate-500 italic !tracking-normal">
+              Publicado el {formatDate(article.publishedAt)}
+           </div>
         </nav>
-        <header className="mb-6 relative">
-           <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }} className="text-3xl md:text-5xl lg:text-7xl font-black mb-6 leading-[1.0] tracking-[-0.05em]">
-              {article.title || 'Información en Desarrollo'}
-            </h1>
-            {article.excerpt ? (
-              <p style={{ color: '#1a1a1a' }} className="text-xl md:text-3xl font-serif leading-[1.4] mb-12 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
-                {article.excerpt}
-              </p>
-            ) : (
-              <div className="mb-12 pt-2 border-t border-gray-100 italic font-serif text-slate-500">
-                Redacción en proceso. Imperio Público está actualizando esta información.
-              </div>
-            )}
-            <div className="flex flex-col md:flex-row md:items-center justify-between py-16 border-y border-black/10 dark:border-zinc-800 gap-10">
-              <div className="flex items-center gap-8">
-                {article.author_avatar ? (
-                  <img
-                    src={article.author_avatar}
-                    alt={article.author}
-                    className="w-20 h-20 rounded-full object-cover border-4 border-black"
-                  />
-                ) : (
-                  <div className="w-20 h-20 bg-black dark:bg-zinc-800 flex items-center justify-center text-white font-black text-4xl select-none rounded-full">
-                    {article.author?.[0]}
-                  </div>
-                )}
-                <div className="text-left">
-                  <p className="overline-label !text-slate-500 dark:text-zinc-600 mb-2">Autoría</p>
-                  <p className="text-2xl font-black text-black dark:text-white uppercase leading-none tracking-tighter">{article.author || 'Redacción Imperio Público'}</p>
-                </div>
-              </div>
-              <div className="text-left md:text-right">
-                <p className="overline-label !text-slate-400 dark:text-zinc-600 mb-2">Publicado el</p>
-                <div className="flex flex-col md:items-end gap-2">
-                  <div className="text-2xl font-black text-foreground uppercase leading-none tracking-tighter">
-                    {formatDate(article.publishedAt)}
-                  </div>
-                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 px-3 py-1.5 rounded-full self-start md:self-end">
-                    <svg className="w-3 h-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
-                      {Math.max(1, Math.ceil((article.content?.split(/\s+/).length || 0) / 200))} min de lectura
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </header>
-          <figure className="mb-24">
-            <div className="relative aspect-[16/9] overflow-hidden bg-slate-50">
-              <Image src={article.image} alt={article.imageAlt || article.title} fill className="object-cover" priority />
-            </div>
-            {article.imageAlt && <figcaption className="mt-6 text-center overline-label !text-slate-400">Créditos: {article.imageAlt}</figcaption>}
-          </figure>
 
-          <AudioReader title={article.title} text={article.content} />
+        {/* PARTE 1: EL TITULAR */}
+        <header className="mb-0">
+          <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, serif' }} className="text-4xl md:text-6xl lg:text-8xl font-black mb-8 leading-[1.0] tracking-[-0.05em]">
+            {article.title || 'Información en Desarrollo'}
+          </h1>
+          
+          {/* PARTE 2: EL SUB-TEMA (Excerpt) */}
+          {article.excerpt && (
+            <p style={{ color: '#1a1a1a', fontFamily: 'Georgia, serif' }} className="text-xl md:text-3xl leading-[1.4] mb-12 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
+              {article.excerpt}
+            </p>
+          )}
+        </header>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-32">
-            {/* Main Content Column */}
-            <div className="lg:col-span-8">
+        {/* PARTE 3: LA IMAGEN DEL ARTÍCULO */}
+        <figure className="mb-12">
+          <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-50 border-y-4 border-black">
+            <Image src={article.image} alt={article.imageAlt || article.title} fill className="object-cover" priority />
+          </div>
+          {article.imageAlt && <figcaption className="mt-4 text-left overline-label !text-slate-400">Créditos: {article.imageAlt}</figcaption>}
+        </figure>
+
+        <AudioReader title={article.title} text={article.content} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-32">
+           {/* Main Content Column */}
+           <div className="lg:col-span-8">
               <div className="prose-news">
-                {paragraphs.map((p, i) => {
-                  if (p.startsWith('## ')) {
-                    return <h2 key={i} className="text-4xl md:text-6xl font-black text-black mt-28 mb-16 uppercase tracking-tighter italic border-b-8 border-black inline-block pb-4">{p.replace('## ', '')}</h2>;
-                  }
-                  if (p.trim() === '---') {
-                    return <hr key={i} className="my-24 border-black/10" />;
-                  }
+                 {paragraphs.map((p, i) => {
+                    const formattedText = p
+                      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
+                      .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
+                    
+                    const isFirstParagraph = i === 0;
+                    
+                    return (
+                      <div key={i}>
+                        <p
+                          className={`${isFirstParagraph ? 'drop-cap' : ''}`}
+                          dangerouslySetInnerHTML={{ __html: formattedText }}
+                        />
+                        {/* Insert Ad after 2nd paragraph */}
+                        {i === 1 && <AdUnit format="in-article" className="my-20" />}
+                      </div>
+                    );
+                  })}
+                </div>
 
-                  const formattedText = p
-                    .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
-
-                  const isFirstParagraph = i === 0;
-
-                  return (
-                    <div key={i}>
-                      <p
-                        className={`${isFirstParagraph ? 'drop-cap' : ''}`}
-                        dangerouslySetInnerHTML={{ __html: formattedText }}
-                      />
-                      {/* Insert Ad after 2nd paragraph */}
-                      {i === 1 && <AdUnit format="in-article" className="my-20" />}
+                {/* AUTORÍA (SOLO) EN EL FINAL */}
+                <div className="py-12 border-y border-black/10 dark:border-zinc-800 mt-20 mb-16">
+                  <div className="flex items-center gap-6">
+                    {article.author_avatar ? (
+                      <img src={article.author_avatar} alt={article.author} className="w-16 h-16 rounded-full object-cover border-2 border-black" />
+                    ) : (
+                      <div className="w-16 h-16 bg-black dark:bg-zinc-800 flex items-center justify-center text-white font-black text-2xl select-none rounded-full">
+                        {article.author?.[0]}
+                      </div>
+                    )}
+                    <div className="text-left">
+                      <p className="overline-label !text-slate-500 mb-1">Editor Responsable</p>
+                      <p className="text-2xl font-black text-black dark:text-white uppercase leading-none tracking-tighter">{article.author || 'Redacción Imperio Público'}</p>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                </div>
               <div className="flex flex-wrap gap-2 mt-20 pt-10 border-t border-border-base">
                 {article.tags?.map(tag => (<span key={tag} className="pill-tag text-red-600 border-red-100 hover:border-red-600 uppercase">#{tag}</span>))}
               </div>
