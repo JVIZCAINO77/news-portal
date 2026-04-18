@@ -29,36 +29,19 @@ export default async function CategoryPage({ params }) {
   return (
     <div className="bg-white min-h-screen">
       
-      {/* Category Header (Only restored for Opinion) */}
-      {slug === 'opinion' && (
-        <div className="border-b border-gray-100 pb-10 pt-16 bg-white relative overflow-hidden">
-          <div className="max-w-6xl mx-auto px-6 relative z-10">
-             <div className="flex items-center justify-start gap-2 mb-2">
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600">Sección Editorial</span>
-                <span className="h-px bg-red-600 w-12 opacity-50"></span>
-             </div>
-             <h1 className="text-6xl md:text-8xl font-black text-black uppercase tracking-tighter leading-none mb-4"> 
-               {cat.label} 
-             </h1>
-          </div>
-        </div>
-      )}
       
       {/* Editorial Contribution Block (Only for Opinion) */}
       {slug === 'opinion' && (
-        <section className="bg-slate-50 border-b border-gray-100 py-16 md:py-24">
+        <section className="bg-slate-50 border-b border-gray-100 py-8 md:py-12">
           <div className="max-w-6xl mx-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               <div>
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-6 block">Tribuna Abierta</span>
-                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-tight mb-8">
-                  Tu voz importa en <br/>
-                  <span className="text-red-600">Imperio Público</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-4 block">Tribuna Abierta</span>
+                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-tight mb-6">
+                  Tu voz importa en <span className="text-red-600">Imperio Público</span>
                 </h2>
-                <p className="text-lg font-serif text-slate-800 leading-relaxed mb-8">
-                  ¿Tienes una reflexión, una denuncia o un análisis que deba ser escuchado? 
-                  Buscamos ciudadanos comprometidos con la verdad. Envía tu artículo de opinión 
-                  y podrías ser nuestro próximo colaborador invitado.
+                <p className="text-base font-serif text-slate-800 leading-relaxed mb-6">
+                  ¿Tienes una reflexión o un análisis? Envía tu artículo y únete a nuestra Tribuna Abierta.
                 </p>
                 <div className="flex gap-4">
                   <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center text-white font-black">1</div>
