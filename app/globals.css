@@ -80,6 +80,12 @@
     margin-bottom: 1.25rem;
   }
 
+  .prose-news p:first-child {
+    /* REGLA 3PX: Forzamos alineación compacta eliminando el margen del navedador */
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
   .overline-label {
     font-family: 'Public Sans', sans-serif;
     font-weight: 900;

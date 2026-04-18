@@ -51,7 +51,7 @@ export default async function HomePage() {
                     fontWeight: 900, 
                     lineHeight: 1.0,
                     letterSpacing: '-0.04em',
-                    marginBottom: '1.5rem',
+                    marginBottom: '3px',
                     marginTop: '0',
                     color: '#000'
                   }} className="font-serif group-hover:text-red-700 transition-colors">
@@ -60,14 +60,14 @@ export default async function HomePage() {
                   
                   {/* PARTE 2: SUB-TEMA (Movido arriba de la imagen para consistencia) */}
                   {(pool[0].excerpt && pool[0].excerpt.trim() !== '') && (
-                    <p style={{ color: '#222' }} className="text-xl md:text-2xl leading-relaxed font-serif line-clamp-3 italic mb-8 border-l-8 border-red-600 pl-8">
+                    <p style={{ color: '#222' }} className="text-xl md:text-2xl leading-relaxed font-serif line-clamp-3 italic mb-[3px] border-l-8 border-red-600 pl-8">
                       {pool[0].excerpt}
                     </p>
                   )}
 
                   {/* PARTE 3: IMAGEN */}
                   {pool[0].image && (
-                    <div className="relative aspect-[16/9] overflow-hidden mb-8 bg-slate-50 shadow-sm border-y-2 border-black">
+                    <div className="relative aspect-[16/9] overflow-hidden mb-[3px] bg-slate-50 shadow-sm border-y-2 border-black">
                       <Image src={pool[0].image} alt={pool[0].title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" priority sizes="(max-width: 1200px) 100vw, 800px" />
                     </div>
                   )}

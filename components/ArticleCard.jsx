@@ -40,11 +40,11 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             />
           </div>
           <header className="mb-4">
-            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#000' }} className="text-2xl md:text-4xl lg:text-5xl mb-3 font-serif">
+            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#000' }} className="text-2xl md:text-4xl lg:text-5xl mb-[3px] font-serif">
                {safeTitle}
              </h1>
             {safeExcerpt && (
-              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-4 max-w-3xl border-l-4 border-red-600 pl-4">
+              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-[3px] max-w-3xl border-l-4 border-red-600 pl-4">
                  {safeExcerpt}
                </p>
             )}
@@ -63,7 +63,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
     return (
       <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 dark:border-zinc-800 pb-6 h-full ${className}`}>
         <article className="h-full flex flex-col">
-          <div className="relative aspect-[4/3] mb-4 overflow-hidden bg-slate-100 dark:bg-zinc-800">
+          <div className="relative aspect-[4/3] mb-[3px] overflow-hidden bg-slate-100 dark:bg-zinc-800">
             <Image
               src={imgSrc}
               alt={article.imageAlt || article.title}
@@ -74,14 +74,14 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             />
           </div>
           <div className="flex-1 flex flex-col">
-            <span className="overline-label mb-4 block">
+            <span className="overline-label mb-[3px] block">
               {cat?.label}
             </span>
-            <h3 style={{ fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#000' }} className="text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-4 font-serif">
+            <h3 style={{ fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#000' }} className="text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-[3px] font-serif">
                {safeTitle}
              </h3>
             {safeExcerpt && (
-              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-4 flex-1">
+              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-[3px] flex-1">
                  {safeExcerpt}
                </p>
             )}
@@ -140,7 +140,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
            </div>
            <div className="p-8 md:p-12">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>
-              <h3 style={{ fontWeight: 900, color: '#000', lineHeight: 1.1, letterSpacing: '-0.04em' }} className="text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-5 font-serif">
+              <h3 style={{ fontWeight: 900, color: '#000', lineHeight: 1.1, letterSpacing: '-0.04em' }} className="text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-[3px] font-serif">
                 {safeTitle}
               </h3>
               {safeExcerpt && (

@@ -76,7 +76,7 @@ export default function AudioReader({ title, text }) {
   }, []);
 
   return (
-    <div className="bg-background border border-border-base p-6 mb-16 flex flex-col md:flex-row items-center gap-6 shadow-sm">
+    <div className="bg-background border border-border-base p-6 mb-[3px] flex flex-col md:flex-row items-center gap-6 shadow-sm">
       <div className="flex items-center gap-4">
         {!isPlaying || isPaused ? (
           <button 

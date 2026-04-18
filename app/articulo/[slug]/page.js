@@ -39,7 +39,7 @@ export default async function ArticlePage({ params }) {
   const latest = await getLatestArticles(5);
   const related = latest.filter(a => a.id !== article.id).slice(0, 3);
 
-  const paragraphs = article.content?.split('\n\n') || [];
+  const paragraphs = article.content?.split('\n\n').filter(p => p.trim() !== "") || [];
 
   // JSON-LD — Datos Estructurados para Google (NewsArticle)
   const jsonLd = {
@@ -93,22 +93,22 @@ export default async function ArticlePage({ params }) {
            </div>
         </nav>
 
-        {/* PARTE 1: EL TITULAR */}
+        {/* REGLA EDITORIAL 3PX: Diseño compacto para siempre entre titular, imagen y audio */}
         <header className="mb-0">
-          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '2.5rem', lineHeight: '1.1' }} className="font-black mb-2 font-serif tracking-tight">
+          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '2.5rem', lineHeight: '1.1' }} className="font-black mb-[3px] font-serif tracking-tight">
             {(article.title && article.title.trim() !== "") ? article.title : 'Información en Desarrollo'}
           </h1>
           
           {/* PARTE 2: EL SUB-TEMA (Excerpt) */}
           {(article.excerpt && article.excerpt.trim() !== "") ? (
-            <p style={{ color: '#222222', fontSize: '1rem' }} className="mb-4 italic border-l-4 border-red-600 pl-4 font-serif leading-relaxed">
+            <p style={{ color: '#222222', fontSize: '1rem' }} className="mb-[3px] italic border-l-4 border-red-600 pl-4 font-serif leading-relaxed">
               {article.excerpt}
             </p>
           ) : null}
         </header>
 
         {/* PARTE 3: LA IMAGEN DEL ARTÍCULO */}
-        <figure className="mb-4 md:mb-6">
+        <figure className="mb-[3px]">
           <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-50 border-y-4 border-black">
             <Image 
               src={article.image} 
@@ -145,14 +145,14 @@ export default async function ArticlePage({ params }) {
                           dangerouslySetInnerHTML={{ __html: formattedText }}
                         />
                         {/* Insert Ad after 2nd paragraph */}
-                        {i === 1 && <AdUnit format="in-article" className="my-20" />}
+                        {i === 1 && <AdUnit format="in-article" className="my-6" />}
                       </div>
                     );
                   })}
                 </div>
 
                 {/* AUTORÍA (SOLO) EN EL FINAL */}
-                <div className="py-12 border-y border-black/10 dark:border-zinc-800 mt-20 mb-16">
+                <div className="py-8 border-y border-black/10 dark:border-zinc-800 mt-[3px] mb-[3px]">
                   <div className="flex items-center gap-6">
                     {article.author_avatar ? (
                       <img src={article.author_avatar} alt={article.author} className="w-16 h-16 rounded-full object-cover border-2 border-black" />

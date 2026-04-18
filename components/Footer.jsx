@@ -30,7 +30,9 @@ export default function Footer() {
             <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left">
               <Link href="/" className="mb-6">
                 <div className="flex items-center gap-4 mb-4">
-                  <img src="/logo.png" alt="Logo Imperio Público" className="h-12 object-contain" />
+                  <div className="bg-white p-1.5 rounded-md shadow-sm flex items-center justify-center">
+                    <img src="/logo.png" alt="Logo Imperio Público" className="h-10 md:h-12 object-contain" />
+                  </div>
                   <span className="text-2xl md:text-3xl font-black tracking-[-0.05em] uppercase text-white leading-none font-serif">
                     Imperio<span className="text-red-600">Público</span>
                   </span>
