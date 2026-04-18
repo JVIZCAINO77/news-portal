@@ -1,9 +1,23 @@
 // components/MobileMenu.jsx — Panel Lateral Premium para Móvil
 'use client';
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { CATEGORIES, SITE_CONFIG } from '@/lib/data';
 
 export default function MobileMenu({ isOpen, onClose, tickerItems = [] }) {
+  const router = useRouter();
+  const [query, setQuery] = useState('');
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/buscar?q=${encodeURIComponent(query.trim())}`);
+      onClose();
+      setQuery('');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -30,7 +44,26 @@ export default function MobileMenu({ isOpen, onClose, tickerItems = [] }) {
         </div>
 
         {/* Contenido Scrollable */}
-        <div className="flex-1 overflow-y-auto py-8">
+        <div className="flex-1 overflow-y-auto pt-4 pb-8">
+          {/* Mobile Search Bar Integrated */}
+          <div className="px-6 mb-8 mt-2">
+            <form onSubmit={handleSearch} className="relative">
+              <input 
+                autoFocus
+                type="text"
+                placeholder="INVESTIGAR NOTICIA..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full bg-slate-100/80 border-b-2 border-transparent focus:border-red-600 outline-none p-4 text-[11px] font-black uppercase tracking-widest transition-all placeholder:text-slate-400"
+              />
+              <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-black">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+            </form>
+          </div>
+
           <nav className="px-6 space-y-6">
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8 border-b-2 border-red-600 inline-block italic">Navegación</p>
             <ul className="space-y-4">
