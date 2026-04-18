@@ -32,7 +32,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#111827' }} className="text-2xl md:text-4xl lg:text-5xl mb-8 font-serif">
                {article.title}
              </h1>
-            <p style={{ color: '#1f2937', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-8 max-w-3xl border-l-4 border-red-600 pl-6">
+            <p style={{ color: '#000000', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-8 max-w-3xl border-l-4 border-red-600 pl-6">
                {article.excerpt}
              </p>
             <div className="flex items-center gap-6">
@@ -65,7 +65,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             <h3 style={{ fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#111827' }} className="text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-4 font-serif">
                {article.title}
              </h3>
-            <p style={{ color: '#374151', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-6 flex-1 opacity-90">
+            <p style={{ color: '#000000', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-6 flex-1">
                {article.excerpt}
              </p>
             <p className="metadata-text uppercase tracking-widest mt-auto border-t border-gray-50 dark:border-zinc-900 pt-6 !text-[9px] text-slate-400 dark:text-zinc-500">
@@ -122,7 +122,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               <h3 style={{ fontWeight: 900, color: '#111827', lineHeight: 1.1, letterSpacing: '-0.04em' }} className="text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-5 font-serif">
                 {article.title}
               </h3>
-              <p className="text-slate-800 dark:text-zinc-300 text-lg font-serif line-clamp-3 leading-relaxed mb-8 italic">
+              <p className="text-black dark:text-white text-lg font-serif line-clamp-3 leading-relaxed mb-8 italic">
                 {article.excerpt}
               </p>
               <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-zinc-500">

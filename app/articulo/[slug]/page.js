@@ -89,7 +89,7 @@ export default async function ArticlePage({ params }) {
            <h1 className="text-3xl md:text-[4rem] lg:text-[5rem] font-black text-black dark:text-white mb-10 leading-[0.9] tracking-[-0.07em]">
               {article.title}
             </h1>
-            <p className="text-xl md:text-4xl text-slate-800 dark:text-zinc-200 font-serif leading-[1.4] mb-16 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
+            <p className="text-xl md:text-4xl text-black dark:text-white font-serif leading-[1.4] mb-16 max-w-6xl italic border-l-[12px] border-red-600 pl-12">
               {article.excerpt}
             </p>
            <div className="flex flex-col md:flex-row md:items-center justify-between py-16 border-y border-black/10 dark:border-zinc-800 gap-10">
