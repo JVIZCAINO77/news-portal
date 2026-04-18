@@ -21,10 +21,10 @@ export default async function SearchPage({ searchParams }) {
       <section className="bg-slate-50 border-b border-gray-100 py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <p className="overline-label !text-red-600 mb-4 animate-fade-in">Buscador Editorial</p>
-          <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter text-black leading-none break-words">
+          <h1 className="text-4xl md:text-7xl font-black uppercase tracking-tighter text-black leading-none break-words font-serif">
             {query ? `"${query}"` : 'Busca en el Imperio'}
           </h1>
-          <p className="mt-8 text-slate-500 font-serif text-xl italic border-l-4 border-black pl-6">
+          <p className="mt-8 text-slate-800 font-serif text-xl italic border-l-4 border-black pl-6">
             {results.length > 0 
               ? `Hemos encontrado ${results.length} artículos que coinciden con tu investigación.`
               : query 
@@ -57,7 +57,7 @@ export default async function SearchPage({ searchParams }) {
             </div>
             <div className="space-y-4">
               <h3 className="text-2xl font-black uppercase tracking-tighter">Sin resultados</h3>
-              <p className="text-slate-500 max-w-sm mx-auto font-serif italic">
+              <p className="text-slate-800 max-w-sm mx-auto font-serif italic">
                 Prueba con términos más generales o revisa nuestras categorías principales.
               </p>
             </div>

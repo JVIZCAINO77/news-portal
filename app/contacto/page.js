@@ -34,7 +34,7 @@ export default function ContactoPage() {
                     <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                   </div>
                   <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">¡Mensaje Enviado!</h3>
-                  <p className="text-slate-500 font-serif text-lg">
+                  <p className="text-slate-800 font-serif text-lg">
                     Nos pondremos en contacto contigo en las próximas 24 horas.
                   </p>
                   <button
@@ -48,7 +48,7 @@ export default function ContactoPage() {
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Nombre Completo *</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-700 mb-3">Nombre Completo *</label>
                       <input
                         name="nombre"
                         type="text"
@@ -60,7 +60,7 @@ export default function ContactoPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Correo Electrónico *</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-700 mb-3">Correo Electrónico *</label>
                       <input
                         name="email"
                         type="email"
@@ -74,7 +74,7 @@ export default function ContactoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Asunto *</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-700 mb-3">Asunto *</label>
                     <select
                       name="asunto"
                       value={form.asunto}
@@ -92,7 +92,7 @@ export default function ContactoPage() {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Mensaje *</label>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-700 mb-3">Mensaje *</label>
                     <textarea
                       name="mensaje"
                       value={form.mensaje}
@@ -129,7 +129,7 @@ export default function ContactoPage() {
                 <a href="mailto:jvizcaino242@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
                   jvizcaino242@gmail.com
                 </a>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Atención y Línea Confidencial</p>
+                <p className="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2">Atención y Línea Confidencial</p>
               </div>
 
               {/* Horario */}
