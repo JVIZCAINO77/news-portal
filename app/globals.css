@@ -161,10 +161,4 @@
   }
 }
 
-/* Fuerza de Succión para Móvil */
-@media (max-width: 768px) {
-  .mobile-article-suction {
-    margin-top: -20px !important;
-    padding-top: 5px !important;
-  }
-}
+

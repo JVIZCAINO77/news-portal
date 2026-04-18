@@ -79,8 +79,8 @@ export default async function ArticlePage({ params }) {
       <article className="bg-background min-h-screen transition-colors duration-500">
       <ReadingProgressBar />
       <SocialShare title={article.title} />
-      <div className="max-w-5xl mx-auto px-6 pt-0 md:pt-4 pb-20 mobile-article-suction">
-        <nav className="mb-6 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em]">
+      <div className="max-w-5xl mx-auto px-6 pt-1 pb-20">
+        <nav className="mb-3 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em]">
            <div className="flex items-center gap-3 text-muted-base">
               <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
               <span className="w-1 h-px bg-slate-200 w-4"></span>
