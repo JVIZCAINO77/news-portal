@@ -79,8 +79,8 @@ export default async function ArticlePage({ params }) {
       <article className="bg-background min-h-screen transition-colors duration-500">
       <ReadingProgressBar />
       <SocialShare title={article.title} />
-      <div className="max-w-5xl mx-auto px-6 pt-1 pb-20">
-        <nav className="mb-3 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em]">
+      <div className="max-w-5xl mx-auto px-6 pt-0 pb-20">
+        <nav className="mb-1 flex items-center justify-between text-[10px] font-black uppercase tracking-[0.3em]">
            <div className="flex items-center gap-3 text-muted-base">
               <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
               <span className="w-1 h-px bg-slate-200 w-4"></span>
@@ -94,22 +94,29 @@ export default async function ArticlePage({ params }) {
 
         {/* PARTE 1: EL TITULAR */}
         <header className="mb-0">
-          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '3rem', lineHeight: '1.1' }} className="font-black mb-3 font-serif tracking-tight">
+          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '3rem', lineHeight: '1.1' }} className="font-black mb-1 font-serif tracking-tight">
             {(article.title && article.title.trim() !== "") ? article.title : 'Información en Desarrollo'}
           </h1>
           
           {/* PARTE 2: EL SUB-TEMA (Excerpt) */}
           {(article.excerpt && article.excerpt.trim() !== "") ? (
-            <p style={{ color: '#222222', fontSize: '1.125rem' }} className="mb-6 italic border-l-4 border-red-600 pl-4 font-serif leading-relaxed">
+            <p style={{ color: '#222222', fontSize: '1.125rem' }} className="mb-3 italic border-l-4 border-red-600 pl-4 font-serif leading-relaxed">
               {article.excerpt}
             </p>
           ) : null}
         </header>
 
         {/* PARTE 3: LA IMAGEN DEL ARTÍCULO */}
-        <figure className="mb-6 md:mb-12">
+        <figure className="mb-4 md:mb-6">
           <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-50 border-y-4 border-black">
-            <Image src={article.image} alt={article.imageAlt || article.title} fill className="object-cover" priority />
+            <Image 
+              src={article.image} 
+              alt={article.imageAlt || article.title} 
+              fill 
+              className="object-cover" 
+              priority 
+              sizes="(max-width: 1280px) 100vw, 1280px"
+            />
           </div>
           {article.imageAlt && <figcaption className="mt-4 text-left overline-label !text-slate-400">Créditos: {article.imageAlt}</figcaption>}
         </figure>

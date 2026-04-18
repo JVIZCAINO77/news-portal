@@ -68,7 +68,7 @@ export default async function HomePage() {
                   {/* PARTE 3: IMAGEN */}
                   {pool[0].image && (
                     <div className="relative aspect-[16/9] overflow-hidden mb-8 bg-slate-50 shadow-sm border-y-2 border-black">
-                      <Image src={pool[0].image} alt={pool[0].title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" priority />
+                      <Image src={pool[0].image} alt={pool[0].title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" priority sizes="(max-width: 1200px) 100vw, 800px" />
                     </div>
                   )}
 
@@ -86,7 +86,7 @@ export default async function HomePage() {
                   <Link href={`/articulo/${art.slug}`} className="group block">
                     {art.image && (
                       <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-50">
-                        <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 400px" />
                       </div>
                     )}
                     <h3 style={{ color: '#000' }} className="text-xl md:text-2xl font-black font-serif group-hover:text-red-700 leading-tight mb-3">
@@ -119,7 +119,7 @@ export default async function HomePage() {
                   <Link href={`/articulo/${art.slug}`} className="group block">
                     {art.image && (
                       <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-50 text-center">
-                        <Image src={art.image} alt={art.title} fill className="object-cover" />
+                        <Image src={art.image} alt={art.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 400px" />
                       </div>
                     )}
                     <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
@@ -176,7 +176,7 @@ export default async function HomePage() {
                <Link key={art.id} href={`/articulo/${art.slug}`} className="group block border-l-2 border-red-600 pl-4 hover:bg-slate-50 transition-colors py-2">
                   {art.image && (
                     <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-50">
-                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 300px" />
                     </div>
                   )}
                   <h4 style={{ color: '#000' }} className="text-sm font-black font-serif group-hover:text-red-700 leading-tight mb-1">
@@ -199,7 +199,7 @@ export default async function HomePage() {
                 <article>
                   {art.image && (
                     <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-50">
-                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 200px" />
                     </div>
                   )}
                   <span className="text-[0.58rem] font-black text-[#bb1b21] uppercase tracking-[0.1em] mb-1 block">

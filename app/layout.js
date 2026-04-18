@@ -57,21 +57,21 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <head>
         {/* Forzar modo claro antes de que React hidrate — evita el flash negro */}
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.remove('dark');localStorage.removeItem('theme');` }} />
-        <meta name="google-adsense-account" content="ca-pub-9579937391435747" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Merriweather:ital,wght@0,300..900;1,300..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
         
         {/* Google AdSense Script — Standard verification tag */}
-        <script 
+        <Script 
           async 
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE_CONFIG.adsenseId}`}
           crossOrigin="anonymous"
-        ></script>
+          strategy="afterInteractive"
+        />
         <meta name="google-adsense-account" content="ca-pub-9579937391435747" />
         {/* Google Analytics 4 */}
         {SITE_CONFIG.gaId && (

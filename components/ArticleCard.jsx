@@ -35,21 +35,22 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               fill
               className="object-cover"
               priority
+              sizes="(max-width: 1200px) 100vw, 1200px"
               onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
             />
           </div>
-          <header className="mb-12">
-            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#000' }} className="text-2xl md:text-4xl lg:text-5xl mb-8 font-serif">
+          <header className="mb-4">
+            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#000' }} className="text-2xl md:text-4xl lg:text-5xl mb-3 font-serif">
                {safeTitle}
              </h1>
             {safeExcerpt && (
-              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-8 max-w-3xl border-l-4 border-red-600 pl-6">
+              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-4 max-w-3xl border-l-4 border-red-600 pl-4">
                  {safeExcerpt}
                </p>
             )}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
                <span className="text-black dark:text-white group-hover:text-red-700 transition-colors metadata-text !font-black !tracking-widest uppercase !text-[10px]">{article.author}</span>
-               <span className="w-12 h-px bg-slate-200 dark:bg-zinc-800"></span>
+               <span className="w-8 h-px bg-slate-200 dark:bg-zinc-800"></span>
                <span className="metadata-text italic !tracking-normal !text-[10px] text-slate-500 dark:text-zinc-500">{formattedDate}</span>
             </div>
           </header>
@@ -60,14 +61,15 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'medium') {
     return (
-      <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 dark:border-zinc-800 pb-12 h-full ${className}`}>
+      <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 dark:border-zinc-800 pb-6 h-full ${className}`}>
         <article className="h-full flex flex-col">
-          <div className="relative aspect-[4/3] mb-8 overflow-hidden bg-slate-100 dark:bg-zinc-800">
+          <div className="relative aspect-[4/3] mb-4 overflow-hidden bg-slate-100 dark:bg-zinc-800">
             <Image
               src={imgSrc}
               alt={article.imageAlt || article.title}
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
               onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
             />
           </div>
@@ -79,7 +81,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
                {safeTitle}
              </h3>
             {safeExcerpt && (
-              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-6 flex-1">
+              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-4 flex-1">
                  {safeExcerpt}
                </p>
             )}
@@ -112,6 +114,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
                 alt={article.imageAlt || article.title}
                 fill
                 className="object-cover"
+                sizes="(max-width: 768px) 224px, 150px"
                 onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
               />
             </div>
@@ -131,6 +134,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
                 alt={article.imageAlt || article.title}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 600px"
                 onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
               />
            </div>
