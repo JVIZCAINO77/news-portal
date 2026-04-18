@@ -90,14 +90,14 @@ export default function Header() {
             </button>
           </div>
 
-          <Link href="/" className="flex items-center justify-center flex-row gap-6 md:gap-10 hover:opacity-90 transition-opacity">
+          <a href="/" className="flex items-center justify-center flex-row gap-6 md:gap-10 hover:opacity-90 transition-opacity">
             <img 
               src="/icon.png" 
               alt="Logo IP" 
               className="h-12 md:h-20 lg:h-24 object-contain mix-blend-multiply" 
             />
             <div className="flex flex-col items-center">
-              <h1 
+              <span 
                 style={{ 
                   color: '#0f0f0f',
                   fontSize: 'clamp(1.5rem, 6vw, 4.5rem)'
@@ -105,7 +105,7 @@ export default function Header() {
                 className="font-black tracking-[-0.05em] uppercase leading-[0.75]"
               >
                 Imperio<span style={{ color: '#bb1b21' }}>Público</span>
-              </h1>
+              </span>
               <div className="flex items-center justify-center gap-4 w-full mt-2">
                 <div style={{ height: '1.5px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.2 }}></div>
                 <span className="text-[0.5rem] md:text-[0.7rem] font-bold text-gray-900 tracking-[0.35em] uppercase italic whitespace-nowrap font-sans">
@@ -114,7 +114,7 @@ export default function Header() {
                 <div style={{ height: '1.5px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.2 }}></div>
               </div>
             </div>
-          </Link>
+          </a>
         </div>
       </section>
 

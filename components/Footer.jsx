@@ -24,10 +24,10 @@ export default function Footer() {
 
       <div className="bg-black text-white pt-20 pb-20">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
             
             {/* Columna 1: Branding y Social (Ancho 4/12) */}
-            <div className="md:col-span-4 flex flex-col items-center md:items-start text-center md:text-left">
+            <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left">
               <Link href="/" className="mb-6">
                 <div className="flex items-center gap-4 mb-4">
                   <img src="/logo.png" alt="Logo Imperio Público" className="h-12 object-contain" />
@@ -80,7 +80,7 @@ export default function Footer() {
             </div>
 
             {/* Columnas 2 y 3: MAPA WEB (Ancho 5/12) */}
-            <div className="md:col-span-5 grid grid-cols-2 gap-8">
+            <div className="lg:col-span-5 grid grid-cols-2 gap-8">
               <div className="col-span-2">
                  <h4 className="text-[13px] font-black uppercase tracking-[0.3em] text-white mb-8">MAPA WEB</h4>
               </div>
@@ -107,7 +107,7 @@ export default function Footer() {
             </div>
 
             {/* Columna 4: NOSOTROS (Ancho 3/12) */}
-            <div className="md:col-span-3">
+            <div className="lg:col-span-3">
               <h4 className="text-[13px] font-black uppercase tracking-[0.3em] text-white mb-8">NOSOTROS</h4>
               <ul className="space-y-4">
                 <li key="contacto"><Link href="/contacto" className="text-[12px] font-bold text-white/60 hover:text-red-600 transition-colors uppercase">Para contactarnos</Link></li>

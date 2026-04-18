@@ -39,14 +39,14 @@ export default async function HomePage() {
 
 
         {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-6 border-b-4 border-black mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-4 border-b border-black mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
             {/* Artículo Especial (Importancia 1) - 2/3 de ancho */}
             <div className="lg:col-span-8 border-b lg:border-b-0 lg:border-r border-gray-100 pb-12 lg:pb-0 lg:pr-12">
               {pool[0] && (
                 <Link href={`/articulo/${pool[0].slug}`} className="group block">
-                  <h2 style={{ 
+                  <h1 style={{ 
                     fontSize: 'clamp(1.6rem, 3.5vw, 3.5rem)', 
                     fontWeight: 900, 
                     lineHeight: 1.0,
@@ -56,7 +56,7 @@ export default async function HomePage() {
                     color: '#000'
                   }} className="font-serif group-hover:text-red-700 transition-colors">
                     {(pool[0].title && pool[0].title.trim() !== '') ? pool[0].title : 'Información en Desarrollo'}
-                  </h2>
+                  </h1>
                   
                   {/* PARTE 2: SUB-TEMA (Movido arriba de la imagen para consistencia) */}
                   {(pool[0].excerpt && pool[0].excerpt.trim() !== '') && (
@@ -80,7 +80,7 @@ export default async function HomePage() {
             </div>
 
             {/* Sidebar de Noticias (Importancia 2 y 3) - 1/3 de ancho */}
-            <div className="lg:col-span-4 flex flex-col gap-10">
+            <div className="lg:col-span-4 flex flex-col gap-6">
               {pool.slice(1, 3).map((art, idx) => (
                 <div key={art.id} className={idx === 0 ? 'pb-10 border-b border-gray-100' : ''}>
                   <Link href={`/articulo/${art.slug}`} className="group block">
@@ -110,10 +110,10 @@ export default async function HomePage() {
 
         {/* ── SECCIÓN 2: Historias 4 y 5 + Columna a la Derecha (Sidebar) ── */}
         <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
             {/* Izquierda: 2 noticias principales secundarias */}
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-12 border-r border-gray-100 pr-0 lg:pr-12">
+            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6 border-r border-gray-100 pr-0 lg:pr-8">
               {pool.slice(3, 5).map((art) => (
                 <div key={art.id}>
                   <Link href={`/articulo/${art.slug}`} className="group block">

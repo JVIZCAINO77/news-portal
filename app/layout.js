@@ -63,7 +63,7 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.remove('dark');localStorage.removeItem('theme');` }} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Merriweather:ital,wght@0,300..900;1,300..900&family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
         
         {/* Google AdSense Script — Standard verification tag */}
         <Script 
@@ -95,7 +95,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className="min-h-screen flex flex-col font-sans">
         <Header />
-        <main className="min-h-screen pt-[2px] md:pt-[2px]">
+        <main className="min-h-screen pt-[2px] md:pt-[2px] pb-24 md:pb-0">
           {children}
         </main>
         <BackToTop />

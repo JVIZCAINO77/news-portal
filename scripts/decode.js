@@ -1,3 +1,0 @@
-const url = "CBMizgFBVV95cUxNZGI2WmN4UVJZaVFyTWNycEdrVXZTaWtDV3Fpb0FmRlhBWXJTd21qMG91dnpmVFh4cUNNMXdBZW9Yb0V5VGptQmtsdFU1UHhlQXNQdkVfbkwyVk5qNmU5VGZOZGNKX0ZfTHdPZ1dVcTNXMUQxTzd2UlhiRWNCUUp5WWxfSjBiT18zdjYzQldJNHJtZGpWbUhNTWFzVl9kMFZfS3k5aWFSeTFyT1dhcS1wVTg3NWh3Tk0wcFhSMEtsQ05leW9aMUJuVjRGNmM0d9";
-const b64 = Buffer.from(url, 'base64').toString('ascii');
-console.log(b64);

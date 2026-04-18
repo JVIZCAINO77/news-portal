@@ -19,6 +19,7 @@ export async function generateMetadata({ params }) {
   return {
     title: article.title,
     description: article.excerpt,
+    keywords: article.tags ? article.tags.sort().join(', ') : '',
     openGraph: {
       type: 'article',
       title: article.title,
@@ -94,13 +95,13 @@ export default async function ArticlePage({ params }) {
 
         {/* PARTE 1: EL TITULAR */}
         <header className="mb-0">
-          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '3rem', lineHeight: '1.1' }} className="font-black mb-1 font-serif tracking-tight">
+          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '2.5rem', lineHeight: '1.1' }} className="font-black mb-2 font-serif tracking-tight">
             {(article.title && article.title.trim() !== "") ? article.title : 'Información en Desarrollo'}
           </h1>
           
           {/* PARTE 2: EL SUB-TEMA (Excerpt) */}
           {(article.excerpt && article.excerpt.trim() !== "") ? (
-            <p style={{ color: '#222222', fontSize: '1.125rem' }} className="mb-3 italic border-l-4 border-red-600 pl-4 font-serif leading-relaxed">
+            <p style={{ color: '#222222', fontSize: '1rem' }} className="mb-4 italic border-l-4 border-red-600 pl-4 font-serif leading-relaxed">
               {article.excerpt}
             </p>
           ) : null}
@@ -123,11 +124,14 @@ export default async function ArticlePage({ params }) {
 
         <AudioReader title={article.title} text={article.content} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-32">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
            {/* Main Content Column */}
-           <div className="lg:col-span-8">
+           <div className="lg:col-span-8 w-full">
               <div className="prose-news">
                  {paragraphs.map((p, i) => {
+                    // Detect if paragraph is entirely made of hashtags and hide it
+                    if (p.trim().match(/^(#[\w-áéíóúñÁÉÍÓÚÑ]+\s*)+$/)) return null;
+
                     const formattedText = p
                       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
                       .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
@@ -163,29 +167,16 @@ export default async function ArticlePage({ params }) {
                     </div>
                   </div>
                 </div>
-              <div className="flex flex-wrap gap-2 mt-20 pt-10 border-t border-border-base">
-                {article.tags?.map(tag => (<span key={tag} className="pill-tag text-red-600 border-red-100 hover:border-red-600 uppercase">#{tag}</span>))}
-              </div>
+            </div>
 
-              {/* Etiquetas y Newsletter */}
-              <div className="mt-12 pt-8 border-t border-gray-100">
-                <div className="flex flex-wrap gap-2 mb-16">
-                  {['#Política', '#Economía', '#Impacto', '#Nacional'].map(tag => (
-                    <span key={tag} className="pill-tag">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <NewsletterBox />
-              </div>
-
-              <div className="mt-20">
+            {/* Sidebar Column */}
+            <aside className="lg:col-span-4 border-l border-gray-100 pl-0 lg:pl-12">
+              <div className="sticky top-32">
                 <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 border-b border-gray-100 pb-4 italic">Lo más reciente</h3>
                 <div className="space-y-8">
                   {latest.map((a, idx) => (
-                    <Link key={a.id} href={`/articulo/${a.slug}`} className="group flex gap-5 items-start">
-                      <span className="text-4xl font-black text-slate-100 group-hover:text-red-600 transition-colors leading-none">{idx + 1}</span>
+                    <Link key={a.id} href={`/articulo/${a.slug}`} className="group flex gap-5 items-start border-b border-slate-50 pb-6 last:border-0">
+                      <span className="text-4xl font-black text-slate-100 font-serif group-hover:text-red-600 transition-colors leading-none">{idx + 1}</span>
                       <div>
                         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-2">{getCategoryBySlug(a.category)?.label}</span>
                         <h5 className="text-[13px] font-black uppercase tracking-tight leading-tight group-hover:underline">{a.title}</h5>
@@ -193,48 +184,26 @@ export default async function ArticlePage({ params }) {
                     </Link>
                   ))}
                 </div>
-              </div>
-            </div>
-
-            {/* Sidebar Monetization & Engagement */}
-            <aside className="lg:col-span-4 border-l border-gray-100 pl-0 lg:pl-16">
-              <div className="sticky top-32 space-y-16">
-                {/* Sidebar Ad Top */}
-                <div className="border-b border-gray-50 pb-16">
-                  <AdUnit format="rectangle" slot="sidebar-top" />
-                </div>
-
-                {/* Numerical Most Read List */}
-                <div>
-                  <h4 className="text-[11px] font-black uppercase tracking-[0.4em] text-red-600 mb-8 pb-3 border-b-2 border-red-600 inline-block italic">Lo más leído</h4>
-                  <div className="space-y-8">
-                    {latest.map((a, idx) => (
-                      <Link key={a.id} href={`/articulo/${a.slug}`} className="group flex gap-5 items-start">
-                        <span className="text-4xl font-black text-slate-100 group-hover:text-red-600 transition-colors leading-none">{idx + 1}</span>
-                        <div>
-                          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-2">{getCategoryBySlug(a.category)?.label}</span>
-                          <h5 className="text-[13px] font-black uppercase tracking-tight leading-tight group-hover:underline">{a.title}</h5>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Sidebar Ad Bottom */}
-                <div className="pt-16 border-t border-gray-50">
-                  <AdUnit format="rectangle" slot="sidebar-bottom" />
+                <div className="mt-16">
+                   <AdUnit format="rectangle" slot="sidebar-bottom" />
                 </div>
               </div>
             </aside>
           </div>
-          <section className="mt-32 pt-20 border-t-8 border-black">
-            <h2 className="text-5xl font-black uppercase tracking-tighter mb-16 italic">Sigue Leyendo en {cat?.label}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          
+          <section className="mt-32 pt-20 border-t-4 border-black pb-16">
+            <h2 className="text-4xl font-black uppercase tracking-tighter mb-16 italic">Sigue Leyendo en {cat?.label}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {latest.slice(0, 3).map(a => (
-                <ArticleCard key={a.id} article={a} variant="medium" className="bg-slate-50/50 p-6" />
+                <ArticleCard key={a.id} article={a} variant="medium" className="bg-slate-50 p-6 border border-gray-100" />
               ))}
             </div>
           </section>
+        </div>
+
+        {/* Full Width Newsletter */}
+        <div className="border-t border-gray-100">
+           <NewsletterBox />
         </div>
       </article>
     </>

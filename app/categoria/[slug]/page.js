@@ -34,7 +34,7 @@ export default async function CategoryPage({ params }) {
       {slug === 'opinion' && (
         <section className="bg-slate-50 border-b border-gray-100 pt-0 pb-12">
           <div className="max-w-6xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
               <div>
                 <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-4 block">Tribuna Abierta</span>
                 <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-tight mb-6">
@@ -70,19 +70,19 @@ export default async function CategoryPage({ params }) {
 
       <div className="max-w-6xl mx-auto px-6 pt-0 pb-20">
         {heroArticles.length > 0 ? (
-          <div className="flex flex-col gap-12">
+          <div className="flex flex-col gap-8">
              {/* First Highlight */}
              <div className="border-b border-gray-100 pt-0 pb-12">
                 <ArticleCard article={heroArticles[0]} variant="hero" />
              </div>
 
-             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-24">
+             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
                 {/* Main Feed */}
-                <div className="lg:col-span-8 flex flex-col gap-10">
+                <div className="lg:col-span-8 flex flex-col gap-6">
                    {/* Second Highlight (Wide) */}
                    {heroArticles[1] && <ArticleCard article={heroArticles[1]} variant="wide" />}
                    
-                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8">
                       {remainingArticles.map(a => (
                         <ArticleCard key={a.id} article={a} variant="medium" />
                       ))}

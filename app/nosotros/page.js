@@ -37,9 +37,9 @@ export default function NosotrosPage() {
             </div>
             <div className="border-l-4 border-slate-300 pl-8">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-800 mb-4">Nuestros Valores</h2>
-              <ul className="space-y-2">
+              <ul className="space-y-3">
                 {['Veracidad', 'Objetividad', 'Independencia editorial', 'Responsabilidad social', 'Innovación'].map(v => (
-                  <li key={v} className="text-base font-bold text-slate-800 uppercase tracking-tight">— {v}</li>
+                  <li key={v} className="text-lg font-serif text-slate-800 leading-relaxed">— {v}</li>
                 ))}
               </ul>
             </div>
