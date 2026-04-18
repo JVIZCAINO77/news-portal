@@ -139,7 +139,7 @@ export default function Header() {
               </h1>
               <div className="flex items-center justify-center gap-4 w-full mt-2">
                 <div style={{ height: '1.5px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.2 }}></div>
-                <span className="text-[0.5rem] md:text-[0.7rem] font-bold text-gray-900 tracking-[0.35em] uppercase italic whitespace-nowrap">
+                <span className="text-[0.5rem] md:text-[0.7rem] font-bold text-gray-900 tracking-[0.35em] uppercase italic whitespace-nowrap font-sans">
                   La Autoridad de la Actualidad
                 </span>
                 <div style={{ height: '1.5px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.2 }}></div>

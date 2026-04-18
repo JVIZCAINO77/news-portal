@@ -18,8 +18,8 @@ export default function MobileMenu({ isOpen, onClose, tickerItems = [] }) {
       <aside className="absolute top-0 left-0 w-4/5 max-w-[320px] h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-left duration-500">
         {/* Header del Menú */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-          <div className="flex flex-col">
-            <span className="text-xl font-black text-black uppercase tracking-tighter leading-none">Imperio<span className="text-red-600">Público</span></span>
+           <div className="flex flex-col">
+            <span className="text-xl font-black text-black uppercase tracking-tighter leading-none font-serif">Imperio<span className="text-red-600">Público</span></span>
             <span className="text-[7px] font-black uppercase tracking-[0.4em] text-slate-400 mt-1">La Autoridad</span>
           </div>
           <button onClick={onClose} className="w-10 h-10 flex items-center justify-center text-black hover:bg-slate-100 transition-colors">
@@ -34,12 +34,6 @@ export default function MobileMenu({ isOpen, onClose, tickerItems = [] }) {
           <nav className="px-6 space-y-6">
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8 border-b-2 border-red-600 inline-block italic">Navegación</p>
             <ul className="space-y-4">
-              <li>
-                <Link href="/" onClick={onClose} className="text-2xl font-black text-black hover:text-red-600 transition-colors uppercase tracking-tighter flex items-center justify-between group">
-                  Portada
-                  <span className="w-2 h-2 bg-red-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                </Link>
-              </li>
               {CATEGORIES.map((cat) => (
                 <li key={cat.slug}>
                   <Link 
