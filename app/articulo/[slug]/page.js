@@ -77,16 +77,16 @@ export default async function ArticlePage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <article className="bg-background min-h-screen transition-colors duration-500">
-        <ReadingProgressBar />
-        <SocialShare title={article.title} />
-        <div className="max-w-5xl mx-auto px-6 py-12 md:py-20">
-          <nav className="mb-12 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-muted-base">
-            <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
-            <span className="w-1 h-1 bg-slate-100 rounded-full"></span>
-            <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
-          </nav>
-          <header className="mb-0 relative z-10">
-            <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1 }} className="text-4xl md:text-[4rem] lg:text-[5rem] font-black mb-8 leading-[0.9] tracking-[-0.07em] font-serif">
+      <ReadingProgressBar />
+      <SocialShare title={article.title} />
+      <div className="max-w-5xl mx-auto px-6 pt-0 md:pt-4 pb-20 mobile-article-suction">
+        <nav className="mb-4 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.3em] text-muted-base">
+           <Link href="/" className="hover:text-red-600 transition-colors">Inicio</Link>
+           <span className="w-1 h-px bg-slate-200 w-4"></span>
+           <Link href={`/categoria/${article.category}`} className="text-red-600">{cat?.label}</Link>
+        </nav>
+        <header className="mb-6 relative">
+           <h1 style={{ color: '#000000', display: 'block', visibility: 'visible', opacity: 1, fontFamily: '"Playfair Display", Georgia, "Times New Roman", serif' }} className="text-3xl md:text-5xl lg:text-7xl font-black mb-6 leading-[1.0] tracking-[-0.05em]">
               {article.title || 'Información en Desarrollo'}
             </h1>
             {article.excerpt ? (
