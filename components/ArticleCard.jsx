@@ -1,7 +1,10 @@
 // components/ArticleCard.jsx — Tarjeta de artículo editorial premium
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getCategoryBySlug, formatDate } from '@/lib/data';
+
+const DEFAULT_PLACEHOLDER = '/icon.png';
 
 /**
  * Variants:
@@ -11,6 +14,8 @@ import { getCategoryBySlug, formatDate } from '@/lib/data';
  *  'minimal' — Solo texto (para sidebars).
  */
 export default function ArticleCard({ article, variant = 'medium', className = '', extraBadge = null }) {
+  const [imgSrc, setImgSrc] = useState(article?.image || DEFAULT_PLACEHOLDER);
+  
   if (!article) return null;
   const cat = getCategoryBySlug(article.category);
   const formattedDate = formatDate(article.publishedAt);
@@ -21,11 +26,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
         <article className="relative">
           <div className="relative aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-100">
             <Image
-              src={article.image}
+              src={imgSrc}
               alt={article.imageAlt || article.title}
               fill
               className="object-cover"
               priority
+              onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
             />
           </div>
           <header className="mb-12">
@@ -52,10 +58,11 @@ export default function ArticleCard({ article, variant = 'medium', className = '
         <article className="h-full flex flex-col">
           <div className="relative aspect-[4/3] mb-8 overflow-hidden bg-slate-100 dark:bg-zinc-800">
             <Image
-              src={article.image}
+              src={imgSrc}
               alt={article.imageAlt || article.title}
               fill
               className="object-cover"
+              onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
             />
           </div>
           <div className="flex-1 flex flex-col">
@@ -93,10 +100,11 @@ export default function ArticleCard({ article, variant = 'medium', className = '
           {article.image && (
             <div className="relative w-32 h-20 md:w-56 md:h-36 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-zinc-800">
               <Image
-                src={article.image}
+                src={imgSrc}
                 alt={article.imageAlt || article.title}
                 fill
                 className="object-cover"
+                onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
               />
             </div>
           )}
@@ -111,10 +119,11 @@ export default function ArticleCard({ article, variant = 'medium', className = '
         <article className="grid grid-cols-1 md:grid-cols-2 items-center">
            <div className="relative aspect-[16/10] overflow-hidden">
               <Image
-                src={article.image}
+                src={imgSrc}
                 alt={article.imageAlt || article.title}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
+                onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
               />
            </div>
            <div className="p-8 md:p-12">
