@@ -20,6 +20,9 @@ export default function ArticleCard({ article, variant = 'medium', className = '
   if (!article) return null;
   const cat = getCategoryBySlug(article.category);
   const formattedDate = formatDate(article.publishedAt);
+  
+  const safeTitle = (article.title && typeof article.title === 'string' && article.title.trim() !== "") ? article.title : 'Información en Desarrollo';
+  const safeExcerpt = (article.excerpt && typeof article.excerpt === 'string' && article.excerpt.trim() !== "") ? article.excerpt : null;
 
   if (variant === 'hero') {
     return (
@@ -36,12 +39,14 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             />
           </div>
           <header className="mb-12">
-            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#111827' }} className="text-2xl md:text-4xl lg:text-5xl mb-8 font-serif">
-               {article.title}
+            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#000' }} className="text-2xl md:text-4xl lg:text-5xl mb-8 font-serif">
+               {safeTitle}
              </h1>
-            <p style={{ color: '#000000', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-8 max-w-3xl border-l-4 border-red-600 pl-6">
-               {article.excerpt}
-             </p>
+            {safeExcerpt && (
+              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-8 max-w-3xl border-l-4 border-red-600 pl-6">
+                 {safeExcerpt}
+               </p>
+            )}
             <div className="flex items-center gap-6">
                <span className="text-black dark:text-white group-hover:text-red-700 transition-colors metadata-text !font-black !tracking-widest uppercase !text-[10px]">{article.author}</span>
                <span className="w-12 h-px bg-slate-200 dark:bg-zinc-800"></span>
@@ -70,12 +75,14 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             <span className="overline-label mb-4 block">
               {cat?.label}
             </span>
-            <h3 style={{ fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#111827' }} className="text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-4 font-serif">
-               {article.title}
+            <h3 style={{ fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#000' }} className="text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-4 font-serif">
+               {safeTitle}
              </h3>
-            <p style={{ color: '#000000', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-6 flex-1">
-               {article.excerpt}
-             </p>
+            {safeExcerpt && (
+              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-6 flex-1">
+                 {safeExcerpt}
+               </p>
+            )}
             <p className="metadata-text uppercase tracking-widest mt-auto border-t border-gray-50 dark:border-zinc-900 pt-6 !text-[9px] text-slate-400 dark:text-zinc-500">
               Por {article.author}
             </p>
@@ -91,8 +98,8 @@ export default function ArticleCard({ article, variant = 'medium', className = '
         <article className="flex gap-10 items-start">
           <div className="flex-1 min-w-0">
              <span className="overline-label text-red-700 mb-2 block">{cat?.label}</span>
-             <h4 style={{ fontWeight: 900, color: '#111827', lineHeight: 1.2, letterSpacing: '-0.02em' }} className="text-base md:text-lg group-hover:text-red-700 transition-colors line-clamp-2 hover:underline underline-offset-4 decoration-1 font-serif">
-                {article.title}
+             <h4 style={{ fontWeight: 900, color: '#000', lineHeight: 1.2, letterSpacing: '-0.02em' }} className="text-base md:text-lg group-hover:text-red-700 transition-colors line-clamp-2 hover:underline underline-offset-4 decoration-1 font-serif">
+                {safeTitle}
               </h4>
              <p className="metadata-text mt-8 opacity-60 !text-[8px] dark:text-zinc-500">
                {formattedDate}
@@ -129,12 +136,14 @@ export default function ArticleCard({ article, variant = 'medium', className = '
            </div>
            <div className="p-8 md:p-12">
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>
-              <h3 style={{ fontWeight: 900, color: '#111827', lineHeight: 1.1, letterSpacing: '-0.04em' }} className="text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-5 font-serif">
-                {article.title}
+              <h3 style={{ fontWeight: 900, color: '#000', lineHeight: 1.1, letterSpacing: '-0.04em' }} className="text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-5 font-serif">
+                {safeTitle}
               </h3>
-              <p className="text-black dark:text-white text-lg font-serif line-clamp-3 leading-relaxed mb-8 italic">
-                {article.excerpt}
-              </p>
+              {safeExcerpt && (
+                <p className="text-black dark:text-white text-lg font-serif line-clamp-3 leading-relaxed mb-8 italic">
+                  {safeExcerpt}
+                </p>
+              )}
               <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-zinc-500">
                  <span className="text-black dark:text-white">Por {article.author}</span>
                  <span className="w-6 h-px bg-slate-200 dark:bg-zinc-800"></span>
@@ -158,7 +167,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
            </div>
            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300 mb-4 block italic">Perspectiva</span>
            <h3 className="text-2xl font-serif italic text-black group-hover:text-red-600 transition-colors leading-tight mb-4">
-             "{article.title}"
+             "{safeTitle}"
            </h3>
            <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
              {article.author}
@@ -176,7 +185,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
           {cat?.label}
         </span>
         <h4 className="text-base font-black text-black group-hover:text-red-600 transition-colors leading-tight uppercase tracking-tight">
-          {article.title}
+          {safeTitle}
         </h4>
       </article>
     </Link>

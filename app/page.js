@@ -52,15 +52,18 @@ export default async function HomePage() {
                     lineHeight: 1.0,
                     letterSpacing: '-0.04em',
                     marginBottom: '1.5rem',
-                    marginTop: '0'
-                  }} className="font-serif text-[#0f0f0f] group-hover:text-red-700 transition-colors">
-                    {pool[0].title}
+                    marginTop: '0',
+                    color: '#000'
+                  }} className="font-serif group-hover:text-red-700 transition-colors">
+                    {(pool[0].title && pool[0].title.trim() !== '') ? pool[0].title : 'Información en Desarrollo'}
                   </h2>
                   
                   {/* PARTE 2: SUB-TEMA (Movido arriba de la imagen para consistencia) */}
-                  <p className="text-xl md:text-2xl leading-relaxed text-gray-700 font-serif line-clamp-3 italic mb-8 border-l-8 border-red-600 pl-8">
-                    {pool[0].excerpt}
-                  </p>
+                  {(pool[0].excerpt && pool[0].excerpt.trim() !== '') && (
+                    <p style={{ color: '#222' }} className="text-xl md:text-2xl leading-relaxed font-serif line-clamp-3 italic mb-8 border-l-8 border-red-600 pl-8">
+                      {pool[0].excerpt}
+                    </p>
+                  )}
 
                   {/* PARTE 3: IMAGEN */}
                   {pool[0].image && (
@@ -86,12 +89,14 @@ export default async function HomePage() {
                         <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                       </div>
                     )}
-                    <h3 className="text-xl md:text-2xl font-black font-serif text-[#0f0f0f] group-hover:text-red-700 leading-tight mb-3">
-                      {art.title}
+                    <h3 style={{ color: '#000' }} className="text-xl md:text-2xl font-black font-serif group-hover:text-red-700 leading-tight mb-3">
+                      {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                     </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2 italic mb-4 text-serif">
-                      {art.excerpt}
-                    </p>
+                    {(art.excerpt && art.excerpt.trim() !== '') && (
+                      <p style={{ color: '#333' }} className="text-sm line-clamp-2 italic mb-4 text-serif">
+                        {art.excerpt}
+                      </p>
+                    )}
                     <span className="text-[0.6rem] font-bold text-gray-400 uppercase tracking-widest">
                        {formatDate(art.publishedAt)}
                     </span>
@@ -120,12 +125,14 @@ export default async function HomePage() {
                     <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
                       {art.category}
                     </span>
-                    <h3 className="text-xl md:text-2xl font-black font-serif text-[#0f0f0f] group-hover:text-red-700 leading-tight mb-4">
-                      {art.title}
+                    <h3 style={{ color: '#000' }} className="text-xl md:text-2xl font-black font-serif group-hover:text-red-700 leading-tight mb-4">
+                      {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                     </h3>
-                    <p className="text-sm text-gray-600 line-clamp-3 italic">
-                      {art.excerpt}
-                    </p>
+                    {(art.excerpt && art.excerpt.trim() !== '') && (
+                      <p style={{ color: '#333' }} className="text-sm line-clamp-3 italic">
+                        {art.excerpt}
+                      </p>
+                    )}
                   </Link>
                 </div>
               ))}
@@ -146,8 +153,8 @@ export default async function HomePage() {
                   <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-5 items-start border-b border-gray-50 pb-6 last:border-0">
                     <div className="text-3xl font-black text-slate-100 font-serif leading-none">{idx + 1}</div>
                     <div className="flex-1">
-                      <h4 className="text-[0.95rem] font-black font-serif group-hover:text-red-700 leading-snug">
-                        {art.title}
+                      <h4 style={{ color: '#000' }} className="text-[0.95rem] font-black font-serif group-hover:text-red-700 leading-snug">
+                        {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                       </h4>
                       <span className="text-[0.55rem] text-[#bb1b21] font-bold uppercase tracking-widest mt-2 block">
                         {art.category}
@@ -172,7 +179,9 @@ export default async function HomePage() {
                       <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
                     </div>
                   )}
-                  <h4 className="text-sm font-black font-serif group-hover:text-red-700 leading-tight mb-1">{art.title}</h4>
+                  <h4 style={{ color: '#000' }} className="text-sm font-black font-serif group-hover:text-red-700 leading-tight mb-1">
+                    {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
+                  </h4>
                   <p className="text-[0.6rem] text-gray-400 font-sans uppercase font-bold">{formatDate(art.publishedAt)}</p>
                </Link>
              ))}
@@ -196,8 +205,8 @@ export default async function HomePage() {
                   <span className="text-[0.58rem] font-black text-[#bb1b21] uppercase tracking-[0.1em] mb-1 block">
                     {art.category}
                   </span>
-                  <h3 className="text-[0.85rem] font-black leading-snug font-serif text-[#111827] group-hover:text-red-700 transition-colors line-clamp-3">
-                    {art.title}
+                  <h3 style={{ color: '#000' }} className="text-[0.85rem] font-black leading-snug font-serif group-hover:text-red-700 transition-colors line-clamp-3">
+                    {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                   </h3>
                   <p className="text-[0.6rem] text-gray-400 font-bold mt-2 uppercase">{formatDate(art.publishedAt)}</p>
                 </article>
