@@ -100,7 +100,10 @@ export default function ArticlePage() {
                   <div 
                     className="article-html-content space-y-2"
                     dangerouslySetInnerHTML={{ 
-                      __html: article.content.replace(/<p[^>]*>(?:\s|#[\w-áéíóúñÁÉÍÓÚÑ]+|&nbsp;)+<\/p>/gi, '') 
+                      __html: article.content.replace(/<p[^>]*>(?:[\s#\w-áéíóúñÁÉÍÓÚÑ,.;]|&nbsp;)+<\/p>/gi, (match) => {
+                        const clean = match.replace(/<[^>]*>/g, '').replace(/[#\s,.;]|&nbsp;/g, '');
+                        return clean.length === 0 ? '' : match;
+                      }) 
                     }} 
                   />
                 ) : (
@@ -139,7 +142,7 @@ export default function ArticlePage() {
               </div>
 
               {/* FIRMA DE AUTOR */}
-              <div className="py-8 border-y border-black/10 mt-8">
+              <div className="py-4 border-y border-black/10 mt-4">
                 <div className="flex items-center gap-6">
                   {article.author_avatar ? (
                     <img src={article.author_avatar} alt={article.author} className="w-16 h-16 rounded-full object-cover border-2 border-black" />
