@@ -1,4 +1,4 @@
-// app/admin/articulos/nuevo/page.js — Nueva Publicación (Imperio Público 2.0)
+// app/admin/articulos/nuevo/page.js — Nueva Publicación (Imperio Público 2.0) - Actualizado: 20/04/2026
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,6 +6,8 @@ import { CATEGORIES } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
 import MarkdownPreview from '@/components/MarkdownPreview';
 import ImageUpload from '@/components/ImageUpload';
+import { uploadToCloudinary } from '@/lib/upload';
+import VisualEditor from '@/components/VisualEditor';
 
 export default function NewArticlePage() {
   const [title, setTitle] = useState('');
@@ -15,6 +17,7 @@ export default function NewArticlePage() {
   const [image, setImage] = useState('');
   const [author, setAuthor] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pasting, setPasting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
   
@@ -36,6 +39,19 @@ export default function NewArticlePage() {
     const slug = title.toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
+    
+    // 🔍 Validación de Duplicados: Revisamos si el enlace ya existe en la base de datos
+    const { data: existingArticle } = await supabase
+      .from('articles')
+      .select('id')
+      .eq('slug', slug)
+      .single();
+
+    if (existingArticle) {
+      alert("⚠️ ALERTA EDITORIAL: Ya existe una noticia publicada con este mismo título. Por favor, cámbialo ligeramente para evitar duplicados.");
+      setLoading(false);
+      return;
+    }
 
     const newArticle = {
       title,
@@ -115,14 +131,15 @@ export default function NewArticlePage() {
                </div>
 
                <div>
-                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cuerpo de la Noticia (Markdown)</label>
-                 <textarea
-                   value={content}
-                   onChange={(e) => setContent(e.target.value)}
-                   className="w-full text-base font-serif text-black border border-gray-100 p-8 focus:border-red-600 focus:outline-none min-h-[400px] leading-relaxed"
-                   placeholder="Escribe el contenido completo..."
-                   required
-                 />
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cuerpo de la Noticia (Redacción Visual)</label>
+                  <VisualEditor 
+                    content={content} 
+                    onChange={setContent} 
+                    onPasting={setPasting} 
+                  />
+                  <p className="mt-4 text-[9px] text-slate-400 font-bold uppercase tracking-tight">
+                    Modo Editorial Activo — Arrastra imágenes o pégalas directamente. Las fotos se verán al instante.
+                  </p>
                </div>
              </div>
           </div>

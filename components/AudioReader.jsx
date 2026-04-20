@@ -9,12 +9,17 @@ export default function AudioReader({ title, text }) {
   const utteranceRef = useRef(null);
 
   const cleanText = (rawText) => {
+    if (!rawText) return "";
     return rawText
+      .replace(/<[^>]*>/g, '') // Elimina etiquetas HTML
+      .replace(/!\[.*?\]\(.*?\)/g, '') // Elimina sintaxis de imágenes Markdown
       .replace(/##/g, '')
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
       .replace(/---/g, '')
-      .replace(/#\w+/g, '');
+      .replace(/#\w+/g, '')
+      .replace(/\s+/g, ' ') // Elimina espacios múltiples
+      .trim();
   };
 
   const startReading = () => {

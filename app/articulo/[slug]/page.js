@@ -94,9 +94,9 @@ export default async function ArticlePage({ params }) {
           </h1>
         </header>
 
-        {/* PARTE 2: LA IMAGEN DEL ARTÍCULO */}
-        <figure className="mb-[10px]">
-          <div className="relative w-[95%] md:w-[90%] aspect-[3/2] overflow-hidden bg-slate-50 shadow-md border border-slate-200">
+        {/* PARTE 2: LA IMAGEN DEL ARTÍCULO (ESTILO PREMIUN UNIFICADO) */}
+        <figure className="mb-12 flex justify-center">
+          <div className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-50 shadow-2xl rounded-2xl border border-slate-100 transition-transform hover:scale-[1.01] duration-700">
             <Image 
               src={article.image} 
               alt={article.imageAlt || article.title} 
@@ -106,7 +106,7 @@ export default async function ArticlePage({ params }) {
               sizes="(max-width: 1280px) 100vw, 1280px"
             />
           </div>
-          {article.imageAlt && <figcaption className="mt-4 text-left overline-label !text-slate-400">Créditos: {article.imageAlt}</figcaption>}
+          {article.imageAlt && <figcaption className="mt-4 text-left overline-label !text-slate-400 italic">Créditos: {article.imageAlt}</figcaption>}
         </figure>
 
         {/* PARTE 3: EL SUB-TEMA (Excerpt sin borde) */}
@@ -123,29 +123,46 @@ export default async function ArticlePage({ params }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
            {/* Main Content Column */}
            <div className="lg:col-span-8 w-full">
-              <div className="prose-news">
-                 {paragraphs.map((p, i) => {
-                    // Detect if paragraph is entirely made of hashtags and hide it
-                    if (p.trim().match(/^(#[\w-áéíóúñÁÉÍÓÚÑ]+\s*)+$/)) return null;
-
-                    const formattedText = p
-                      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
-                      .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
-                    
-                    const isFirstParagraph = i === 0;
-                    
-                    return (
-                      <div key={i}>
-                        <p
-                          className={`${isFirstParagraph ? 'drop-cap' : ''}`}
-                          dangerouslySetInnerHTML={{ __html: formattedText }}
-                        />
-                        {/* Insert Ad after 2nd paragraph */}
-                        {i === 1 && <AdUnit format="in-article" className="my-6" />}
-                      </div>
-                    );
-                  })}
-                </div>
+            <div className="prose-news">
+               {article.content?.trim().startsWith('<') ? (
+                  <div 
+                    className="article-html-content space-y-6"
+                    dangerouslySetInnerHTML={{ __html: article.content }} 
+                  />
+               ) : (
+                  <div className="space-y-6">
+                    {paragraphs.map((p, i) => {
+                        if (p.trim().match(/^(#[\w-áéíóúñÁÉÍÓÚÑ]+\s*)+$/)) return null;
+                        const imgMatch = p.trim().match(/^!\[(.*?)\]\((.*?)\)$/);
+                        if (imgMatch) {
+                          const alt = imgMatch[1];
+                          const src = imgMatch[2];
+                          return (
+                            <figure key={i} className="my-10 -mx-4 md:-mx-8">
+                              <div className="relative aspect-video w-full overflow-hidden bg-slate-100 shadow-xl border border-slate-200">
+                                <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" />
+                              </div>
+                              {alt && <figcaption className="mt-4 px-4 text-center overline-label !text-slate-400">Figura: {alt}</figcaption>}
+                            </figure>
+                          );
+                        }
+                        const formattedText = p
+                          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
+                        const isFirstParagraph = i === 0;
+                        return (
+                          <div key={i} className="relative">
+                            <div
+                              className={`${isFirstParagraph ? 'drop-cap' : 'paragraph-text'}`}
+                              dangerouslySetInnerHTML={{ __html: formattedText }}
+                            />
+                            {i === 1 && <AdUnit format="in-article" className="my-12 py-8 border-y border-slate-100" />}
+                          </div>
+                        );
+                    })}
+                  </div>
+               )}
+            </div>
 
                 {/* AUTORÍA (SOLO) EN EL FINAL */}
                 <div className="py-8 border-y border-black/10 dark:border-zinc-800 mt-[3px] mb-[3px]">

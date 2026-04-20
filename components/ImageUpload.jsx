@@ -1,51 +1,43 @@
 'use client';
 import { useState } from 'react';
+import { uploadToCloudinary } from '@/lib/upload';
 
 /**
  * ImageUpload — Componente premium para subir imágenes a Cloudinary
  * @param {string} value - La URL de la imagen actual
  * @param {function} onChange - Callback cuando la imagen cambia (recibe la URL)
  * @param {string} label - Texto de la etiqueta
+ * @param {function} onInsertToContent - Callback para insertar sintaxis Markdown en el contenido
  */
-export default function ImageUpload({ value, onChange, label = "Imagen Destacada" }) {
+export default function ImageUpload({ value, onChange, label = "Imagen Destacada", onInsertToContent }) {
   const [loading, setLoading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const handleUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setLoading(true);
-    setProgress(0);
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
 
     try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        onChange(data.secure_url);
-        setLoading(false);
-      } else {
-        const errorData = await response.json();
-        console.error('Error Cloudinary:', errorData);
-        alert('Error al subir la imagen. Verifica el preset de Cloudinary.');
-        setLoading(false);
-      }
+      const url = await uploadToCloudinary(file);
+      onChange(url);
     } catch (err) {
-      console.error('Network Error:', err);
-      alert('Error de red al intentar subir.');
+      console.error('Upload Error:', err);
+      alert('Error al subir la imagen. Verifica la configuración de Cloudinary.');
+    } finally {
       setLoading(false);
     }
+  };
+
+  const handleCopyMarkdown = () => {
+    if (!value) return;
+    const syntax = `![Descripción de la imagen](${value})`;
+    navigator.clipboard.writeText(syntax).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+    if (onInsertToContent) onInsertToContent(syntax);
   };
 
   return (
@@ -102,6 +94,31 @@ export default function ImageUpload({ value, onChange, label = "Imagen Destacada
           className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-[10px] outline-none focus:border-red-600 transition-all"
         />
       </div>
+
+      {/* Botón para insertar en el cuerpo del artículo */}
+      {value && (
+        <button
+          type="button"
+          onClick={handleCopyMarkdown}
+          className={`w-full py-3 text-[9px] font-black uppercase tracking-[0.3em] transition-all border-2 flex items-center justify-center gap-2 ${
+            copied
+              ? 'bg-green-600 text-white border-green-600'
+              : 'bg-slate-50 text-slate-600 border-slate-100 hover:border-black hover:text-black'
+          }`}
+        >
+          {copied ? (
+            <>✓ ¡Copiado al Portapapeles!</>
+          ) : (
+            <>
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copiar sintaxis para el Cuerpo
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
+

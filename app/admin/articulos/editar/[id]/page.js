@@ -6,6 +6,8 @@ import { CATEGORIES } from '@/lib/data';
 import { createClient } from '@/lib/supabase/client';
 import MarkdownPreview from '@/components/MarkdownPreview';
 import ImageUpload from '@/components/ImageUpload';
+import { uploadToCloudinary } from '@/lib/upload';
+import VisualEditor from '@/components/VisualEditor';
 
 export default function EditArticlePage() {
   const { id } = useParams();
@@ -16,6 +18,7 @@ export default function EditArticlePage() {
   const [image, setImage] = useState('');
   const [author, setAuthor] = useState('');
   const [loading, setLoading] = useState(true);
+  const [pasting, setPasting] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
@@ -51,10 +54,29 @@ export default function EditArticlePage() {
     e.preventDefault();
     setSaving(true);
 
+    const slug = title.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)+/g, '');
+
+    // 🔍 Validación de Duplicados (excluyendo el artículo actual)
+    const { data: existingArticle } = await supabase
+      .from('articles')
+      .select('id')
+      .eq('slug', slug)
+      .neq('id', id)
+      .single();
+
+    if (existingArticle) {
+      alert("⚠️ ALERTA: Ya existe OTRA noticia con este título. Por favor usa un título diferente.");
+      setSaving(false);
+      return;
+    }
+
     const { error } = await supabase
       .from('articles')
       .update({
         title,
+        slug,
         excerpt,
         content,
         category,
@@ -127,13 +149,15 @@ export default function EditArticlePage() {
                </div>
 
                <div>
-                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cuerpo de la Noticia (Markdown)</label>
-                 <textarea
-                   value={content}
-                   onChange={(e) => setContent(e.target.value)}
-                   className="w-full text-base font-serif text-black border border-gray-100 p-8 focus:border-red-600 focus:outline-none min-h-[400px]"
-                   required
-                 />
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cuerpo de la Noticia (Redacción Visual)</label>
+                  <VisualEditor 
+                    content={content} 
+                    onChange={setContent} 
+                    onPasting={setPasting} 
+                  />
+                  <p className="mt-4 text-[9px] text-slate-400 font-bold uppercase tracking-tight">
+                    Modo Editorial Activo — Arrastra imágenes o pégalas directamente. Las fotos se verán al instante.
+                  </p>
                </div>
              </div>
           </div>
