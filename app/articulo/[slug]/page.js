@@ -126,11 +126,11 @@ export default async function ArticlePage({ params }) {
             <div className="prose-news">
                {article.content?.trim().startsWith('<') ? (
                   <div 
-                    className="article-html-content space-y-6"
+                    className="article-html-content space-y-2"
                     dangerouslySetInnerHTML={{ __html: article.content }} 
                   />
                ) : (
-                  <div className="space-y-6">
+                  <div className="space-y-2">
                     {paragraphs.map((p, i) => {
                         if (p.trim().match(/^(#[\w-áéíóúñÁÉÍÓÚÑ]+\s*)+$/)) return null;
                         const imgMatch = p.trim().match(/^!\[(.*?)\]\((.*?)\)$/);
@@ -138,8 +138,8 @@ export default async function ArticlePage({ params }) {
                           const alt = imgMatch[1];
                           const src = imgMatch[2];
                           return (
-                            <figure key={i} className="my-10 -mx-4 md:-mx-8">
-                              <div className="relative aspect-video w-full overflow-hidden bg-slate-100 shadow-xl border border-slate-200">
+                            <figure key={i} className="my-8 -mx-4 md:-mx-8">
+                              <div className="relative aspect-video w-full overflow-hidden bg-slate-100 shadow-xl border border-slate-200 rounded-xl">
                                 <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" />
                               </div>
                               {alt && <figcaption className="mt-4 px-4 text-center overline-label !text-slate-400">Figura: {alt}</figcaption>}
@@ -156,7 +156,7 @@ export default async function ArticlePage({ params }) {
                               className={`${isFirstParagraph ? 'drop-cap' : 'paragraph-text'}`}
                               dangerouslySetInnerHTML={{ __html: formattedText }}
                             />
-                            {i === 1 && <AdUnit format="in-article" className="my-12 py-8 border-y border-slate-100" />}
+                            {i === 1 && <AdUnit format="in-article" className="my-10 py-6 border-y border-slate-100" />}
                           </div>
                         );
                     })}
