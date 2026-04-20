@@ -86,17 +86,25 @@ export default async function ArticlePage({ params }) {
            <div className="text-slate-500 italic !tracking-normal">
               Publicado el {formatDate(article.publishedAt)}
            </div>
-        </nav>
+      <div className="container-custom py-4 md:py-6">
+      {/* 1. SECCIÓN DE CABECERA (Titular y Bajada) */}
+      <header className="mb-4 md:mb-6 max-w-4xl">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="section-title !mb-0">{article.category}</span>
+          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">{formatDate(article.publishedAt)}</span>
+        </div>
+        <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-black leading-[0.95] tracking-tighter italic uppercase mb-2">
+          {article.title}
+        </h1>
+      </header>
 
-        <header className="mt-0 mb-[10px]">
-          <h1 style={{ color: '#000000', display: 'block', opacity: 1, visibility: 'visible', fontSize: '2.5rem', lineHeight: '1.1' }} className="font-black mt-0 mb-0 font-serif tracking-tight">
-            {(article.title && article.title.trim() !== "") ? article.title : 'Información en Desarrollo'}
-          </h1>
-        </header>
-
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+        {/* Main Content Column */}
+        <div className="lg:col-span-8 w-full border-t-[3px] border-black pt-4">
+          
         {/* PARTE 2: LA IMAGEN DEL ARTÍCULO (ESTILO PREMIUN UNIFICADO) */}
-        <figure className="mb-12 flex justify-center">
-          <div className="relative w-full aspect-[16/9] md:aspect-[21/9] overflow-hidden bg-slate-50 shadow-2xl rounded-2xl border border-slate-100 transition-transform hover:scale-[1.01] duration-700">
+        <figure className="mb-6 flex flex-col items-center">
+          <div className="relative w-full aspect-video overflow-hidden bg-slate-50 shadow-2xl rounded-2xl border border-slate-100 transition-transform hover:scale-[1.01] duration-700">
             <Image 
               src={article.image} 
               alt={article.imageAlt || article.title} 
@@ -106,28 +114,27 @@ export default async function ArticlePage({ params }) {
               sizes="(max-width: 1280px) 100vw, 1280px"
             />
           </div>
-          {article.imageAlt && <figcaption className="mt-4 text-left overline-label !text-slate-400 italic">Créditos: {article.imageAlt}</figcaption>}
+          {article.imageAlt && <figcaption className="mt-2 text-center overline-label !text-slate-400 italic">Créditos: {article.imageAlt}</figcaption>}
         </figure>
 
         {/* PARTE 3: EL SUB-TEMA (Excerpt sin borde) */}
-        {(article.excerpt && article.excerpt.trim() !== "") ? (
-          <div className="mb-[10px]">
-            <p style={{ color: '#222222', fontSize: '1rem' }} className="italic font-serif leading-relaxed">
-              {article.excerpt}
-            </p>
-          </div>
-        ) : null}
+        <div className="mb-6">
+          <p className="text-xl md:text-2xl font-serif italic text-slate-600 leading-tight">
+            {article.excerpt}
+          </p>
+        </div>
 
         <AudioReader title={article.title} text={article.content} />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-           {/* Main Content Column */}
-           <div className="lg:col-span-8 w-full">
+            <div className="lg:col-span-12 w-full">
             <div className="prose-news">
                {article.content?.trim().startsWith('<') ? (
                   <div 
                     className="article-html-content space-y-2"
-                    dangerouslySetInnerHTML={{ __html: article.content }} 
+                    dangerouslySetInnerHTML={{ 
+                      __html: article.content.replace(/<p[^>]*>(?:\s|#[\w-áéíóúñÁÉÍÓÚÑ]+|&nbsp;)+<\/p>/gi, '') 
+                    }} 
                   />
                ) : (
                   <div className="space-y-2">
@@ -138,11 +145,11 @@ export default async function ArticlePage({ params }) {
                           const alt = imgMatch[1];
                           const src = imgMatch[2];
                           return (
-                            <figure key={i} className="my-8 -mx-4 md:-mx-8">
+                            <figure key={i} className="my-4 -mx-4 md:-mx-8">
                               <div className="relative aspect-video w-full overflow-hidden bg-slate-100 shadow-xl border border-slate-200 rounded-xl">
                                 <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" />
                               </div>
-                              {alt && <figcaption className="mt-4 px-4 text-center overline-label !text-slate-400">Figura: {alt}</figcaption>}
+                              {alt && <figcaption className="mt-2 px-4 text-center overline-label !text-slate-400">Figura: {alt}</figcaption>}
                             </figure>
                           );
                         }
@@ -156,7 +163,7 @@ export default async function ArticlePage({ params }) {
                               className={`${isFirstParagraph ? 'drop-cap' : 'paragraph-text'}`}
                               dangerouslySetInnerHTML={{ __html: formattedText }}
                             />
-                            {i === 1 && <AdUnit format="in-article" className="my-10 py-6 border-y border-slate-100" />}
+                            {i === 1 && <AdUnit format="in-article" className="my-6 py-4 border-y border-slate-100" />}
                           </div>
                         );
                     })}
