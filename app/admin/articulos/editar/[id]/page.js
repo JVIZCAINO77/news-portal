@@ -84,7 +84,7 @@ export default function EditArticlePage() {
         category,
         image,
         author,
-        tags,
+        tags: tags.trim() || null,
         updated_at: new Date().toISOString()
       })
       .eq('id', id);
