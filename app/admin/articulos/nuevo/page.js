@@ -16,6 +16,7 @@ export default function NewArticlePage() {
   const [category, setCategory] = useState('noticias');
   const [image, setImage] = useState('');
   const [author, setAuthor] = useState('');
+  const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(false);
   const [pasting, setPasting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -62,6 +63,7 @@ export default function NewArticlePage() {
       image: image || 'https://images.unsplash.com/photo-1504711331083-9c897949ff59?auto=format&fit=crop&w=1200&h=630&q=80',
       author: author || profile?.full_name || user.email.split('@')[0],
       author_id: user.id,
+      tags: tags,
       publishedAt: new Date().toISOString(),
       featured: false
     };
@@ -174,6 +176,20 @@ export default function NewArticlePage() {
                     className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
                     placeholder="Dejar vacío para el nombre del perfil"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Hashtags / Etiquetas</label>
+                  <input
+                    type="text"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
+                    placeholder="Ej: #ADP, #EDUCACIÓN (separados por coma)"
+                  />
+                  <p className="mt-2 text-[9px] text-slate-400 font-bold uppercase tracking-tight">
+                    Ayuda a los lectores a encontrar temas relacionados.
+                  </p>
                 </div>
 
                 <div className="bg-slate-50 p-6 border-l-4 border-red-600">

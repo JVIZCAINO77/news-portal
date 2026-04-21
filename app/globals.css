@@ -9,6 +9,7 @@
   --color-muted-base: var(--muted);
   
   --font-serif: "Lora", serif;
+  --font-poppins: "Poppins", sans-serif;
   --font-sans: "Inter", sans-serif;
   --font-mono: ui-monospace, monospace;
 }
@@ -63,7 +64,7 @@
 
 @layer components {
   .prose-news {
-    font-family: "Lora", serif;
+    font-family: var(--font-poppins);
     font-size: 1.15rem;
     line-height: 1.8;
     color: var(--foreground);
@@ -193,7 +194,7 @@
 
 /* Tipografía dentro de las noticias redactadas visualmente */
 .article-html-content {
-  font-family: "Lora", serif;
+  font-family: var(--font-poppins);
   font-size: 1.15rem;
   line-height: 1.8;
   color: var(--foreground);

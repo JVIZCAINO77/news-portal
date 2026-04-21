@@ -17,6 +17,7 @@ export default function EditArticlePage() {
   const [category, setCategory] = useState('noticias');
   const [image, setImage] = useState('');
   const [author, setAuthor] = useState('');
+  const [tags, setTags] = useState('');
   const [loading, setLoading] = useState(true);
   const [pasting, setPasting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -44,6 +45,7 @@ export default function EditArticlePage() {
         setCategory(data.category);
         setImage(data.image);
         setAuthor(data.author);
+        setTags(data.tags || '');
         setLoading(false);
       }
     }
@@ -82,6 +84,7 @@ export default function EditArticlePage() {
         category,
         image,
         author,
+        tags,
         updated_at: new Date().toISOString()
       })
       .eq('id', id);
@@ -190,6 +193,17 @@ export default function EditArticlePage() {
                     value={author}
                     onChange={(e) => setAuthor(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Hashtags / Etiquetas</label>
+                  <input
+                    type="text"
+                    value={tags}
+                    onChange={(e) => setTags(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
+                    placeholder="Ej: #ADP, #EDUCACIÓN"
                   />
                 </div>
 

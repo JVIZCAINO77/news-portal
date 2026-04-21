@@ -63,7 +63,7 @@ export default function VisualEditor({ content, onChange, onPasting }) {
         return false;
       },
       attributes: {
-        class: 'prose prose-slate max-w-none focus:outline-none min-h-[500px] font-serif p-8 text-lg leading-relaxed text-black bg-white border border-gray-100 shadow-sm transition-all focus:border-red-600',
+        class: 'prose prose-slate max-w-none focus:outline-none min-h-[500px] font-poppins p-8 text-lg leading-relaxed text-black bg-white border border-gray-100 shadow-sm transition-all focus:border-red-600',
       },
     },
   });
