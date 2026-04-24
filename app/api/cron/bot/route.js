@@ -62,6 +62,15 @@ export async function GET(request) {
     // 2. Extraer Noticias directamente de los Feeds de WordPress de las fuentes solicitadas
     const parser = new Parser();
     const wpSources = [
+      'https://acento.com.do/feed/?s=',
+      'https://n.com.do/feed/?s=',
+      'https://elnacional.com.do/feed/?s=',
+      'https://elcaribe.com.do/feed/?s=',
+      'https://hoy.com.do/feed/?s=',
+      'https://eldia.com.do/feed/?s=',
+      'https://z101digital.com/feed/?s=',
+      'https://cdn.com.do/feed/?s=',
+      'https://noticiassin.com/feed/?s=',
       'https://desenredandodr.com/feed/?s=',
       'https://deultimominuto.net/feed/?s='
     ];
@@ -227,9 +236,17 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
       sourceName = urlObj.hostname.replace('www.', '').split('.')[0].toUpperCase();
       // Mapeo amigable para los medios asignados
       const sourceMap = {
+        'acento': 'Acento.com.do',
+        'n.com.do': 'N Digital (Nuria Piera)',
+        'elnacional': 'El Nacional',
+        'elcaribe': 'El Caribe',
+        'hoy': 'Hoy Digital',
+        'eldia': 'El Día',
+        'z101digital': 'Z101 Digital',
+        'cdn.com.do': 'CDN 37',
+        'noticiassin': 'Noticias SIN',
         'desenredandodr': 'Desenredando RD',
-        'deultimominuto': 'De Último Minuto',
-        'noticiaslatam': 'Noticias Latam'
+        'deultimominuto': 'De Último Minuto'
       };
       sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
     } catch (e) { /* ignore */ }
