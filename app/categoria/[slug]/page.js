@@ -30,43 +30,7 @@ export default async function CategoryPage({ params }) {
     <div className="bg-white min-h-screen">
       
       
-      {/* Editorial Contribution Block (Only for Opinion) */}
-      {slug === 'opinion' && (
-        <section className="bg-slate-50 border-b border-gray-100 pt-0 pb-12">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-              <div>
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-4 block">Tribuna Abierta</span>
-                <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-tight mb-6">
-                  Tu voz importa en <span className="text-red-600">Imperio Público</span>
-                </h2>
-                <p className="text-base font-serif text-slate-800 leading-relaxed mb-6">
-                  ¿Tienes una reflexión o un análisis? Envía tu artículo y únete a nuestra Tribuna Abierta.
-                </p>
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center text-white font-black">1</div>
-                  <p className="text-sm font-bold text-slate-700 uppercase tracking-widest pt-3">Escribe tu análisis con rigor y respeto.</p>
-                </div>
-              </div>
-
-              <div className="bg-white p-10 shadow-2xl border border-gray-100">
-                <h3 className="text-xl font-black uppercase tracking-tight mb-8 border-b border-black pb-4">Envía tu Opinión</h3>
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input type="text" placeholder="Nombre" className="w-full border-0 border-b border-gray-200 py-3 outline-none focus:border-red-600 font-bold uppercase text-xs" />
-                    <input type="email" placeholder="Correo" className="w-full border-0 border-b border-gray-200 py-3 outline-none focus:border-red-600 font-bold uppercase text-xs" />
-                  </div>
-                  <input type="text" placeholder="Asunto / Título de tu Opinión" className="w-full border-0 border-b border-gray-200 py-3 outline-none focus:border-red-600 font-bold uppercase text-xs" />
-                  <textarea placeholder="Tu reflexión..." rows={4} className="w-full border border-gray-100 p-4 outline-none focus:border-red-600 font-serif text-lg bg-slate-50/30"></textarea>
-                  <button className="w-full bg-red-600 text-white font-black uppercase tracking-[0.3em] py-5 text-[10px] hover:bg-black transition-all">
-                    Enviar a Consejo Editorial
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+      {/* Bloque de contribución editorial deshabilitado temporalmente */}
 
       <div className="max-w-6xl mx-auto px-6 pt-0 pb-20">
         {heroArticles.length > 0 ? (
