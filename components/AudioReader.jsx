@@ -11,10 +11,11 @@ export default function AudioReader({ title, text }) {
   const cleanText = (rawText) => {
     if (!rawText) return "";
     return rawText
+      .replace(/Etiquetas SEO:.*$/is, '') // Elimina la sección de etiquetas al final si existe
       .replace(/<[^>]*>/g, '') // Elimina etiquetas HTML
       .replace(/!\[.*?\]\(.*?\)/g, '') // Elimina sintaxis de imágenes Markdown
       .replace(/#+/g, '') // Elimina almohadillas
-      .replace(/_/g, ' ') // Elimina guiones bajos y los cambia por espacio para evitar que los diga
+      .replace(/_{1,}/g, ' ') // Elimina guiones bajos y los cambia por espacio
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
       .replace(/---/g, '')
@@ -36,7 +37,7 @@ export default function AudioReader({ title, text }) {
     // Stop anything else first
     window.speechSynthesis.cancel();
 
-    const fullText = `${title}. ${cleanText(text)}`;
+    const fullText = `${cleanText(title)}. ${cleanText(text)}`;
     const utterance = new SpeechSynthesisUtterance(fullText);
     utterance.lang = 'es-ES'; // Prefer Spanish
     utterance.rate = 1.0;

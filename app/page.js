@@ -230,12 +230,12 @@ export default async function HomePage() {
 
       </main>
 
+      {/* Newsletter - Full Width */}
+      <NewsletterBox />
 
-      {/* Newsletter */}
-      <section style={{ backgroundColor: '#111827' }} className="py-16">
-        <NewsletterBox />
+      <section style={{ backgroundColor: '#111827' }}>
+         {/* Blank space for future ads or spacing if needed, but for now kept minimal */}
       </section>
-
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 
 export default function Footer() {
   return (
-    <footer className="mt-[1px] border-t border-gray-200">
+    <footer className="mt-0 border-0">
       <div className="bg-black text-white pt-20 pb-20">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">

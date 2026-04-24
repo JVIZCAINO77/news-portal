@@ -290,11 +290,13 @@ export default async function ArticlePage({ params }) {
             </div>
           </section>
 
-          <div className="mt-20">
-             <NewsletterBox />
-          </div>
         </div>
       </article>
+
+      {/* Newsletter - Full Width and Edge to Edge */}
+      <div className="w-full">
+        <NewsletterBox />
+      </div>
     </>
   );
 }
