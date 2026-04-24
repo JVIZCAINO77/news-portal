@@ -18,6 +18,7 @@ export default function EditArticlePage() {
   const [image, setImage] = useState('');
   const [author, setAuthor] = useState('');
   const [tags, setTags] = useState('');
+  const [sourceLink, setSourceLink] = useState('');
   const [loading, setLoading] = useState(true);
   const [pasting, setPasting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -46,6 +47,7 @@ export default function EditArticlePage() {
         setImage(data.image);
         setAuthor(data.author);
         setTags(data.tags || '');
+        setSourceLink(data.source_link || '');
         setLoading(false);
       }
     }
@@ -85,6 +87,7 @@ export default function EditArticlePage() {
         image,
         author,
         tags: tags.trim() || null,
+        source_link: sourceLink.trim() || null,
         updated_at: new Date().toISOString()
       })
       .eq('id', id);
@@ -205,6 +208,17 @@ export default function EditArticlePage() {
                     className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
                     placeholder="Ej: #ADP, #EDUCACIÓN"
                   />
+                </div>
+
+                <div>
+                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">URL de la Fuente (Opcional)</label>
+                   <input
+                     type="url"
+                     value={sourceLink}
+                     onChange={(e) => setSourceLink(e.target.value)}
+                     className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
+                     placeholder="https://ejemplo.com/noticia"
+                   />
                 </div>
 
                 <div className="bg-slate-50 p-6 border-l-4 border-black">

@@ -117,15 +117,25 @@ export default async function ArticlePage({ params }) {
             <div className="lg:col-span-8 space-y-6">
               
               <figure className="mb-6">
-                <div className="relative w-full aspect-video overflow-hidden bg-slate-50 shadow-2xl rounded-2xl border border-slate-100 transition-transform hover:scale-[1.01] duration-700">
-                  <Image 
+                <div className="relative w-full min-h-[300px] max-h-[75vh] overflow-hidden bg-slate-900 shadow-2xl rounded-2xl border border-slate-100 transition-transform hover:scale-[1.01] duration-700 flex items-center justify-center group">
+                  {/* Fondo difuminado para evitar espacios vacíos y dar profundidad */}
+                  <div className="absolute inset-0 z-0 overflow-hidden">
+                    <img 
+                      src={article.image} 
+                      className="w-full h-full object-cover blur-3xl opacity-40 scale-110" 
+                      alt="" 
+                    />
+                  </div>
+                  
+                  {/* Imagen Real sin recortes */}
+                  <img 
                     src={article.image} 
                     alt={article.imageAlt || article.title} 
-                    fill 
-                    className="object-cover" 
-                    priority 
-                    sizes="(max-width: 1280px) 100vw, 1280px"
+                    className="relative z-10 max-w-full max-h-[75vh] w-auto h-auto object-contain shadow-2xl" 
                   />
+
+                  {/* Overlay sutil al pasar el mouse */}
+                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
                 </div>
                 {article.imageAlt && (
                   <figcaption className="mt-2 text-center overline-label !text-slate-400 italic">
@@ -171,11 +181,16 @@ export default async function ArticlePage({ params }) {
                           const alt = imgMatch[1];
                           const src = imgMatch[2];
                           return (
-                            <figure key={i} className="my-8 -mx-4 md:-mx-8">
-                              <div className="relative aspect-video w-full overflow-hidden bg-slate-100 shadow-xl border border-slate-200 rounded-xl">
-                                <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" />
+                            <figure key={i} className="my-10 -mx-4 md:-mx-8">
+                              <div className="relative w-full overflow-hidden bg-slate-50 shadow-xl border border-slate-100 rounded-xl">
+                                <img 
+                                  src={src} 
+                                  alt={alt} 
+                                  className="w-full h-auto object-contain block mx-auto" 
+                                  loading="lazy" 
+                                />
                               </div>
-                              {alt && <figcaption className="mt-2 px-4 text-center overline-label !text-slate-400">Figura: {alt}</figcaption>}
+                              {alt && <figcaption className="mt-3 px-4 text-center overline-label !text-slate-400">Figura: {alt}</figcaption>}
                             </figure>
                           );
                         }
@@ -208,6 +223,21 @@ export default async function ArticlePage({ params }) {
 
               {/* SECCIÓN DE TEMAS Y AUTOR */}
               <div className="mt-12 space-y-8 border-t border-slate-100 pt-8">
+                {article.source_link && (
+                  <div className="flex items-center gap-2 bg-slate-50 p-3 rounded-sm border-l-4 border-slate-300">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Fuente:</span>
+                    <a 
+                      href={article.source_link} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-[10px] font-bold text-red-600 hover:underline uppercase tracking-tight flex items-center gap-1"
+                    >
+                      {article.source_name || (article.source_link.includes('deultimominuto') ? 'De Último Minuto' : article.source_link.includes('desenredandodr') ? 'Desenredando RD' : 'Ver Fuente Original')}
+                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                    </a>
+                  </div>
+                )}
+
                 {tagsStr.trim() !== '' && (
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="bg-black text-white px-2 py-1 text-[10px] font-black uppercase tracking-widest leading-none">TEMAS:</span>

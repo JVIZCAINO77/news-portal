@@ -244,7 +244,7 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
       title: articleData.title,
       slug,
       excerpt: articleData.excerpt || articleData.title,
-      content: `${articleData.content}\n\n---\n*Fuente original: ${sourceName}*${injectedTagsList}`, 
+      content: `${articleData.content}${injectedTagsList}`, 
       category: cat.slug,
       author: cat.author,
       image: finalImageUrl,

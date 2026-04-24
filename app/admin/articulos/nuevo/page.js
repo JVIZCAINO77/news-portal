@@ -17,6 +17,7 @@ export default function NewArticlePage() {
   const [image, setImage] = useState('');
   const [author, setAuthor] = useState('');
   const [tags, setTags] = useState('');
+  const [sourceLink, setSourceLink] = useState('');
   const [loading, setLoading] = useState(false);
   const [pasting, setPasting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -64,6 +65,7 @@ export default function NewArticlePage() {
       author: author || profile?.full_name || user.email.split('@')[0],
       author_id: user.id,
       tags: tags.trim() || null,
+      source_link: sourceLink.trim() || null,
       publishedAt: new Date().toISOString(),
       featured: false
     };
@@ -189,6 +191,20 @@ export default function NewArticlePage() {
                   />
                   <p className="mt-2 text-[9px] text-slate-400 font-bold uppercase tracking-tight">
                     Ayuda a los lectores a encontrar temas relacionados.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">URL de la Fuente (Opcional)</label>
+                  <input
+                    type="url"
+                    value={sourceLink}
+                    onChange={(e) => setSourceLink(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
+                    placeholder="https://ejemplo.com/noticia"
+                  />
+                  <p className="mt-2 text-[9px] text-slate-400 font-bold uppercase tracking-tight">
+                    Enlace al medio original si la noticia es externa.
                   </p>
                 </div>
 

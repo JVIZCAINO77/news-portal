@@ -36,14 +36,15 @@ export default function ArticleCard({ article, variant = 'medium', className = '
              </h1>
           </header>
 
-          <div className="relative w-[95%] md:w-[90%] aspect-[3/2] overflow-hidden bg-slate-100 shadow-md border border-slate-200 mb-4">
-            <Image
+          <div className="relative w-[95%] md:w-[90%] min-h-[300px] max-h-[500px] aspect-[16/10] overflow-hidden bg-slate-900 shadow-md border border-slate-200 mb-4 flex items-center justify-center">
+            {/* Blurred background for hero */}
+            <div className="absolute inset-0 z-0">
+              <img src={imgSrc} className="w-full h-full object-cover blur-2xl opacity-40" alt="" />
+            </div>
+            <img
               src={imgSrc}
               alt={article.imageAlt || article.title}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 1200px) 100vw, 1200px"
+              className="relative z-10 max-w-full max-h-full w-auto h-auto object-contain"
               onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
             />
           </div>
@@ -74,7 +75,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               src={imgSrc}
               alt={article.imageAlt || article.title}
               fill
-              className="object-cover"
+              className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
               onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
             />
@@ -116,12 +117,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
              </p>
           </div>
           {article.image && (
-            <div className="relative w-32 h-20 md:w-56 md:h-36 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-zinc-800">
+            <div className="relative w-32 h-20 md:w-56 md:h-36 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-zinc-800 shadow-sm">
               <Image
                 src={imgSrc}
                 alt={article.imageAlt || article.title}
                 fill
-                className="object-cover"
+                className="object-cover object-top"
                 sizes="(max-width: 768px) 224px, 150px"
                 onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
               />
@@ -136,13 +137,19 @@ export default function ArticleCard({ article, variant = 'medium', className = '
     return (
       <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden bg-slate-50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800 ${className}`}>
         <article className="grid grid-cols-1 md:grid-cols-2 items-center">
-           <div className="relative aspect-[16/10] overflow-hidden">
-              <Image
+           <div className="relative aspect-[16/10] overflow-hidden bg-slate-900 flex items-center justify-center group/img">
+              {/* Fondo difuminado para el variant wide */}
+              <div className="absolute inset-0 z-0">
+                <img 
+                  src={imgSrc} 
+                  className="w-full h-full object-cover blur-2xl opacity-40" 
+                  alt="" 
+                />
+              </div>
+              <img
                 src={imgSrc}
                 alt={article.imageAlt || article.title}
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, 600px"
+                className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105"
                 onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
               />
            </div>

@@ -63,8 +63,21 @@ export default async function HomePage() {
 
                   {/* PARTE 2: IMAGEN */}
                   {pool[0].image && (
-                    <div className="relative w-[95%] md:w-[90%] aspect-[3/2] overflow-hidden mb-[10px] sm:mb-[16px] bg-slate-50 shadow-md border border-gray-200">
-                      <Image src={pool[0].image} alt={pool[0].title} fill className="object-cover group-hover:scale-105 transition-transform duration-700" priority sizes="(max-width: 1200px) 100vw, 800px" />
+                    <div className="relative w-full min-h-[350px] md:min-h-[500px] max-h-[650px] overflow-hidden mb-[16px] bg-slate-900 shadow-xl border border-gray-100 flex items-center justify-center group/img rounded-sm">
+                      {/* Fondo difuminado para el hero de portada */}
+                      <div className="absolute inset-0 z-0">
+                        <img 
+                          src={pool[0].image} 
+                          className="w-full h-full object-cover blur-3xl opacity-50 scale-110" 
+                          alt="" 
+                        />
+                      </div>
+                      
+                      <img 
+                        src={pool[0].image} 
+                        alt={pool[0].title} 
+                        className="relative z-10 w-auto h-auto max-w-full max-h-[650px] object-contain transition-transform duration-700 group-hover/img:scale-[1.01] shadow-2xl" 
+                      />
                     </div>
                   )}
                   
@@ -88,8 +101,8 @@ export default async function HomePage() {
                 <div key={art.id} className={idx === 0 ? 'pb-10 border-b border-gray-100' : ''}>
                   <Link href={`/articulo/${art.slug}`} className="group block">
                     {art.image && (
-                      <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-50">
-                        <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 400px" />
+                      <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-50 shadow-sm">
+                        <Image src={art.image} alt={art.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 400px" />
                       </div>
                     )}
                     <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-3">
@@ -121,8 +134,19 @@ export default async function HomePage() {
                 <div key={art.id}>
                   <Link href={`/articulo/${art.slug}`} className="group block">
                     {art.image && (
-                      <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-50 text-center">
-                        <Image src={art.image} alt={art.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 400px" />
+                      <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-900 text-center shadow-md rounded-sm flex items-center justify-center group/img">
+                        <div className="absolute inset-0 z-0">
+                          <img 
+                            src={art.image} 
+                            className="w-full h-full object-cover blur-2xl opacity-40" 
+                            alt="" 
+                          />
+                        </div>
+                        <img 
+                          src={art.image} 
+                          alt={art.title} 
+                          className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105" 
+                        />
                       </div>
                     )}
                     {art.category?.toLowerCase() !== 'noticias' && (
@@ -182,8 +206,19 @@ export default async function HomePage() {
              {pool.slice(5, 8).map(art => (
                <Link key={art.id} href={`/articulo/${art.slug}`} className="group block border-l-2 border-red-600 pl-4 hover:bg-slate-50 transition-colors py-2">
                   {art.image && (
-                    <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-50">
-                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 300px" />
+                    <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-900 shadow-sm rounded-sm flex items-center justify-center group/img">
+                      <div className="absolute inset-0 z-0">
+                        <img 
+                          src={art.image} 
+                          className="w-full h-full object-cover blur-xl opacity-30" 
+                          alt="" 
+                        />
+                      </div>
+                      <img 
+                        src={art.image} 
+                        alt={art.title} 
+                        className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110" 
+                      />
                     </div>
                   )}
                   <h4 className="text-sm font-bold group-hover:text-red-700 leading-tight mb-1">
@@ -205,8 +240,19 @@ export default async function HomePage() {
               <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
                 <article>
                   {art.image && (
-                    <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-50">
-                      <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 200px" />
+                    <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-900 shadow-sm rounded-sm flex items-center justify-center group/img">
+                      <div className="absolute inset-0 z-0">
+                        <img 
+                          src={art.image} 
+                          className="w-full h-full object-cover blur-xl opacity-30" 
+                          alt="" 
+                        />
+                      </div>
+                      <img 
+                        src={art.image} 
+                        alt={art.title} 
+                        className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105" 
+                      />
                     </div>
                   )}
                   {art.category?.toLowerCase() !== 'noticias' && (
