@@ -51,8 +51,19 @@ export default function LoadMore({ initialOffset = 30 }) {
           >
             <article>
               {art.image && (
-                <div className="relative aspect-[16/9] overflow-hidden mb-4 bg-slate-50 border border-gray-100 shadow-sm">
-                  <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="relative aspect-[16/9] overflow-hidden mb-4 bg-slate-900 border border-gray-100 shadow-md rounded-sm flex items-center justify-center group/img">
+                  <div className="absolute inset-0 z-0">
+                    <img 
+                      src={art.image} 
+                      className="w-full h-full object-cover blur-2xl opacity-40" 
+                      alt="" 
+                    />
+                  </div>
+                  <img 
+                    src={art.image} 
+                    alt={art.title} 
+                    className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110" 
+                  />
                 </div>
               )}
               {art.category?.toLowerCase() !== 'noticias' && (

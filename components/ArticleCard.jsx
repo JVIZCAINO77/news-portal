@@ -70,13 +70,18 @@ export default function ArticleCard({ article, variant = 'medium', className = '
     return (
       <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 dark:border-zinc-800 pb-6 h-full ${className}`}>
         <article className="h-full flex flex-col">
-          <div className="relative aspect-[4/3] mb-[3px] overflow-hidden bg-slate-100 dark:bg-zinc-800">
-            <Image
+          <div className="relative aspect-[4/3] mb-[3px] overflow-hidden bg-slate-900 flex items-center justify-center group/img shadow-md">
+            <div className="absolute inset-0 z-0">
+              <img 
+                src={imgSrc} 
+                className="w-full h-full object-cover blur-2xl opacity-40" 
+                alt="" 
+              />
+            </div>
+            <img
               src={imgSrc}
               alt={article.imageAlt || article.title}
-              fill
-              className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+              className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
               onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
             />
           </div>
