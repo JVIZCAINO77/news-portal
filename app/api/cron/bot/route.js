@@ -60,7 +60,12 @@ export async function GET(request) {
 
   try {
     // 2. Extraer Noticias directamente de los Feeds de WordPress de las fuentes solicitadas
-    const parser = new Parser();
+    const parser = new Parser({
+      headers: { 
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8'
+      }
+    });
     const allSources = [
       // --- DOMINICANAS (Búsqueda WP) ---
       'https://acento.com.do/feed/?s=',
@@ -79,7 +84,8 @@ export async function GET(request) {
       'https://www.france24.com/es/rss',
       'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
-      'https://www.rtve.es/api/noticias.rss'
+      'https://www.rtve.es/api/noticias.rss',
+      'https://www.europapress.es/rss/rss.aspx?ch=00066' // Internacional
     ];
     // Elegimos una plataforma de forma aleatoria para esta ejecución
     const selectedSource = allSources[Math.floor(Math.random() * allSources.length)];
@@ -260,7 +266,8 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
         'france24': 'France 24',
         'dw.com': 'Deutsche Welle (DW)',
         'bbc.com': 'BBC Mundo',
-        'rtve.es': 'RTVE'
+        'rtve.es': 'RTVE',
+        'europapress.es': 'Europa Press'
       };
       sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
     } catch (e) { /* ignore */ }
