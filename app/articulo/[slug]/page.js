@@ -212,11 +212,19 @@ export default async function ArticlePage({ params }) {
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="bg-black text-white px-2 py-1 text-[10px] font-black uppercase tracking-widest leading-none">TEMAS:</span>
                     <div className="flex flex-wrap gap-2">
-                      {tagsStr.split(',').map((tag, idx) => (
-                        <span key={idx} className="border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-500 uppercase hover:bg-slate-50 transition-colors cursor-default">
-                          {tag.trim().replace(/^#/, '')}
-                        </span>
-                      ))}
+                      {/* Robust parsing: split by commas OR spaces, filter out empty, remove leading # */}
+                      {tagsStr.split(/[\s,]+/).filter(t => t.trim() !== '').map((tag, idx) => {
+                        const cleanTag = tag.trim().replace(/^#/, '');
+                        return (
+                          <Link 
+                            key={idx} 
+                            href={`/buscar?q=${encodeURIComponent(cleanTag)}`}
+                            className="border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-500 uppercase hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
+                          >
+                            {cleanTag}
+                          </Link>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

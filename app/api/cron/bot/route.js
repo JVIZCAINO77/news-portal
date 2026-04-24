@@ -236,7 +236,7 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
 
     // Preparar el cuerpo del artículo con las etiquetas inyectadas al final de la nota (para que sea robusto en DB)
     const injectedTagsList = (articleData.tags && articleData.tags.length > 0)
-      ? `\n\n**Etiquetas SEO:** ${articleData.tags.map(t => t.replace(/\s+/g,'')).join(', ')}`
+      ? `\n\n**Etiquetas SEO:** ${articleData.tags.map(t => t.trim().replace(/^#/, '').replace(/\s+/g,'')).join(', ')}`
       : '';
 
     // 6. Guardar en Supabase
