@@ -61,7 +61,8 @@ export async function GET(request) {
   try {
     // 2. Extraer Noticias directamente de los Feeds de WordPress de las fuentes solicitadas
     const parser = new Parser();
-    const wpSources = [
+    const allSources = [
+      // --- DOMINICANAS (Búsqueda WP) ---
       'https://acento.com.do/feed/?s=',
       'https://n.com.do/feed/?s=',
       'https://elnacional.com.do/feed/?s=',
@@ -72,11 +73,19 @@ export async function GET(request) {
       'https://cdn.com.do/feed/?s=',
       'https://noticiassin.com/feed/?s=',
       'https://desenredandodr.com/feed/?s=',
-      'https://deultimominuto.net/feed/?s='
+      'https://deultimominuto.net/feed/?s=',
+      // --- INTERNACIONALES (Feeds Directos) ---
+      'https://cnnespanol.cnn.com/feed/',
+      'https://www.france24.com/es/rss',
+      'https://rss.dw.com/xml/rss-es-all',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://www.rtve.es/api/noticias.rss'
     ];
     // Elegimos una plataforma de forma aleatoria para esta ejecución
-    const selectedSource = wpSources[Math.floor(Math.random() * wpSources.length)];
-    const feedUrl = `${selectedSource}${encodeURIComponent(cat.query)}`;
+    const selectedSource = allSources[Math.floor(Math.random() * allSources.length)];
+    const feedUrl = selectedSource.includes('?s=') 
+      ? `${selectedSource}${encodeURIComponent(cat.query)}` 
+      : selectedSource;
     const feed = await parser.parseURL(feedUrl);
 
     if (!feed.items || feed.items.length === 0) {
@@ -246,7 +255,12 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
         'cdn.com.do': 'CDN 37',
         'noticiassin': 'Noticias SIN',
         'desenredandodr': 'Desenredando RD',
-        'deultimominuto': 'De Último Minuto'
+        'deultimominuto': 'De Último Minuto',
+        'cnnespanol': 'CNN en Español',
+        'france24': 'France 24',
+        'dw.com': 'Deutsche Welle (DW)',
+        'bbc.com': 'BBC Mundo',
+        'rtve.es': 'RTVE'
       };
       sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
     } catch (e) { /* ignore */ }
