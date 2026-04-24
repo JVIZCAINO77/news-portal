@@ -127,11 +127,12 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
 1. El artículo debe estar COMPLETAMENTE EN ESPAÑOL.
 2. VERACIDAD ABSOLUTA: Basate ÚNICAMENTE en los hechos del resumen. NO inventes datos.
 3. Aplica tu estilo de periodista: ${cat.style}.
-4. EL TITULAR DEBE SER MUY LLAMATIVO Y MAGNÉTICO: Reformula el titular original para que capte la atención del lector de inmediato, con un gancho periodístico fuerte que invite a hacer clic.
+4. EL TITULAR DEBE SER MUY LLAMATIVO Y MAGNÉTICO: Reformula el titular original para que capte la atención del lector de inmediato. Usa mayúsculas solo para nombres propios o al inicio; PROHIBIDO escribir el titular o partes de él en mayúsculas sostenidas.
 5. Usa formato Markdown en el campo 'content' (## para subtítulos, **negritas** para datos clave).
-6. Escribe mínimo 3 párrafos bien desarrollados.
-7. Extrae de 3 a 5 palabras clave de alto tráfico SEO (SEO Tags) enfocadas en este tema y devuélvelas en un arreglo de strings.
-8. Tu respuesta DEBE ser EXCLUSIVAMENTE un JSON válido con este formato exacto (sin bloques de código):
+6. PROHIBIDO: No uses hashtags (#) ni guiones bajos (_) en el texto ni en las etiquetas.
+7. Escribe mínimo 3 párrafos bien desarrollados.
+8. Extrae de 3 a 5 palabras clave de alto tráfico SEO (SEO Tags) enfocadas en este tema y devuélvelas en un arreglo de strings (SIN el símbolo #).
+9. Tu respuesta DEBE ser EXCLUSIVAMENTE un JSON válido con este formato exacto (sin bloques de código):
 {"title":"TITULAR LLAMATIVO Y MAGNÉTICO AQUÍ","excerpt":"Resumen en forma de 'gancho' para mantener la retención","content":"Artículo completo en Markdown","tags":["seo1", "seo2", "seo3"]}`;
 
     let rawText = '';
@@ -235,7 +236,7 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
 
     // Preparar el cuerpo del artículo con las etiquetas inyectadas al final de la nota (para que sea robusto en DB)
     const injectedTagsList = (articleData.tags && articleData.tags.length > 0)
-      ? `\n\n**Etiquetas SEO:** ${articleData.tags.map(t => '#' + t.replace(/\s+/g,'')).join(' ')}`
+      ? `\n\n**Etiquetas SEO:** ${articleData.tags.map(t => t.replace(/\s+/g,'')).join(', ')}`
       : '';
 
     // 6. Guardar en Supabase

@@ -18,7 +18,17 @@ export default async function HomePage() {
     getLatestArticles(30),
   ]);
 
-  const pool = featured.length >= 12 ? featured : [...featured, ...latest].filter(
+  const clean = (str) => typeof str === 'string' ? str.replace(/#+\s*/g, '').trim() : str;
+  const sanitize = (art) => ({
+    ...art,
+    title: clean(art.title),
+    excerpt: clean(art.excerpt)
+  });
+
+  const cleanedFeatured = featured.map(sanitize);
+  const cleanedLatest = latest.map(sanitize);
+
+  const pool = cleanedFeatured.length >= 12 ? cleanedFeatured : [...cleanedFeatured, ...cleanedLatest].filter(
     (a, i, arr) => arr.findIndex(x => x.id === a.id) === i
   );
 
@@ -27,7 +37,7 @@ export default async function HomePage() {
   const ticker  = latest.filter(a => !usedIds.has(a.id)).slice(0, 6); // Remaining for "Lo más reciente" grid
 
   return (
-    <div style={{ backgroundColor: '#ffffff', color: '#111827', fontFamily: "'Public Sans', sans-serif" }}>
+    <div className="bg-white text-gray-900">
 
       {/* ══════════════════════════════════════════════
           PORTADA — Diseño Periódico Clásico
@@ -47,14 +57,7 @@ export default async function HomePage() {
               {pool[0] && (
                 <Link href={`/articulo/${pool[0].slug}`} className="group block">
                   {/* PARTE 1: TÍTULO EN LA SECCIÓN ROJA */}
-                  <h1 style={{ 
-                    fontSize: 'clamp(1.6rem, 3.5vw, 3.5rem)', 
-                    fontWeight: 900, 
-                    lineHeight: 1.0,
-                    letterSpacing: '-0.04em',
-                    marginBottom: '10px',
-                    color: '#000'
-                  }} className="font-serif group-hover:text-red-700 transition-colors">
+                  <h1 className="editorial-title group-hover:text-red-700 transition-colors mb-4 text-4xl md:text-5xl lg:text-7xl">
                     {(pool[0].title && pool[0].title.trim() !== '') ? pool[0].title : 'Información en Desarrollo'}
                   </h1>
 
@@ -67,7 +70,7 @@ export default async function HomePage() {
                   
                   {/* PARTE 3: SUBTÍTULO EN LA SECCIÓN VERDE (El amarillo fue eliminado) */}
                   {(pool[0].excerpt && pool[0].excerpt.trim() !== '') && (
-                    <p style={{ color: '#222' }} className="text-xl md:text-2xl leading-relaxed font-serif line-clamp-3 italic mb-[4px]">
+                    <p className="text-xl md:text-2xl leading-relaxed font-serif line-clamp-3 text-gray-800 mb-[4px]">
                       {pool[0].excerpt}
                     </p>
                   )}
@@ -89,11 +92,11 @@ export default async function HomePage() {
                         <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 400px" />
                       </div>
                     )}
-                    <h3 style={{ color: '#000' }} className="text-xl md:text-2xl font-black font-serif group-hover:text-red-700 leading-tight mb-3">
+                    <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-3">
                       {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                     </h3>
                     {(art.excerpt && art.excerpt.trim() !== '') && (
-                      <p style={{ color: '#333' }} className="text-sm line-clamp-2 italic mb-4 text-serif">
+                      <p className="text-sm line-clamp-2 mb-4 text-serif text-gray-700">
                         {art.excerpt}
                       </p>
                     )}
@@ -122,14 +125,16 @@ export default async function HomePage() {
                         <Image src={art.image} alt={art.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 400px" />
                       </div>
                     )}
-                    <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
-                      {art.category}
-                    </span>
-                    <h3 style={{ color: '#000' }} className="text-xl md:text-2xl font-black font-serif group-hover:text-red-700 leading-tight mb-4">
+                    {art.category?.toLowerCase() !== 'noticias' && (
+                      <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
+                        {art.category}
+                      </span>
+                    )}
+                    <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-4">
                       {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                     </h3>
                     {(art.excerpt && art.excerpt.trim() !== '') && (
-                      <p style={{ color: '#333' }} className="text-sm line-clamp-3 italic">
+                      <p className="text-sm line-clamp-3 text-gray-700">
                         {art.excerpt}
                       </p>
                     )}
@@ -147,18 +152,20 @@ export default async function HomePage() {
                 </span>
               </div>
 
-              <AdUnit format="rectangle" slot="home-sidebar-top" className="my-0 mb-10" />
+              <AdUnit format="rectangle" slot="home_sidebar" className="my-0 mb-10" />
               <div className="space-y-8">
                 {pool.slice(8, 12).map((art, idx) => (
                   <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-5 items-start border-b border-gray-50 pb-6 last:border-0">
                     <div className="text-3xl font-black text-slate-100 font-serif leading-none">{idx + 1}</div>
                     <div className="flex-1">
-                      <h4 style={{ color: '#000' }} className="text-[0.95rem] font-black font-serif group-hover:text-red-700 leading-snug">
+                      <h4 className="text-[0.95rem] font-bold group-hover:text-red-700 leading-snug">
                         {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                       </h4>
-                      <span className="text-[0.55rem] text-[#bb1b21] font-bold uppercase tracking-widest mt-2 block">
-                        {art.category}
-                      </span>
+                      {art.category?.toLowerCase() !== 'noticias' && (
+                        <span className="text-[0.55rem] text-[#bb1b21] font-bold uppercase tracking-widest mt-2 block">
+                          {art.category}
+                        </span>
+                      )}
                     </div>
                   </Link>
                 ))}
@@ -179,7 +186,7 @@ export default async function HomePage() {
                       <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 300px" />
                     </div>
                   )}
-                  <h4 style={{ color: '#000' }} className="text-sm font-black font-serif group-hover:text-red-700 leading-tight mb-1">
+                  <h4 className="text-sm font-bold group-hover:text-red-700 leading-tight mb-1">
                     {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                   </h4>
                   <p className="text-[0.6rem] text-gray-400 font-sans uppercase font-bold">{formatDate(art.publishedAt)}</p>
@@ -202,10 +209,12 @@ export default async function HomePage() {
                       <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 200px" />
                     </div>
                   )}
-                  <span className="text-[0.58rem] font-black text-[#bb1b21] uppercase tracking-[0.1em] mb-1 block">
-                    {art.category}
-                  </span>
-                  <h3 style={{ color: '#000' }} className="text-[0.85rem] font-black leading-snug font-serif group-hover:text-red-700 transition-colors line-clamp-3">
+                  {art.category?.toLowerCase() !== 'noticias' && (
+                    <span className="text-[0.58rem] font-black text-[#bb1b21] uppercase tracking-[0.1em] mb-1 block">
+                      {art.category}
+                    </span>
+                  )}
+                  <h3 className="text-[0.85rem] font-bold leading-snug group-hover:text-red-700 transition-colors line-clamp-3">
                     {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                   </h3>
                   <p className="text-[0.6rem] text-gray-400 font-bold mt-2 uppercase">{formatDate(art.publishedAt)}</p>

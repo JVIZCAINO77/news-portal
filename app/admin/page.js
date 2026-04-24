@@ -20,9 +20,15 @@ export default async function AdminDashboardPage() {
   );
 
   // 1. Obtener conteos reales
-  const { count: articleCount } = await supabase
+  const { data: allArticles, error: countError } = await supabase
     .from('articles')
-    .select('*', { count: 'exact', head: true });
+    .select('views, category');
+
+  const articleCount = allArticles?.length || 0;
+  const totalViews = allArticles?.reduce((acc, curr) => acc + (curr.views || 0), 0) || 0;
+  
+  // Obtener categorías únicas
+  const activeCategories = new Set(allArticles?.map(a => a.category)).size;
 
   const { count: userCount } = await supabaseAdmin
     .from('profiles')
@@ -46,11 +52,21 @@ export default async function AdminDashboardPage() {
   const gaId = SITE_CONFIG.gaId;
 
   const stats = [
-    { label: 'Artículos Totales', value: articleCount || 0 },
+    { label: 'Artículos Totales', value: articleCount },
     { label: 'Equipo Editorial', value: userCount || 0 },
-    { label: 'Lectores Estimados', value: '1.2k' },
-    { label: 'Categorías Activas', value: '5' },
+    { label: 'Vistas Totales', value: totalViews.toLocaleString() },
+    { label: 'Categorías Activas', value: activeCategories },
   ];
+
+  // Calcular distribución de categorías (Real)
+  const catStats = {};
+  allArticles?.forEach(a => {
+    catStats[a.category] = (catStats[a.category] || 0) + (a.views || 0);
+  });
+  const topCategories = Object.entries(catStats)
+    .map(([name, count]) => ({ name: name.toUpperCase(), count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
 
   return (
     <div className="space-y-12">
@@ -77,7 +93,7 @@ export default async function AdminDashboardPage() {
 
       {/* TRÁFICO — SOLO ADMIN */}
       {isAdmin && (
-        <TrafficDashboard gaId={gaId} />
+        <TrafficDashboard gaId={gaId} realStats={{ totalViews, topCategories }} />
       )}
 
       {/* Stats Grid — solo admin ve todos los stats */}

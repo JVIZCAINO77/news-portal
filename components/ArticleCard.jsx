@@ -21,15 +21,17 @@ export default function ArticleCard({ article, variant = 'medium', className = '
   const cat = getCategoryBySlug(article.category);
   const formattedDate = formatDate(article.publishedAt);
   
-  const safeTitle = (article.title && typeof article.title === 'string' && article.title.trim() !== "") ? article.title : 'Información en Desarrollo';
-  const safeExcerpt = (article.excerpt && typeof article.excerpt === 'string' && article.excerpt.trim() !== "") ? article.excerpt : null;
+  const clean = (str) => typeof str === 'string' ? str.replace(/#+\s*/g, '').trim() : str;
+  const safeTitleRaw = (article.title && typeof article.title === 'string' && article.title.trim() !== "") ? article.title : 'Información en Desarrollo';
+  const safeTitle = clean(safeTitleRaw);
+  const safeExcerpt = (article.excerpt && typeof article.excerpt === 'string' && article.excerpt.trim() !== "") ? clean(article.excerpt) : null;
 
   if (variant === 'hero') {
     return (
       <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden ${className}`}>
         <article className="relative mt-[7px]">
           <header className="mb-4">
-            <h1 style={{ fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1.1, color: '#000' }} className="text-2xl md:text-4xl lg:text-5xl mb-[10px] font-serif">
+            <h1 className="editorial-title text-2xl md:text-4xl lg:text-5xl mb-[10px]">
                {safeTitle}
              </h1>
           </header>
@@ -48,7 +50,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
           <div>
             {safeExcerpt && (
-              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.7 }} className="text-base md:text-xl font-serif line-clamp-3 mb-4 max-w-3xl">
+              <p style={{ color: '#1a1a1a', lineHeight: 1.6 }} className="text-base md:text-xl font-serif line-clamp-3 mb-4 max-w-3xl">
                  {safeExcerpt}
                </p>
             )}
@@ -78,14 +80,16 @@ export default function ArticleCard({ article, variant = 'medium', className = '
             />
           </div>
           <div className="flex-1 flex flex-col">
-            <span className="overline-label mb-[3px] block">
-              {cat?.label}
-            </span>
-            <h3 style={{ fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#000' }} className="text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-[3px] font-serif">
+            {cat?.slug !== 'noticias' && (
+              <span className="overline-label mb-[3px] block">
+                {cat?.label}
+              </span>
+            )}
+            <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-[3px]">
                {safeTitle}
              </h3>
             {safeExcerpt && (
-              <p style={{ color: '#222', fontStyle: 'italic', lineHeight: 1.65 }} className="text-sm font-serif line-clamp-3 mb-[3px] flex-1">
+              <p style={{ color: '#1a1a1a', lineHeight: 1.5 }} className="text-sm font-serif line-clamp-3 mb-[3px] flex-1">
                  {safeExcerpt}
                </p>
             )}
@@ -103,8 +107,8 @@ export default function ArticleCard({ article, variant = 'medium', className = '
       <Link href={`/articulo/${article.slug}`} className={`group block py-10 border-b border-gray-100 dark:border-zinc-800 last:border-0 ${className}`}>
         <article className="flex gap-10 items-start">
           <div className="flex-1 min-w-0">
-             <span className="overline-label text-red-700 mb-2 block">{cat?.label}</span>
-             <h4 style={{ fontWeight: 900, color: '#000', lineHeight: 1.2, letterSpacing: '-0.02em' }} className="text-base md:text-lg group-hover:text-red-700 transition-colors line-clamp-2 hover:underline underline-offset-4 decoration-1 font-serif">
+             {cat?.slug !== 'noticias' && <span className="overline-label text-red-700 mb-2 block">{cat?.label}</span>}
+             <h4 className="card-title text-base md:text-lg group-hover:text-red-700 transition-colors line-clamp-2 hover:underline underline-offset-4 decoration-1">
                 {safeTitle}
               </h4>
              <p className="metadata-text mt-8 opacity-60 !text-[8px] dark:text-zinc-500">
@@ -143,12 +147,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               />
            </div>
            <div className="p-8 md:p-12">
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>
-              <h3 style={{ fontWeight: 900, color: '#000', lineHeight: 1.1, letterSpacing: '-0.04em' }} className="text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-[3px] font-serif">
+              {cat?.slug !== 'noticias' && <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>}
+              <h3 className="card-title text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-[3px]">
                 {safeTitle}
               </h3>
               {safeExcerpt && (
-                <p className="text-black dark:text-white text-lg font-serif line-clamp-3 leading-relaxed mb-8 italic">
+                <p className="text-black dark:text-white text-lg font-serif line-clamp-3 leading-relaxed mb-8">
                   {safeExcerpt}
                 </p>
               )}
@@ -189,9 +193,11 @@ export default function ArticleCard({ article, variant = 'medium', className = '
   return (
     <Link href={`/articulo/${article.slug}`} className={`group block py-4 border-b border-gray-100 last:border-0 ${className}`}>
       <article>
-        <span className="text-[8px] font-black uppercase tracking-[0.2em] text-red-600 mb-1 block">
-          {cat?.label}
-        </span>
+        {cat?.slug !== 'noticias' && (
+          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-red-600 mb-1 block">
+            {cat?.label}
+          </span>
+        )}
         <h4 className="text-base font-black text-black group-hover:text-red-600 transition-colors leading-tight uppercase tracking-tight">
           {safeTitle}
         </h4>

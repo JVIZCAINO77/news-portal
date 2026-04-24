@@ -8,6 +8,7 @@
   --color-border-base: var(--border);
   --color-muted-base: var(--muted);
   
+  --font-title: "Playfair Display", serif;
   --font-serif: "Lora", serif;
   --font-poppins: "Poppins", sans-serif;
   --font-sans: "Inter", sans-serif;
@@ -53,10 +54,10 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Inter", sans-serif;
-    font-weight: 900;
+    font-family: var(--font-title);
+    font-weight: 800;
     line-height: 1.1;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.02em;
     color: var(--foreground);
     transition: color 0.5s ease;
   }
@@ -65,10 +66,10 @@
 @layer components {
   .prose-news {
     font-family: var(--font-poppins);
-    font-size: 1.15rem;
-    line-height: 1.8;
+    font-size: 1.125rem;
+    line-height: 1.7;
     color: var(--foreground);
-    max-width: 720px;
+    max-width: 750px;
     margin-left: auto;
     margin-right: auto;
     text-align: justify;
@@ -79,8 +80,35 @@
     transition: color 0.5s ease;
   }
 
-  .prose-news p {
-    margin-bottom: 0.35rem; /* REGLA 3-5PX: Margen ultra compacto */
+  .paragraph-text {
+    font-family: var(--font-poppins);
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: #1a1a1a; /* Negro más suave pero profundo */
+    margin-bottom: 0.85rem;
+    display: block;
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  .prose-news p, .article-html-content p {
+    margin-bottom: 0.85rem;
+  }
+
+  .editorial-title {
+    font-family: var(--font-title);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #000000;
+  }
+
+  .card-title {
+    font-family: var(--font-title);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: #000000;
   }
 
   .prose-news p:first-child {
@@ -137,6 +165,14 @@
   margin-top: 0.12em;
   margin-right: 0.12em;
   color: var(--primary);
+}
+
+@media (max-width: 640px) {
+  .drop-cap::first-letter {
+    font-size: 4rem;
+    margin-top: 0.1em;
+    margin-right: 0.1em;
+  }
 }
 
 /* Custom Scrollbar */
@@ -208,11 +244,12 @@
 }
 
 .article-html-content h2 {
-  font-family: "Inter", sans-serif;
-  font-size: 1.5rem;
+  font-family: var(--font-title);
+  font-size: 1.75rem;
   font-weight: 900;
   letter-spacing: -0.04em;
-  margin: 1.5rem 0 0.5rem 0;
+  line-height: 1.1;
+  margin: 2rem 0 0.75rem 0;
   color: var(--primary);
   text-transform: uppercase;
   font-style: italic;

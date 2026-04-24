@@ -31,6 +31,13 @@ export function useArticle(slug) {
 
       setArticle(articleData);
 
+      // Increment view count (Simple update, ignoring potential race conditions for now)
+      // Note: Ideally this should be an RPC, but we'll use a direct update for simplicity
+      await supabase
+        .from('articles')
+        .update({ views: (articleData.views || 0) + 1 })
+        .eq('id', articleData.id);
+
       // Fetch latest articles excluding the current one
       const { data: latestData } = await supabase
         .from('articles')

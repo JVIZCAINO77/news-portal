@@ -55,9 +55,11 @@ export default function LoadMore({ initialOffset = 30 }) {
                   <Image src={art.image} alt={art.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
               )}
-              <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-2 block">
-                {art.category}
-              </span>
+              {art.category?.toLowerCase() !== 'noticias' && (
+                <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-2 block">
+                  {art.category}
+                </span>
+              )}
               <h3 className="text-lg font-black leading-tight font-serif text-[#111827] group-hover:text-red-700 transition-colors line-clamp-3">
                 {art.title}
               </h3>

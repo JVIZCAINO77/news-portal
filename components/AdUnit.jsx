@@ -1,10 +1,13 @@
 // components/AdUnit.jsx — Espacio publicitario con reserva de espacio (CLS Prevention)
 'use client';
 import { useEffect, useState } from 'react';
-import { SITE_CONFIG } from '@/lib/data';
+import { SITE_CONFIG, ADS_SLOTS } from '@/lib/data';
 
 export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
   const [adLoaded, setAdLoaded] = useState(false);
+
+  // Mapeo dinámico: si el slot pasado es una llave de ADS_SLOTS, usar su valor.
+  const finalSlot = ADS_SLOTS[slot] || slot;
 
   // Si los anuncios globales están apagados, esconder silenciosamente este componente
   if (!SITE_CONFIG.showAds) return null;
@@ -38,7 +41,7 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
         <ins className="adsbygoogle"
              style={{ display: adLoaded ? 'block' : 'none', minWidth: '250px', minHeight: adLoaded ? style.minHeight : '0px' }}
              data-ad-client={SITE_CONFIG.adsenseId}
-             data-ad-slot={slot}
+             data-ad-slot={finalSlot}
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
       </div>

@@ -2,16 +2,18 @@
 // components/TrafficDashboard.jsx — Panel de Tráfico Real-time (Exclusivo Admin)
 import { useState, useEffect } from 'react';
 
-export default function TrafficDashboard({ gaId }) {
-  // Mock data for initial view (user will later see real stats if integrated via API)
+export default function TrafficDashboard({ gaId, realStats }) {
+  // Use real data from database if available, otherwise mock
   const [stats, setStats] = useState({
-    activeUsers: 14,
-    pageViews24h: 1240,
-    topCategories: [
-      { name: 'Noticias', count: 450 },
-      { name: 'Entretenimiento', count: 320 },
-      { name: 'Deportes', count: 210 }
-    ],
+    activeUsers: Math.floor(Math.random() * 5) + 5, // Simulated active users
+    pageViews24h: realStats?.totalViews || 1240,
+    topCategories: realStats?.topCategories && realStats.topCategories.length > 0 
+      ? realStats.topCategories 
+      : [
+          { name: 'Noticias', count: 450 },
+          { name: 'Entretenimiento', count: 320 },
+          { name: 'Deportes', count: 210 }
+        ],
     deviceSplit: { mobile: '65%', desktop: '35%' }
   });
 

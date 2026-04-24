@@ -13,11 +13,12 @@ export default function AudioReader({ title, text }) {
     return rawText
       .replace(/<[^>]*>/g, '') // Elimina etiquetas HTML
       .replace(/!\[.*?\]\(.*?\)/g, '') // Elimina sintaxis de imágenes Markdown
-      .replace(/##/g, '')
+      .replace(/#+/g, '') // Elimina almohadillas
+      .replace(/_/g, ' ') // Elimina guiones bajos y los cambia por espacio para evitar que los diga
       .replace(/\*\*/g, '')
       .replace(/\*/g, '')
       .replace(/---/g, '')
-      .replace(/#\w+/g, '')
+      .replace(/\[|\]|\(|\)/g, '') // Elimina corchetes y paréntesis remanentes
       .replace(/\s+/g, ' ') // Elimina espacios múltiples
       .trim();
   };

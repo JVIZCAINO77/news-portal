@@ -1,27 +1,73 @@
-// app/articulo/[slug]/page.js — Estructura Editorial 2.0 (Restaurada)
-'use client';
-import { useArticle } from '@/hooks/useArticle';
-import { useParams } from 'next/navigation';
+// app/articulo/[slug]/page.js — Estructura Editorial SSR 2.0
+import { getArticleBySlug, getLatestArticles } from '@/lib/serverData';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import SocialShare from '@/components/SocialShare';
 import AudioReader from '@/components/AudioReader';
 import AdUnit from '@/components/AdUnit';
 import NewsletterBox from '@/components/NewsletterBox';
 import ArticleCard from '@/components/ArticleCard';
-import { formatDate, getCategoryBySlug } from '@/lib/data';
+import { formatDate, getCategoryBySlug, SITE_CONFIG } from '@/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
-import Head from 'next/head';
+import { notFound } from 'next/navigation';
 
-export default function ArticlePage() {
-  const { slug } = useParams();
-  const { article, latest, loading } = useArticle(slug);
+export const revalidate = 60; // Revalidar cada minuto para noticias frescas
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center font-black uppercase tracking-widest text-slate-200">Cargando Historia...</div>;
-  if (!article) return <div className="min-h-screen flex items-center justify-center font-black uppercase tracking-widest text-red-600">404 - Noticia no encontrada</div>;
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
 
-  const paragraphs = article.content?.split('\n').filter(p => p.trim() !== '') || [];
-  const cat = getCategoryBySlug(article.category);
+  if (!article) return { title: 'Noticia no encontrada | Imperio Público' };
+
+  return {
+    title: article.title,
+    description: article.excerpt || article.content?.substring(0, 160),
+    openGraph: {
+      title: article.title,
+      description: article.excerpt,
+      url: `${SITE_CONFIG.url}/articulo/${slug}`,
+      siteName: SITE_CONFIG.name,
+      images: [{ url: article.image, width: 1200, height: 630 }],
+      type: 'article',
+      publishedTime: article.publishedAt,
+      authors: [article.author || SITE_CONFIG.name],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.excerpt,
+      images: [article.image],
+    },
+  };
+}
+
+export default async function ArticlePage({ params }) {
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
+
+  if (!article) notFound();
+
+  // Cargar noticias relacionadas (misma categoría o recientes)
+  const latest = await getLatestArticles(10);
+  const related = latest.filter(a => a.id !== article.id).slice(0, 6);
+
+  const cleanText = (str) => {
+    if (!str) return '';
+    return str
+      .replace(/#+/g, '') // Elimina todas las almohadillas
+      .replace(/_{1,}/g, '') // Elimina guiones bajos
+      .trim();
+  };
+
+  const displayTitle = cleanText(article.title);
+  const displayExcerpt = cleanText(article.excerpt);
+  
+  // Procesamiento de párrafos más robusto
+  const paragraphs = article.content?.split('\n')
+    .map(p => p.trim())
+    .filter(p => p !== '' && p !== '---') // Elimina líneas vacías y separadores markdown
+    .map(p => p.replace(/^#+\s*/g, '')) // Elimina ## al inicio
+    || [];
 
   // Normalize tags: can be a string, array, or null from Supabase
   const tagsStr = Array.isArray(article.tags)
@@ -37,7 +83,7 @@ export default function ArticlePage() {
     "author": [{
       "@type": "Person",
       "name": article.author || "Redacción Imperio Público",
-      "url": "https://www.imperiopublico.com"
+      "url": SITE_CONFIG.url
     }]
   };
 
@@ -51,28 +97,25 @@ export default function ArticlePage() {
         <ReadingProgressBar />
         <SocialShare title={article.title} />
         
-        {/* ENTORNO DE LECTURA COMPACTO */}
         <div className="max-w-6xl mx-auto px-6 py-4 md:py-8">
           
           {/* 1. CABECERA EDITORIAL */}
           <header className="mb-4 md:mb-6 border-b-[3px] border-black pb-4">
             <div className="flex items-center justify-between mb-4">
-              <span className="section-title !mb-0">{article.category}</span>
+              {article.category?.toLowerCase() !== 'noticias' && <span className="section-title !mb-0">{article.category}</span>}
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
                 Publicado el {formatDate(article.publishedAt)}
               </span>
             </div>
-            <h1 className="text-4xl md:text-5xl lg:text-7xl font-black text-black leading-[0.95] tracking-tighter italic uppercase">
-              {article.title}
+            <h1 className="editorial-title text-4xl md:text-5xl lg:text-7xl">
+              {displayTitle}
             </h1>
           </header>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             
-            {/* COLUMNA PRINCIPAL */}
             <div className="lg:col-span-8 space-y-6">
               
-              {/* IMAGEN PRINCIPAL (16:9) */}
               <figure className="mb-6">
                 <div className="relative w-full aspect-video overflow-hidden bg-slate-50 shadow-2xl rounded-2xl border border-slate-100 transition-transform hover:scale-[1.01] duration-700">
                   <Image 
@@ -91,36 +134,44 @@ export default function ArticlePage() {
                 )}
               </figure>
 
-              {/* BAJADA / EXCERPT */}
-              <p className="text-xl md:text-2xl font-serif italic text-slate-600 leading-tight">
-                {article.excerpt}
+              <p className="text-xl md:text-2xl font-serif text-slate-800 leading-snug">
+                {displayExcerpt}
               </p>
 
-              {/* AUDIO READER */}
-              <AudioReader title={article.title} text={article.content} />
+              <AudioReader title={displayTitle} text={article.content} />
 
-              {/* CUERPO DE LA NOTICIA */}
               <div className="prose-news pt-4">
                 {article.content?.trim().startsWith('<') ? (
                   <div 
-                    className="article-html-content space-y-2"
-                    dangerouslySetInnerHTML={{ 
-                      __html: article.content.replace(/<p[^>]*>(?:[\s#\w-áéíóúñÁÉÍÓÚÑ,.;]|&nbsp;)+<\/p>/gi, (match) => {
-                        const clean = match.replace(/<[^>]*>/g, '').replace(/[#\s,.;]|&nbsp;/g, '');
-                        return clean.length === 0 ? '' : match;
-                      }) 
+                    className="article-html-content"
+                    dangerouslySetInnerHTML={{
+                      __html: article.content
+                        .replace(/#+\s*/g, '') 
+                        .replace(/<p[^>]*>(?:\s|&nbsp;)*<\/p>/gi, '') 
+                        .replace(/<p([^>]*)>/, (match, attrs) => {
+                          const cleanAttrs = attrs.replace(/class="[^"]*"/, (cls) => {
+                             return cls.replace('class="', 'class="drop-cap ');
+                          });
+                          if (cleanAttrs === attrs && !attrs.includes('class=')) {
+                             return `<p class="drop-cap"${attrs}>`;
+                          }
+                          return `<p${cleanAttrs}>`;
+                        })
                     }} 
                   />
                 ) : (
-                  <div className="space-y-2">
-                    {paragraphs.map((p, i) => {
-                        if (p.trim().match(/^(#[\w-áéíóúñÁÉÍÓÚÑ]+\s*)+$/)) return null;
+                  <div className="">
+                    {paragraphs.map((rawP, i) => {
+                        const isSubheading = rawP.startsWith('##');
+                        const p = rawP.replace(/#+/g, '').replace(/_/g, '').trim(); 
+                        if (p.length === 0) return null;
+
                         const imgMatch = p.trim().match(/^!\[(.*?)\]\((.*?)\)$/);
                         if (imgMatch) {
                           const alt = imgMatch[1];
                           const src = imgMatch[2];
                           return (
-                            <figure key={i} className="my-4 -mx-4 md:-mx-8">
+                            <figure key={i} className="my-8 -mx-4 md:-mx-8">
                               <div className="relative aspect-video w-full overflow-hidden bg-slate-100 shadow-xl border border-slate-200 rounded-xl">
                                 <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" />
                               </div>
@@ -128,6 +179,15 @@ export default function ArticlePage() {
                             </figure>
                           );
                         }
+
+                        if (isSubheading) {
+                          return (
+                            <h2 key={i} className="text-2xl md:text-3xl font-black text-black uppercase tracking-tighter mt-10 mb-4 border-l-4 border-red-600 pl-4 italic">
+                              {p}
+                            </h2>
+                          );
+                        }
+
                         const formattedText = p
                           .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
                           .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
@@ -138,7 +198,7 @@ export default function ArticlePage() {
                               className={`${isFirstParagraph ? 'drop-cap' : 'paragraph-text'}`}
                               dangerouslySetInnerHTML={{ __html: formattedText }}
                             />
-                            {i === 1 && <AdUnit format="in-article" className="my-6 py-4 border-y border-slate-100" />}
+                            {i === 1 && <AdUnit format="in-article" slot="article_mid" className="my-6 py-4 border-y border-slate-100" />}
                           </div>
                         );
                     })}
@@ -146,24 +206,21 @@ export default function ArticlePage() {
                 )}
               </div>
 
-              {/* SECCIÓN DE TEMAS Y AUTOR (ESTILO EL NACIONAL / PREMIUM) */}
+              {/* SECCIÓN DE TEMAS Y AUTOR */}
               <div className="mt-12 space-y-8 border-t border-slate-100 pt-8">
-                
-                {/* 1. HASHTAGS / TEMAS */}
                 {tagsStr.trim() !== '' && (
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="bg-black text-white px-2 py-1 text-[10px] font-black uppercase tracking-widest leading-none">TEMAS:</span>
                     <div className="flex flex-wrap gap-2">
                       {tagsStr.split(',').map((tag, idx) => (
                         <span key={idx} className="border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-500 uppercase hover:bg-slate-50 transition-colors cursor-default">
-                          {tag.trim().startsWith('#') ? tag.trim() : `#${tag.trim()}`}
+                          {tag.trim().replace(/^#/, '')}
                         </span>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* 2. CAJA DE AUTOR PERIODISTA */}
                 <div className="bg-[#F9FAFB] border border-slate-100 p-6 md:p-8 rounded-sm flex flex-col md:flex-row gap-6 md:gap-10 items-center md:items-start group">
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <div className="absolute inset-0 bg-red-600 rounded-full scale-[1.03] opacity-0 group-hover:opacity-10 transition-opacity"></div>
@@ -184,18 +241,17 @@ export default function ArticlePage() {
                       {article.author_bio || 'Periodista especializado en actualidad y análisis editorial. Corresponsal comprometido con la veracidad informativa en el equipo de Imperio Público.'}
                     </p>
                     
-                    {/* REDES SOCIALES (ICONOS TIPO IMAGEN) */}
                     <div className="flex items-center justify-center md:justify-start gap-4 pt-2">
-                      <a href={`mailto:${article.author_email || '#'}`} className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-600 shadow-sm transition-all" title="Email">
+                      <a href={`mailto:${article.author_email || 'info@imperiopublico.com'}`} className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-600 shadow-sm transition-all hover:scale-110" title="Email">
                         <span className="font-bold text-lg">@</span>
                       </a>
-                      <a href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-black hover:border-black shadow-sm transition-all" title="X">
+                      <a href={SITE_CONFIG.social.twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-black hover:border-black shadow-sm transition-all hover:scale-110" title="X (Twitter)">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932 6.064-6.932zm-1.292 19.49h2.039L6.486 3.24H4.298l13.311 17.403z" /></svg>
                       </a>
-                      <a href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-600 shadow-sm transition-all" title="Facebook">
+                      <a href={SITE_CONFIG.social.facebook} target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-600 shadow-sm transition-all hover:scale-110" title="Facebook">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
                       </a>
-                      <a href="#" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-pink-600 hover:border-pink-600 shadow-sm transition-all" title="Instagram">
+                      <a href={SITE_CONFIG.social.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-pink-600 hover:border-pink-600 shadow-sm transition-all hover:scale-110" title="Instagram">
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
                       </a>
                     </div>
@@ -204,12 +260,11 @@ export default function ArticlePage() {
               </div>
             </div>
 
-            {/* BARRA LATERAL (SIDEBAR) */}
             <aside className="lg:col-span-4 border-l border-gray-100 lg:pl-12">
               <div className="sticky top-32">
                 <h3 className="section-title w-full">Lo más reciente</h3>
                 <div className="space-y-8 mt-8">
-                  {latest.map((a, idx) => (
+                  {related.map((a, idx) => (
                     <Link key={a.id} href={`/articulo/${a.slug}`} className="group flex gap-5 items-start border-b border-slate-50 pb-6 last:border-0">
                       <span className="text-4xl font-black text-slate-100 font-serif group-hover:text-red-600 transition-colors leading-none">{idx + 1}</span>
                       <div>
@@ -220,23 +275,21 @@ export default function ArticlePage() {
                   ))}
                 </div>
                 <div className="mt-16">
-                   <AdUnit format="rectangle" slot="sidebar-bottom" />
+                   <AdUnit format="rectangle" slot="article_sidebar" />
                 </div>
               </div>
             </aside>
           </div>
 
-          {/* SECCIÓN "SIGUE LEYENDO" */}
           <section className="mt-20 pt-10 border-t-4 border-black">
             <h2 className="text-4xl font-black uppercase tracking-tighter mb-10 italic">Más Noticias Relacionadas</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {latest.slice(0, 3).map(a => (
+              {related.slice(0, 3).map(a => (
                 <ArticleCard key={a.id} article={a} variant="medium" className="bg-slate-50 p-6 border border-gray-100" />
               ))}
             </div>
           </section>
 
-          {/* NEWSLETTER FINAL */}
           <div className="mt-20">
              <NewsletterBox />
           </div>

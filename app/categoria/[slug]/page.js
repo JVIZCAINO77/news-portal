@@ -100,14 +100,16 @@ export default async function CategoryPage({ params }) {
                             ))}
                          </div>
                       </div>
-                      <AdUnit format="rectangle" />
+                      <AdUnit format="rectangle" slot="category_top" />
                    </div>
                 </aside>
              </div>
           </div>
         ) : (
-          <div className="h-96 flex items-center justify-center text-slate-300 font-black uppercase tracking-widest bg-gray-50 border border-dashed border-gray-200">
-             No hay artículos en esta sección aún.
+          <div className="h-96 flex flex-col items-center justify-center text-slate-400 font-black uppercase tracking-widest bg-gray-50 border border-dashed border-gray-200 p-10 text-center">
+             <span className="text-6xl mb-6 opacity-20">📰</span>
+             <p>Estamos preparando las mejores noticias de esta sección para ti.</p>
+             <p className="text-[10px] mt-4 opacity-50 tracking-[0.3em]">Vuelve pronto — Imperio Público</p>
           </div>
         )}
       </div>
