@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getFeaturedArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
+import PremiumImage from '@/components/PremiumImage';
 import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
 import LoadMore from '@/components/LoadMore';
@@ -63,22 +64,13 @@ export default async function HomePage() {
 
                   {/* PARTE 2: IMAGEN */}
                   {pool[0].image && (
-                    <div className="relative w-full min-h-[350px] md:min-h-[500px] max-h-[650px] overflow-hidden mb-[16px] bg-slate-900 shadow-xl border border-gray-100 flex items-center justify-center group/img rounded-sm">
-                      {/* Fondo difuminado para el hero de portada */}
-                      <div className="absolute inset-0 z-0">
-                        <img 
-                          src={pool[0].image} 
-                          className="w-full h-full object-cover blur-3xl opacity-50 scale-110" 
-                          alt="" 
-                        />
-                      </div>
-                      
-                      <img 
-                        src={pool[0].image} 
-                        alt={pool[0].title} 
-                        className="relative z-10 w-auto h-auto max-w-full max-h-[650px] object-contain transition-transform duration-700 group-hover/img:scale-[1.01] shadow-2xl" 
-                      />
-                    </div>
+                    <PremiumImage 
+                      src={pool[0].image} 
+                      alt={pool[0].title}
+                      containerClassName="w-full min-h-[350px] md:min-h-[500px] max-h-[650px] mb-[16px] shadow-xl border border-gray-100 rounded-sm group/img"
+                      className="w-auto h-auto max-w-full max-h-[650px] object-contain transition-transform duration-700 group-hover/img:scale-[1.01] shadow-2xl"
+                      priority={true}
+                    />
                   )}
                   
                   {/* PARTE 3: SUBTÍTULO EN LA SECCIÓN VERDE (El amarillo fue eliminado) */}
@@ -134,20 +126,12 @@ export default async function HomePage() {
                 <div key={art.id}>
                   <Link href={`/articulo/${art.slug}`} className="group block">
                     {art.image && (
-                      <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-900 text-center shadow-md rounded-sm flex items-center justify-center group/img">
-                        <div className="absolute inset-0 z-0">
-                          <img 
-                            src={art.image} 
-                            className="w-full h-full object-cover blur-2xl opacity-40" 
-                            alt="" 
-                          />
-                        </div>
-                        <img 
-                          src={art.image} 
-                          alt={art.title} 
-                          className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105" 
-                        />
-                      </div>
+                      <PremiumImage 
+                        src={art.image} 
+                        alt={art.title}
+                        containerClassName="aspect-[16/9] mb-5 shadow-md rounded-sm group/img"
+                        className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
+                      />
                     )}
                     {art.category?.toLowerCase() !== 'noticias' && (
                       <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
@@ -206,20 +190,12 @@ export default async function HomePage() {
              {pool.slice(5, 8).map(art => (
                <Link key={art.id} href={`/articulo/${art.slug}`} className="group block border-l-2 border-red-600 pl-4 hover:bg-slate-50 transition-colors py-2">
                   {art.image && (
-                    <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-900 shadow-sm rounded-sm flex items-center justify-center group/img">
-                      <div className="absolute inset-0 z-0">
-                        <img 
-                          src={art.image} 
-                          className="w-full h-full object-cover blur-xl opacity-30" 
-                          alt="" 
-                        />
-                      </div>
-                      <img 
-                        src={art.image} 
-                        alt={art.title} 
-                        className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110" 
-                      />
-                    </div>
+                    <PremiumImage 
+                      src={art.image} 
+                      alt={art.title}
+                      containerClassName="aspect-[16/9] mb-3 shadow-sm rounded-sm group/img"
+                      className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110"
+                    />
                   )}
                   <h4 className="text-sm font-bold group-hover:text-red-700 leading-tight mb-1">
                     {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
@@ -240,20 +216,12 @@ export default async function HomePage() {
               <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
                 <article>
                   {art.image && (
-                    <div className="relative aspect-[16/9] overflow-hidden mb-3 bg-slate-900 shadow-sm rounded-sm flex items-center justify-center group/img">
-                      <div className="absolute inset-0 z-0">
-                        <img 
-                          src={art.image} 
-                          className="w-full h-full object-cover blur-xl opacity-30" 
-                          alt="" 
-                        />
-                      </div>
-                      <img 
-                        src={art.image} 
-                        alt={art.title} 
-                        className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105" 
-                      />
-                    </div>
+                    <PremiumImage 
+                      src={art.image} 
+                      alt={art.title}
+                      containerClassName="aspect-[16/9] mb-3 shadow-sm rounded-sm group/img"
+                      className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
+                    />
                   )}
                   {art.category?.toLowerCase() !== 'noticias' && (
                     <span className="text-[0.58rem] font-black text-[#bb1b21] uppercase tracking-[0.1em] mb-1 block">

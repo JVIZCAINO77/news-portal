@@ -155,25 +155,6 @@
   }
 }
 
-/* Letra Capital (Drop Cap) */
-.drop-cap::first-letter {
-  float: left;
-  font-family: "Inter", sans-serif;
-  font-weight: 900;
-  font-size: 6rem;
-  line-height: 0.7;
-  margin-top: 0.12em;
-  margin-right: 0.12em;
-  color: var(--primary);
-}
-
-@media (max-width: 640px) {
-  .drop-cap::first-letter {
-    font-size: 4rem;
-    margin-top: 0.1em;
-    margin-right: 0.1em;
-  }
-}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

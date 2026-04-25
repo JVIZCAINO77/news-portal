@@ -9,6 +9,7 @@ import ArticleCard from '@/components/ArticleCard';
 import { formatDate, getCategoryBySlug, SITE_CONFIG } from '@/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
+import PremiumImage from '@/components/PremiumImage';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 60; // Revalidar cada minuto para noticias frescas
@@ -77,14 +78,28 @@ export default async function ArticlePage({ params }) {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
-    "headline": article.title,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${SITE_CONFIG.url}/articulo/${article.slug}`
+    },
+    "headline": displayTitle,
+    "description": displayExcerpt,
     "image": [article.image],
     "datePublished": article.publishedAt,
+    "dateModified": article.updated_at || article.publishedAt,
     "author": [{
       "@type": "Person",
       "name": article.author || "Redacción Imperio Público",
       "url": SITE_CONFIG.url
-    }]
+    }],
+    "publisher": {
+      "@type": "Organization",
+      "name": SITE_CONFIG.name,
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${SITE_CONFIG.url}${SITE_CONFIG.logo}`
+      }
+    }
   };
 
   return (
@@ -117,26 +132,13 @@ export default async function ArticlePage({ params }) {
             <div className="lg:col-span-8 space-y-6">
               
               <figure className="mb-6">
-                <div className="relative w-full min-h-[300px] max-h-[75vh] overflow-hidden bg-slate-900 shadow-2xl rounded-2xl border border-slate-100 transition-transform hover:scale-[1.01] duration-700 flex items-center justify-center group">
-                  {/* Fondo difuminado para evitar espacios vacíos y dar profundidad */}
-                  <div className="absolute inset-0 z-0 overflow-hidden">
-                    <img 
-                      src={article.image} 
-                      className="w-full h-full object-cover blur-3xl opacity-40 scale-110" 
-                      alt="" 
-                    />
-                  </div>
-                  
-                  {/* Imagen Real sin recortes */}
-                  <img 
-                    src={article.image} 
-                    alt={article.imageAlt || article.title} 
-                    className="relative z-10 max-w-full max-h-[75vh] w-auto h-auto object-contain shadow-2xl" 
-                  />
-
-                  {/* Overlay sutil al pasar el mouse */}
-                  <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
-                </div>
+                <PremiumImage 
+                  src={article.image} 
+                  alt={article.imageAlt || article.title}
+                  containerClassName="w-full min-h-[300px] max-h-[75vh] shadow-2xl rounded-2xl border border-slate-100 group"
+                  className="max-w-full max-h-[75vh] w-auto h-auto object-contain shadow-2xl transition-transform hover:scale-[1.01] duration-700"
+                  priority={true}
+                />
                 {article.imageAlt && (
                   <figcaption className="mt-2 text-center overline-label !text-slate-400 italic">
                     Créditos: {article.imageAlt}
@@ -159,13 +161,7 @@ export default async function ArticlePage({ params }) {
                         .replace(/#+\s*/g, '') 
                         .replace(/<p[^>]*>(?:\s|&nbsp;)*<\/p>/gi, '') 
                         .replace(/<p([^>]*)>/, (match, attrs) => {
-                          const cleanAttrs = attrs.replace(/class="[^"]*"/, (cls) => {
-                             return cls.replace('class="', 'class="drop-cap ');
-                          });
-                          if (cleanAttrs === attrs && !attrs.includes('class=')) {
-                             return `<p class="drop-cap"${attrs}>`;
-                          }
-                          return `<p${cleanAttrs}>`;
+                          return `<p class="paragraph-text"${attrs}>`;
                         })
                     }} 
                   />
@@ -182,14 +178,12 @@ export default async function ArticlePage({ params }) {
                           const src = imgMatch[2];
                           return (
                             <figure key={i} className="my-10 -mx-4 md:-mx-8">
-                              <div className="relative w-full overflow-hidden bg-slate-50 shadow-xl border border-slate-100 rounded-xl">
-                                <img 
+                                <PremiumImage 
                                   src={src} 
                                   alt={alt} 
+                                  containerClassName="w-full shadow-xl border border-slate-100 rounded-xl"
                                   className="w-full h-auto object-contain block mx-auto" 
-                                  loading="lazy" 
                                 />
-                              </div>
                               {alt && <figcaption className="mt-3 px-4 text-center overline-label !text-slate-400">Figura: {alt}</figcaption>}
                             </figure>
                           );
@@ -210,7 +204,7 @@ export default async function ArticlePage({ params }) {
                         return (
                           <div key={i} className="relative">
                             <div
-                              className={`${isFirstParagraph ? 'drop-cap' : 'paragraph-text'}`}
+                              className="paragraph-text"
                               dangerouslySetInnerHTML={{ __html: formattedText }}
                             />
                             {i === 1 && <AdUnit format="in-article" slot="article_mid" className="my-6 py-4 border-y border-slate-100" />}
@@ -263,12 +257,16 @@ export default async function ArticlePage({ params }) {
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <div className="absolute inset-0 bg-red-600 rounded-full scale-[1.03] opacity-0 group-hover:opacity-10 transition-opacity"></div>
                     {article.author_avatar ? (
-                      <img src={article.author_avatar} alt={article.author} className="w-full h-full rounded-full object-cover border-4 border-white shadow-md relative z-10" />
-                    ) : (
-                      <div className="w-full h-full bg-slate-200 flex items-center justify-center text-slate-400 font-black text-4xl rounded-full border-4 border-white shadow-md relative z-10">
-                        {article.author?.[0] || 'A'}
-                      </div>
-                    )}
+                      <img 
+                        src={article.author_avatar} 
+                        alt={article.author} 
+                        className="w-full h-full rounded-full object-cover border-4 border-white shadow-md relative z-10" 
+                        onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
+                      />
+                    ) : null}
+                    <div className={`w-full h-full bg-slate-200 flex items-center justify-center text-slate-400 font-black text-4xl rounded-full border-4 border-white shadow-md relative z-10 ${article.author_avatar ? 'hidden' : 'flex'}`}>
+                      {article.author?.[0] || 'A'}
+                    </div>
                   </div>
                   
                   <div className="flex-1 text-center md:text-left space-y-3">

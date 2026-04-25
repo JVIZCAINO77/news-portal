@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import PremiumImage from './PremiumImage';
 import { getCategoryBySlug, formatDate } from '@/lib/data';
 
 const DEFAULT_PLACEHOLDER = '/icon.png';
@@ -36,18 +37,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
              </h1>
           </header>
 
-          <div className="relative w-[95%] md:w-[90%] min-h-[300px] max-h-[500px] aspect-[16/10] overflow-hidden bg-slate-900 shadow-md border border-slate-200 mb-4 flex items-center justify-center">
-            {/* Blurred background for hero */}
-            <div className="absolute inset-0 z-0">
-              <img src={imgSrc} className="w-full h-full object-cover blur-2xl opacity-40" alt="" />
-            </div>
-            <img
-              src={imgSrc}
-              alt={article.imageAlt || article.title}
-              className="relative z-10 max-w-full max-h-full w-auto h-auto object-contain"
-              onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
-            />
-          </div>
+          <PremiumImage 
+            src={article.image} 
+            alt={article.imageAlt || article.title}
+            containerClassName="w-[95%] md:w-[90%] min-h-[300px] max-h-[500px] aspect-[16/10] shadow-md border border-slate-200 mb-4"
+            className="max-w-full max-h-full w-auto h-auto object-contain"
+          />
 
           <div>
             {safeExcerpt && (
@@ -70,21 +65,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
     return (
       <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 dark:border-zinc-800 pb-6 h-full ${className}`}>
         <article className="h-full flex flex-col">
-          <div className="relative aspect-[4/3] mb-[3px] overflow-hidden bg-slate-900 flex items-center justify-center group/img shadow-md">
-            <div className="absolute inset-0 z-0">
-              <img 
-                src={imgSrc} 
-                className="w-full h-full object-cover blur-2xl opacity-40" 
-                alt="" 
-              />
-            </div>
-            <img
-              src={imgSrc}
-              alt={article.imageAlt || article.title}
-              className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
-              onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
-            />
-          </div>
+          <PremiumImage 
+            src={article.image} 
+            alt={article.imageAlt || article.title}
+            containerClassName="aspect-[4/3] mb-[3px] group/img shadow-md"
+            className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
+          />
           <div className="flex-1 flex flex-col">
             {cat?.slug !== 'noticias' && (
               <span className="overline-label mb-[3px] block">
@@ -142,22 +128,12 @@ export default function ArticleCard({ article, variant = 'medium', className = '
     return (
       <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden bg-slate-50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800 ${className}`}>
         <article className="grid grid-cols-1 md:grid-cols-2 items-center">
-           <div className="relative aspect-[16/10] overflow-hidden bg-slate-900 flex items-center justify-center group/img">
-              {/* Fondo difuminado para el variant wide */}
-              <div className="absolute inset-0 z-0">
-                <img 
-                  src={imgSrc} 
-                  className="w-full h-full object-cover blur-2xl opacity-40" 
-                  alt="" 
-                />
-              </div>
-              <img
-                src={imgSrc}
-                alt={article.imageAlt || article.title}
-                className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105"
-                onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
-              />
-           </div>
+           <PremiumImage 
+             src={article.image} 
+             alt={article.imageAlt || article.title}
+             containerClassName="aspect-[16/10] group/img"
+             className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105"
+           />
            <div className="p-8 md:p-12">
               {cat?.slug !== 'noticias' && <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>}
               <h3 className="card-title text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-[3px]">

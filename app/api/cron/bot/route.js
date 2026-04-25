@@ -2,11 +2,10 @@ import { NextResponse } from 'next/server';
 import Parser from 'rss-parser';
 import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
+import { internalizeImage } from '@/lib/botUtils';
 
 // Token secreto para evitar ataques externos, manejado por Vercel
 const CRON_SECRET = process.env.CRON_SECRET;
-
-// DR_SOURCES ya no es requerido para Google News, usamos los dominios WP directamente
 
 const CATEGORIES = {
   noticias:       { query: `nacionales`,        slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
@@ -24,7 +23,6 @@ const CATEGORIES = {
 };
 
 export async function GET(request) {
-  // Autenticación — se omite si viene del disparador manual del admin
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
 
   if (!isManualTrigger && CRON_SECRET) {
@@ -47,7 +45,6 @@ export async function GET(request) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // 1. Verificación del Kill-Switch del Admin
   const { data: botSetting } = await supabase
     .from('settings')
     .select('value')
@@ -59,7 +56,6 @@ export async function GET(request) {
   }
 
   try {
-    // 2. Extraer Noticias directamente de los Feeds de WordPress de las fuentes solicitadas
     const parser = new Parser({
       headers: { 
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -67,7 +63,6 @@ export async function GET(request) {
       }
     });
     const allSources = [
-      // --- DOMINICANAS (Búsqueda WP) ---
       'https://acento.com.do/feed/?s=',
       'https://n.com.do/feed/?s=',
       'https://elnacional.com.do/feed/?s=',
@@ -79,15 +74,13 @@ export async function GET(request) {
       'https://noticiassin.com/feed/?s=',
       'https://desenredandodr.com/feed/?s=',
       'https://deultimominuto.net/feed/?s=',
-      // --- INTERNACIONALES (Feeds Directos) ---
       'https://cnnespanol.cnn.com/feed/',
       'https://www.france24.com/es/rss',
       'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
       'https://www.rtve.es/api/noticias.rss',
-      'https://www.europapress.es/rss/rss.aspx?ch=00066' // Internacional
+      'https://www.europapress.es/rss/rss.aspx?ch=00066'
     ];
-    // Elegimos una plataforma de forma aleatoria para esta ejecución
     const selectedSource = allSources[Math.floor(Math.random() * allSources.length)];
     const feedUrl = selectedSource.includes('?s=') 
       ? `${selectedSource}${encodeURIComponent(cat.query)}` 
@@ -99,17 +92,48 @@ export async function GET(request) {
     }
 
     let news = null;
+    const now = new Date();
+    
+    // Obtener la fecha actual en formato YYYY-MM-DD para la zona horaria de RD
+    const todayDR = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Santo_Domingo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).format(now);
+
+    console.log(`[Bot] Buscando noticias para la fecha: ${todayDR}`);
+
     for (const item of feed.items) {
       if (!item.link) continue;
-      
-      // Validar si ese link original ya fue subido a la BD
+
+      // Filtro de fecha estricto: Solo hoy
+      const itemDateStr = item.isoDate || item.pubDate;
+      if (itemDateStr) {
+        const itemDate = new Date(itemDateStr);
+        const itemDR = new Intl.DateTimeFormat('en-CA', {
+          timeZone: 'America/Santo_Domingo',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }).format(itemDate);
+
+        if (itemDR !== todayDR) {
+          console.log(`[Bot Skip] Omitiendo noticia vieja: "${item.title}" (Fecha: ${itemDR}, Esperada: ${todayDR})`);
+          continue;
+        }
+      } else {
+        // Si no tiene fecha, no podemos garantizar que sea actual
+        console.log(`[Bot Skip] Omitiendo noticia sin fecha: "${item.title}"`);
+        continue;
+      }
+
       const { data: existingLink } = await supabase
         .from('articles')
         .select('id')
         .eq('source_link', item.link)
         .maybeSingle();
 
-      // Validar también si el título original ya fue abordado
       const { data: existingTitle } = await supabase
         .from('articles')
         .select('id')
@@ -117,13 +141,13 @@ export async function GET(request) {
         .maybeSingle();
 
       if (!existingLink && !existingTitle) {
-        news = item; // Encontramos una noticia fresca
+        news = item;
         break;
       }
     }
 
     if (!news) {
-      return NextResponse.json({ message: `No hay noticias frescas que no hayan sido publicadas para: ${categoryKey}` }, { status: 200 });
+      return NextResponse.json({ message: `No hay noticias frescas de hoy (${todayDR}) disponibles para: ${categoryKey}` }, { status: 200 });
     }
     const baseSlug = news.title
       .toLowerCase()
@@ -134,20 +158,23 @@ export async function GET(request) {
       .slice(0, 80);
     const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
-    // 3. Redacción con Inteligencia Artificial (Con Rotación de Keys y Fallback)
     const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
     const selectedKey = keys[Math.floor(Math.random() * keys.length)] || process.env.GEMINI_API_KEY;
     const ai = new GoogleGenAI({ apiKey: selectedKey });
 
     const prompt = `Actúa como un periodista ético y profesional de "Imperio Público". Analiza cuidadosamente esta noticia para la sección "${cat.slug.toUpperCase()}":
 
+Fecha actual: ${todayDR}
 Titular original: ${news.title}
 Resumen de fuente confiable: ${news.contentSnippet || 'Sin resumen disponible'}
 
-FILTRO ESTRICTO DE CATEGORÍA:
-Debes analizar si los hechos de esta noticia realmente encajan perfectamente y sin forzarse en la categoría de "${cat.slug.toUpperCase()}". Si es otro tema (por ejemplo, si envían algo de Política a Tecnología), tu ÚNICA RESPUESTA debe ser exactamente la palabra: IRRELEVANTE
+POLÍTICA DE ACTUALIDAD (CERO FICCIÓN/CERO NOTICIAS VIEJAS):
+Solo debes procesar esta noticia si es de HOY (${todayDR}) o extremadamente reciente. Si la noticia parece ser de días anteriores o información obsoleta, responde exactamente: IRRELEVANTE
 
-Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora el filtro anterior y redacta la nota completa cumpliendo estas REGLAS ESTRICTAS:
+FILTRO ESTRICTO DE CATEGORÍA:
+Debes analizar si los hechos de esta noticia realmente encajan perfectamente y sin forzarse en la categoría de "${cat.slug.toUpperCase()}". Si es otro tema, tu ÚNICA RESPUESTA debe ser exactamente la palabra: IRRELEVANTE
+
+Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}" y es ACTUAL, redacta la nota completa cumpliendo estas REGLAS ESTRICTAS:
 1. El artículo debe estar COMPLETAMENTE EN ESPAÑOL.
 2. VERACIDAD ABSOLUTA: Basate ÚNICAMENTE en los hechos del resumen. NO inventes datos.
 3. Aplica tu estilo de periodista: ${cat.style}.
@@ -169,14 +196,12 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
     } catch (fallbackError) {
       if (fallbackError.message.includes('Quota') || fallbackError.message.includes('429')) {
         try {
-          console.warn(`[Bot Warning] Cuota de gemini-2.0-flash excedida. Probando gemini-2.0-flash-lite...`);
           const fallbackResponse = await ai.models.generateContent({
             model: 'gemini-2.0-flash-lite',
             contents: prompt,
           });
           rawText = fallbackResponse.text || '';
         } catch (superFallbackError) {
-           console.warn(`[Bot Critical] Todos los modelos de Gemini agotados. Rescatando con IA Pollinations (Ilimitada)...`);
            const textUrl = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?json=true`;
            const polRes = await fetch(textUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } });
            rawText = await polRes.text();
@@ -186,15 +211,10 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
       }
     }
 
-    // Parseo seguro del JSON
-    const cleanedText = rawText
-      .replace(/```json\s*/gi, '')
-      .replace(/```\s*/gi, '')
-      .trim();
+    const cleanedText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
 
-    // Filtro de irrelevancia emitido por la IA
     if (cleanedText === 'IRRELEVANTE') {
-      throw new Error(`La Inteligencia Artificial dictaminó que la noticia encontrada (${news.title}) no pertenece estrictamente a la sección de ${cat.slug.toUpperCase()}. Se omite para evitar desorden.`);
+      throw new Error(`La Inteligencia Artificial dictaminó que la noticia encontrada (${news.title}) no pertenece estrictamente a la sección de ${cat.slug.toUpperCase()}.`);
     }
 
     let articleData;
@@ -202,54 +222,68 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
       articleData = JSON.parse(cleanedText);
     } catch {
       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error(`Respuesta de IA no válida: ${rawText.slice(0, 200)}`);
+      if (!jsonMatch) throw new Error(`Respuesta de IA no válida`);
       articleData = JSON.parse(jsonMatch[0]);
     }
 
     if (!articleData.title || !articleData.content) {
-      throw new Error('La IA no devolvió los campos requeridos (title, content).');
+      throw new Error('La IA no devolvió los campos requeridos.');
     }
 
-    // 4. Obtener imagen real de la fuente (Scraper ligero)
     let finalImageUrl = null;
     try {
-      // Google News redirecciona. Intentamos seguirlo hasta el sitio final.
       const redirectRes = await fetch(news.link, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0' } });
       const html = await redirectRes.text();
       
-      // Intentar encontrar og:image
       const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) || 
                           html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
       
       if (ogImageMatch && ogImageMatch[1]) {
-        const foundUrl = ogImageMatch[1];
-        
-        // Evitaremos logos genéricos o imágenes dañadas en el caso de que la URL esté rota
-        if (foundUrl.length > 10) {
-          finalImageUrl = foundUrl;
+        finalImageUrl = ogImageMatch[1];
+      } else {
+        const twitterImageMatch = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i) ||
+                                  html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+        if (twitterImageMatch && twitterImageMatch[1]) {
+          finalImageUrl = twitterImageMatch[1];
+        } else {
+          const anyImageMatch = html.match(/<img[^>]+src=["']([^"']+\.(?:jpg|jpeg|png|webp))["']/i);
+          if (anyImageMatch && anyImageMatch[1]) {
+            finalImageUrl = anyImageMatch[1];
+          }
         }
-        // Asegurarse de que sea una URL absoluta
-        if (finalImageUrl.startsWith('/')) {
+      }
+
+      if (finalImageUrl) {
+        if (finalImageUrl.startsWith('//')) {
+          finalImageUrl = `https:${finalImageUrl}`;
+        } else if (finalImageUrl.startsWith('/')) {
           const origin = new URL(redirectRes.url).origin;
           finalImageUrl = `${origin}${finalImageUrl}`;
+        }
+        if (finalImageUrl.length < 15 || finalImageUrl.toLowerCase().includes('logo') || finalImageUrl.toLowerCase().includes('icon')) {
+          finalImageUrl = null;
         }
       }
     } catch (err) {
       console.warn('[Scraper Warning] No se pudo extraer imagen real:', err.message);
     }
 
-    // 5. Fallback a IA si no hay imagen real o si la foto estaba repetida
+    // MEJORA: Generación de Imagen por IA como Fallback si no se encontró imagen real
     if (!finalImageUrl) {
-      const imageContext = `Professional photojournalism editorial photography, Dominican Republic news: "${articleData.title}"`;
-      finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imageContext)}?width=1200&height=630&nologo=true&seed=${Date.now()}`;
+      console.log(`[Bot] Generando imagen por IA como fallback para: ${articleData.title}`);
+      const visualPrompt = `professional editorial news photography, ${articleData.title}, high quality, journalistic style, sharp focus, 16:9 aspect ratio`;
+      finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(visualPrompt)}?width=1280&height=720&nologo=true&seed=${Date.now()}`;
     }
 
-    // --- NUEVO: Extraer nombre de la fuente ---
+    if (finalImageUrl) {
+      console.log(`[Bot] Internalizando imagen real: ${finalImageUrl.slice(0, 50)}...`);
+      finalImageUrl = await internalizeImage(finalImageUrl);
+    }
+
     let sourceName = 'Fuente Externa';
     try {
       const urlObj = new URL(news.link);
       sourceName = urlObj.hostname.replace('www.', '').split('.')[0].toUpperCase();
-      // Mapeo amigable para los medios asignados
       const sourceMap = {
         'acento': 'Acento.com.do',
         'n.com.do': 'N Digital (Nuria Piera)',
@@ -272,12 +306,10 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
       sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
     } catch (e) { /* ignore */ }
 
-    // Preparar el cuerpo del artículo con las etiquetas inyectadas al final de la nota (para que sea robusto en DB)
     const injectedTagsList = (articleData.tags && articleData.tags.length > 0)
       ? `\n\n**Etiquetas SEO:** ${articleData.tags.map(t => t.trim().replace(/^#/, '').replace(/\s+/g,'')).join(', ')}`
       : '';
 
-    // 6. Guardar en Supabase
     const newArticle = {
       title: articleData.title,
       slug,
@@ -303,32 +335,17 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}", ignora 
 
     return NextResponse.json({
       success: true,
-      message: '¡Noticia redactada, ilustrada y publicada con éxito!',
+      message: '¡Noticia publicada con éxito!',
       article: {
         id: insertedArticle.id,
         title: insertedArticle.title,
         slug,
         category: cat.slug,
-        author: cat.author,
       },
     }, { status: 200 });
 
   } catch (error) {
-    console.error(`[Bot Error] Categoría: ${categoryKey} |`, error.message);
-    
-    // Humanizar el error para el dashboard
-    let cleanMessage = error.message;
-    if (error.message.includes('Quota exceeded') || error.message.includes('429')) {
-      cleanMessage = 'Límite de cuota de IA alcanzado. Por favor, reintenta en unos minutos.';
-    } else if (error.message.includes('timeout') || error.message.includes('fetch')) {
-      cleanMessage = 'Error de conexión. Reintentando pronto...';
-    }
-
-    return NextResponse.json({
-      error: cleanMessage,
-      category: categoryKey,
-      timestamp: new Date().toISOString(),
-      raw: process.env.NODE_ENV === 'development' ? error.message : undefined
-    }, { status: 500 });
+    console.error(`[Bot Error]`, error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
