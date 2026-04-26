@@ -7,6 +7,45 @@ import { internalizeImage } from '@/lib/botUtils';
 // Token secreto para evitar ataques externos, manejado por Vercel
 const CRON_SECRET = process.env.CRON_SECRET;
 
+// ─── LÍMITES DIARIOS ───────────────────────────────────────────────────────
+const DAILY_LIMIT_NORMAL   = 3;  // Artículos normales por categoría/día
+const DAILY_LIMIT_BREAKING = 10; // Máximo para noticias de ÚLTIMA HORA
+
+// ─── DETECTOR DE ÚLTIMA HORA ───────────────────────────────────────────────
+// Palabras clave que indican un suceso urgente/crítico que NUNCA debe bloquearse
+const BREAKING_KEYWORDS = [
+  // Violencia / seguridad
+  'tirador', 'shooter', 'disparo', 'disparos', 'bala', 'atentado', 'ataque',
+  'bomba', 'explosión', 'explosion', 'terrorista', 'terrorismo', 'asesinato',
+  'asesinato', 'homicidio', 'secuestro', 'rehén', 'rehenes',
+  // Evacuación / emergencias
+  'evacuado', 'evacuación', 'emergencia', 'alerta', 'alarma',
+  'incendio', 'derrumbe', 'accidente grave', 'catástrofe', 'desastre',
+  // Política urgente
+  'golpe de estado', 'coup', 'renuncia', 'dimisión', 'muerto', 'muertos',
+  'fallece', 'fallecio', 'fallecida', 'herido', 'heridos', 'víctimas',
+  // Desastres naturales
+  'terremoto', 'sismo', 'tsunami', 'huracán', 'ciclón', 'inundación',
+  // Marcadores de urgencia explícitos
+  'última hora', 'urgente', 'breaking', 'alerta roja', 'en vivo',
+  // Detención / arresto relacionado a sucesos
+  'detenido', 'detenidos', 'arrestado', 'capturado', 'fugitivo',
+];
+
+/**
+ * Detecta si un titular corresponde a una noticia de ÚLTIMA HORA.
+ * @param {string} title - El titular de la noticia
+ * @returns {boolean}
+ */
+function isBreakingNews(title) {
+  if (!title) return false;
+  const normalized = title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  return BREAKING_KEYWORDS.some(kw => normalized.includes(kw));
+}
+
 const CATEGORIES = {
   noticias:       { query: `nacionales`,        slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
   entretenimiento:{ query: `farandula espectaculos`, slug: 'entretenimiento', author: 'Sección Espectáculos', style: 'dinámico y ameno' },
@@ -128,7 +167,7 @@ export async function GET(request) {
       return NextResponse.json({ message: `No hay noticias de HOY (${todayDR}) en las fuentes consultadas para: ${categoryKey}` }, { status: 200 });
     }
 
-    // === CAPA 2: Límite diario por categoría (max 3 por sección/día) ===
+    // === CAPA 2: Límite diario con excepción para ÚLTIMA HORA ===
     const startOfTodayDR = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
     const endOfTodayDR   = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
     const { data: todayCount } = await supabase
@@ -137,10 +176,21 @@ export async function GET(request) {
       .eq('category', cat.slug)
       .gte('publishedAt', startOfTodayDR)
       .lte('publishedAt', endOfTodayDR);
-    
+
     const countToday = todayCount?.length ?? 0;
-    if (countToday >= 3) {
-      return NextResponse.json({ message: `Límite diario alcanzado: ya hay ${countToday} artículos de ${categoryKey} publicados hoy.` }, { status: 200 });
+
+    // Detectar si alguna noticia de hoy es de ÚLTIMA HORA para aumentar el cupo
+    const hasBreakingItem = todaysItems.some(item => isBreakingNews(item.title));
+    const effectiveLimit  = hasBreakingItem ? DAILY_LIMIT_BREAKING : DAILY_LIMIT_NORMAL;
+
+    if (countToday >= effectiveLimit) {
+      return NextResponse.json({
+        message: `Límite diario alcanzado: ya hay ${countToday} artículos de ${categoryKey} publicados hoy (límite activo: ${effectiveLimit}${hasBreakingItem ? ' — modo ÚLTIMA HORA' : ''}).`
+      }, { status: 200 });
+    }
+
+    if (hasBreakingItem) {
+      console.log(`[Bot] ⚡ ÚLTIMA HORA detectada en ${categoryKey}. Límite ampliado a ${DAILY_LIMIT_BREAKING} artículos/día.`);
     }
 
     // === CAPA 3: Deduplicación masiva — obtener todos los links y títulos ya publicados HOY ===
@@ -157,9 +207,19 @@ export async function GET(request) {
       )
     );
 
-    // === CAPA 4: Selección final — primer ítem de HOY que no esté publicado ===
+    // === CAPA 4: Selección final — priorizar ÚLTIMA HORA, luego el resto ===
+    // Separar ítems de ÚLTIMA HORA del resto para procesarlos primero
+    const breakingItems = todaysItems.filter(i => isBreakingNews(i.title));
+    const normalItems   = todaysItems.filter(i => !isBreakingNews(i.title));
+    const prioritizedItems = [...breakingItems, ...normalItems];
+
+    if (breakingItems.length > 0) {
+      console.log(`[Bot] ⚡ ${breakingItems.length} noticia(s) de ÚLTIMA HORA en cola. Se procesan primero.`);
+    }
+
     let news = null;
-    for (const item of todaysItems) {
+    let isNewsBreaking = false;
+    for (const item of prioritizedItems) {
       if (!item.link || !item.title) continue;
 
       // 4a. Verificar link exacto
@@ -185,6 +245,10 @@ export async function GET(request) {
       }
 
       news = item;
+      isNewsBreaking = isBreakingNews(item.title);
+      if (isNewsBreaking) {
+        console.log(`[Bot] ⚡ ÚLTIMA HORA seleccionada: "${item.title.slice(0, 70)}"`);
+      }
       break;
     }
 
@@ -407,8 +471,14 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}" y es ACT
       source_link: news.link, 
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      featured: Math.random() > 0.85,
+      // Las noticias de ÚLTIMA HORA siempre son destacadas
+      featured: isNewsBreaking ? true : Math.random() > 0.85,
+      // Campo de contexto para logs (no guardado en BD, solo informativo)
     };
+
+    if (isNewsBreaking) {
+      console.log(`[Bot] ⚡ Artículo marcado como DESTACADO por ser ÚLTIMA HORA.`);
+    }
 
     const { data: insertedArticle, error: insertError } = await supabase
       .from('articles')
