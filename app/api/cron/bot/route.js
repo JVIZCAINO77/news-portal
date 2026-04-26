@@ -46,6 +46,54 @@ function isBreakingNews(title) {
   return BREAKING_KEYWORDS.some(kw => normalized.includes(kw));
 }
 
+// ─── DEDUPLICACIÓN SEMÁNTICA ──────────────────────────────────────────────────
+// Palabras vacías (stop words) que no aportan significado al tema de la noticia
+const STOP_WORDS = new Set([
+  'el','la','los','las','un','una','unos','unas','de','del','al','a','en','y','e',
+  'o','u','que','por','para','con','sin','sobre','entre','ante','bajo','tras',
+  'se','le','lo','les','nos','me','te','su','sus','mi','tu','es','son','ha','han',
+  'fue','era','ser','estar','tiene','tienen','hay','tras','como','pero','mas',
+  'ya','si','no','ni','su','sus','también','también','esto','esta','este','ese',
+  'esa','esos','esas','quien','cuyo','cuya','cuando','donde','aunque','mientras',
+  'nuevo','nueva','nuevos','nuevas','gran','grande','primer','primera','tras',
+  'uno','dos','tres','más','menos','muy','bien','mal','vez','vez','días','horas',
+]);
+
+/**
+ * Extrae un Set de keywords significativas de un título.
+ * Elimina stop words, tildes y tokens de ≤3 caracteres.
+ * @param {string} title
+ * @returns {Set<string>}
+ */
+function extractKeywords(title) {
+  if (!title) return new Set();
+  const normalized = title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .trim();
+  return new Set(
+    normalized.split(/\s+/).filter(w => w.length > 3 && !STOP_WORDS.has(w))
+  );
+}
+
+/**
+ * Calcula el solapamiento semántico (Jaccard) entre dos conjuntos de keywords.
+ * @param {Set<string>} setA
+ * @param {Set<string>} setB
+ * @returns {number} — valor entre 0 y 1
+ */
+function semanticOverlap(setA, setB) {
+  if (setA.size === 0 || setB.size === 0) return 0;
+  const intersection = [...setA].filter(k => setB.has(k)).length;
+  const union = new Set([...setA, ...setB]).size;
+  return intersection / union;
+}
+
+// Umbral mínimo de solapamiento para considerar dos noticias "el mismo evento"
+const SEMANTIC_THRESHOLD = 0.35; // 35% de palabras en común → duplicado semántico
+
 const CATEGORIES = {
   noticias:       { query: `nacionales`,        slug: 'noticias',       author: 'Redacción Central',  style: 'periodístico objetivo y formal' },
   entretenimiento:{ query: `farandula espectaculos`, slug: 'entretenimiento', author: 'Sección Espectáculos', style: 'dinámico y ameno' },
@@ -194,6 +242,7 @@ export async function GET(request) {
     }
 
     // === CAPA 3: Deduplicación masiva — obtener todos los links y títulos ya publicados HOY ===
+    // Consultamos TODAS las categorías (sin filtro de categoría) para detectar duplicados semánticos cross-categoría
     const { data: publishedToday } = await supabase
       .from('articles')
       .select('source_link, title')
@@ -206,6 +255,10 @@ export async function GET(request) {
         a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
       )
     );
+    // Pre-computar keywords de todos los artículos publicados hoy (para check semántico)
+    const publishedKeywordSets = (publishedToday || [])
+      .map(a => extractKeywords(a.title))
+      .filter(s => s.size > 0);
 
     // === CAPA 4: Selección final — priorizar ÚLTIMA HORA, luego el resto ===
     // Separar ítems de ÚLTIMA HORA del resto para procesarlos primero
@@ -241,6 +294,17 @@ export async function GET(request) {
         .from('articles').select('id').eq('source_link', item.link).maybeSingle();
       if (existingLink) {
         console.log(`[Bot] Duplicado histórico por link: ${item.link.slice(0, 60)}`);
+        continue;
+      }
+
+      // 4d. Deduplicación SEMÁNTICA — detectar el mismo evento aunque venga de diferente fuente/título
+      const candidateKeywords = extractKeywords(item.title);
+      const semanticDuplicate = publishedKeywordSets.find(
+        existingKws => semanticOverlap(candidateKeywords, existingKws) >= SEMANTIC_THRESHOLD
+      );
+      if (semanticDuplicate) {
+        const overlap = Math.round(semanticOverlap(candidateKeywords, semanticDuplicate) * 100);
+        console.log(`[Bot] 🔁 Duplicado SEMÁNTICO (${overlap}% overlap): "${item.title.slice(0, 60)}" ya cubierto hoy.`);
         continue;
       }
 
