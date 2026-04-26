@@ -56,6 +56,12 @@ export async function GET(request) {
   }
 
   try {
+    // Fecha de hoy en zona horaria de República Dominicana (UTC-4)
+    const todayDR = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Santo_Domingo',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+
     const parser = new Parser({
       headers: { 
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -104,57 +110,86 @@ export async function GET(request) {
       return NextResponse.json({ message: `Sin noticias disponibles en las fuentes para: ${categoryKey}` }, { status: 200 });
     }
 
-    // Ordenar por fecha (las más recientes primero)
-    pooledItems.sort((a, b) => {
-      const dateA = new Date(a.isoDate || a.pubDate || 0);
-      const dateB = new Date(b.isoDate || b.pubDate || 0);
-      return dateB - dateA;
+
+    // === CAPA 1: Pre-filtro estricto por fecha (solo HOY en RD) ===
+    const todaysItems = pooledItems.filter(item => {
+      const dateStr = item.isoDate || item.pubDate;
+      if (!dateStr) return false; // Sin fecha = rechazado
+      const itemDR = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Santo_Domingo',
+        year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(new Date(dateStr));
+      return itemDR === todayDR;
     });
 
-    let news = null;
-    const now = new Date();
+    console.log(`[Bot] ${todaysItems.length} noticias de HOY (${todayDR}) de ${pooledItems.length} totales`);
+
+    if (todaysItems.length === 0) {
+      return NextResponse.json({ message: `No hay noticias de HOY (${todayDR}) en las fuentes consultadas para: ${categoryKey}` }, { status: 200 });
+    }
+
+    // === CAPA 2: Límite diario por categoría (max 3 por sección/día) ===
+    const startOfTodayDR = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
+    const endOfTodayDR   = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
+    const { data: todayCount } = await supabase
+      .from('articles')
+      .select('id', { count: 'exact', head: true })
+      .eq('category', cat.slug)
+      .gte('publishedAt', startOfTodayDR)
+      .lte('publishedAt', endOfTodayDR);
     
-    const todayDR = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/Santo_Domingo',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    }).format(now);
+    const countToday = todayCount?.length ?? 0;
+    if (countToday >= 3) {
+      return NextResponse.json({ message: `Límite diario alcanzado: ya hay ${countToday} artículos de ${categoryKey} publicados hoy.` }, { status: 200 });
+    }
 
-    console.log(`[Bot] Analizando ${pooledItems.length} noticias para la fecha: ${todayDR}`);
+    // === CAPA 3: Deduplicación masiva — obtener todos los links y títulos ya publicados HOY ===
+    const { data: publishedToday } = await supabase
+      .from('articles')
+      .select('source_link, title')
+      .gte('publishedAt', startOfTodayDR)
+      .lte('publishedAt', endOfTodayDR);
 
-    for (const item of pooledItems) {
+    const publishedLinks  = new Set((publishedToday || []).map(a => a.source_link).filter(Boolean));
+    const publishedTitles = new Set(
+      (publishedToday || []).map(a =>
+        a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
+      )
+    );
+
+    // === CAPA 4: Selección final — primer ítem de HOY que no esté publicado ===
+    let news = null;
+    for (const item of todaysItems) {
       if (!item.link || !item.title) continue;
 
-      // Filtro de fecha estricto: Solo hoy (DR)
-      const itemDateStr = item.isoDate || item.pubDate;
-      if (itemDateStr) {
-        const itemDate = new Date(itemDateStr);
-        const itemDR = new Intl.DateTimeFormat('en-CA', {
-          timeZone: 'America/Santo_Domingo',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        }).format(itemDate);
-
-        if (itemDR !== todayDR) continue;
-      } else {
+      // 4a. Verificar link exacto
+      if (publishedLinks.has(item.link)) {
+        console.log(`[Bot] Duplicado por link: ${item.link.slice(0, 60)}`);
         continue;
       }
 
-      // Evitar duplicados
-      const { data: existingLink } = await supabase.from('articles').select('id').eq('source_link', item.link).maybeSingle();
-      if (existingLink) continue;
+      // 4b. Verificar título normalizado (tolerante a pequeñas variaciones)
+      const normalizedTitle = item.title.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+      if (publishedTitles.has(normalizedTitle)) {
+        console.log(`[Bot] Duplicado por título: ${item.title.slice(0, 60)}`);
+        continue;
+      }
 
-      const { data: existingTitle } = await supabase.from('articles').select('id').eq('title', item.title).maybeSingle();
-      if (existingTitle) continue;
+      // 4c. Verificar en toda la historia (por si acaso el mismo link fue publicado en otro día)
+      const { data: existingLink } = await supabase
+        .from('articles').select('id').eq('source_link', item.link).maybeSingle();
+      if (existingLink) {
+        console.log(`[Bot] Duplicado histórico por link: ${item.link.slice(0, 60)}`);
+        continue;
+      }
 
       news = item;
       break;
     }
 
     if (!news) {
-      return NextResponse.json({ message: `No se encontraron noticias de ALTO IMPACTO hoy (${todayDR}) para: ${categoryKey}` }, { status: 200 });
+      return NextResponse.json({ message: `No se encontraron noticias NUEVAS de HOY (${todayDR}) para: ${categoryKey}. Todo ya estaba publicado.` }, { status: 200 });
     }
     const baseSlug = news.title
       .toLowerCase()
