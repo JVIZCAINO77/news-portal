@@ -1,7 +1,7 @@
 // app/page.js — Portada Imperio Público — Diseño Periódico Clásico
 import Link from 'next/link';
 import Image from 'next/image';
-import { getFeaturedArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
+import { getDailyTopArticles, getLatestArticles } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
 import PremiumImage from '@/components/PremiumImage';
 import NewsletterBox from '@/components/NewsletterBox';
@@ -14,8 +14,9 @@ export const revalidate = 60;
 
 
 export default async function HomePage() {
-  const [featured, latest] = await Promise.all([
-    getFeaturedArticles(6),
+  // Cargamos en paralelo: top del día (por impacto) + últimas noticias (para el ticker)
+  const [dailyTop, latest] = await Promise.all([
+    getDailyTopArticles(12, 6),
     getLatestArticles(30),
   ]);
 
@@ -26,16 +27,19 @@ export default async function HomePage() {
     excerpt: clean(art.excerpt)
   });
 
-  const cleanedFeatured = featured.map(sanitize);
+  const cleanedTop    = dailyTop.map(sanitize);
   const cleanedLatest = latest.map(sanitize);
 
-  const pool = cleanedFeatured.length >= 12 ? cleanedFeatured : [...cleanedFeatured, ...cleanedLatest].filter(
-    (a, i, arr) => arr.findIndex(x => x.id === a.id) === i
-  );
+  // Pool principal: artículos de mayor impacto del día, completado con los más recientes si hace falta
+  const pool = cleanedTop.length >= 12
+    ? cleanedTop
+    : [...cleanedTop, ...cleanedLatest].filter(
+        (a, i, arr) => arr.findIndex(x => x.id === a.id) === i
+      );
 
-  // Mark all articles used in the above sections as unique
+  // El ticker muestra las noticias recientes que NO están ya en el pool principal
   const usedIds = new Set(pool.slice(0, 12).map(a => a.id));
-  const ticker  = latest.filter(a => !usedIds.has(a.id)).slice(0, 6); // Remaining for "Lo más reciente" grid
+  const ticker  = cleanedLatest.filter(a => !usedIds.has(a.id)).slice(0, 6);
 
   return (
     <div className="bg-white text-gray-900">
