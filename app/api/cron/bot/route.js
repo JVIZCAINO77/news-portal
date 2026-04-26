@@ -62,6 +62,7 @@ export async function GET(request) {
         'Accept': 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8'
       }
     });
+    // --- MEJORA: Consultar múltiples fuentes para encontrar la mejor tendencia ---
     const allSources = [
       'https://acento.com.do/feed/?s=',
       'https://n.com.do/feed/?s=',
@@ -81,20 +82,38 @@ export async function GET(request) {
       'https://www.rtve.es/api/noticias.rss',
       'https://www.europapress.es/rss/rss.aspx?ch=00066'
     ];
-    const selectedSource = allSources[Math.floor(Math.random() * allSources.length)];
-    const feedUrl = selectedSource.includes('?s=') 
-      ? `${selectedSource}${encodeURIComponent(cat.query)}` 
-      : selectedSource;
-    const feed = await parser.parseURL(feedUrl);
 
-    if (!feed.items || feed.items.length === 0) {
-      return NextResponse.json({ message: `Sin noticias disponibles para: ${categoryKey}` }, { status: 200 });
+    // Seleccionamos 3 fuentes al azar para mayor diversidad
+    const shuffled = [...allSources].sort(() => 0.5 - Math.random());
+    const selectedSources = shuffled.slice(0, 3);
+    
+    let pooledItems = [];
+    for (const source of selectedSources) {
+      try {
+        const feedUrl = source.includes('?s=') 
+          ? `${source}${encodeURIComponent(cat.query)}` 
+          : source;
+        const feed = await parser.parseURL(feedUrl);
+        if (feed.items) pooledItems = [...pooledItems, ...feed.items];
+      } catch (e) {
+        console.error(`[Bot] Error en fuente ${source}:`, e.message);
+      }
     }
+
+    if (pooledItems.length === 0) {
+      return NextResponse.json({ message: `Sin noticias disponibles en las fuentes para: ${categoryKey}` }, { status: 200 });
+    }
+
+    // Ordenar por fecha (las más recientes primero)
+    pooledItems.sort((a, b) => {
+      const dateA = new Date(a.isoDate || a.pubDate || 0);
+      const dateB = new Date(b.isoDate || b.pubDate || 0);
+      return dateB - dateA;
+    });
 
     let news = null;
     const now = new Date();
     
-    // Obtener la fecha actual en formato YYYY-MM-DD para la zona horaria de RD
     const todayDR = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Santo_Domingo',
       year: 'numeric',
@@ -102,12 +121,12 @@ export async function GET(request) {
       day: '2-digit'
     }).format(now);
 
-    console.log(`[Bot] Buscando noticias para la fecha: ${todayDR}`);
+    console.log(`[Bot] Analizando ${pooledItems.length} noticias para la fecha: ${todayDR}`);
 
-    for (const item of feed.items) {
-      if (!item.link) continue;
+    for (const item of pooledItems) {
+      if (!item.link || !item.title) continue;
 
-      // Filtro de fecha estricto: Solo hoy
+      // Filtro de fecha estricto: Solo hoy (DR)
       const itemDateStr = item.isoDate || item.pubDate;
       if (itemDateStr) {
         const itemDate = new Date(itemDateStr);
@@ -118,36 +137,24 @@ export async function GET(request) {
           day: '2-digit'
         }).format(itemDate);
 
-        if (itemDR !== todayDR) {
-          console.log(`[Bot Skip] Omitiendo noticia vieja: "${item.title}" (Fecha: ${itemDR}, Esperada: ${todayDR})`);
-          continue;
-        }
+        if (itemDR !== todayDR) continue;
       } else {
-        // Si no tiene fecha, no podemos garantizar que sea actual
-        console.log(`[Bot Skip] Omitiendo noticia sin fecha: "${item.title}"`);
         continue;
       }
 
-      const { data: existingLink } = await supabase
-        .from('articles')
-        .select('id')
-        .eq('source_link', item.link)
-        .maybeSingle();
+      // Evitar duplicados
+      const { data: existingLink } = await supabase.from('articles').select('id').eq('source_link', item.link).maybeSingle();
+      if (existingLink) continue;
 
-      const { data: existingTitle } = await supabase
-        .from('articles')
-        .select('id')
-        .eq('title', item.title)
-        .maybeSingle();
+      const { data: existingTitle } = await supabase.from('articles').select('id').eq('title', item.title).maybeSingle();
+      if (existingTitle) continue;
 
-      if (!existingLink && !existingTitle) {
-        news = item;
-        break;
-      }
+      news = item;
+      break;
     }
 
     if (!news) {
-      return NextResponse.json({ message: `No hay noticias frescas de hoy (${todayDR}) disponibles para: ${categoryKey}` }, { status: 200 });
+      return NextResponse.json({ message: `No se encontraron noticias de ALTO IMPACTO hoy (${todayDR}) para: ${categoryKey}` }, { status: 200 });
     }
     const baseSlug = news.title
       .toLowerCase()
@@ -230,6 +237,32 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}" y es ACT
       throw new Error('La IA no devolvió los campos requeridos.');
     }
 
+    // LIMPIEZA ESTRICTA: Reemplazar secuencias literales de \n por saltos de línea reales
+    const sanitizeAiText = (str) => {
+      if (typeof str !== 'string') return str;
+      return str
+        .replace(/\\+n/g, '\n') // Detecta \n, \\n, \\\n etc y los vuelve saltos reales
+        .replace(/\\"/g, '"')  
+        .replace(/\n\n+/g, '\n\n') // Colapsa múltiples saltos en máximo 2
+        .trim();
+    };
+
+    const sanitizeContent = (str) => {
+      if (typeof str !== 'string') return str;
+      return sanitizeAiText(str)
+        // Elimina bloque "Etiquetas SEO:" al final del contenido (variantes comunes)
+        // NOTA: usamos ancla de fin de string (no 'g') para no borrar ocurrencias internas
+        .replace(/\n?[\s\*]*etiquetas\s*(seo)?\s*:.*$/is, '')
+        .replace(/\n?[\s\*]*palabras\s*clave\s*:.*$/is, '')
+        .replace(/\n?[\s\*]*keywords?\s*:.*$/is, '')
+        .trim();
+    };
+
+    articleData.title = sanitizeAiText(articleData.title);
+    articleData.excerpt = sanitizeAiText(articleData.excerpt);
+    articleData.content = sanitizeContent(articleData.content);
+
+
     let finalImageUrl = null;
     try {
       const redirectRes = await fetch(news.link, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0' } });
@@ -306,15 +339,32 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}" y es ACT
       sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
     } catch (e) { /* ignore */ }
 
-    const injectedTagsList = (articleData.tags && articleData.tags.length > 0)
-      ? `\n\n**Etiquetas SEO:** ${articleData.tags.map(t => t.trim().replace(/^#/, '').replace(/\s+/g,'')).join(', ')}`
-      : '';
+    // Sanitize tags: strip leading # and whitespace, remove empty entries
+    let cleanedTags = Array.isArray(articleData.tags)
+      ? articleData.tags
+          .map(t => String(t).trim().replace(/^#+/, '').replace(/[_\s]+/g, ''))
+          .filter(t => t.length > 0 && t.length < 60)
+      : [];
+
+    // Fallback: si la IA no devolvió tags, generamos algunos del título + categoría
+    if (cleanedTags.length === 0) {
+      console.warn('[Bot] IA no devolvió tags. Generando fallback desde título...');
+      const titleWords = articleData.title
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar tildes
+        .replace(/[^a-zA-Z0-9\s]/g, '')
+        .split(/\s+/)
+        .filter(w => w.length > 3)
+        .slice(0, 5)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+      cleanedTags = [cat.slug.charAt(0).toUpperCase() + cat.slug.slice(1), ...titleWords];
+    }
 
     const newArticle = {
       title: articleData.title,
       slug,
       excerpt: articleData.excerpt || articleData.title,
-      content: `${articleData.content}${injectedTagsList}`, 
+      content: articleData.content,
+      tags: cleanedTags.length > 0 ? cleanedTags : null,
       category: cat.slug,
       author: cat.author,
       image: finalImageUrl,

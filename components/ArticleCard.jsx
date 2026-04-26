@@ -22,7 +22,13 @@ export default function ArticleCard({ article, variant = 'medium', className = '
   const cat = getCategoryBySlug(article.category);
   const formattedDate = formatDate(article.publishedAt);
   
-  const clean = (str) => typeof str === 'string' ? str.replace(/#+\s*/g, '').trim() : str;
+  const clean = (str) => {
+    if (typeof str !== 'string') return str;
+    return str
+      .replace(/\\+n/g, ' ') // Elimina \n literal y variaciones
+      .replace(/#+\s*/g, '') 
+      .trim();
+  };
   const safeTitleRaw = (article.title && typeof article.title === 'string' && article.title.trim() !== "") ? article.title : 'Información en Desarrollo';
   const safeTitle = clean(safeTitleRaw);
   const safeExcerpt = (article.excerpt && typeof article.excerpt === 'string' && article.excerpt.trim() !== "") ? clean(article.excerpt) : null;

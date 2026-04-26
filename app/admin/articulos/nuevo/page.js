@@ -64,7 +64,9 @@ export default function NewArticlePage() {
       image: image || 'https://images.unsplash.com/photo-1504711331083-9c897949ff59?auto=format&fit=crop&w=1200&h=630&q=80',
       author: author || profile?.full_name || user.email.split('@')[0],
       author_id: user.id,
-      tags: tags.trim() || null,
+      tags: tags.trim()
+        ? tags.split(',').map(t => t.trim().replace(/^#/, '').replace(/\s+/g, '')).filter(Boolean)
+        : null,
       source_link: sourceLink.trim() || null,
       publishedAt: new Date().toISOString(),
       featured: false

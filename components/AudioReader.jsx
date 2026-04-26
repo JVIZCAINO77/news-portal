@@ -11,7 +11,10 @@ export default function AudioReader({ title, text }) {
   const cleanText = (rawText) => {
     if (!rawText) return "";
     return rawText
-      .replace(/Etiquetas SEO:.*$/is, '') // Elimina la sección de etiquetas al final si existe
+      .replace(/[\s\*]*etiquetas\s*(seo)?\s*:.*$/gis, '') // Elimina bloque de etiquetas SEO (cualquier variante)
+      .replace(/[\s\*]*tags?\s*:.*$/gis, '')
+      .replace(/[\s\*]*palabras\s*clave\s*:.*$/gis, '')
+      .replace(/[\s\*]*keywords?\s*:.*$/gis, '')
       .replace(/<[^>]*>/g, '') // Elimina etiquetas HTML
       .replace(/!\[.*?\]\(.*?\)/g, '') // Elimina sintaxis de imágenes Markdown
       .replace(/#+/g, '') // Elimina almohadillas
@@ -20,6 +23,7 @@ export default function AudioReader({ title, text }) {
       .replace(/\*/g, '')
       .replace(/---/g, '')
       .replace(/\[|\]|\(|\)/g, '') // Elimina corchetes y paréntesis remanentes
+      .replace(/\\+n/g, ' ') // CORRECCIÓN: Elimina \n literales para que no se escuchen
       .replace(/\s+/g, ' ') // Elimina espacios múltiples
       .trim();
   };

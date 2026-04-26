@@ -6,7 +6,7 @@ import AudioReader from '@/components/AudioReader';
 import AdUnit from '@/components/AdUnit';
 import NewsletterBox from '@/components/NewsletterBox';
 import ArticleCard from '@/components/ArticleCard';
-import { formatDate, getCategoryBySlug, SITE_CONFIG } from '@/lib/data';
+import { formatDate, getCategoryBySlug, parseTags, SITE_CONFIG } from '@/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
 import PremiumImage from '@/components/PremiumImage';
@@ -55,8 +55,9 @@ export default async function ArticlePage({ params }) {
   const cleanText = (str) => {
     if (!str) return '';
     return str
-      .replace(/#+/g, '') // Elimina todas las almohadillas
-      .replace(/_{1,}/g, '') // Elimina guiones bajos
+      .replace(/#+/g, '') 
+      .replace(/_{1,}/g, '') 
+      .replace(/\\+n/g, ' ') // Limpieza agresiva: cualquier variante de \n a espacio en títulos/resúmenes
       .trim();
   };
 
@@ -64,16 +65,19 @@ export default async function ArticlePage({ params }) {
   const displayExcerpt = cleanText(article.excerpt);
   
   // Procesamiento de párrafos más robusto
-  const paragraphs = article.content?.split('\n')
+  const paragraphs = (article.content || '')
+    .replace(/\\+n/g, '\n') // CORRECCIÓN AGRESIVA: Convierte cualquier variante de \n literal en salto real
+    // Limpia bloque de etiquetas SEO al FINAL del contenido (sin 'g' para evitar borrar ocurrencias internas)
+    .replace(/\n?[\s\*]*etiquetas\s*(seo)?\s*:.*$/is, '')
+    .replace(/\n?[\s\*]*palabras\s*clave\s*:.*$/is, '')
+    .replace(/\n?[\s\*]*keywords?\s*:.*$/is, '')
+    .split('\n')
     .map(p => p.trim())
     .filter(p => p !== '' && p !== '---') // Elimina líneas vacías y separadores markdown
-    .map(p => p.replace(/^#+\s*/g, '')) // Elimina ## al inicio
-    || [];
+    .map(p => p.replace(/^#+\s*/g, '')); // Elimina ## al inicio
 
-  // Normalize tags: can be a string, array, or null from Supabase
-  const tagsStr = Array.isArray(article.tags)
-    ? article.tags.join(', ')
-    : (typeof article.tags === 'string' ? article.tags : '');
+  // Normalize tags: handles array, Postgres {"a","b"}, JSON ["a","b"] or plain comma-string
+  const tagsList = parseTags(article.tags);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -92,6 +96,7 @@ export default async function ArticlePage({ params }) {
       "name": article.author || "Redacción Imperio Público",
       "url": SITE_CONFIG.url
     }],
+    "keywords": tagsList.join(', '),
     "publisher": {
       "@type": "Organization",
       "name": SITE_CONFIG.name,
@@ -158,6 +163,7 @@ export default async function ArticlePage({ params }) {
                     className="article-html-content"
                     dangerouslySetInnerHTML={{
                       __html: article.content
+                        .replace(/\\+n/g, '<br/>') // Convertir \n literal en break HTML
                         .replace(/#+\s*/g, '') 
                         .replace(/<p[^>]*>(?:\s|&nbsp;)*<\/p>/gi, '') 
                         .replace(/<p([^>]*)>/, (match, attrs) => {
@@ -201,11 +207,23 @@ export default async function ArticlePage({ params }) {
                           .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
                           .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
                         const isFirstParagraph = i === 0;
+                        
+                        // AUTO INTER-LINKING: Link category names within the text
+                        let linkedText = formattedText;
+                        const { CATEGORIES } = require('@/lib/data');
+                        CATEGORIES.forEach(cat => {
+                          const regex = new RegExp(`\\b(${cat.label})\\b`, 'gi');
+                          // Avoid linking the same word multiple times or if already inside a tag
+                          linkedText = linkedText.replace(regex, (match) => {
+                            return `<a href="/categoria/${cat.slug}" class="text-red-600 font-bold hover:underline">${match}</a>`;
+                          });
+                        });
+
                         return (
                           <div key={i} className="relative">
                             <div
                               className="paragraph-text"
-                              dangerouslySetInnerHTML={{ __html: formattedText }}
+                              dangerouslySetInnerHTML={{ __html: linkedText }}
                             />
                             {i === 1 && <AdUnit format="in-article" slot="article_mid" className="my-6 py-4 border-y border-slate-100" />}
                           </div>
@@ -232,23 +250,19 @@ export default async function ArticlePage({ params }) {
                   </div>
                 )}
 
-                {tagsStr.trim() !== '' && (
+                {tagsList.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="bg-black text-white px-2 py-1 text-[10px] font-black uppercase tracking-widest leading-none">TEMAS:</span>
                     <div className="flex flex-wrap gap-2">
-                      {/* Robust parsing: split by commas OR spaces, filter out empty, remove leading # */}
-                      {tagsStr.split(/[\s,]+/).filter(t => t.trim() !== '').map((tag, idx) => {
-                        const cleanTag = tag.trim().replace(/^#/, '');
-                        return (
-                          <Link 
-                            key={idx} 
-                            href={`/buscar?q=${encodeURIComponent(cleanTag)}`}
-                            className="border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-500 uppercase hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
-                          >
-                            {cleanTag}
-                          </Link>
-                        );
-                      })}
+                      {tagsList.map((tag, idx) => (
+                        <Link 
+                          key={idx} 
+                          href={`/buscar?q=${encodeURIComponent(tag)}`}
+                          className="border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-500 uppercase hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
+                        >
+                          #{tag}
+                        </Link>
+                      ))}
                     </div>
                   </div>
                 )}

@@ -9,8 +9,8 @@
   --color-muted-base: var(--muted);
   
   --font-title: "Playfair Display", serif;
-  --font-serif: "Lora", serif;
-  --font-poppins: "Poppins", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-poppins: "Inter", sans-serif;
   --font-sans: "Inter", sans-serif;
   --font-mono: ui-monospace, monospace;
 }
@@ -65,7 +65,7 @@
 
 @layer components {
   .prose-news {
-    font-family: var(--font-poppins);
+    font-family: var(--font-sans);
     font-size: 1.125rem;
     line-height: 1.7;
     color: var(--foreground);
@@ -81,7 +81,7 @@
   }
 
   .paragraph-text {
-    font-family: var(--font-poppins);
+    font-family: var(--font-sans);
     font-size: 1.15rem;
     line-height: 1.8;
     color: #1a1a1a; /* Negro más suave pero profundo */
@@ -118,7 +118,7 @@
   }
 
   .overline-label {
-    font-family: 'Public Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 900;
     font-size: 0.65rem;
     text-transform: uppercase;
@@ -127,7 +127,7 @@
   }
 
   .metadata-text {
-    font-family: 'Public Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 700;
     font-size: 0.72rem;
     color: #374151;
@@ -136,7 +136,7 @@
   }
 
   .section-title {
-    font-family: 'Public Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
     font-weight: 900;
     font-size: 0.65rem;
     text-transform: uppercase;
@@ -151,7 +151,7 @@
 
   .pill-tag {
     @apply px-4 py-1.5 bg-background border border-border-base text-[10px] font-black uppercase tracking-widest text-muted-base transition-all hover:bg-foreground hover:text-background hover:border-foreground italic select-none;
-    font-family: 'Public Sans', sans-serif;
+    font-family: 'Inter', sans-serif;
   }
 }
 
@@ -211,7 +211,7 @@
 
 /* Tipografía dentro de las noticias redactadas visualmente */
 .article-html-content {
-  font-family: var(--font-poppins);
+  font-family: var(--font-sans);
   font-size: 1.15rem;
   line-height: 1.8;
   color: var(--foreground);

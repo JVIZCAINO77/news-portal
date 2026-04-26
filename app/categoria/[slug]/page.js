@@ -10,9 +10,29 @@ export async function generateMetadata({ params }) {
   const cat = getCategoryBySlug(slug);
   if (!cat) return { title: 'Categoría no encontrada' };
 
+  const title = `${cat.label} — Imperio Público`;
+  const description = `Últimas noticias de ${cat.label} en Imperio Público. Información veraz, análisis editorial y cobertura en tiempo real sobre ${cat.label.toLowerCase()} en República Dominicana y el mundo.`;
+
   return {
-    title: `Sección: ${cat.label} — Imperio Público`,
-    description: `Explora las últimas noticias sobre ${cat.label} en Imperio Público.`,
+    title,
+    description,
+    alternates: {
+      canonical: `/categoria/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://imperiopublico.com/categoria/${slug}`,
+      siteName: 'Imperio Público',
+      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: `${cat.label} — Imperio Público` }],
+      type: 'website',
+      locale: 'es_DO',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   };
 }
 

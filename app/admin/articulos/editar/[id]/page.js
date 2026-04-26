@@ -46,7 +46,7 @@ export default function EditArticlePage() {
         setCategory(data.category);
         setImage(data.image);
         setAuthor(data.author);
-        setTags(data.tags || '');
+        setTags(Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || ''));
         setSourceLink(data.source_link || '');
         setLoading(false);
       }
@@ -86,7 +86,9 @@ export default function EditArticlePage() {
         category,
         image,
         author,
-        tags: tags.trim() || null,
+        tags: tags.trim()
+          ? tags.split(',').map(t => t.trim().replace(/^#/, '').replace(/\s+/g, '')).filter(Boolean)
+          : null,
         source_link: sourceLink.trim() || null,
         updated_at: new Date().toISOString()
       })
