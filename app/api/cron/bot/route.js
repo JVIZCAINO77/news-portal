@@ -30,6 +30,12 @@ const BREAKING_KEYWORDS = [
   'última hora', 'urgente', 'breaking', 'alerta roja', 'en vivo',
   // Detención / arresto relacionado a sucesos
   'detenido', 'detenidos', 'arrestado', 'capturado', 'fugitivo',
+  // Impacto Económico / Social
+  'histórico', 'historico', 'récord', 'record', 'crisis', 'inflación', 'alza', 'sube',
+  // Triunfos / Logros
+  'campeón', 'campeon', 'victoria', 'medalla', 'oro', 'clasifica',
+  // Otros
+  'escándalo', 'escandalo', 'corrupción', 'fraude', 'justicia',
 ];
 
 /**
@@ -176,9 +182,9 @@ export async function GET(request) {
       'https://www.europapress.es/rss/rss.aspx?ch=00066'
     ];
 
-    // Seleccionamos 3 fuentes al azar para mayor diversidad
+    // Seleccionamos 5 fuentes al azar para mayor diversidad (antes 3)
     const shuffled = [...allSources].sort(() => 0.5 - Math.random());
-    const selectedSources = shuffled.slice(0, 3);
+    const selectedSources = shuffled.slice(0, 5);
     
     let pooledItems = [];
     for (const source of selectedSources) {
@@ -345,7 +351,8 @@ Resumen de fuente: ${news.contentSnippet || 'Sin resumen disponible'}
 PASO 1 — VERIFICACIÓN DE VIGENCIA Y RELEVANCIA:
 - Si la noticia es de días anteriores a ${todayDR} o parece desactualizada → responde exactamente: IRRELEVANTE
 - Si el tema NO encaja genuinamente en la sección ${cat.slug.toUpperCase()} → responde exactamente: IRRELEVANTE
-- Si la noticia no tiene valor informativo real para el lector → responde exactamente: IRRELEVANTE
+- Si la noticia es "relleno" (ej: curiosidades triviales, horóscopos, chismes sin sustento, comunicados vacíos) → responde exactamente: IRRELEVANTE
+- Tu prioridad es el IMPACTO. Si la noticia no cambiaría la conversación del día, descártala.
 
 PASO 2 — SI ES VÁLIDA, redacta el artículo completo cumpliendo TODAS estas reglas:
 
