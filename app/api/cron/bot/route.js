@@ -163,7 +163,7 @@ export async function GET(request) {
       'https://elcaribe.com.do/feed/?s=',
       'https://hoy.com.do/feed/?s=',
       'https://eldia.com.do/feed/?s=',
-      'https://z101digital.com/feed/?s=',
+      // z101digital.com eliminado: su og:image siempre devuelve el logo de la marca
       'https://cdn.com.do/feed/?s=',
       'https://noticiassin.com/feed/?s=',
       'https://desenredandodr.com/feed/?s=',
@@ -332,29 +332,49 @@ export async function GET(request) {
     const selectedKey = keys[Math.floor(Math.random() * keys.length)] || process.env.GEMINI_API_KEY;
     const ai = new GoogleGenAI({ apiKey: selectedKey });
 
-    const prompt = `Actúa como un periodista ético y profesional de "Imperio Público". Analiza cuidadosamente esta noticia para la sección "${cat.slug.toUpperCase()}":
+    const prompt = `Eres el editor jefe de "Imperio Público", un portal de noticias cuyo lema es: NOTICIA REAL Y DE VALOR.
+Tu misión es convertir la siguiente fuente en un artículo periodístico que el lector NO pueda ignorar.
 
-Fecha actual: ${todayDR}
-Titular original: ${news.title}
-Resumen de fuente confiable: ${news.contentSnippet || 'Sin resumen disponible'}
+--- DATOS DE LA NOTICIA ---
+Fecha: ${todayDR}
+Sección: ${cat.slug.toUpperCase()}
+Titular de fuente: ${news.title}
+Resumen de fuente: ${news.contentSnippet || 'Sin resumen disponible'}
+--------------------------
 
-POLÍTICA DE ACTUALIDAD (CERO FICCIÓN/CERO NOTICIAS VIEJAS):
-Solo debes procesar esta noticia si es de HOY (${todayDR}) o extremadamente reciente. Si la noticia parece ser de días anteriores o información obsoleta, responde exactamente: IRRELEVANTE
+PASO 1 — VERIFICACIÓN DE VIGENCIA Y RELEVANCIA:
+- Si la noticia es de días anteriores a ${todayDR} o parece desactualizada → responde exactamente: IRRELEVANTE
+- Si el tema NO encaja genuinamente en la sección ${cat.slug.toUpperCase()} → responde exactamente: IRRELEVANTE
+- Si la noticia no tiene valor informativo real para el lector → responde exactamente: IRRELEVANTE
 
-FILTRO ESTRICTO DE CATEGORÍA:
-Debes analizar si los hechos de esta noticia realmente encajan perfectamente y sin forzarse en la categoría de "${cat.slug.toUpperCase()}". Si es otro tema, tu ÚNICA RESPUESTA debe ser exactamente la palabra: IRRELEVANTE
+PASO 2 — SI ES VÁLIDA, redacta el artículo completo cumpliendo TODAS estas reglas:
 
-Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}" y es ACTUAL, redacta la nota completa cumpliendo estas REGLAS ESTRICTAS:
-1. El artículo debe estar COMPLETAMENTE EN ESPAÑOL.
-2. VERACIDAD ABSOLUTA: Basate ÚNICAMENTE en los hechos del resumen. NO inventes datos.
-3. Aplica tu estilo de periodista: ${cat.style}.
-4. EL TITULAR DEBE SER MUY LLAMATIVO Y MAGNÉTICO: Reformula el titular original para que capte la atención del lector de inmediato. Usa mayúsculas solo para nombres propios o al inicio; PROHIBIDO escribir el titular o partes de él en mayúsculas sostenidas.
-5. Usa formato Markdown en el campo 'content' (## para subtítulos, **negritas** para datos clave).
-6. PROHIBIDO: No uses hashtags (#) ni guiones bajos (_) en el texto ni en las etiquetas.
-7. Escribe mínimo 3 párrafos bien desarrollados.
-8. Extrae de 3 a 5 palabras clave de alto tráfico SEO (SEO Tags) enfocadas en este tema y devuélvelas en un arreglo de strings (SIN el símbolo #).
-9. Tu respuesta DEBE ser EXCLUSIVAMENTE un JSON válido con este formato exacto (sin bloques de código):
-{"title":"TITULAR LLAMATIVO Y MAGNÉTICO AQUÍ","excerpt":"Resumen en forma de 'gancho' para mantener la retención","content":"Artículo completo en Markdown","tags":["seo1", "seo2", "seo3"]}`;
+TITULAR (campo "title"):
+- Crea un titular NUEVO, propio, distinto al de la fuente. Debe ser poderoso, en tendencia, que genere curiosidad inmediata.
+- Debe reflejar el hecho más impactante o sorprendente de la noticia.
+- Estilo: ${cat.style}. Usa mayúsculas solo en nombres propios o inicio de oración.
+- PROHIBIDO usar mayúsculas sostenidas en el titular.
+- PROHIBIDO copiar el titular original tal cual.
+
+EXCERPT (campo "excerpt"):
+- Un gancho de 1-2 oraciones que responda: ¿por qué le importa esto al lector HOY?
+- Debe generar urgencia o curiosidad sin revelar todo.
+
+CONTENIDO (campo "content"):
+- Mínimo 4 párrafos bien desarrollados. Estilo: ${cat.style}.
+- Formato Markdown: usa ## para subtítulos, **negritas** en datos clave.
+- Solo hechos verificables del resumen. CERO ficción, CERO datos inventados.
+- PROHIBIDO usar hashtags (#) ni guiones bajos (_).
+- PROHIBIDO incluir secciones de "etiquetas", "palabras clave" ni "SEO" dentro del contenido.
+
+TAGS (campo "tags"):
+- De 3 a 5 palabras clave SEO de alto tráfico relacionadas con el tema.
+- Sin el símbolo #. Sin espacios dentro de cada tag.
+
+PASO 3 — FORMATO DE RESPUESTA:
+Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido. Sin bloques de código, sin texto adicional antes ni después.
+Esquema obligatorio:
+{ "title": "<titular real aquí>", "excerpt": "<gancho real aquí>", "content": "<artículo real en Markdown aquí>", "tags": ["<tag1>", "<tag2>", "<tag3>"] }`;`
 
     let rawText = '';
     try {
@@ -383,8 +403,9 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}" y es ACT
 
     const cleanedText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
 
-    if (cleanedText === 'IRRELEVANTE') {
-      throw new Error(`La Inteligencia Artificial dictaminó que la noticia encontrada (${news.title}) no pertenece estrictamente a la sección de ${cat.slug.toUpperCase()}.`);
+    // ── Guardia IRRELEVANTE (texto plano) ─────────────────────────────────────
+    if (/^irrelevante\.?$/i.test(cleanedText)) {
+      throw new Error(`La IA dictaminó IRRELEVANTE (texto plano) para: "${news.title.slice(0, 80)}"`);
     }
 
     let articleData;
@@ -399,6 +420,36 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}" y es ACT
     if (!articleData.title || !articleData.content) {
       throw new Error('La IA no devolvió los campos requeridos.');
     }
+
+    // ── Guardia IRRELEVANTE (JSON con campos seteados a esa palabra) ──────────
+    // Ocurre cuando la IA envuelve la respuesta en JSON en vez de texto plano
+    const IRRELEVANTE_RE = /^irrelevante\.?$/i;
+    if (
+      IRRELEVANTE_RE.test(String(articleData.title || '').trim()) ||
+      IRRELEVANTE_RE.test(String(articleData.content || '').trim()) ||
+      IRRELEVANTE_RE.test(String(articleData.excerpt || '').trim())
+    ) {
+      throw new Error(`La IA dictaminó IRRELEVANTE (en JSON) para: "${news.title.slice(0, 80)}"`);
+    }
+
+    // ─── GUARDIA ANTI-PLACEHOLDER ───────────────────────────────────────────
+    // Detecta si la IA devolvió texto de plantilla en vez de contenido real
+    const PLACEHOLDER_SIGNALS = [
+      'titular real aquí',
+      'gancho real aquí',
+      'artículo real en markdown',
+      'titular llamativo y magnético aquí',
+      'artículo completo en markdown',
+      'gancho periodístico corto',
+      'resumen en forma de',
+      'seo1', 'seo2', 'seo3',
+    ];
+    const combinedAiText = `${articleData.title} ${articleData.excerpt} ${articleData.content}`.toLowerCase();
+    const isPlaceholder = PLACEHOLDER_SIGNALS.some(sig => combinedAiText.includes(sig));
+    if (isPlaceholder) {
+      throw new Error(`La IA devolvió texto de plantilla en vez de contenido real. Noticia omitida: "${news.title.slice(0, 80)}".`);
+    }
+    // ────────────────────────────────────────────────────────────────────────
 
     // LIMPIEZA ESTRICTA: Reemplazar secuencias literales de \n por saltos de línea reales
     const sanitizeAiText = (str) => {
@@ -487,17 +538,16 @@ Si la noticia sí pertenece estrictamente a "${cat.slug.toUpperCase()}" y es ACT
         'elcaribe': 'El Caribe',
         'hoy': 'Hoy Digital',
         'eldia': 'El Día',
-        'z101digital': 'Z101 Digital',
-        'cdn.com.do': 'CDN 37',
+        'cdn': 'CDN 37',
         'noticiassin': 'Noticias SIN',
         'desenredandodr': 'Desenredando RD',
         'deultimominuto': 'De Último Minuto',
         'cnnespanol': 'CNN en Español',
         'france24': 'France 24',
-        'dw.com': 'Deutsche Welle (DW)',
-        'bbc.com': 'BBC Mundo',
-        'rtve.es': 'RTVE',
-        'europapress.es': 'Europa Press'
+        'dw': 'Deutsche Welle (DW)',
+        'bbc': 'BBC Mundo',
+        'rtve': 'RTVE',
+        'europapress': 'Europa Press'
       };
       sourceName = sourceMap[sourceName.toLowerCase()] || sourceName;
     } catch (e) { /* ignore */ }
