@@ -208,14 +208,28 @@ export default async function ArticlePage({ params }) {
                           .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
                         const isFirstParagraph = i === 0;
                         
-                        // AUTO INTER-LINKING: Link category names within the text
+                        // AUTO INTER-LINKING: Link category names AND recent articles
                         let linkedText = formattedText;
+                        
+                        // 1. Link to Categories
                         const { CATEGORIES } = require('@/lib/data');
                         CATEGORIES.forEach(cat => {
                           const regex = new RegExp(`\\b(${cat.label})\\b`, 'gi');
-                          // Avoid linking the same word multiple times or if already inside a tag
                           linkedText = linkedText.replace(regex, (match) => {
                             return `<a href="/categoria/${cat.slug}" class="text-red-600 font-bold hover:underline">${match}</a>`;
+                          });
+                        });
+
+                        // 2. Link to Recent Articles (Internal SEO Mesh)
+                        // Buscamos palabras clave de los títulos de noticias recientes para crear enlaces internos
+                        latest.slice(0, 5).forEach(recent => {
+                          if (recent.id === article.id) return;
+                          // Tomamos las primeras 3 palabras significativas del título
+                          const keywords = recent.title.split(' ').filter(w => w.length > 4).slice(0, 2);
+                          keywords.forEach(kw => {
+                             const kwRegex = new RegExp(`\\b(${kw})\\b`, 'i');
+                             // Solo reemplazamos la primera ocurrencia para no saturar
+                             linkedText = linkedText.replace(kwRegex, `<a href="/articulo/${recent.slug}" class="border-b border-dotted border-red-400 hover:text-red-700 transition-colors">$1</a>`);
                           });
                         });
 

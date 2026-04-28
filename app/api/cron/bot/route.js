@@ -3,6 +3,9 @@ import Parser from 'rss-parser';
 import { GoogleGenAI } from '@google/genai';
 import { createClient } from '@supabase/supabase-js';
 import { internalizeImage } from '@/lib/botUtils';
+import { notifyGoogleIndexing } from '@/lib/indexing';
+import { postToSocialMedia } from '@/lib/social';
+import { SITE_CONFIG } from '@/lib/data';
 
 // Token secreto para evitar ataques externos, manejado por Vercel
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -162,6 +165,14 @@ export async function GET(request) {
       }
     });
     // --- MEJORA: Consultar múltiples fuentes para encontrar la mejor tendencia ---
+    // Determinar el feed de Diario Libre según la categoría
+    let dlFeed = 'portada';
+    if (cat.slug === 'economia') dlFeed = 'economia';
+    else if (cat.slug === 'deportes') dlFeed = 'deportes';
+    else if (cat.slug === 'opinion') dlFeed = 'opinion';
+    else if (['entretenimiento', 'cultura', 'tendencias'].includes(cat.slug)) dlFeed = 'revista';
+    else if (['noticias', 'politica', 'sucesos', 'internacional'].includes(cat.slug)) dlFeed = 'actualidad';
+
     const allSources = [
       'https://acento.com.do/feed/?s=',
       'https://n.com.do/feed/?s=',
@@ -169,12 +180,11 @@ export async function GET(request) {
       'https://elcaribe.com.do/feed/?s=',
       'https://hoy.com.do/feed/?s=',
       'https://eldia.com.do/feed/?s=',
-      // z101digital.com eliminado: su og:image siempre devuelve el logo de la marca
       'https://cdn.com.do/feed/?s=',
       'https://noticiassin.com/feed/?s=',
       'https://desenredandodr.com/feed/?s=',
       'https://deultimominuto.net/feed/?s=',
-      'https://www.diariolibre.com/rss/portada.xml',
+      `https://www.diariolibre.com/rss/${dlFeed}.xml`,
       'https://almomento.net/feed/',
       'https://remolacha.net/feed/',
       'https://cnnespanol.cnn.com/feed/',
@@ -185,9 +195,8 @@ export async function GET(request) {
       'https://www.europapress.es/rss/rss.aspx?ch=00066'
     ];
 
-    // Seleccionamos 5 fuentes al azar para mayor diversidad (antes 3)
-    const shuffled = [...allSources].sort(() => 0.5 - Math.random());
-    const selectedSources = shuffled.slice(0, 5);
+    // Ahora usamos TODOS los medios disponibles para mayor diversidad
+    const selectedSources = allSources;
     
     let pooledItems = [];
     for (const source of selectedSources) {
@@ -271,8 +280,8 @@ export async function GET(request) {
 
     // === CAPA 4: Selección final — priorizar ÚLTIMA HORA, luego el resto ===
     // Separar ítems de ÚLTIMA HORA del resto para procesarlos primero
-    const breakingItems = todaysItems.filter(i => isBreakingNews(i.title));
-    const normalItems   = todaysItems.filter(i => !isBreakingNews(i.title));
+    const breakingItems = todaysItems.filter(i => isBreakingNews(i.title)).sort(() => 0.5 - Math.random());
+    const normalItems   = todaysItems.filter(i => !isBreakingNews(i.title)).sort(() => 0.5 - Math.random());
     const prioritizedItems = [...breakingItems, ...normalItems];
 
     if (breakingItems.length > 0) {
@@ -322,12 +331,9 @@ export async function GET(request) {
       if (isNewsBreaking) {
         console.log(`[Bot] ⚡ ÚLTIMA HORA seleccionada: "${item.title.slice(0, 70)}"`);
       }
-      break;
-    }
 
-    if (!news) {
-      return NextResponse.json({ message: `No se encontraron noticias NUEVAS de HOY (${todayDR}) para: ${categoryKey}. Todo ya estaba publicado.` }, { status: 200 });
-    }
+      // --- LLAMADA A LA IA ---
+      try {
     const baseSlug = news.title
       .toLowerCase()
       .normalize('NFD')
@@ -341,8 +347,7 @@ export async function GET(request) {
     const selectedKey = keys[Math.floor(Math.random() * keys.length)] || process.env.GEMINI_API_KEY;
     const ai = new GoogleGenAI({ apiKey: selectedKey });
 
-    const prompt = `Eres el editor jefe de "Imperio Público", un portal de noticias cuyo lema es: NOTICIA REAL Y DE VALOR.
-Tu misión es convertir la siguiente fuente en un artículo periodístico que el lector NO pueda ignorar.
+    const prompt = `Eres el editor jefe y experto en SEO de "Imperio Público". Tu misión es transformar la fuente en un artículo de alto impacto que domine los buscadores y genere clics.
 
 --- DATOS DE LA NOTICIA ---
 Fecha: ${todayDR}
@@ -351,42 +356,29 @@ Titular de fuente: ${news.title}
 Resumen de fuente: ${news.contentSnippet || 'Sin resumen disponible'}
 --------------------------
 
-PASO 1 — VERIFICACIÓN DE VIGENCIA Y RELEVANCIA:
-- Si la noticia es de días anteriores a ${todayDR} o parece desactualizada → responde exactamente: IRRELEVANTE
-- Si el tema NO encaja genuinamente en la sección ${cat.slug.toUpperCase()} → responde exactamente: IRRELEVANTE
-- Si la noticia es "relleno" (ej: curiosidades triviales, horóscopos, chismes sin sustento, comunicados vacíos) → responde exactamente: IRRELEVANTE
-- Si por alguna razón técnica NO puedes generar un artículo real con datos concretos, responde exactamente: IRRELEVANTE.
-- PROHIBIDO devolver textos de ejemplo como "Titular real aquí" o "Contenido en Markdown".
-- Tu prioridad es el IMPACTO. Si la noticia no cambiaría la conversación del día, descártala.
+REGLAS DE ORO (MANDATORIAS):
+1. IDIOMA: Todo en ESPAÑOL.
+2. ESTRUCTURA SEO: 
+   - El primer párrafo DEBE contener las palabras clave más importantes del hecho.
+   - Usa subtítulos (##) atractivos para organizar la información.
+   - Usa **negritas** para resaltar datos, nombres y cifras clave.
+3. TÍTULO (campo "title"): 
+   - Máximo impacto y curiosidad. Debe ser digno de "Última Hora".
+   - Optimizado para buscadores pero extremadamente humano y "clickeable".
+   - PROHIBIDO copiar el original. PROHIBIDO usar mayúsculas sostenidas.
+4. CONTENIDO (campo "content"):
+   - Mínimo 450 palabras de alta calidad periodística.
+   - Estilo: ${cat.style}.
+   - CERO relleno. CERO inventos. Solo hechos del resumen procesados con elegancia.
+5. EXCERPT (campo "excerpt"):
+   - Un gancho magnético de 160 caracteres (ideal para Google) que obligue a entrar a leer.
 
-PASO 2 — SI ES VÁLIDA, redacta el artículo completo cumpliendo TODAS estas reglas:
+PASO 1 — VERIFICACIÓN:
+- Si la noticia es vieja, irrelevante o de relleno → responde exactamente: IRRELEVANTE.
 
-TITULAR (campo "title"):
-- Crea un titular NUEVO, propio, distinto al de la fuente. Debe ser poderoso, en tendencia, que genere curiosidad inmediata.
-- Debe reflejar el hecho más impactante o sorprendente de la noticia.
-- Estilo: ${cat.style}. Usa mayúsculas solo en nombres propios o inicio de oración.
-- PROHIBIDO usar mayúsculas sostenidas en el titular.
-- PROHIBIDO copiar el titular original tal cual.
-
-EXCERPT (campo "excerpt"):
-- Un gancho de 1-2 oraciones que responda: ¿por qué le importa esto al lector HOY?
-- Debe generar urgencia o curiosidad sin revelar todo.
-
-CONTENIDO (campo "content"):
-- Mínimo 4 párrafos bien desarrollados. Estilo: ${cat.style}.
-- Formato Markdown: usa ## para subtítulos, **negritas** en datos clave.
-- Solo hechos verificables del resumen. CERO ficción, CERO datos inventados.
-- PROHIBIDO usar hashtags (#) ni guiones bajos (_).
-- PROHIBIDO incluir secciones de "etiquetas", "palabras clave" ni "SEO" dentro del contenido.
-
-TAGS (campo "tags"):
-- De 3 a 5 palabras clave SEO de alto tráfico relacionadas con el tema.
-- Sin el símbolo #. Sin espacios dentro de cada tag.
-
-PASO 3 — FORMATO DE RESPUESTA:
-Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido. Sin bloques de código, sin texto adicional antes ni después.
-Esquema obligatorio:
-{ "title": "<titular_generado>", "excerpt": "<excerpt_generado>", "content": "<contenido_generado>", "tags": ["tag1", "tag2"] }`;
+PASO 2 — FORMATO DE RESPUESTA:
+Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido.
+{ "title": "<titular_seo>", "excerpt": "<gancho_meta_description>", "content": "<contenido_con_h2_y_negritas>", "tags": ["tag1", "tag2", "tag3"] }`;
 
     let rawText = '';
     try {
@@ -399,7 +391,7 @@ Esquema obligatorio:
       if (fallbackError.message.includes('Quota') || fallbackError.message.includes('429')) {
         try {
           const fallbackResponse = await ai.models.generateContent({
-            model: 'gemini-2.0-flash-lite',
+            model: 'gemini-1.5-flash',
             contents: prompt,
           });
           rawText = fallbackResponse.text || '';
@@ -414,35 +406,33 @@ Esquema obligatorio:
     }
 
     const cleanedText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+    console.log(`[Bot DEBUG] AI Raw Text:`, rawText.substring(0, 200));
 
-    // ── Guardia IRRELEVANTE (texto plano) ─────────────────────────────────────
-    if (/^irrelevante\.?$/i.test(cleanedText)) {
-      throw new Error(`La IA dictaminó IRRELEVANTE (texto plano) para: "${news.title.slice(0, 80)}"`);
+    // ── Guardia IRRELEVANTE ─────────────────────────────────────
+    if (/irrelevante/i.test(cleanedText)) {
+      throw new Error(`La IA dictaminó IRRELEVANTE para: "${news.title.slice(0, 80)}"`);
     }
 
     let articleData;
     try {
       articleData = JSON.parse(cleanedText);
-    } catch {
+    } catch (parseError) {
       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error(`Respuesta de IA no válida`);
-      articleData = JSON.parse(jsonMatch[0]);
+      if (!jsonMatch) {
+        throw new Error(`Respuesta de IA no válida: no JSON format`);
+      }
+      try {
+        articleData = JSON.parse(jsonMatch[0]);
+      } catch (innerError) {
+        throw new Error(`Respuesta de IA no válida: JSON malformed`);
+      }
     }
 
     if (!articleData.title || !articleData.content) {
       throw new Error('La IA no devolvió los campos requeridos.');
     }
 
-    // ── Guardia IRRELEVANTE (JSON con campos seteados a esa palabra) ──────────
-    // Ocurre cuando la IA envuelve la respuesta en JSON en vez de texto plano
-    const IRRELEVANTE_RE = /^irrelevante\.?$/i;
-    if (
-      IRRELEVANTE_RE.test(String(articleData.title || '').trim()) ||
-      IRRELEVANTE_RE.test(String(articleData.content || '').trim()) ||
-      IRRELEVANTE_RE.test(String(articleData.excerpt || '').trim())
-    ) {
-      throw new Error(`La IA dictaminó IRRELEVANTE (en JSON) para: "${news.title.slice(0, 80)}"`);
-    }
+
 
     // ─── GUARDIA ANTI-PLACEHOLDER ───────────────────────────────────────────
     // Detecta si la IA devolvió texto de plantilla en vez de contenido real
@@ -633,6 +623,17 @@ Esquema obligatorio:
 
     if (insertError) throw new Error(`Error al guardar en BD: ${insertError.message}`);
 
+    // NOTIFICACIÓN PRIORITARIA: Indexación en Google (Instantánea)
+    try {
+      const articleUrl = `${SITE_CONFIG.url}/articulo/${slug}`;
+      await notifyGoogleIndexing(articleUrl);
+      
+      // AUTO-POST: Redes Sociales
+      await postToSocialMedia(newArticle);
+    } catch (indexErr) {
+      console.warn('[Bot] No se pudo notificar a servicios externos:', indexErr.message);
+    }
+
     return NextResponse.json({
       success: true,
       message: '¡Noticia publicada con éxito!',
@@ -643,6 +644,16 @@ Esquema obligatorio:
         category: cat.slug,
       },
     }, { status: 200 });
+
+      } catch (aiError) {
+        console.log(`[Bot] Descartada noticia "${news.title.slice(0, 60)}": ${aiError.message}`);
+        // Continúa con la siguiente noticia en el bucle
+        continue;
+      }
+    } // fin del bucle for
+
+    // Si termina el bucle y no se publicó nada
+    return NextResponse.json({ message: `No se pudo generar contenido válido para ninguna de las noticias candidatas.` }, { status: 200 });
 
   } catch (error) {
     console.error(`[Bot Error]`, error.message);
