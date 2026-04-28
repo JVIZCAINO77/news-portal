@@ -352,6 +352,8 @@ PASO 1 — VERIFICACIÓN DE VIGENCIA Y RELEVANCIA:
 - Si la noticia es de días anteriores a ${todayDR} o parece desactualizada → responde exactamente: IRRELEVANTE
 - Si el tema NO encaja genuinamente en la sección ${cat.slug.toUpperCase()} → responde exactamente: IRRELEVANTE
 - Si la noticia es "relleno" (ej: curiosidades triviales, horóscopos, chismes sin sustento, comunicados vacíos) → responde exactamente: IRRELEVANTE
+- Si por alguna razón técnica NO puedes generar un artículo real con datos concretos, responde exactamente: IRRELEVANTE.
+- PROHIBIDO devolver textos de ejemplo como "Titular real aquí" o "Contenido en Markdown".
 - Tu prioridad es el IMPACTO. Si la noticia no cambiaría la conversación del día, descártala.
 
 PASO 2 — SI ES VÁLIDA, redacta el artículo completo cumpliendo TODAS estas reglas:
@@ -381,7 +383,7 @@ TAGS (campo "tags"):
 PASO 3 — FORMATO DE RESPUESTA:
 Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido. Sin bloques de código, sin texto adicional antes ni después.
 Esquema obligatorio:
-{ "title": "<titular real aquí>", "excerpt": "<gancho real aquí>", "content": "<artículo real en Markdown aquí>", "tags": ["<tag1>", "<tag2>", "<tag3>"] }`;`
+{ "title": "<titular_generado>", "excerpt": "<excerpt_generado>", "content": "<contenido_generado>", "tags": ["tag1", "tag2"] }`;
 
     let rawText = '';
     try {
@@ -445,17 +447,33 @@ Esquema obligatorio:
       'titular real aquí',
       'gancho real aquí',
       'artículo real en markdown',
-      'titular llamativo y magnético aquí',
-      'artículo completo en markdown',
-      'gancho periodístico corto',
+      'titular llamativo',
+      'magnético aquí',
+      'artículo completo',
+      'gancho periodístico',
       'resumen en forma de',
       'seo1', 'seo2', 'seo3',
+      '<titular', '<excerpt', '<contenido', '<tag',
     ];
-    const combinedAiText = `${articleData.title} ${articleData.excerpt} ${articleData.content}`.toLowerCase();
-    const isPlaceholder = PLACEHOLDER_SIGNALS.some(sig => combinedAiText.includes(sig));
+    
+    const normalizeForCheck = (str) => 
+      String(str || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+    const combinedAiText = normalizeForCheck(
+      `${articleData.title} ${articleData.excerpt} ${articleData.content} ${(articleData.tags || []).join(' ')}`
+    );
+
+    const isPlaceholder = PLACEHOLDER_SIGNALS.some(sig => 
+      combinedAiText.includes(normalizeForCheck(sig))
+    );
+
     if (isPlaceholder) {
       throw new Error(`La IA devolvió texto de plantilla en vez de contenido real. Noticia omitida: "${news.title.slice(0, 80)}".`);
     }
+    // ────────────────────────────────────────────────────────────────────────
     // ────────────────────────────────────────────────────────────────────────
 
     // LIMPIEZA ESTRICTA: Reemplazar secuencias literales de \n por saltos de línea reales
