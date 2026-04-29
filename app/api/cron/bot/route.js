@@ -119,6 +119,76 @@ const CATEGORIES = {
   politica:       { query: `politica`,          slug: 'politica',        author: 'Mesa Política', style: 'neutral y objetivo' },
 };
 
+// ─── VALIDADOR TEMÁTICO ───────────────────────────────────────────────────────
+// Palabras que NUNCA deben aparecer en el título de una noticia de esa sección.
+// Si aparecen → el ítem del feed NO es apto para esa sección y se descarta.
+// Esto previene que el agente de "tecnologia" procese noticias de "sucesos", etc.
+const TOPIC_BLOCKLIST = {
+  // Un artículo de DEPORTES no puede hablar de crímenes o economía doméstica
+  deportes: ['homicidio','asesinado','asesinato','detenido','arrestado',
+             'inflacion','pib','banco central','ministro de','presidente abinader'],
+
+  // Un artículo de ECONOMÍA no puede hablar de deportes o farándula
+  economia: ['beisbol','jonron','mlb','nba','partido de futbol',
+             'actor','actriz','cantante','concierto','farandula'],
+
+  // Un artículo de POLÍTICA no puede hablar de farándula o deportes
+  politica: ['beisbol','jonron','mlb','nba','actor','actriz','cantante',
+             'concierto','farandula','asesinado a tiros','homicidio'],
+
+  // Un artículo de SALUD no puede hablar de deportes, política o crímenes
+  salud: ['beisbol','jonron','mlb','presidente abinader','ministro de',
+          'asesinado','homicidio','partido politico'],
+
+  // Un artículo de ENTRETENIMIENTO no puede hablar de política o economía
+  entretenimiento: ['presidente abinader','ministro de','pib','inflacion',
+                    'banco central','homicidio','asesinado','tribunal'],
+
+  // Un artículo de CULTURA no puede hablar de deportes o economía macro
+  cultura: ['beisbol','jonron','mlb','nba','pib','inflacion','banco central'],
+
+  // Un artículo de TECNOLOGÍA no puede hablar de crímenes ni política local
+  tecnologia: ['homicidio','asesinado','asesinato','detenido por','arrestado por',
+               'presidente abinader','ministro de','senado dominicano'],
+
+  // Un artículo de SUCESOS no puede hablar de farándula o deportes
+  sucesos: ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba'],
+
+  // Un artículo de TENDENCIAS no puede hablar de macroeconomía ni política formal
+  tendencias: ['pib','inflacion','banco central','reforma constitucional',
+               'proyecto de ley','decreto presidencial'],
+
+  // Un artículo de INTERNACIONAL no puede hablar de política local dominicana
+  internacional: ['presidente abinader','senado dominicano','camara de diputados',
+                  'ayuntamiento de','alcalde de rd'],
+
+  // Un artículo de OPINIÓN no necesita filtro estricto
+  opinion: [],
+
+  // NOTICIAS es la sección general — sin filtros
+  noticias: [],
+};
+
+/**
+ * Verifica si el ítem del RSS es temáticamente apto para la sección.
+ * Devuelve true si el ítem puede procesarse para esa sección.
+ */
+function isOnTopicForCategory(item, categorySlug) {
+  const blocklist = TOPIC_BLOCKLIST[categorySlug] || [];
+  if (blocklist.length === 0) return true; // sin filtro
+
+  const text = `${item.title || ''} ${item.contentSnippet || ''}`
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+  // Si el texto contiene alguna palabra bloqueada → descartar
+  return !blocklist.some(blocked => {
+    const norm = blocked.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return text.includes(norm);
+  });
+}
+
 export async function GET(request) {
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
 
@@ -309,6 +379,12 @@ export async function GET(request) {
     let isNewsBreaking = false;
     for (const item of prioritizedItems) {
       if (!item.link || !item.title) continue;
+
+      // 4a. VALIDACIÓN TEMÁTICA — descartar si el ítem no es apto para esta sección
+      if (!isOnTopicForCategory(item, cat.slug)) {
+        console.log(`[Bot] ⛔ Fuera de sección [${cat.slug.toUpperCase()}]: "${item.title.slice(0, 65)}"`);
+        continue;
+      }
 
       // 4a. Verificar link exacto
       if (publishedLinks.has(item.link)) {
