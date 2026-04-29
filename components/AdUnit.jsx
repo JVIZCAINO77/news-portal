@@ -13,10 +13,11 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
   if (!SITE_CONFIG.showAds) return null;
 
   // Dimensiones estándar de anuncios
+
   const dimensions = {
-    leaderboard: { minHeight: '0px', width: '100%', label: '728 x 90' },
-    rectangle: { minHeight: '0px', width: '100%', label: '300 x 250' },
-    'in-article': { minHeight: '0px', width: '100%', label: 'Native / In-Article' },
+    leaderboard: { minHeight: '90px', width: '100%', label: '728 x 90' },
+    rectangle: { minHeight: '250px', width: '100%', label: '300 x 250' },
+    'in-article': { minHeight: '120px', width: '100%', label: 'Native / In-Article' },
   };
 
   const style = dimensions[format] || dimensions.rectangle;
@@ -34,9 +35,13 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
   }, [slot]);
 
   return (
-    <div className={`ad-container ${adLoaded ? 'my-4' : 'my-0'} ${className}`} style={{ minHeight: adLoaded ? style.minHeight : '0px' }}>
+    <div className={`ad-container ${adLoaded ? 'my-8' : 'my-0'} ${className}`} style={{ minHeight: adLoaded ? style.minHeight : '0px' }}>
       <div className="flex flex-col items-center justify-center relative overflow-hidden">
-        {/* Visual placeholder removed to improve aesthetic before ad loads */}
+        {adLoaded && (
+          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-300 mb-2">
+            Publicidad
+          </span>
+        )}
         
         <ins className="adsbygoogle"
              style={{ display: adLoaded ? 'block' : 'none', minWidth: '250px', minHeight: adLoaded ? style.minHeight : '0px' }}

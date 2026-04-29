@@ -21,21 +21,21 @@ export default function NosotrosPage() {
       <section className="pt-0 pb-24 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="border-l-4 border-red-600 pl-8">
+            <div id="mision" className="border-l-4 border-red-600 pl-8 scroll-mt-24">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4">Nuestra Misión</h2>
               <p className="text-lg font-serif text-slate-800 leading-relaxed">
                 Proveer información veraz, oportuna y accesible a todos los dominicanos dentro y fuera del país, 
                 con rigor periodístico y responsabilidad ética.
               </p>
             </div>
-            <div className="border-l-4 border-black pl-8">
+            <div id="vision" className="border-l-4 border-black pl-8 scroll-mt-24">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-black mb-4">Nuestra Visión</h2>
               <p className="text-lg font-serif text-slate-800 leading-relaxed">
                 Ser el portal de noticias de referencia de la República Dominicana, reconocido por su excelencia 
                 editorial y su compromiso con la verdad.
               </p>
             </div>
-            <div className="border-l-4 border-slate-300 pl-8">
+            <div id="valores" className="border-l-4 border-slate-300 pl-8 scroll-mt-24">
               <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-800 mb-4">Nuestros Valores</h2>
               <ul className="space-y-3">
                 {['Veracidad', 'Objetividad', 'Independencia editorial', 'Responsabilidad social', 'Innovación'].map(v => (

@@ -18,6 +18,8 @@ export default function NewArticlePage() {
   const [author, setAuthor] = useState('');
   const [tags, setTags] = useState('');
   const [sourceLink, setSourceLink] = useState('');
+  const [featured, setFeatured] = useState(false);
+  const [trending, setTrending] = useState(false);
   const [loading, setLoading] = useState(false);
   const [pasting, setPasting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -69,7 +71,8 @@ export default function NewArticlePage() {
         : null,
       source_link: sourceLink.trim() || null,
       publishedAt: new Date().toISOString(),
-      featured: false
+      featured,
+      trending
     };
 
     const { error } = await supabase.from('articles').insert(newArticle);
@@ -208,6 +211,32 @@ export default function NewArticlePage() {
                   <p className="mt-2 text-[9px] text-slate-400 font-bold uppercase tracking-tight">
                     Enlace al medio original si la noticia es externa.
                   </p>
+                </div>
+
+                <div className="flex flex-col gap-4 bg-slate-50 p-6 border-l-4 border-red-600">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={featured} 
+                        onChange={(e) => setFeatured(e.target.checked)}
+                        className="w-5 h-5 accent-red-600"
+                      />
+                      <span className="text-[11px] font-black uppercase tracking-widest text-black group-hover:text-red-600 transition-colors">
+                        Destacar en Portada (Impacto)
+                      </span>
+                    </label>
+                    
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={trending} 
+                        onChange={(e) => setTrending(e.target.checked)}
+                        className="w-5 h-5 accent-red-600"
+                      />
+                      <span className="text-[11px] font-black uppercase tracking-widest text-black group-hover:text-red-600 transition-colors">
+                        Tendencia Crítica (Urgente)
+                      </span>
+                    </label>
                 </div>
 
                 <div className="bg-slate-50 p-6 border-l-4 border-red-600">

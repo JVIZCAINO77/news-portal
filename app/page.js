@@ -1,12 +1,13 @@
 // app/page.js — Portada Imperio Público — Diseño Periódico Clásico
 import Link from 'next/link';
 import Image from 'next/image';
-import { getDailyTopArticles, getLatestArticles } from '@/lib/serverData';
-import { SITE_CONFIG } from '@/lib/data';
+import { getDailyTopArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
+import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 import PremiumImage from '@/components/PremiumImage';
 import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
 import LoadMore from '@/components/LoadMore';
+import CategoryBlock from '@/components/CategoryBlock';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -15,9 +16,16 @@ export const revalidate = 60;
 
 export default async function HomePage() {
   // Cargamos en paralelo: top del día (por impacto) + últimas noticias (para el ticker)
-  const [dailyTop, latest] = await Promise.all([
+  const [dailyTop, latest, sports, economy, international, entertainment, tech, politics, incidents] = await Promise.all([
     getDailyTopArticles(12, 6),
     getLatestArticles(30),
+    getArticlesByCategory('deportes', 4),
+    getArticlesByCategory('economia', 4),
+    getArticlesByCategory('internacional', 4),
+    getArticlesByCategory('entretenimiento', 4),
+    getArticlesByCategory('tecnologia', 4),
+    getArticlesByCategory('politica', 4),
+    getArticlesByCategory('sucesos', 4),
   ]);
 
   const clean = (str) => typeof str === 'string' ? str.replace(/#+\s*/g, '').trim() : str;
@@ -41,8 +49,33 @@ export default async function HomePage() {
   const usedIds = new Set(pool.slice(0, 12).map(a => a.id));
   const ticker  = cleanedLatest.filter(a => !usedIds.has(a.id)).slice(0, 6);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": SITE_CONFIG.name,
+    "url": SITE_CONFIG.url,
+    "logo": `${SITE_CONFIG.url}${SITE_CONFIG.logo}`,
+    "sameAs": [
+      SITE_CONFIG.social.facebook,
+      SITE_CONFIG.social.instagram,
+      SITE_CONFIG.social.twitter,
+      SITE_CONFIG.social.youtube
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+1-829-637-1008",
+      "contactType": "customer service",
+      "areaServed": "DO",
+      "availableLanguage": "Spanish"
+    }
+  };
+
   return (
     <div className="bg-white text-gray-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* ══════════════════════════════════════════════
           PORTADA — Diseño Periódico Clásico
@@ -91,15 +124,20 @@ export default async function HomePage() {
               )}
             </div>
 
+
             {/* Sidebar de Noticias (Importancia 2 y 3) - 1/3 de ancho */}
             <div className="lg:col-span-4 flex flex-col gap-6">
               {pool.slice(1, 3).map((art, idx) => (
                 <div key={art.id} className={idx === 0 ? 'pb-10 border-b border-gray-100' : ''}>
                   <Link href={`/articulo/${art.slug}`} className="group block">
                     {art.image && (
-                      <div className="relative aspect-[16/9] overflow-hidden mb-5 bg-slate-50 shadow-sm">
-                        <Image src={art.image} alt={art.title} fill className="object-cover object-top group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 768px) 100vw, 400px" />
-                      </div>
+                      <PremiumImage 
+                        src={art.image} 
+                        alt={art.title}
+                        containerClassName="aspect-[16/9] mb-5 shadow-md rounded-sm group/img"
+                        className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
+                        width={600}
+                      />
                     )}
                     <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-3">
                       {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
@@ -186,6 +224,23 @@ export default async function HomePage() {
           </div>
         </div>
 
+        {/* ── SECCIÓN DE CATEGORÍAS — Impacto por Sección ── */}
+        <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 border-t border-gray-100">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
+            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'deportes')} articles={sports} />
+            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'economia')} articles={economy} />
+            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'internacional')} articles={international} />
+            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'entretenimiento')} articles={entertainment} />
+            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'politica')} articles={politics} />
+            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'sucesos')} articles={incidents} />
+          </div>
+          
+          {/* Fila completa para Tecnología para balancear el diseño */}
+          <div className="mt-8">
+            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'tecnologia')} articles={tech} />
+          </div>
+        </div>
+
         {/* ── SECCIÓN 3: Cintillo de texto + Lo más Reciente ── */}
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 border-t-2 border-slate-100">
           
@@ -199,6 +254,7 @@ export default async function HomePage() {
                       alt={art.title}
                       containerClassName="aspect-[16/9] mb-3 shadow-sm rounded-sm group/img"
                       className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110"
+                      width={400}
                     />
                   )}
                   <h4 className="text-sm font-bold group-hover:text-red-700 leading-tight mb-1">
@@ -225,6 +281,7 @@ export default async function HomePage() {
                       alt={art.title}
                       containerClassName="aspect-[16/9] mb-3 shadow-sm rounded-sm group/img"
                       className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
+                      width={300}
                     />
                   )}
                   {art.category?.toLowerCase() !== 'noticias' && (

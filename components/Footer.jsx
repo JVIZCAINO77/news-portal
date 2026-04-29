@@ -96,8 +96,9 @@ export default function Footer() {
               <ul className="space-y-4">
                 <li key="contacto"><Link href="/contacto" className="text-[12px] font-bold text-white/60 hover:text-red-600 transition-colors uppercase">Para contactarnos</Link></li>
                 <li key="nosotros"><Link href="/nosotros" className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors uppercase">Historia</Link></li>
-                <li key="mision"><Link href="/mision" className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors uppercase">Misión, visión, valores</Link></li>
+                <li key="mision"><Link href="/nosotros#mision" className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors uppercase">Misión, visión, valores</Link></li>
                 <li key="legal"><Link href="/aviso-legal" className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors uppercase">Aviso Legal</Link></li>
+                <li key="terminos"><Link href="/terminos" className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors uppercase">Términos y Condiciones</Link></li>
                 <li key="privacidad"><Link href="/privacidad" className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors uppercase">Política de privacidad</Link></li>
               </ul>
             </div>

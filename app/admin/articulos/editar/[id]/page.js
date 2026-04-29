@@ -19,6 +19,8 @@ export default function EditArticlePage() {
   const [author, setAuthor] = useState('');
   const [tags, setTags] = useState('');
   const [sourceLink, setSourceLink] = useState('');
+  const [featured, setFeatured] = useState(false);
+  const [trending, setTrending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pasting, setPasting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -48,6 +50,8 @@ export default function EditArticlePage() {
         setAuthor(data.author);
         setTags(Array.isArray(data.tags) ? data.tags.join(', ') : (data.tags || ''));
         setSourceLink(data.source_link || '');
+        setFeatured(!!data.featured);
+        setTrending(!!data.trending);
         setLoading(false);
       }
     }
@@ -90,6 +94,8 @@ export default function EditArticlePage() {
           ? tags.split(',').map(t => t.trim().replace(/^#/, '').replace(/\s+/g, '')).filter(Boolean)
           : null,
         source_link: sourceLink.trim() || null,
+        featured,
+        trending,
         updated_at: new Date().toISOString()
       })
       .eq('id', id);
@@ -221,6 +227,32 @@ export default function EditArticlePage() {
                      className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-xs outline-none focus:border-red-600"
                      placeholder="https://ejemplo.com/noticia"
                    />
+                </div>
+
+                <div className="flex flex-col gap-4 bg-slate-50 p-6 border-l-4 border-red-600">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={featured} 
+                        onChange={(e) => setFeatured(e.target.checked)}
+                        className="w-5 h-5 accent-red-600"
+                      />
+                      <span className="text-[11px] font-black uppercase tracking-widest text-black group-hover:text-red-600 transition-colors">
+                        Destacar en Portada (Impacto)
+                      </span>
+                    </label>
+                    
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="checkbox" 
+                        checked={trending} 
+                        onChange={(e) => setTrending(e.target.checked)}
+                        className="w-5 h-5 accent-red-600"
+                      />
+                      <span className="text-[11px] font-black uppercase tracking-widest text-black group-hover:text-red-600 transition-colors">
+                        Tendencia Crítica (Urgente)
+                      </span>
+                    </label>
                 </div>
 
                 <div className="bg-slate-50 p-6 border-l-4 border-black">

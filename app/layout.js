@@ -3,9 +3,23 @@ import './globals.css';
 import { SITE_CONFIG } from '@/lib/data';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import CookieConsent from '@/components/CookieConsent';
 import BackToTop from '@/components/BackToTop';
 import { Analytics } from '@vercel/analytics/react';
 import Script from 'next/script';
+import { Inter, Playfair_Display } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-playfair',
+});
 
 export const metadata = {
   metadataBase: new URL(SITE_CONFIG.url),
@@ -57,17 +71,15 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning className={`${inter.variable} ${playfair.variable}`}>
       <head>
         {/* Forzar modo claro antes de que React hidrate — evita el flash negro */}
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.remove('dark');localStorage.removeItem('theme');` }} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet" />
-        {/* RSS Feed autodiscovery — permite que Google y lectores detecten el feed */}
+        
+        {/* RSS Feed autodiscovery */}
         <link rel="alternate" type="application/rss+xml" title={`${SITE_CONFIG.name} — Últimas Noticias`} href="/feed.xml" />
         
-        {/* Google AdSense Script — Standard verification tag */}
+        {/* Google AdSense Script */}
         <Script 
           async 
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE_CONFIG.adsenseId}`}
@@ -95,13 +107,14 @@ export default function RootLayout({ children }) {
           </>
         )}
       </head>
-      <body className="min-h-screen flex flex-col font-sans">
+      <body className="min-h-screen flex flex-col font-sans antialiased">
         <Header />
         <main className="min-h-screen pb-24 md:pb-0" style={{ paddingTop: '2px' }}>
           {children}
         </main>
         <BackToTop />
         <Footer />
+        <CookieConsent />
         <Analytics />
       </body>
     </html>

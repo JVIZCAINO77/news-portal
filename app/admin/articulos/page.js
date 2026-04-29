@@ -65,6 +65,7 @@ export default async function AdminArticlesPage() {
                   <tr className="bg-slate-50 border-b border-gray-100">
                      <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Título</th>
                      <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Categoría</th>
+                     <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Estado</th>
                      <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Fecha</th>
                      {isAdmin && <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Autor</th>}
                      <th className="px-8 py-5 text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 text-right">Acciones</th>
@@ -78,6 +79,26 @@ export default async function AdminArticlesPage() {
                        </td>
                        <td className="px-8 py-6">
                           <span className="text-[9px] font-black uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1">{a.category}</span>
+                       </td>
+                       <td className="px-8 py-6">
+                          <div className="flex gap-2">
+                            {a.trending && (
+                              <span className="text-[8px] font-black uppercase tracking-widest bg-black text-white px-2 py-1 flex items-center gap-1">
+                                <span className="w-1 h-1 bg-red-600 rounded-full animate-pulse"></span>
+                                Impacto
+                              </span>
+                            )}
+                            {a.featured && (
+                              <span className="text-[8px] font-black uppercase tracking-widest bg-red-600 text-white px-2 py-1">
+                                Portada
+                              </span>
+                            )}
+                            {!a.trending && !a.featured && (
+                              <span className="text-[8px] font-black uppercase tracking-widest text-slate-300 border border-slate-100 px-2 py-1">
+                                Normal
+                              </span>
+                            )}
+                          </div>
                        </td>
                        <td className="px-8 py-6">
                           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">

@@ -6,7 +6,7 @@ import AudioReader from '@/components/AudioReader';
 import AdUnit from '@/components/AdUnit';
 import NewsletterBox from '@/components/NewsletterBox';
 import ArticleCard from '@/components/ArticleCard';
-import { formatDate, getCategoryBySlug, parseTags, SITE_CONFIG } from '@/lib/data';
+import { formatDate, getCategoryBySlug, parseTags, SITE_CONFIG, calculateReadingTime } from '@/lib/data';
 import Image from 'next/image';
 import Link from 'next/link';
 import PremiumImage from '@/components/PremiumImage';
@@ -120,14 +120,31 @@ export default async function ArticlePage({ params }) {
         <div className="max-w-6xl mx-auto px-6 py-4 md:py-8">
           
           {/* 1. CABECERA EDITORIAL */}
-          <header className="mb-4 md:mb-6 border-b-[3px] border-black pb-4">
-            <div className="flex items-center justify-between mb-4">
-              {article.category?.toLowerCase() !== 'noticias' && <span className="section-title !mb-0">{article.category}</span>}
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
-                Publicado el {formatDate(article.publishedAt)}
-              </span>
+          <header className="mb-4 md:mb-10 border-b-[3px] border-black pb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                {article.category?.toLowerCase() !== 'noticias' && (
+                  <span className="bg-red-600 text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest italic">
+                    {article.category}
+                  </span>
+                )}
+                {(article.featured || article.trending) && (
+                  <span className="flex items-center gap-1.5 bg-black text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest animate-pulse">
+                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                    {article.trending ? 'Tendencia Global' : 'Impacto Nacional'}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">
+                <span>{formatDate(article.publishedAt)}</span>
+                <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                <span className="flex items-center gap-1">
+                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                   {calculateReadingTime(article.content)} min
+                </span>
+              </div>
             </div>
-            <h1 className="editorial-title text-4xl md:text-5xl lg:text-7xl">
+            <h1 className="editorial-title text-4xl md:text-6xl lg:text-8xl leading-[0.95] tracking-tighter">
               {displayTitle}
             </h1>
           </header>
@@ -136,16 +153,16 @@ export default async function ArticlePage({ params }) {
             
             <div className="lg:col-span-8 space-y-6">
               
-              <figure className="mb-6">
+              <figure className="mb-10 group animate-in fade-in zoom-in-95 duration-1000 delay-200">
                 <PremiumImage 
                   src={article.image} 
                   alt={article.imageAlt || article.title}
-                  containerClassName="w-full min-h-[300px] max-h-[75vh] shadow-2xl rounded-2xl border border-slate-100 group"
-                  className="max-w-full max-h-[75vh] w-auto h-auto object-contain shadow-2xl transition-transform hover:scale-[1.01] duration-700"
+                  containerClassName="w-full min-h-[300px] md:min-h-[500px] max-h-[85vh] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.3)] rounded-3xl border border-slate-100 group-hover:border-red-100 transition-colors"
+                  className="max-w-full max-h-[85vh] w-auto h-auto object-contain transition-transform group-hover:scale-[1.01] duration-1000"
                   priority={true}
                 />
                 {article.imageAlt && (
-                  <figcaption className="mt-2 text-center overline-label !text-slate-400 italic">
+                  <figcaption className="mt-4 text-center overline-label !text-slate-400 italic">
                     Créditos: {article.imageAlt}
                   </figcaption>
                 )}

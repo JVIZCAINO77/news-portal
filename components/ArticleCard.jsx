@@ -1,12 +1,10 @@
+
 'use client';
 // components/ArticleCard.jsx — Tarjeta de artículo editorial premium
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import PremiumImage from './PremiumImage';
 import { getCategoryBySlug, formatDate } from '@/lib/data';
-
-const DEFAULT_PLACEHOLDER = '/icon.png';
 
 /**
  * Variants:
@@ -16,8 +14,6 @@ const DEFAULT_PLACEHOLDER = '/icon.png';
  *  'minimal' — Solo texto (para sidebars).
  */
 export default function ArticleCard({ article, variant = 'medium', className = '', extraBadge = null }) {
-  const [imgSrc, setImgSrc] = useState(article?.image || DEFAULT_PLACEHOLDER);
-  
   if (!article) return null;
   const cat = getCategoryBySlug(article.category);
   const formattedDate = formatDate(article.publishedAt);
@@ -25,41 +21,62 @@ export default function ArticleCard({ article, variant = 'medium', className = '
   const clean = (str) => {
     if (typeof str !== 'string') return str;
     return str
-      .replace(/\\+n/g, ' ') // Elimina \n literal y variaciones
+      .replace(/\\+n/g, ' ') 
       .replace(/#+\s*/g, '') 
       .trim();
   };
-  const safeTitleRaw = (article.title && typeof article.title === 'string' && article.title.trim() !== "") ? article.title : 'Información en Desarrollo';
-  const safeTitle = clean(safeTitleRaw);
-  const safeExcerpt = (article.excerpt && typeof article.excerpt === 'string' && article.excerpt.trim() !== "") ? clean(article.excerpt) : null;
+  const safeTitle = clean(article.title || 'Información en Desarrollo');
+  const safeExcerpt = article.excerpt ? clean(article.excerpt) : null;
+
+  // Badge de Impacto
+  const ImpactBadge = () => {
+    if (!article.trending && !article.featured) return null;
+    return (
+      <div className="absolute top-4 left-4 z-20 flex flex-col gap-1">
+        {article.trending && (
+          <span className="bg-black text-white text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 flex items-center gap-1 animate-pulse">
+            <span className="w-1 h-1 bg-red-600 rounded-full"></span> Tendencia
+          </span>
+        )}
+        {article.featured && !article.trending && (
+          <span className="bg-red-600 text-white text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5">Destacado</span>
+        )}
+      </div>
+    );
+  };
+
 
   if (variant === 'hero') {
     return (
       <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden ${className}`}>
-        <article className="relative mt-[7px]">
+        <article className="relative transition-all duration-500 hover:translate-y-[-4px]">
           <header className="mb-4">
-            <h1 className="editorial-title text-2xl md:text-4xl lg:text-5xl mb-[10px]">
+            <h1 className="editorial-title text-3xl md:text-5xl lg:text-7xl group-hover:text-red-700 transition-colors">
                {safeTitle}
              </h1>
           </header>
 
-          <PremiumImage 
-            src={article.image} 
-            alt={article.imageAlt || article.title}
-            containerClassName="w-[95%] md:w-[90%] min-h-[300px] max-h-[500px] aspect-[16/10] shadow-md border border-slate-200 mb-4"
-            className="max-w-full max-h-full w-auto h-auto object-contain"
-          />
+          <div className="relative overflow-hidden rounded-2xl shadow-2xl mb-6">
+            <ImpactBadge />
+            <PremiumImage 
+              src={article.image} 
+              alt={article.imageAlt || article.title}
+              containerClassName="w-full aspect-[16/9] md:aspect-[21/9]"
+              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+              width={1280}
+            />
+          </div>
 
-          <div>
+          <div className="max-w-4xl">
             {safeExcerpt && (
-              <p style={{ color: '#1a1a1a', lineHeight: 1.6 }} className="text-base md:text-xl font-serif line-clamp-3 mb-4 max-w-3xl">
+              <p className="text-xl md:text-2xl font-serif text-slate-800 line-clamp-3 mb-6 leading-relaxed">
                  {safeExcerpt}
                </p>
             )}
             <div className="flex items-center gap-4">
-               <span className="text-black dark:text-white group-hover:text-red-700 transition-colors metadata-text !font-black !tracking-widest uppercase !text-[10px]">{article.author}</span>
-               <span className="w-8 h-px bg-slate-200 dark:bg-zinc-800"></span>
-               <span className="metadata-text italic !tracking-normal !text-[10px] text-slate-500 dark:text-zinc-500">{formattedDate}</span>
+               <span className="metadata-text !text-[10px] !font-black !text-black">{article.author}</span>
+               <span className="w-10 h-px bg-slate-200"></span>
+               <span className="metadata-text !text-[10px] !italic text-slate-400">{formattedDate}</span>
             </div>
           </div>
         </article>
@@ -69,31 +86,36 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'medium') {
     return (
-      <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 dark:border-zinc-800 pb-6 h-full ${className}`}>
+      <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 pb-8 h-full transition-all hover:border-red-100 ${className}`}>
         <article className="h-full flex flex-col">
-          <PremiumImage 
-            src={article.image} 
-            alt={article.imageAlt || article.title}
-            containerClassName="aspect-[4/3] mb-[3px] group/img shadow-md"
-            className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
-          />
+          <div className="relative overflow-hidden rounded-xl shadow-lg mb-5">
+            <ImpactBadge />
+            <PremiumImage 
+              src={article.image} 
+              alt={article.imageAlt || article.title}
+              containerClassName="aspect-[4/3]"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              width={600}
+            />
+          </div>
           <div className="flex-1 flex flex-col">
             {cat?.slug !== 'noticias' && (
-              <span className="overline-label mb-[3px] block">
+              <span className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-2 block italic">
                 {cat?.label}
               </span>
             )}
-            <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 transition-colors line-clamp-3 mb-[3px]">
+            <h3 className="card-title text-xl group-hover:text-red-700 transition-colors line-clamp-3 mb-4 leading-tight">
                {safeTitle}
              </h3>
             {safeExcerpt && (
-              <p style={{ color: '#1a1a1a', lineHeight: 1.5 }} className="text-sm font-serif line-clamp-3 mb-[3px] flex-1">
+              <p className="text-sm font-serif text-slate-600 line-clamp-3 mb-4 leading-relaxed flex-1">
                  {safeExcerpt}
                </p>
             )}
-            <p className="metadata-text uppercase tracking-widest mt-auto border-t border-gray-50 dark:border-zinc-900 pt-6 !text-[9px] text-slate-400 dark:text-zinc-500">
-              Por {article.author}
-            </p>
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-50">
+               <span className="text-[9px] font-black uppercase tracking-widest text-slate-900">Por {article.author}</span>
+               <span className="text-[9px] font-bold text-slate-400">{formattedDate}</span>
+            </div>
           </div>
         </article>
       </Link>
@@ -102,29 +124,26 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'small') {
     return (
-      <Link href={`/articulo/${article.slug}`} className={`group block py-10 border-b border-gray-100 dark:border-zinc-800 last:border-0 ${className}`}>
-        <article className="flex gap-10 items-start">
+      <Link href={`/articulo/${article.slug}`} className={`group block py-6 border-b border-gray-100 last:border-0 hover:bg-slate-50/50 transition-all px-4 -mx-4 rounded-xl ${className}`}>
+        <article className="flex gap-6 items-center">
           <div className="flex-1 min-w-0">
-             {cat?.slug !== 'noticias' && <span className="overline-label text-red-700 mb-2 block">{cat?.label}</span>}
-             <h4 className="card-title text-base md:text-lg group-hover:text-red-700 transition-colors line-clamp-2 hover:underline underline-offset-4 decoration-1">
+             {cat?.slug !== 'noticias' && <span className="text-[9px] font-black text-red-600 uppercase tracking-widest mb-1 block">{cat?.label}</span>}
+             <h4 className="font-bold text-base group-hover:text-red-700 transition-colors line-clamp-2 leading-tight">
                 {safeTitle}
               </h4>
-             <p className="metadata-text mt-8 opacity-60 !text-[8px] dark:text-zinc-500">
-               {formattedDate}
+             <p className="text-[9px] font-bold text-slate-400 mt-2 uppercase tracking-tighter">
+               {formattedDate} · Por {article.author}
              </p>
           </div>
-          {article.image && (
-            <div className="relative w-32 h-20 md:w-56 md:h-36 flex-shrink-0 overflow-hidden bg-slate-100 dark:bg-zinc-800 shadow-sm">
-              <Image
-                src={imgSrc}
-                alt={article.imageAlt || article.title}
-                fill
-                className="object-cover object-top"
-                sizes="(max-width: 768px) 224px, 150px"
-                onError={() => setImgSrc(DEFAULT_PLACEHOLDER)}
-              />
-            </div>
-          )}
+          <div className="relative w-28 h-20 md:w-40 md:h-24 flex-shrink-0 overflow-hidden rounded-lg shadow-md">
+            <PremiumImage 
+              src={article.image} 
+              alt={article.title}
+              containerClassName="w-full h-full"
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              width={400}
+            />
+          </div>
         </article>
       </Link>
     );
@@ -132,52 +151,38 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   if (variant === 'wide') {
     return (
-      <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden bg-slate-50 dark:bg-zinc-900/50 border border-gray-100 dark:border-zinc-800 ${className}`}>
-        <article className="grid grid-cols-1 md:grid-cols-2 items-center">
-           <PremiumImage 
-             src={article.image} 
-             alt={article.imageAlt || article.title}
-             containerClassName="aspect-[16/10] group/img"
-             className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-700 group-hover:scale-105"
-           />
-           <div className="p-8 md:p-12">
-              {cat?.slug !== 'noticias' && <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-4 block">{cat?.label}</span>}
-              <h3 className="card-title text-xl md:text-3xl group-hover:text-red-600 transition-colors mb-[3px]">
+      <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden bg-white border border-slate-100 rounded-3xl shadow-sm hover:shadow-xl transition-all ${className}`}>
+        <article className="grid grid-cols-1 md:grid-cols-2">
+           <div className="relative overflow-hidden">
+             <ImpactBadge />
+             <PremiumImage 
+               src={article.image} 
+               alt={article.imageAlt || article.title}
+               containerClassName="aspect-[16/10] md:h-full"
+               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+               width={800}
+             />
+           </div>
+           <div className="p-8 md:p-12 flex flex-col justify-center">
+              {cat?.slug !== 'noticias' && <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-600 mb-6 block italic">{cat?.label}</span>}
+              <h3 className="editorial-title text-2xl md:text-4xl group-hover:text-red-700 transition-colors mb-6 leading-none">
                 {safeTitle}
               </h3>
               {safeExcerpt && (
-                <p className="text-black dark:text-white text-lg font-serif line-clamp-3 leading-relaxed mb-8">
+                <p className="text-slate-700 text-lg font-serif line-clamp-3 leading-relaxed mb-8">
                   {safeExcerpt}
                 </p>
               )}
-              <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-zinc-500">
-                 <span className="text-black dark:text-white">Por {article.author}</span>
-                 <span className="w-6 h-px bg-slate-200 dark:bg-zinc-800"></span>
-                 <span>{formattedDate}</span>
+              <div className="flex items-center gap-4">
+                 <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 font-black text-xs uppercase">
+                    {article.author?.[0]}
+                 </div>
+                 <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-black">{article.author}</span>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase">{formattedDate}</span>
+                 </div>
               </div>
            </div>
-        </article>
-      </Link>
-    );
-  }
-
-  if (variant === 'editorial') {
-    return (
-      <Link href={`/articulo/${article.slug}`} className={`group block text-center p-8 border border-transparent hover:border-gray-100 hover:bg-slate-50/50 transition-all ${className}`}>
-        <article>
-           <div className="mb-6 mx-auto w-20 h-20 bg-slate-200 rounded-full overflow-hidden border-2 border-white shadow-xl group-hover:scale-110 transition-transform duration-500">
-              {/* Fallback pattern for author if no pic */}
-              <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-400 font-bold text-2xl uppercase">
-                 {article.author?.[0]}
-              </div>
-           </div>
-           <span className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-300 mb-4 block italic">Perspectiva</span>
-           <h3 className="text-2xl font-serif italic text-black group-hover:text-red-600 transition-colors leading-tight mb-4">
-             "{safeTitle}"
-           </h3>
-           <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest">
-             {article.author}
-           </p>
         </article>
       </Link>
     );
@@ -185,14 +190,17 @@ export default function ArticleCard({ article, variant = 'medium', className = '
 
   // Minimal variant (text only)
   return (
-    <Link href={`/articulo/${article.slug}`} className={`group block py-4 border-b border-gray-100 last:border-0 ${className}`}>
+    <Link href={`/articulo/${article.slug}`} className={`group block py-5 border-b border-slate-50 last:border-0 hover:translate-x-1 transition-transform ${className}`}>
       <article>
-        {cat?.slug !== 'noticias' && (
-          <span className="text-[8px] font-black uppercase tracking-[0.2em] text-red-600 mb-1 block">
-            {cat?.label}
-          </span>
-        )}
-        <h4 className="text-base font-black text-black group-hover:text-red-600 transition-colors leading-tight uppercase tracking-tight">
+        <div className="flex items-center gap-2 mb-1.5">
+          {cat?.slug !== 'noticias' && (
+            <span className="text-[8px] font-black uppercase tracking-widest text-red-600 italic">
+              {cat?.label}
+            </span>
+          )}
+          {article.trending && <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>}
+        </div>
+        <h4 className="text-[15px] font-black text-slate-900 group-hover:text-red-700 transition-colors leading-tight uppercase tracking-tight line-clamp-2">
           {safeTitle}
         </h4>
       </article>
