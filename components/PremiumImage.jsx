@@ -32,8 +32,17 @@ export default function PremiumImage({
     setIsError(false);
     setIsLoading(true);
     loadingRef.current = true;
-    // Sin timeout artificial — el browser maneja su propio límite de carga.
-    // Un timeout de 12s mataba imágenes de Cloudinary en su primera generación.
+
+    // Timeout de 30s — evita que imágenes rotas muestren el spinner para siempre
+    const timeout = setTimeout(() => {
+      if (loadingRef.current) {
+        setIsError(true);
+        setIsLoading(false);
+        loadingRef.current = false;
+      }
+    }, 30000);
+
+    return () => clearTimeout(timeout);
   }, [src, width]);
 
   const handleError = () => {
