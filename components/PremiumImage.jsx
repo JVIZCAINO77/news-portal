@@ -35,12 +35,12 @@ export default function PremiumImage({
 
     const timeout = setTimeout(() => {
       if (loadingRef.current) {
-        console.warn(`[PremiumImage] Timeout: ${src}`);
+        console.warn(`[PremiumImage] Timeout (12s): ${src}`);
         setIsError(true);
         setIsLoading(false);
         loadingRef.current = false;
       }
-    }, 5000);
+    }, 12000);
 
     return () => clearTimeout(timeout);
   }, [src, width]);
