@@ -6,8 +6,6 @@ import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 import PremiumImage from '@/components/PremiumImage';
 import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
-import LoadMore from '@/components/LoadMore';
-import CategoryBlock from '@/components/CategoryBlock';
 import BreakingTicker from '@/components/BreakingTicker';
 
 export const dynamic = 'force-dynamic';
@@ -229,94 +227,13 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* ── SECCIÓN DE CATEGORÍAS — Impacto por Sección ── */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-12 border-t border-gray-100">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8">
-            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'deportes')} articles={sports} />
-            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'economia')} articles={economy} />
-            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'internacional')} articles={international} />
-            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'entretenimiento')} articles={entertainment} />
-            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'politica')} articles={politics} />
-            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'sucesos')} articles={incidents} />
-          </div>
-          
-          {/* Fila completa para Tecnología para balancear el diseño */}
-          <div className="mt-8">
-            <CategoryBlock category={CATEGORIES.find(c => c.slug === 'tecnologia')} articles={tech} />
-          </div>
-        </div>
-
-        {/* ── SECCIÓN 3: Cintillo de texto + Lo más Reciente ── */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 border-t-2 border-slate-100">
-          
-          {/* Fila superior: Texto breve horizontal */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 pb-8 border-b border-gray-100">
-             {pool.slice(5, 8).map(art => (
-               <Link key={art.id} href={`/articulo/${art.slug}`} className="group block border-l-2 border-red-600 pl-4 hover:bg-slate-50 transition-colors py-2">
-                  {art.image && (
-                    <PremiumImage 
-                      src={art.image} 
-                      alt={art.title}
-                      category={art.category}
-                      containerClassName="aspect-[16/9] mb-3 shadow-sm rounded-sm group/img"
-                      className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110"
-                      width={400}
-                    />
-                  )}
-                  <h4 className="text-sm font-bold group-hover:text-red-700 leading-tight mb-1">
-                    {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
-                  </h4>
-                  <p className="text-[0.6rem] text-gray-400 font-sans uppercase font-bold">{formatDate(art.publishedAt)}</p>
-               </Link>
-             ))}
-          </div>
-
-          {/* Fila inferior: Lo más reciente con imágenes */}
-          <div className="mb-8 flex items-center gap-4">
-            <h2 className="text-[0.7rem] font-sans font-black uppercase tracking-[0.4em] text-gray-900">Lo más Reciente</h2>
-            <div className="h-px flex-1 bg-gray-100"></div>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {ticker.map(art => (
-              <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
-                <article>
-                  {art.image && (
-                    <PremiumImage 
-                      src={art.image} 
-                      alt={art.title}
-                      category={art.category}
-                      containerClassName="aspect-[16/9] mb-3 shadow-sm rounded-sm group/img"
-                      className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
-                      width={300}
-                    />
-                  )}
-                  {art.category?.toLowerCase() !== 'noticias' && (
-                    <span className="text-[0.58rem] font-black text-[#bb1b21] uppercase tracking-[0.1em] mb-1 block">
-                      {art.category}
-                    </span>
-                  )}
-                  <h3 className="text-[0.85rem] font-bold leading-snug group-hover:text-red-700 transition-colors line-clamp-3">
-                    {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
-                  </h3>
-                  <p className="text-[0.6rem] text-gray-400 font-bold mt-2 uppercase">{formatDate(art.publishedAt)}</p>
-                </article>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto px-4 md:px-8 mt-16">
-          <LoadMore initialOffset={30} />
-        </div>
-
       </main>
 
       {/* Newsletter - Full Width */}
       <NewsletterBox />
 
       <section style={{ backgroundColor: '#111827' }}>
-         {/* Blank space for future ads or spacing if needed, but for now kept minimal */}
+         {/* Espacio reservado para pie de página o créditos adicionales */}
       </section>
     </div>
   );
