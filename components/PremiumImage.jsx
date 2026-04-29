@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { optimizeImageUrl } from '@/lib/data';
 
 /**
@@ -22,6 +22,7 @@ export default function PremiumImage({
   const [imgSrc, setImgSrc] = useState(optimizedSrc);
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const loadingRef = useRef(true);
 
   // Sincronizar si el src cambia externamente
   useEffect(() => {
@@ -29,17 +30,29 @@ export default function PremiumImage({
     setImgSrc(newOptimized);
     setIsError(false);
     setIsLoading(true);
+    loadingRef.current = true;
+
+    const timeout = setTimeout(() => {
+      if (loadingRef.current) {
+        console.warn(`[PremiumImage] Timeout: ${src}`);
+        setIsError(true);
+        setIsLoading(false);
+        loadingRef.current = false;
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeout);
   }, [src, width]);
 
   const handleError = () => {
-    if (!isError) {
-      setIsError(true);
-      setIsLoading(false);
-    }
+    setIsError(true);
+    setIsLoading(false);
+    loadingRef.current = false;
   };
 
   const handleLoad = () => {
     setIsLoading(false);
+    loadingRef.current = false;
   };
 
   return (
