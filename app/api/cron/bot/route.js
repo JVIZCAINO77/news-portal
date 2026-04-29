@@ -149,18 +149,19 @@ const TOPIC_BLOCKLIST = {
 
   // Un artículo de TECNOLOGÍA no puede hablar de crímenes ni política local
   tecnologia: ['homicidio','asesinado','asesinato','detenido por','arrestado por',
-               'presidente abinader','ministro de','senado dominicano'],
+               'presidente abinader','ministro de','senado dominicano','elecciones',
+               'votos','partido politico','diputado','senador','balonmano','beisbol','futbol'],
 
   // Un artículo de SUCESOS no puede hablar de farándula o deportes
-  sucesos: ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba'],
+  sucesos: ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','futbol'],
 
   // Un artículo de TENDENCIAS no puede hablar de macroeconomía ni política formal
   tendencias: ['pib','inflacion','banco central','reforma constitucional',
-               'proyecto de ley','decreto presidencial'],
+               'proyecto de ley','decreto presidencial','senado dominicano','homicidio','asesinato'],
 
   // Un artículo de INTERNACIONAL no puede hablar de política local dominicana
   internacional: ['presidente abinader','senado dominicano','camara de diputados',
-                  'ayuntamiento de','alcalde de rd'],
+                  'ayuntamiento de','alcalde de rd','abinader','dajabón','mirador sur','santo domingo'],
 
   // Un artículo de OPINIÓN no necesita filtro estricto
   opinion: [],
