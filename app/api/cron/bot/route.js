@@ -11,8 +11,9 @@ import { SITE_CONFIG } from '@/lib/data';
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ───────────────────────────────────────────────────────
-const DAILY_LIMIT_NORMAL   = 3;  // Artículos normales por categoría/día
-const DAILY_LIMIT_BREAKING = 10; // Máximo para noticias de ÚLTIMA HORA
+const DAILY_LIMIT_GLOBAL   = 15; // Máximo TOTAL de artículos por día (Protección AdSense)
+const DAILY_LIMIT_NORMAL   = 2;  // Artículos normales por categoría/día
+const DAILY_LIMIT_BREAKING = 5;  // Máximo para noticias de ÚLTIMA HORA por categoría
 
 // ─── DETECTOR DE ÚLTIMA HORA ───────────────────────────────────────────────
 // Palabras clave que indican un suceso urgente/crítico que NUNCA debe bloquearse
@@ -236,14 +237,30 @@ export async function GET(request) {
     // === CAPA 2: Límite diario con excepción para ÚLTIMA HORA ===
     const startOfTodayDR = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
     const endOfTodayDR   = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
-    const { data: todayCount } = await supabase
+
+    // 2a. Check GLOBAL (Seguridad AdSense)
+    const { data: globalArticles } = await supabase
       .from('articles')
-      .select('id', { count: 'exact', head: true })
+      .select('id')
+      .gte('publishedAt', startOfTodayDR)
+      .lte('publishedAt', endOfTodayDR);
+    
+    const totalToday = globalArticles?.length ?? 0;
+    if (totalToday >= DAILY_LIMIT_GLOBAL) {
+      return NextResponse.json({
+        message: `Límite GLOBAL diario alcanzado (${totalToday}/${DAILY_LIMIT_GLOBAL}). Protegiendo AdSense.`
+      }, { status: 200 });
+    }
+
+    // 2b. Check por Categoría
+    const { data: categoryArticles } = await supabase
+      .from('articles')
+      .select('id')
       .eq('category', cat.slug)
       .gte('publishedAt', startOfTodayDR)
       .lte('publishedAt', endOfTodayDR);
 
-    const countToday = todayCount?.length ?? 0;
+    const countToday = categoryArticles?.length ?? 0;
 
     // Detectar si alguna noticia de hoy es de ÚLTIMA HORA para aumentar el cupo
     const hasBreakingItem = todaysItems.some(item => isBreakingNews(item.title));
@@ -251,12 +268,12 @@ export async function GET(request) {
 
     if (countToday >= effectiveLimit) {
       return NextResponse.json({
-        message: `Límite diario alcanzado: ya hay ${countToday} artículos de ${categoryKey} publicados hoy (límite activo: ${effectiveLimit}${hasBreakingItem ? ' — modo ÚLTIMA HORA' : ''}).`
+        message: `Límite de categoría alcanzado: ya hay ${countToday} artículos de ${categoryKey} publicados hoy.`
       }, { status: 200 });
     }
 
     if (hasBreakingItem) {
-      console.log(`[Bot] ⚡ ÚLTIMA HORA detectada en ${categoryKey}. Límite ampliado a ${DAILY_LIMIT_BREAKING} artículos/día.`);
+      console.log(`[Bot] ⚡ ÚLTIMA HORA detectada en ${categoryKey}. Límite ampliado.`);
     }
 
     // === CAPA 3: Deduplicación masiva — obtener todos los links y títulos ya publicados HOY ===
@@ -347,38 +364,42 @@ export async function GET(request) {
     const selectedKey = keys[Math.floor(Math.random() * keys.length)] || process.env.GEMINI_API_KEY;
     const ai = new GoogleGenAI({ apiKey: selectedKey });
 
-    const prompt = `Eres el editor jefe y experto en SEO de "Imperio Público". Tu misión es transformar la fuente en un artículo de alto impacto que domine los buscadores y genere clics.
+    const prompt = `Eres el editor de la sección "${cat.slug.toUpperCase()}" de "Imperio Público", un medio digital de élite reconocido por su profundidad periodística y rigor analítico.
 
 --- DATOS DE LA NOTICIA ---
 Fecha: ${todayDR}
-Sección: ${cat.slug.toUpperCase()}
+SECCIÓN ASIGNADA (FIJA, NO CAMBIAR): ${cat.slug.toUpperCase()}
 Titular de fuente: ${news.title}
 Resumen de fuente: ${news.contentSnippet || 'Sin resumen disponible'}
 --------------------------
 
-REGLAS DE ORO (MANDATORIAS):
-1. IDIOMA: Todo en ESPAÑOL.
-2. ESTRUCTURA SEO: 
-   - El primer párrafo DEBE contener las palabras clave más importantes del hecho.
-   - Usa subtítulos (##) atractivos para organizar la información.
-   - Usa **negritas** para resaltar datos, nombres y cifras clave.
-3. TÍTULO (campo "title"): 
-   - Máximo impacto y curiosidad. Debe ser digno de "Última Hora".
-   - Optimizado para buscadores pero extremadamente humano y "clickeable".
-   - PROHIBIDO copiar el original. PROHIBIDO usar mayúsculas sostenidas.
-4. CONTENIDO (campo "content"):
-   - Mínimo 450 palabras de alta calidad periodística.
+REGLAS EDITORIALES CRÍTICAS (MANDATORIAS):
+1. SECCIÓN: Tu artículo se publicará EXCLUSIVAMENTE en la sección "${cat.slug.toUpperCase()}". No debes cambiarla. Redacta el contenido enfocado en ese ángulo editorial.
+2. IDIOMA: Español neutro y profesional.
+3. VALOR AGREGADO (E-E-A-T): 
+   - El artículo DEBE incluir un análisis del impacto de la noticia para la sociedad o el sector relacionado.
+   - Proporciona contexto histórico o antecedentes si son relevantes para entender el hecho.
+4. ESTRUCTURA SEO PREMIUM: 
+   - Primer párrafo: Debe enganchar al lector con los datos clave (qué, quién, dónde, cuándo) integrando palabras clave de forma natural.
+   - Usa al menos 3 subtítulos (##) analíticos y atractivos.
+   - Usa **negritas** para resaltar datos estadísticos, nombres propios y declaraciones clave.
+5. TÍTULO (campo "title"): 
+   - Debe ser original, potente y optimizado para SEO (50-70 caracteres). 
+   - Evita el sensacionalismo barato; busca la autoridad informativa.
+6. CONTENIDO (campo "content"):
+   - MÍNIMO 550 palabras. Si el resumen es corto, expande con análisis, implicaciones futuras y contexto general del tema.
    - Estilo: ${cat.style}.
-   - CERO relleno. CERO inventos. Solo hechos del resumen procesados con elegancia.
-5. EXCERPT (campo "excerpt"):
-   - Un gancho magnético de 160 caracteres (ideal para Google) que obligue a entrar a leer.
+   - PROHIBIDO: Frases genéricas de IA como "En el dinámico mundo de hoy", "Es importante destacar", etc.
+7. EXCERPT (campo "excerpt"):
+   - Meta-descripción perfecta de 155 caracteres que incite al clic por su valor informativo.
 
-PASO 1 — VERIFICACIÓN:
-- Si la noticia es vieja, irrelevante o de relleno → responde exactamente: IRRELEVANTE.
+PASO 1 — EVALUACIÓN:
+- Si la noticia es vieja (>48h), trivial o sin relevancia pública → responde exactamente: IRRELEVANTE.
 
 PASO 2 — FORMATO DE RESPUESTA:
-Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido.
-{ "title": "<titular_seo>", "excerpt": "<gancho_meta_description>", "content": "<contenido_con_h2_y_negritas>", "tags": ["tag1", "tag2", "tag3"] }`;
+Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin texto adicional):
+{ "title": "<titular_autoridad>", "excerpt": "<gancho_informativo>", "content": "<contenido_analitico_extenso_markdown>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
+
 
     let rawText = '';
     try {
@@ -593,22 +614,24 @@ Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido.
       cleanedTags = [cat.slug.charAt(0).toUpperCase() + cat.slug.slice(1), ...titleWords];
     }
 
+    // REGLA CRÍTICA: La categoría SIEMPRE es la del agente que disparó el bot.
+    // La IA no puede reclasificar artículos a otras secciones.
     const newArticle = {
       title: articleData.title,
       slug,
       excerpt: articleData.excerpt || articleData.title,
       content: articleData.content,
       tags: cleanedTags.length > 0 ? cleanedTags : null,
-      category: cat.slug,
-      author: cat.author,
+      category: cat.slug,   // ← SIEMPRE la sección del agente, sin excepción
+      author: cat.author,   // ← SIEMPRE el autor de la sección
       image: finalImageUrl,
       imageAlt: `Imagen para: ${articleData.title}`,
-      source_link: news.link, 
+      source_link: news.link,
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       // Las noticias de ÚLTIMA HORA siempre son destacadas
-      featured: isNewsBreaking ? true : Math.random() > 0.85,
-      // Campo de contexto para logs (no guardado en BD, solo informativo)
+      featured: articleData.impact_level === 'high' || articleData.impact_level === 'medium' || isNewsBreaking || Math.random() > 0.9,
+      trending: articleData.impact_level === 'high' || (isNewsBreaking && Math.random() > 0.5),
     };
 
     if (isNewsBreaking) {
@@ -634,6 +657,7 @@ Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido.
       console.warn('[Bot] No se pudo notificar a servicios externos:', indexErr.message);
     }
 
+    console.log(`[Bot] ✅ Artículo publicado en sección "${cat.slug}": "${articleData.title.slice(0, 60)}"`);
     return NextResponse.json({
       success: true,
       message: '¡Noticia publicada con éxito!',

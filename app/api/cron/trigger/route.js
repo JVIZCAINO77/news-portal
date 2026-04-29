@@ -2,7 +2,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-const VALID_CATEGORIES = ['noticias', 'deportes', 'entretenimiento', 'tecnologia', 'economia'];
+const VALID_CATEGORIES = [
+  'noticias', 'politica', 'economia', 'internacional',
+  'deportes', 'sucesos', 'salud', 'entretenimiento',
+  'cultura', 'tecnologia', 'tendencias', 'opinion',
+];
 
 export async function POST(request) {
   // 1. Verificar que el usuario está autenticado y es admin

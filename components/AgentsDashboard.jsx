@@ -6,7 +6,7 @@ const AGENTS = [
   {
     category: 'noticias',
     label: 'Noticias Generales',
-    author: 'Carlos Mendoza',
+    author: 'Redacción Central',
     scheduleUTC: '11:00 UTC',
     scheduleRD: '7:00 AM RD',
     icon: '📰',
@@ -14,9 +14,19 @@ const AGENTS = [
     bg: 'bg-red-50',
   },
   {
+    category: 'politica',
+    label: 'Política',
+    author: 'Mesa Política',
+    scheduleUTC: '12:00 UTC',
+    scheduleRD: '8:00 AM RD',
+    icon: '🏛️',
+    color: 'border-l-slate-700',
+    bg: 'bg-slate-50',
+  },
+  {
     category: 'economia',
     label: 'Economía',
-    author: 'Roberto Silva',
+    author: 'Redacción Económica',
     scheduleUTC: '13:00 UTC',
     scheduleRD: '9:00 AM RD',
     icon: '📈',
@@ -24,9 +34,19 @@ const AGENTS = [
     bg: 'bg-emerald-50',
   },
   {
+    category: 'internacional',
+    label: 'Internacional',
+    author: 'Redacción Internacional',
+    scheduleUTC: '14:00 UTC',
+    scheduleRD: '10:00 AM RD',
+    icon: '🌍',
+    color: 'border-l-indigo-600',
+    bg: 'bg-indigo-50',
+  },
+  {
     category: 'deportes',
     label: 'Deportes',
-    author: 'Marcos Alarcón',
+    author: 'Mesa Deportiva',
     scheduleUTC: '15:00 UTC',
     scheduleRD: '11:00 AM RD',
     icon: '⚾',
@@ -34,24 +54,74 @@ const AGENTS = [
     bg: 'bg-blue-50',
   },
   {
+    category: 'sucesos',
+    label: 'Sucesos',
+    author: 'Redacción de Sucesos',
+    scheduleUTC: '16:00 UTC',
+    scheduleRD: '12:00 PM RD',
+    icon: '🚨',
+    color: 'border-l-orange-600',
+    bg: 'bg-orange-50',
+  },
+  {
+    category: 'salud',
+    label: 'Salud',
+    author: 'Sección de Salud',
+    scheduleUTC: '17:00 UTC',
+    scheduleRD: '1:00 PM RD',
+    icon: '🏥',
+    color: 'border-l-green-600',
+    bg: 'bg-green-50',
+  },
+  {
     category: 'entretenimiento',
     label: 'Entretenimiento',
-    author: 'Valeria Reyes',
-    scheduleUTC: '19:00 UTC',
-    scheduleRD: '3:00 PM RD',
+    author: 'Sección Espectáculos',
+    scheduleUTC: '18:00 UTC',
+    scheduleRD: '2:00 PM RD',
     icon: '🎬',
     color: 'border-l-violet-600',
     bg: 'bg-violet-50',
   },
   {
+    category: 'cultura',
+    label: 'Cultura',
+    author: 'Sección Cultural',
+    scheduleUTC: '19:00 UTC',
+    scheduleRD: '3:00 PM RD',
+    icon: '🎨',
+    color: 'border-l-pink-600',
+    bg: 'bg-pink-50',
+  },
+  {
     category: 'tecnologia',
     label: 'Tecnología',
-    author: 'Elena Torres',
-    scheduleUTC: '22:00 UTC',
-    scheduleRD: '6:00 PM RD',
+    author: 'Redacción Tecnológica',
+    scheduleUTC: '20:00 UTC',
+    scheduleRD: '4:00 PM RD',
     icon: '💻',
     color: 'border-l-cyan-600',
     bg: 'bg-cyan-50',
+  },
+  {
+    category: 'tendencias',
+    label: 'Tendencias',
+    author: 'Mesa de Tendencias',
+    scheduleUTC: '21:00 UTC',
+    scheduleRD: '5:00 PM RD',
+    icon: '🔥',
+    color: 'border-l-rose-600',
+    bg: 'bg-rose-50',
+  },
+  {
+    category: 'opinion',
+    label: 'Opinión',
+    author: 'Dirección Editorial',
+    scheduleUTC: '22:00 UTC',
+    scheduleRD: '6:00 PM RD',
+    icon: '✍️',
+    color: 'border-l-amber-600',
+    bg: 'bg-amber-50',
   },
 ];
 
@@ -110,7 +180,7 @@ export default function AgentsDashboard({ botEnabled }) {
         <div>
           <h3 className="text-2xl font-black uppercase tracking-tighter">Agentes de Publicación</h3>
           <p className="text-[9px] font-black uppercase tracking-widest text-slate-400 mt-1">
-            5 bots activos · Publicación automática diaria · Hora República Dominicana (UTC-4)
+            12 agentes activos · Publicación automática diaria · Hora República Dominicana (UTC-4)
           </p>
         </div>
         <div className={`px-4 py-2 text-[9px] font-black uppercase tracking-widest border ${
@@ -133,7 +203,7 @@ export default function AgentsDashboard({ botEnabled }) {
       )}
 
       {/* Grid de Agentes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {AGENTS.map((agent) => {
           const isLoading = loadingAgent === agent.category;
           const result = results[agent.category];
