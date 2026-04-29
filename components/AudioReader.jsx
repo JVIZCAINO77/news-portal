@@ -1,4 +1,3 @@
-
 'use client';
 // components/AudioReader.jsx — Lector de Artículos con Voz de IA (Nativo)
 import { useState, useEffect, useRef } from 'react';
