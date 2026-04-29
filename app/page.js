@@ -8,6 +8,7 @@ import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
 import LoadMore from '@/components/LoadMore';
 import CategoryBlock from '@/components/CategoryBlock';
+import BreakingTicker from '@/components/BreakingTicker';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 60;
@@ -81,6 +82,7 @@ export default async function HomePage() {
           PORTADA — Diseño Periódico Clásico
       ══════════════════════════════════════════════ */}
       <main aria-label="Portada">
+        <BreakingTicker items={ticker} />
 
         {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
 
@@ -104,6 +106,7 @@ export default async function HomePage() {
                     <PremiumImage 
                       src={pool[0].image} 
                       alt={pool[0].title}
+                      category={pool[0].category}
                       containerClassName="w-full min-h-[350px] md:min-h-[500px] max-h-[650px] mb-[16px] shadow-xl border border-gray-100 rounded-sm group/img"
                       className="w-auto h-auto max-w-full max-h-[650px] object-contain transition-transform duration-700 group-hover/img:scale-[1.01] shadow-2xl"
                       priority={true}
@@ -134,6 +137,7 @@ export default async function HomePage() {
                       <PremiumImage 
                         src={art.image} 
                         alt={art.title}
+                        category={art.category}
                         containerClassName="aspect-[16/9] mb-5 shadow-md rounded-sm group/img"
                         className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
                         width={600}
@@ -171,6 +175,7 @@ export default async function HomePage() {
                       <PremiumImage 
                         src={art.image} 
                         alt={art.title}
+                        category={art.category}
                         containerClassName="aspect-[16/9] mb-5 shadow-md rounded-sm group/img"
                         className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
                       />
@@ -252,6 +257,7 @@ export default async function HomePage() {
                     <PremiumImage 
                       src={art.image} 
                       alt={art.title}
+                      category={art.category}
                       containerClassName="aspect-[16/9] mb-3 shadow-sm rounded-sm group/img"
                       className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110"
                       width={400}
@@ -279,6 +285,7 @@ export default async function HomePage() {
                     <PremiumImage 
                       src={art.image} 
                       alt={art.title}
+                      category={art.category}
                       containerClassName="aspect-[16/9] mb-3 shadow-sm rounded-sm group/img"
                       className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
                       width={300}

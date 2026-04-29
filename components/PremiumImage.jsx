@@ -10,6 +10,7 @@ import { optimizeImageUrl } from '@/lib/data';
 export default function PremiumImage({ 
   src, 
   alt, 
+  category = "",
   className = "", 
   containerClassName = "", 
   blurOpacity = "0.4",
@@ -55,6 +56,21 @@ export default function PremiumImage({
     loadingRef.current = false;
   };
 
+  // Mapeo de fallbacks por categoría (Unsplash curated)
+  const FALLBACKS = {
+    deportes: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1000&auto=format&fit=crop',
+    economia: 'https://images.unsplash.com/photo-1611974714851-eb60516746e3?q=80&w=1000&auto=format&fit=crop',
+    internacional: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?q=80&w=1000&auto=format&fit=crop',
+    entretenimiento: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop',
+    sucesos: 'https://images.unsplash.com/photo-1563206767-5b18f218e7de?q=80&w=1000&auto=format&fit=crop',
+    tecnologia: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?q=80&w=1000&auto=format&fit=crop',
+    salud: 'https://images.unsplash.com/photo-1505751172107-573225a91200?q=80&w=1000&auto=format&fit=crop',
+    cultura: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=1000&auto=format&fit=crop',
+    default: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1000&auto=format&fit=crop'
+  };
+
+  const currentFallback = FALLBACKS[category.toLowerCase()] || FALLBACKS.default;
+
   return (
     <div className={`relative overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-zinc-900 ${containerClassName}`}>
       
@@ -67,13 +83,20 @@ export default function PremiumImage({
 
       {/* 2. BRANDED FALLBACK (Si hay error) */}
       {isError ? (
-        <div className="absolute inset-0 z-10 bg-gradient-to-br from-slate-900 via-red-950 to-black flex flex-col items-center justify-center p-8 text-center">
-          <div className="relative mb-4">
-             <div className="absolute inset-0 bg-red-600 blur-2xl opacity-20 animate-pulse"></div>
-             <img src="/icon.png" alt="Imperio Público" className="w-20 h-20 object-contain relative z-10 opacity-50 grayscale contrast-125" />
-          </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500/60 mb-2">Contenido no disponible</span>
-          <h3 className="text-white/30 font-serif italic text-lg leading-tight max-w-xs">{alt}</h3>
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900">
+           <img 
+            src={currentFallback} 
+            alt="Fallback" 
+            className="absolute inset-0 w-full h-full object-cover opacity-40 blur-[2px]" 
+           />
+           <div className="relative z-20 flex flex-col items-center justify-center p-8 text-center bg-black/40 backdrop-blur-sm w-full h-full">
+              <div className="relative mb-3">
+                 <div className="absolute inset-0 bg-red-600 blur-2xl opacity-20"></div>
+                 <img src="/icon.png" alt="Logo" className="w-12 h-12 object-contain relative z-10 opacity-60 grayscale brightness-200" />
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-[0.4em] text-red-500/80 mb-2">Imperio Público</span>
+              <h3 className="text-white/60 font-serif italic text-sm leading-tight max-w-[200px] line-clamp-2">{alt}</h3>
+           </div>
         </div>
       ) : (
         <>
