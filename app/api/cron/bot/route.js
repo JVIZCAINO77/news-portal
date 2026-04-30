@@ -639,8 +639,15 @@ Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin t
     }
 
     if (finalImageUrl) {
-      console.log(`[Bot] Internalizando imagen real: ${finalImageUrl.slice(0, 50)}...`);
+      console.log(`[Bot] Internalizando imagen: ${finalImageUrl.slice(0, 60)}...`);
       finalImageUrl = await internalizeImage(finalImageUrl);
+
+      // Guardia: si internalizeImage falló y la URL sigue siendo externa,
+      // preferimos null antes que guardar una URL con hotlink bloqueado
+      if (finalImageUrl && !finalImageUrl.includes('cloudinary.com')) {
+        console.warn('[Bot] ⚠️ internalizeImage falló — imagen descartada para evitar hotlink roto');
+        finalImageUrl = null;
+      }
     }
 
     let sourceName = 'Fuente Externa';
