@@ -1,34 +1,60 @@
 // app/admin/layout.js — Layout del Panel de Administración (Imperio Público 2.0)
+export const dynamic = 'force-dynamic';
+
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import BotControls from '@/components/BotControls';
 
+
 export default async function AdminLayout({ children }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  let user = null;
+  let profile = null;
+  let isAdmin = false;
+  let botEnabled = false;
 
-  if (!user) return <>{children}</>;
+  try {
+    const supabase = await createClient();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
 
-  const { createClient: createAdminClient } = await import('@supabase/supabase-js');
-  const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+    if (authError || !authData?.user) {
+      // No autenticado — solo muestra el children (ej. página de login)
+      return <>{children}</>;
+    }
 
-  const { data: profile } = await supabaseAdmin
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
+    user = authData.user;
 
-  const { data: botSetting } = await supabase
-    .from('settings')
-    .select('value')
-    .eq('key', 'automation_enabled')
-    .maybeSingle();
+    const { createClient: createAdminClient } = await import('@supabase/supabase-js');
+    const supabaseAdmin = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
 
-  const isAdmin = profile?.role === 'admin';
-  const botEnabled = botSetting?.value === true;
+    const { data: profileData } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    profile = profileData;
+    isAdmin = profile?.role === 'admin';
+
+    // La tabla settings puede no existir aún — no debe romper el layout
+    try {
+      const { data: botSetting } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'automation_enabled')
+        .maybeSingle();
+      botEnabled = botSetting?.value === true;
+    } catch (_settingsErr) {
+      // Ignorar si la tabla settings no existe
+      botEnabled = false;
+    }
+  } catch (layoutError) {
+    console.error('[AdminLayout] Error cargando datos:', layoutError);
+    // Si hay un error grave de auth, mostrar solo el children
+    return <>{children}</>;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
