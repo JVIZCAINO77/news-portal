@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // app/admin/perfil/page.js — Centro de Gestión Personal (Imperio Público 2.0)
 import { createClient } from '@/lib/supabase/server';
 import ProfileForm from './ProfileForm';

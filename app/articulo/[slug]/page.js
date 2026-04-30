@@ -6,7 +6,8 @@ import AudioReader from '@/components/AudioReader';
 import AdUnit from '@/components/AdUnit';
 import NewsletterBox from '@/components/NewsletterBox';
 import ArticleCard from '@/components/ArticleCard';
-import { formatDate, getCategoryBySlug, parseTags, SITE_CONFIG, calculateReadingTime } from '@/lib/data';
+import { formatDate, getCategoryBySlug, parseTags, SITE_CONFIG, calculateReadingTime, CATEGORIES } from '@/lib/data';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import PremiumImage from '@/components/PremiumImage';
@@ -229,7 +230,6 @@ export default async function ArticlePage({ params }) {
                         let linkedText = formattedText;
                         
                         // 1. Link to Categories
-                        const { CATEGORIES } = require('@/lib/data');
                         CATEGORIES.forEach(cat => {
                           const regex = new RegExp(`\\b(${cat.label})\\b`, 'gi');
                           linkedText = linkedText.replace(regex, (match) => {

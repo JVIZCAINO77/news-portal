@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // app/admin/articulos/page.js — Gestión de Artículos con vista de tarjetas (Imperio Público 2.0)
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';

@@ -1,7 +1,6 @@
 // app/page.js — Portada Imperio Público — Diseño Periódico Clásico
 import Link from 'next/link';
-import Image from 'next/image';
-import { getDailyTopArticles, getLatestArticles, getArticlesByCategory } from '@/lib/serverData';
+import { getDailyTopArticles, getLatestArticles } from '@/lib/serverData';
 import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 import PremiumImage from '@/components/PremiumImage';
 import NewsletterBox from '@/components/NewsletterBox';
@@ -9,22 +8,14 @@ import AdUnit from '@/components/AdUnit';
 import BreakingTicker from '@/components/BreakingTicker';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 60;
 
 
 
 export default async function HomePage() {
   // Cargamos en paralelo: top del día (por impacto) + últimas noticias (para el ticker)
-  const [dailyTop, latest, sports, economy, international, entertainment, tech, politics, incidents] = await Promise.all([
+  const [dailyTop, latest] = await Promise.all([
     getDailyTopArticles(12, 6),
     getLatestArticles(30),
-    getArticlesByCategory('deportes', 4),
-    getArticlesByCategory('economia', 4),
-    getArticlesByCategory('internacional', 4),
-    getArticlesByCategory('entretenimiento', 4),
-    getArticlesByCategory('tecnologia', 4),
-    getArticlesByCategory('politica', 4),
-    getArticlesByCategory('sucesos', 4),
   ]);
 
   const clean = (str) => typeof str === 'string' ? str.replace(/#+\s*/g, '').trim() : str;
@@ -84,9 +75,6 @@ export default async function HomePage() {
 
         {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
 
-
-
-        {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
         <div className="max-w-6xl mx-auto px-4 md:px-8 pb-4 border-b border-black mb-6 mt-[7px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
@@ -119,7 +107,7 @@ export default async function HomePage() {
                   )}
 
                   <p className="text-[0.7rem] font-black text-gray-400 uppercase tracking-[0.2em] pt-6 border-t border-gray-50">
-                    EDICIÓN ESPECIAL · POR {pool[0].author.toUpperCase()} · {formatDate(pool[0].publishedAt)}
+                   EDICIÓN ESPECIAL · POR {(pool[0].author || 'Redacción').toUpperCase()} · {formatDate(pool[0].publishedAt)}
                   </p>
                 </Link>
               )}

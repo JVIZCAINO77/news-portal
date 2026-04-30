@@ -1,4 +1,6 @@
 // app/admin/page.js — Dashboard Overview (Imperio Público 2.0)
+export const dynamic = 'force-dynamic';
+
 import { createClient } from '@/lib/supabase/server';
 import { getLatestArticles } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
@@ -10,6 +12,7 @@ import TrafficDashboard from '@/components/TrafficDashboard';
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
   const latest = await getLatestArticles(5);
 
   // Usar service role para ver los perfiles para no caer en RLS recursion

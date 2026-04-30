@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 // app/admin/usuarios/page.js — Gestión de Equipo Editorial (Solo Admin)
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
