@@ -1,20 +1,41 @@
+// app/admin/articulos/page.js — Gestión de Artículos con vista de tarjetas (Imperio Público 2.0)
 export const dynamic = 'force-dynamic';
 
-// app/admin/articulos/page.js — Gestión de Artículos con vista de tarjetas (Imperio Público 2.0)
-import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import DeleteArticleButton from '@/components/DeleteArticleButton';
+import { createClient } from '@supabase/supabase-js';
+
+// Usamos el service role directamente — evita cookies() que puede fallar en prod
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function AdminArticlesPage() {
-  const supabase = await createClient();
   let articles = [];
   let isAdmin = false;
+  let errorMsg = null;
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return <div>Redirigiendo...</div>;
+    // Obtener sesión usando el client de cookies (SSR)
+    const { createClient: createServerClient } = await import('@/lib/supabase/server');
+    const supabase = await createServerClient();
+    const { data: authData, error: authError } = await supabase.auth.getUser();
 
-    const { data: profile } = await supabase
+    if (authError || !authData?.user) {
+      return (
+        <div className="p-12 text-center">
+          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Sesión no válida. <a href="/admin/login" className="text-red-600 underline">Iniciar sesión</a>
+          </p>
+        </div>
+      );
+    }
+
+    const user = authData.user;
+
+    // Usar service role para leer perfil (evita RLS recursion)
+    const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('role')
       .eq('id', user.id)
@@ -22,19 +43,29 @@ export default async function AdminArticlesPage() {
 
     isAdmin = profile?.role === 'admin';
 
-    let query = supabase.from('articles').select('*').order('publishedAt', { ascending: false });
+    // Leer artículos con service role para máxima compatibilidad
+    let query = supabaseAdmin
+      .from('articles')
+      .select('id, slug, title, excerpt, image, category, author, publishedAt, featured, trending, author_id')
+      .order('publishedAt', { ascending: false })
+      .limit(200);
+
     if (!isAdmin) query = query.eq('author_id', user.id);
 
     const { data, error } = await query;
     if (error) throw error;
     articles = data || [];
   } catch (err) {
-    console.error('Error loading articles:', err);
+    console.error('[AdminArticulos] Error:', err);
+    errorMsg = err?.message || 'Error desconocido';
+  }
+
+  if (errorMsg) {
     return (
       <div className="p-12 border-2 border-red-500 bg-red-50 text-red-900">
         <h2 className="text-2xl font-black uppercase mb-4">Error de Base de Datos</h2>
         <p className="text-sm">No pudimos cargar los artículos.</p>
-        <pre className="mt-4 text-[10px] bg-white p-4 border border-red-200 overflow-auto">{err.message}</pre>
+        <pre className="mt-4 text-[10px] bg-white p-4 border border-red-200 overflow-auto max-h-32">{errorMsg}</pre>
       </div>
     );
   }
@@ -84,9 +115,12 @@ export default async function AdminArticlesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {articles.map(a => {
             const hasImage = !!a.image;
-            const date = a.publishedAt
-              ? new Date(a.publishedAt).toLocaleDateString('es-DO', { day: '2-digit', month: 'short', year: '2-digit' })
-              : 'Borrador';
+            let date = 'Sin fecha';
+            try {
+              if (a.publishedAt) {
+                date = new Date(a.publishedAt).toLocaleDateString('es-DO', { day: '2-digit', month: 'short', year: '2-digit' });
+              }
+            } catch (_) {}
 
             return (
               <div
@@ -99,14 +133,13 @@ export default async function AdminArticlesPage() {
                     <>
                       <img
                         src={a.image}
-                        alt={a.title}
+                        alt={a.title || ''}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
                           e.target.style.display = 'none';
-                          e.target.nextElementSibling.style.display = 'flex';
+                          if (e.target.nextElementSibling) e.target.nextElementSibling.style.display = 'flex';
                         }}
                       />
-                      {/* Fallback si la img falla */}
                       <div className="absolute inset-0 bg-slate-900 flex-col items-center justify-center hidden">
                         <svg className="w-8 h-8 text-slate-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -115,7 +148,6 @@ export default async function AdminArticlesPage() {
                       </div>
                     </>
                   ) : (
-                    /* Sin imagen en BD */
                     <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center">
                       <svg className="w-8 h-8 text-slate-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -126,9 +158,11 @@ export default async function AdminArticlesPage() {
 
                   {/* Badges sobre la imagen */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                    <span className="text-[8px] font-black uppercase tracking-widest bg-red-600 text-white px-2 py-0.5">
-                      {a.category}
-                    </span>
+                    {a.category && (
+                      <span className="text-[8px] font-black uppercase tracking-widest bg-red-600 text-white px-2 py-0.5">
+                        {a.category}
+                      </span>
+                    )}
                     {a.trending && (
                       <span className="text-[8px] font-black uppercase tracking-widest bg-black text-white px-2 py-0.5 flex items-center gap-1">
                         <span className="w-1 h-1 bg-red-500 rounded-full animate-pulse"></span>Impacto
@@ -152,7 +186,7 @@ export default async function AdminArticlesPage() {
                 {/* ── CONTENIDO ── */}
                 <div className="p-5 flex flex-col flex-1 gap-3">
                   <h3 className="text-sm font-black uppercase tracking-tight text-black leading-tight line-clamp-2 group-hover:text-red-700 transition-colors">
-                    {a.title}
+                    {a.title || 'Sin título'}
                   </h3>
 
                   {a.excerpt && (
@@ -170,7 +204,7 @@ export default async function AdminArticlesPage() {
                   {/* ── ACCIONES ── */}
                   <div className="flex items-center gap-2 pt-3 border-t border-slate-50 mt-auto">
                     <Link
-                      href={`/articulo/${a.slug}`}
+                      href={`/articulo/${a.slug || ''}`}
                       target="_blank"
                       className="flex-1 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 border border-slate-100 px-3 py-2 hover:bg-slate-50 transition-colors"
                     >
