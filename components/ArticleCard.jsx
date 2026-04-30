@@ -62,8 +62,8 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               src={article.image} 
               alt={article.imageAlt || article.title}
               category={article.category}
-              containerClassName="w-full aspect-[16/9] md:aspect-[21/9]"
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+              containerClassName="w-full aspect-[16/9] md:aspect-[21/9] bg-slate-50"
+              className="w-full h-full object-contain transition-transform duration-1000 group-hover:scale-[1.02]"
               width={1280}
             />
           </div>
@@ -162,8 +162,8 @@ export default function ArticleCard({ article, variant = 'medium', className = '
                src={article.image} 
                alt={article.imageAlt || article.title}
                category={article.category}
-               containerClassName="aspect-[16/10] md:h-full"
-               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+               containerClassName="aspect-[16/10] md:h-full bg-slate-50"
+               className="w-full h-full object-contain transition-transform duration-1000 group-hover:scale-[1.02]"
                width={800}
              />
            </div>

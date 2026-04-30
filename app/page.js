@@ -71,7 +71,8 @@ export default async function HomePage() {
           PORTADA — Diseño Periódico Clásico
       ══════════════════════════════════════════════ */}
       <main aria-label="Portada">
-        <BreakingTicker items={ticker} />
+        {/* Espacio en blanco (Ticker eliminado a petición) */}
+        <div className="h-4 md:h-6" />
 
         {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
 
@@ -127,6 +128,7 @@ export default async function HomePage() {
                         containerClassName="aspect-[16/9] mb-5 shadow-md rounded-sm group/img"
                         className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
                         width={600}
+                        priority={true}
                       />
                     )}
                     <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-3">

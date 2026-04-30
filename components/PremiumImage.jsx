@@ -6,6 +6,11 @@ import { optimizeImageUrl } from '@/lib/data';
 /**
  * PremiumImage — Componente de imagen con manejo de errores, efecto de fondo difuminado
  * y sistema de fallback estético (Branded Fallback).
+ *
+ * NOTA: El timeout fue eliminado porque causaba falsos positivos en móvil:
+ * cuando hay muchas imágenes lazy en cola, el browser las carga secuencialmente
+ * y el timeout de 15s expiraba antes de que el browser intentara la imagen.
+ * El onError nativo es suficiente para detectar fallos reales.
  */
 export default function PremiumImage({ 
   src, 
@@ -16,47 +21,36 @@ export default function PremiumImage({
   blurOpacity = "0.4",
   blurScale = "1.1",
   priority = false,
-  width = 1200 // Ancho sugerido para optimización
+  width = 1200
 }) {
-  // Aplicamos optimización a la URL inicial
   const optimizedSrc = optimizeImageUrl(src, width);
   const [imgSrc, setImgSrc] = useState(optimizedSrc);
   const [isError, setIsError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const loadingRef = useRef(true);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const imgRef = useRef(null);
 
-  // Sincronizar si el src cambia externamente
   useEffect(() => {
     const newOptimized = optimizeImageUrl(src, width);
     setImgSrc(newOptimized);
     setIsError(false);
-    setIsLoading(true);
-    loadingRef.current = true;
+    setIsLoaded(false);
 
-    // Timeout de 15s — margen generoso para CDNs lentos en primera carga
-    const timeout = setTimeout(() => {
-      if (loadingRef.current) {
-        setIsError(true);
-        setIsLoading(false);
-        loadingRef.current = false;
-      }
-    }, 15000);
-
-    return () => clearTimeout(timeout);
+    // Check if image is already complete (cached)
+    if (imgRef.current && imgRef.current.complete) {
+      handleLoad();
+    }
   }, [src, width]);
 
   const handleError = () => {
+    console.error(`PremiumImage: Failed to load image: ${imgSrc}`);
     setIsError(true);
-    setIsLoading(false);
-    loadingRef.current = false;
+    setIsLoaded(false);
   };
 
   const handleLoad = () => {
-    setIsLoading(false);
-    loadingRef.current = false;
+    setIsLoaded(true);
   };
 
-  // Mapeo de fallbacks por categoría (Unsplash curated)
   const FALLBACKS = {
     deportes: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1000&auto=format&fit=crop',
     economia: 'https://images.unsplash.com/photo-1611974714851-eb60516746e3?q=80&w=1000&auto=format&fit=crop',
@@ -74,14 +68,10 @@ export default function PremiumImage({
   return (
     <div className={`relative overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-zinc-900 ${containerClassName}`}>
       
-      {/* 1. SKELETON / LOADING STATE */}
-      {isLoading && (
-        <div className="absolute inset-0 z-20 bg-slate-200 dark:bg-zinc-800 animate-pulse flex items-center justify-center">
-          <div className="w-12 h-12 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin"></div>
-        </div>
+      {!isLoaded && !isError && (
+        <div className="absolute inset-0 z-0 bg-slate-200 dark:bg-zinc-800 animate-pulse" />
       )}
 
-      {/* 2. BRANDED FALLBACK (Si hay error) */}
       {isError ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900">
            <img 
@@ -100,8 +90,7 @@ export default function PremiumImage({
         </div>
       ) : (
         <>
-          {/* 3. CAPA DE FONDO DIFUMINADA (Solo si cargó bien) */}
-          {!isLoading && imgSrc && (
+          {isLoaded && imgSrc && (
             <div className="absolute inset-0 z-0 select-none pointer-events-none">
               <img 
                 src={imgSrc} 
@@ -112,12 +101,12 @@ export default function PremiumImage({
             </div>
           )}
 
-          {/* 4. IMAGEN PRINCIPAL */}
           {imgSrc && (
             <img 
+              ref={imgRef}
               src={imgSrc} 
               alt={alt} 
-              className={`relative z-10 transition-all duration-1000 ${isLoading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'} ${className}`} 
+              className={`relative z-10 transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
               onError={handleError}
               onLoad={handleLoad}
               loading={priority ? "eager" : "lazy"}
@@ -128,3 +117,4 @@ export default function PremiumImage({
     </div>
   );
 }
+
