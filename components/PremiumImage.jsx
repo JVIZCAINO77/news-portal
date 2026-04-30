@@ -33,14 +33,14 @@ export default function PremiumImage({
     setIsLoading(true);
     loadingRef.current = true;
 
-    // Timeout de 8s — evita que imágenes rotas muestren el spinner para siempre
+    // Timeout de 15s — margen generoso para CDNs lentos en primera carga
     const timeout = setTimeout(() => {
       if (loadingRef.current) {
         setIsError(true);
         setIsLoading(false);
         loadingRef.current = false;
       }
-    }, 8000);
+    }, 15000);
 
     return () => clearTimeout(timeout);
   }, [src, width]);
