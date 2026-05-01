@@ -35,7 +35,10 @@ export default function PremiumImage({
   };
 
   const currentFallback = FALLBACKS[category.toLowerCase()] || FALLBACKS.default;
-  const displaySrc = isError ? currentFallback : (src || currentFallback);
+  
+  // Forzamos HTTPS para evitar problemas de Mixed Content en navegadores modernos
+  const safeSrc = src?.startsWith('http://') ? src.replace('http://', 'https://') : src;
+  const displaySrc = isError ? currentFallback : (safeSrc || currentFallback);
 
   // Solo optimizamos lo que sabemos que NO va a fallar
   const shouldOptimize = (url) => {
