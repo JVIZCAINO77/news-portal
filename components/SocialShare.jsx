@@ -59,7 +59,7 @@ export default function SocialShare({ url, title }) {
     <>
       {/* Desktop Sticky Share (Left) */}
       <div className="hidden xl:flex fixed left-10 top-1/2 -translate-y-1/2 flex-col items-center gap-6 z-50 bg-white/10 backdrop-blur-md p-4 rounded-full border border-white/20 shadow-xl">
-         <p className="text-[8px] font-black uppercase vertical-text tracking-widest text-slate-400 mb-4 select-none">Impacto Social</p>
+         <p className="text-[8px] font-black uppercase vertical-text tracking-widest text-slate-500 mb-4 select-none">Impacto Social</p>
          <div className="flex flex-col gap-6">
             {channels.map((ch) => (
               <a 
@@ -107,6 +107,7 @@ export default function SocialShare({ url, title }) {
             <button 
               onClick={copyToClipboard}
               className={`text-[9px] font-black uppercase tracking-widest transition-all ${copied ? 'text-emerald-400' : 'text-white'}`}
+              aria-label="Copiar enlace al portapapeles"
             >
               {copied ? 'Listo' : 'Link'}
             </button>

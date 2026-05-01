@@ -54,6 +54,7 @@ export default function Footer() {
                     href={s.url} 
                     target="_blank" 
                     className="w-10 h-10 border border-white/20 rounded-full flex items-center justify-center hover:bg-white hover:text-black transition-all group"
+                    aria-label={`Seguir en ${s.name}`}
                   >
                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                         {s.icon}
@@ -69,10 +70,10 @@ export default function Footer() {
                  <h4 className="text-[13px] font-black uppercase tracking-[0.3em] text-white mb-8">MAPA WEB</h4>
               </div>
               <ul className="space-y-4">
-                <li key="inicio"><Link href="/" className="text-[12px] font-bold text-white/60 hover:text-red-600 transition-colors">Inicio</Link></li>
+                <li key="inicio"><Link href="/" className="text-[12px] font-bold text-white/80 hover:text-red-600 transition-colors">Inicio</Link></li>
                 {CATEGORIES.filter(cat => cat.slug !== 'noticias').slice(0, 7).map(cat => (
                   <li key={cat.slug}>
-                    <Link href={`/categoria/${cat.slug}`} className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors">
+                    <Link href={`/categoria/${cat.slug}`} className="text-[12px] font-bold text-white/70 hover:text-red-600 transition-colors">
                       {cat.label}
                     </Link>
                   </li>
@@ -81,12 +82,12 @@ export default function Footer() {
               <ul className="space-y-4 pt-0">
                 {CATEGORIES.filter(cat => cat.slug !== 'noticias').slice(7, 14).map(cat => (
                   <li key={cat.slug}>
-                    <Link href={`/categoria/${cat.slug}`} className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors">
+                    <Link href={`/categoria/${cat.slug}`} className="text-[12px] font-bold text-white/70 hover:text-red-600 transition-colors">
                       {cat.label}
                     </Link>
                   </li>
                 ))}
-                <li key="sitemap"><Link href="/sitemap.xml" className="text-[12px] font-bold text-white/50 hover:text-red-600 transition-colors">Sitemap</Link></li>
+                <li key="sitemap"><Link href="/sitemap.xml" className="text-[12px] font-bold text-white/70 hover:text-red-600 transition-colors">Sitemap</Link></li>
               </ul>
             </div>
 

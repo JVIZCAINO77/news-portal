@@ -107,7 +107,7 @@ export default async function HomePage() {
                     </p>
                   )}
 
-                  <p className="text-[0.7rem] font-black text-gray-400 uppercase tracking-[0.2em] pt-6 border-t border-gray-50">
+                  <p className="text-[0.7rem] font-black text-gray-600 uppercase tracking-[0.2em] pt-6 border-t border-gray-50">
                    EDICIÓN ESPECIAL · POR {(pool[0].author || 'Redacción').toUpperCase()} · {formatDate(pool[0].publishedAt)}
                   </p>
                 </Link>
@@ -131,15 +131,15 @@ export default async function HomePage() {
                         priority={true}
                       />
                     )}
-                    <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-3">
+                    <h2 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-3">
                       {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
-                    </h3>
+                    </h2>
                     {(art.excerpt && art.excerpt.trim() !== '') && (
                       <p className="text-sm line-clamp-2 mb-4 text-serif text-gray-700">
                         {art.excerpt}
                       </p>
                     )}
-                    <span className="text-[0.6rem] font-bold text-gray-400 uppercase tracking-widest">
+                    <span className="text-[0.6rem] font-bold text-gray-600 uppercase tracking-widest">
                        {formatDate(art.publishedAt)}
                     </span>
                   </Link>
@@ -173,9 +173,9 @@ export default async function HomePage() {
                         {art.category}
                       </span>
                     )}
-                    <h3 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-4">
+                    <h2 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-4">
                       {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
-                    </h3>
+                    </h2>
                     {(art.excerpt && art.excerpt.trim() !== '') && (
                       <p className="text-sm line-clamp-3 text-gray-700">
                         {art.excerpt}
@@ -201,9 +201,9 @@ export default async function HomePage() {
                   <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-5 items-start border-b border-gray-50 pb-6 last:border-0">
                     <div className="text-3xl font-black text-slate-100 font-serif leading-none">{idx + 1}</div>
                     <div className="flex-1">
-                      <h4 className="text-[0.95rem] font-bold group-hover:text-red-700 leading-snug">
+                      <h3 className="text-[0.95rem] font-bold group-hover:text-red-700 leading-snug">
                         {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
-                      </h4>
+                      </h3>
                       {art.category?.toLowerCase() !== 'noticias' && (
                         <span className="text-[0.55rem] text-[#bb1b21] font-bold uppercase tracking-widest mt-2 block">
                           {art.category}

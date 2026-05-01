@@ -290,9 +290,9 @@ export default async function ArticlePage({ params }) {
                   </div>
                   
                   <div className="flex-1 text-center md:text-left space-y-3">
-                    <h4 className="text-xl md:text-2xl font-black text-red-600 uppercase tracking-tighter italic leading-none">
+                    <h3 className="text-xl md:text-2xl font-black text-red-600 uppercase tracking-tighter italic leading-none">
                       {article.author || 'Redacción Imperio Público'}
-                    </h4>
+                    </h3>
                     <p className="text-sm md:text-base text-slate-600 leading-relaxed font-serif italic max-w-2xl">
                       {article.author_bio || 'Periodista especializado en actualidad y análisis editorial. Corresponsal comprometido con la veracidad informativa en el equipo de Imperio Público.'}
                     </p>
@@ -318,14 +318,14 @@ export default async function ArticlePage({ params }) {
 
             <aside className="lg:col-span-4 border-l border-gray-100 lg:pl-12">
               <div className="sticky top-32">
-                <h3 className="section-title w-full">Lo más reciente</h3>
+                <h2 className="section-title w-full">Lo más reciente</h2>
                 <div className="space-y-8 mt-8">
                   {related.map((a, idx) => (
                     <Link key={a.id} href={`/articulo/${a.slug}`} className="group flex gap-5 items-start border-b border-slate-50 pb-6 last:border-0">
                       <span className="text-4xl font-black text-slate-100 font-serif group-hover:text-red-600 transition-colors leading-none">{idx + 1}</span>
                       <div>
                         <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-2">{getCategoryBySlug(a.category)?.label}</span>
-                        <h5 className="text-[13px] font-black uppercase tracking-tight leading-tight group-hover:underline">{a.title}</h5>
+                        <h3 className="text-[13px] font-black uppercase tracking-tight leading-tight group-hover:underline">{a.title}</h3>
                       </div>
                     </Link>
                   ))}
