@@ -260,3 +260,20 @@
   pointer-events: none;
   height: 0;
 }
+
+/* --- Control de Publicidad (Anti-AutoAds Intrusivos) --- */
+/* Oculta anuncios inyectados automáticamente por Google que no están en nuestros contenedores con label */
+ins.adsbygoogle:not(.ad-container ins) {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Asegurar que nuestras unidades manuales tengan un espaciado limpio */
+.ad-container {
+  margin: 3rem 0;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
