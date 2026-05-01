@@ -83,12 +83,24 @@
   .paragraph-text {
     font-family: var(--font-sans);
     font-size: 1.15rem;
-    line-height: 1.8;
-    color: #1a1a1a; /* Negro más suave pero profundo */
-    margin-bottom: 0.85rem;
+    line-height: 1.9; /* Mayor interlineado para lectura premium */
+    color: #1a1a1a;
+    margin-bottom: 1.5rem; /* Más espacio entre párrafos */
     display: block;
     text-align: justify;
     text-justify: inter-word;
+  }
+
+  .drop-cap::first-letter {
+    font-family: var(--font-serif);
+    float: left;
+    font-size: 4.5rem;
+    line-height: 0.8;
+    padding-top: 4px;
+    padding-right: 8px;
+    padding-left: 3px;
+    font-weight: 900;
+    color: var(--primary);
   }
 
   .prose-news p, .article-html-content p {

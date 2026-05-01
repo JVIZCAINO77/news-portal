@@ -159,7 +159,7 @@ export default async function ArticlePage({ params }) {
                   src={article.image} 
                   alt={article.imageAlt || article.title}
                   containerClassName="w-full min-h-[300px] md:min-h-[500px] max-h-[85vh] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.3)] rounded-3xl border border-slate-100 group-hover:border-red-100 transition-colors"
-                  className="max-w-full max-h-[85vh] w-auto h-auto object-contain transition-transform group-hover:scale-[1.01] duration-1000"
+                  className="max-w-full max-h-[85vh] w-auto h-auto object-cover transition-transform group-hover:scale-[1.01] duration-1000"
                   priority={true}
                 />
                 {article.imageAlt && (
@@ -253,7 +253,7 @@ export default async function ArticlePage({ params }) {
                         return (
                           <div key={i} className="relative">
                             <div
-                              className="paragraph-text"
+                              className={`paragraph-text ${i === 0 ? 'drop-cap' : ''}`}
                               dangerouslySetInnerHTML={{ __html: linkedText }}
                             />
                             {i === 1 && <AdUnit format="in-article" slot="article_mid" className="my-6 py-4 border-y border-slate-100" />}

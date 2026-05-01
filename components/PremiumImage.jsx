@@ -94,7 +94,7 @@ export default function PremiumImage({
             <div className="absolute inset-0 z-0 select-none pointer-events-none">
               <img 
                 src={imgSrc} 
-                className="w-full h-full object-cover blur-3xl scale-125 opacity-30" 
+                className="w-full h-full object-cover blur-3xl scale-125 opacity-60" 
                 alt="" 
                 aria-hidden="true"
               />

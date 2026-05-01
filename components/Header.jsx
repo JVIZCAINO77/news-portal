@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
 import ServiceWidgets from './ServiceWidgets';
 import MobileMenu from './MobileMenu';
+import BreakingNews from './BreakingNews';
 
 export default function Header() {
   const router = useRouter();
@@ -63,7 +64,7 @@ export default function Header() {
 
   return (
     <div className="w-full">
-
+      <BreakingNews />
       {/* 1. Static Branding Section */}
       <section className="w-full bg-white py-2 md:py-4 border-b border-gray-100 relative">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
