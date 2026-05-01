@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -91,11 +92,15 @@ export default function Header() {
           </div>
 
           <a href="/" className="flex items-center justify-center flex-row gap-6 md:gap-10 hover:opacity-90 transition-opacity">
-            <img 
-              src="/icon.png" 
-              alt="Logo IP" 
-              className="h-12 md:h-20 lg:h-24 object-contain mix-blend-multiply" 
-            />
+            <div className="relative h-12 md:h-20 lg:h-24 w-12 md:w-20 lg:w-24">
+              <Image 
+                src="/icon.png" 
+                alt="Logo IP" 
+                fill
+                priority={true}
+                className="object-contain mix-blend-multiply" 
+              />
+            </div>
             <div className="flex flex-col items-center">
               <span 
                 style={{ 

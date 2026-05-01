@@ -35,16 +35,14 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
   }, [slot]);
 
   return (
-    <div className={`ad-container ${adLoaded ? 'my-8' : 'my-0'} ${className}`} style={{ minHeight: adLoaded ? style.minHeight : '0px' }}>
-      <div className="flex flex-col items-center justify-center relative overflow-hidden">
-        {adLoaded && (
-          <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-300 mb-2">
-            Publicidad
-          </span>
-        )}
+    <div className={`ad-container my-8 ${className}`} style={{ minHeight: style.minHeight }}>
+      <div className="flex flex-col items-center justify-center relative overflow-hidden" style={{ minHeight: style.minHeight }}>
+        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-300 mb-2">
+          Publicidad
+        </span>
         
         <ins className="adsbygoogle"
-             style={{ display: adLoaded ? 'block' : 'none', minWidth: '250px', minHeight: adLoaded ? style.minHeight : '0px' }}
+             style={{ display: 'block', minWidth: '250px', minHeight: style.minHeight }}
              data-ad-client={SITE_CONFIG.adsenseId}
              data-ad-slot={finalSlot}
              data-ad-format="auto"
