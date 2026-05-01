@@ -644,10 +644,10 @@ Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin t
       finalImageUrl = await internalizeImage(finalImageUrl);
 
       // Guardia: si internalizeImage falló y la URL sigue siendo externa,
-      // preferimos null antes que guardar una URL con hotlink bloqueado
+      // la mantenemos. Gracias a nuestra mejora en PremiumImage.jsx, 
+      // el frontend podrá mostrarla usando <img> nativo sin errores de dominio.
       if (finalImageUrl && !finalImageUrl.includes('cloudinary.com')) {
-        console.warn('[Bot] ⚠️ internalizeImage falló — imagen descartada para evitar hotlink roto');
-        finalImageUrl = null;
+        console.warn('[Bot] ⚠️ internalizeImage falló — se usará la URL original como respaldo');
       }
     }
 
