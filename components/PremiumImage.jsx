@@ -36,17 +36,23 @@ export default function PremiumImage({
 
   const currentFallback = FALLBACKS[category.toLowerCase()] || FALLBACKS.default;
   
-  // Forzamos HTTPS para evitar problemas de Mixed Content en navegadores modernos
+  // Forzamos HTTPS para evitar problemas de Mixed Content
   const safeSrc = src?.startsWith('http://') ? src.replace('http://', 'https://') : src;
-  const displaySrc = isError ? currentFallback : (safeSrc || currentFallback);
-
+  
   // Solo optimizamos lo que sabemos que NO va a fallar
   const shouldOptimize = (url) => {
     if (!url) return false;
     return url.includes('cloudinary.com') || url.includes('unsplash.com');
   };
 
-  const useNextImage = shouldOptimize(displaySrc);
+  const useNextImage = shouldOptimize(safeSrc);
+
+  // Si no es optimizable y es una URL externa, usamos el proxy para evitar hotlinking
+  const displaySrc = isError 
+    ? currentFallback 
+    : (!useNextImage && safeSrc?.startsWith('http')) 
+      ? `/api/proxy-image?url=${encodeURIComponent(safeSrc)}` 
+      : (safeSrc || currentFallback);
 
   return (
     <div className={`relative overflow-hidden bg-slate-900 ${containerClassName}`}>
