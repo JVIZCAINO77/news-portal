@@ -634,7 +634,8 @@ Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin t
     // MEJORA: Generación de Imagen por IA como Fallback si no se encontró imagen real
     if (!finalImageUrl) {
       console.log(`[Bot] Generando imagen por IA como fallback para: ${articleData.title}`);
-      const visualPrompt = `professional editorial news photography, ${articleData.title}, high quality, journalistic style, sharp focus, 16:9 aspect ratio`;
+      const topicTags = Array.isArray(articleData.tags) ? articleData.tags.join(', ') : '';
+      const visualPrompt = `high-end editorial news photography for an article titled "${articleData.title}". Subject: ${topicTags}. Professional journalistic style, cinematic lighting, 8k resolution, realistic, wide shot, 16:9 aspect ratio.`;
       finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(visualPrompt)}?width=1280&height=720&nologo=true&seed=${Date.now()}`;
     }
 
