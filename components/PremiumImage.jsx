@@ -66,10 +66,10 @@ export default function PremiumImage({
   const currentFallback = FALLBACKS[category.toLowerCase()] || FALLBACKS.default;
 
   return (
-    <div className={`relative overflow-hidden flex items-center justify-center bg-slate-100 dark:bg-zinc-900 ${containerClassName}`}>
+    <div className={`relative overflow-hidden bg-slate-900 ${containerClassName}`}>
       
       {!isLoaded && !isError && (
-        <div className="absolute inset-0 z-0 bg-slate-200 dark:bg-zinc-800 animate-pulse" />
+        <div className="absolute inset-0 z-0 bg-slate-800 animate-pulse" />
       )}
 
       {isError ? (
@@ -106,7 +106,7 @@ export default function PremiumImage({
               ref={imgRef}
               src={imgSrc} 
               alt={alt} 
-              className={`relative z-10 transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
               onError={handleError}
               onLoad={handleLoad}
               loading={priority ? "eager" : "lazy"}
