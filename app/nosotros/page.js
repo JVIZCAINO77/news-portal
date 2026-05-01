@@ -17,8 +17,19 @@ const TEAM = [
 export default function NosotrosPage() {
   return (
     <div className="bg-white">
+      {/* Encabezado de Página */}
+      <header className="bg-gray-50 border-b border-gray-100 py-20 mb-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-4 block">Nuestra Identidad</span>
+          <h1 className="text-6xl md:text-7xl font-black uppercase tracking-tighter leading-none italic mb-6">Sobre <span className="text-red-600">Nosotros</span></h1>
+          <p className="text-xl font-serif text-slate-600 max-w-3xl leading-relaxed">
+            Imperio Público es un medio digital de vanguardia comprometido con la fiscalización ciudadana, 
+            la transparencia institucional y el periodismo de profundidad en la República Dominicana.
+          </p>
+        </div>
+      </header>
 
-      <section className="pt-0 pb-24 border-b border-gray-100">
+      <section className="pb-24 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div id="mision" className="border-l-4 border-red-600 pl-8 scroll-mt-24">

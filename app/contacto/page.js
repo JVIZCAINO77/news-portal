@@ -20,9 +20,19 @@ export default function ContactoPage() {
 
   return (
     <div className="bg-white">
+      {/* Encabezado de Página */}
+      <header className="bg-gray-50 border-b border-gray-100 py-20 mb-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-4 block">Canales Directos</span>
+          <h1 className="text-6xl md:text-7xl font-black uppercase tracking-tighter leading-none italic mb-6">Contáctanos</h1>
+          <p className="text-xl font-serif text-slate-600 max-w-3xl leading-relaxed">
+            Estamos aquí para escucharte. Utiliza nuestros canales oficiales para denuncias, colaboraciones o publicidad.
+          </p>
+        </div>
+      </header>
 
       {/* Grid: Formulario + Info */}
-      <section className="pt-0 pb-24">
+      <section className="pb-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-20">
 
@@ -56,7 +66,7 @@ export default function ContactoPage() {
                         onChange={handleChange}
                         required
                         placeholder="Tu nombre"
-                        className="w-full border-0 border-b-2 border-gray-200 focus:border-red-600 outline-none py-3 text-lg font-bold placeholder:text-slate-200 transition-colors"
+                        className="w-full border-0 border-b-2 border-gray-200 focus:border-red-600 outline-none py-3 text-lg font-bold placeholder:text-slate-400 transition-colors"
                       />
                     </div>
                     <div>
@@ -68,7 +78,7 @@ export default function ContactoPage() {
                         onChange={handleChange}
                         required
                         placeholder="tu@email.com"
-                        className="w-full border-0 border-b-2 border-gray-200 focus:border-red-600 outline-none py-3 text-lg font-bold placeholder:text-slate-200 transition-colors"
+                        className="w-full border-0 border-b-2 border-gray-200 focus:border-red-600 outline-none py-3 text-lg font-bold placeholder:text-slate-400 transition-colors"
                       />
                     </div>
                   </div>
@@ -100,7 +110,7 @@ export default function ContactoPage() {
                       required
                       rows={6}
                       placeholder="Escribe aquí tu mensaje..."
-                      className="w-full border border-gray-100 focus:border-red-600 outline-none p-6 text-base font-serif leading-relaxed placeholder:text-slate-200 resize-none transition-colors"
+                      className="w-full border border-gray-100 focus:border-red-600 outline-none p-6 text-base font-serif leading-relaxed placeholder:text-slate-400 resize-none transition-colors"
                     />
                   </div>
 
@@ -140,25 +150,25 @@ export default function ContactoPage() {
               <div className="border-l-4 border-red-600 pl-8 pt-4">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-6">Síguenos en Redes</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <a href="https://www.facebook.com/profile.php?id=61573298082093" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                  <a href="https://www.facebook.com/profile.php?id=61573298082093" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="Síguenos en Facebook">
                     <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
                       <span className="text-[10px] font-black">FB</span>
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-widest">Facebook</span>
                   </a>
-                  <a href="https://www.instagram.com/imperiopublico/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                  <a href="https://www.instagram.com/imperiopublico/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="Síguenos en Instagram">
                     <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
                       <span className="text-[10px] font-black">IG</span>
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-widest">Instagram</span>
                   </a>
-                  <a href="https://x.com/imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                  <a href="https://x.com/imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="Síguenos en X (Twitter)">
                     <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
                       <span className="text-[10px] font-black">X</span>
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-widest">Twitter / X</span>
                   </a>
-                  <a href="https://www.youtube.com/@Imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group">
+                  <a href="https://www.youtube.com/@Imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="Síguenos en YouTube">
                     <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
                       <span className="text-[10px] font-black">YT</span>
                     </div>
