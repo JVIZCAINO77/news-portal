@@ -4,7 +4,9 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 /**
- * PremiumImage — Componente de imagen ultra-robusto con fallback y optimización híbrida.
+ * PremiumImage — Componente de imagen definitivo.
+ * Usa Next.js Image para dominios conocidos y <img> estándar para fuentes externas
+ * para evitar bloqueos de dominio (Error 400) y problemas de hotlinking.
  */
 export default function PremiumImage({ 
   src, 
@@ -45,10 +47,14 @@ export default function PremiumImage({
       'diariolibre.com', 
       'elcaribe.com.do', 
       'hoy.com.do', 
-      'remolacha.net'
+      'remolacha.net',
+      'almomento.net',
+      'eldiario.es'
     ];
     return allowed.some(domain => url.includes(domain));
   };
+
+  const canUseNextImage = isOptimizable(displaySrc);
 
   return (
     <div className={`relative overflow-hidden bg-slate-900 ${containerClassName}`}>
@@ -58,18 +64,25 @@ export default function PremiumImage({
         <div className="absolute inset-0 z-0 bg-slate-800 animate-pulse" />
       )}
 
-      {/* Efecto de fondo difuminado (solo si cargó y no es error) */}
+      {/* Efecto de fondo difuminado */}
       {isLoaded && !isError && (
         <div className="absolute inset-0 z-0 select-none pointer-events-none opacity-40 blur-3xl scale-125">
-          <Image 
-            src={displaySrc} 
-            alt="" 
-            fill
-            unoptimized={!isOptimizable(displaySrc)}
-            className="object-cover"
-            sizes="10vw"
-            quality={10}
-          />
+          {canUseNextImage ? (
+            <Image 
+              src={displaySrc} 
+              alt="" 
+              fill
+              className="object-cover"
+              sizes="10vw"
+              quality={10}
+            />
+          ) : (
+            <img 
+              src={displaySrc} 
+              alt="" 
+              className="w-full h-full object-cover" 
+            />
+          )}
         </div>
       )}
 
@@ -90,17 +103,29 @@ export default function PremiumImage({
            </div>
         </div>
       ) : (
-        <Image 
-          src={src || currentFallback} 
-          alt={alt || "Noticia"} 
-          fill
-          priority={priority}
-          unoptimized={!isOptimizable(src)}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
-          onLoad={() => setIsLoaded(true)}
-          onError={() => setIsError(true)}
-        />
+        <>
+          {canUseNextImage ? (
+            <Image 
+              src={src || currentFallback} 
+              alt={alt || "Noticia"} 
+              fill
+              priority={priority}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
+              onLoad={() => setIsLoaded(true)}
+              onError={() => setIsError(true)}
+            />
+          ) : (
+            <img 
+              src={src || currentFallback} 
+              alt={alt || "Noticia"} 
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
+              onLoad={() => setIsLoaded(true)}
+              onError={() => setIsError(true)}
+              loading={priority ? "eager" : "lazy"}
+            />
+          )}
+        </>
       )}
     </div>
   );
