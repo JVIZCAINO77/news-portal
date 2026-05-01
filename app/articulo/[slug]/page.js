@@ -222,39 +222,14 @@ export default async function ArticlePage({ params }) {
                         }
 
                         const formattedText = p
-                          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-black">$1</strong>')
-                          .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500 font-medium">$1</em>');
-                        const isFirstParagraph = i === 0;
-                        
-                        // AUTO INTER-LINKING: Link category names AND recent articles
-                        let linkedText = formattedText;
-                        
-                        // 1. Link to Categories
-                        CATEGORIES.forEach(cat => {
-                          const regex = new RegExp(`\\b(${cat.label})\\b`, 'gi');
-                          linkedText = linkedText.replace(regex, (match) => {
-                            return `<a href="/categoria/${cat.slug}" class="text-red-600 font-bold hover:underline">${match}</a>`;
-                          });
-                        });
-
-                        // 2. Link to Recent Articles (Internal SEO Mesh)
-                        // Buscamos palabras clave de los títulos de noticias recientes para crear enlaces internos
-                        latest.slice(0, 5).forEach(recent => {
-                          if (recent.id === article.id) return;
-                          // Tomamos las primeras 3 palabras significativas del título
-                          const keywords = recent.title.split(' ').filter(w => w.length > 4).slice(0, 2);
-                          keywords.forEach(kw => {
-                             const kwRegex = new RegExp(`\\b(${kw})\\b`, 'i');
-                             // Solo reemplazamos la primera ocurrencia para no saturar
-                             linkedText = linkedText.replace(kwRegex, `<a href="/articulo/${recent.slug}" class="border-b border-dotted border-red-400 hover:text-red-700 transition-colors">$1</a>`);
-                          });
-                        });
+                          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
 
                         return (
                           <div key={i} className="relative">
                             <div
-                              className={`paragraph-text ${i === 0 ? 'drop-cap' : ''}`}
-                              dangerouslySetInnerHTML={{ __html: linkedText }}
+                              className="paragraph-text"
+                              dangerouslySetInnerHTML={{ __html: formattedText }}
                             />
                             {i === 1 && <AdUnit format="in-article" slot="article_mid" className="my-6 py-4 border-y border-slate-100" />}
                           </div>
