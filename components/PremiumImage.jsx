@@ -4,9 +4,10 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 
 /**
- * PremiumImage — Componente de imagen definitivo.
- * Usa Next.js Image para dominios conocidos y <img> estándar para fuentes externas
- * para evitar bloqueos de dominio (Error 400) y problemas de hotlinking.
+ * PremiumImage — Componente de imagen ultra-robusto.
+ * PRIORIDAD: Que la imagen se vea siempre.
+ * ESTRATEGIA: Solo usamos Next.js Image para dominios 100% controlados (Cloudinary, Unsplash).
+ * Para todo lo demás (noticias externas), usamos <img> nativo para evitar bloqueos de Next.js.
  */
 export default function PremiumImage({ 
   src, 
@@ -34,27 +35,15 @@ export default function PremiumImage({
   };
 
   const currentFallback = FALLBACKS[category.toLowerCase()] || FALLBACKS.default;
-  const displaySrc = isError ? currentFallback : src;
+  const displaySrc = isError ? currentFallback : (src || currentFallback);
 
-  // Dominios que sabemos que están configurados en next.config.mjs para optimización
-  const isOptimizable = (url) => {
+  // Solo optimizamos lo que sabemos que NO va a fallar
+  const shouldOptimize = (url) => {
     if (!url) return false;
-    const allowed = [
-      'cloudinary.com', 
-      'unsplash.com', 
-      'pollinations.ai', 
-      'listindiario.com', 
-      'diariolibre.com', 
-      'elcaribe.com.do', 
-      'hoy.com.do', 
-      'remolacha.net',
-      'almomento.net',
-      'eldiario.es'
-    ];
-    return allowed.some(domain => url.includes(domain));
+    return url.includes('cloudinary.com') || url.includes('unsplash.com') || url.includes('pollinations.ai');
   };
 
-  const canUseNextImage = isOptimizable(displaySrc);
+  const useNextImage = shouldOptimize(displaySrc);
 
   return (
     <div className={`relative overflow-hidden bg-slate-900 ${containerClassName}`}>
@@ -64,37 +53,25 @@ export default function PremiumImage({
         <div className="absolute inset-0 z-0 bg-slate-800 animate-pulse" />
       )}
 
-      {/* Efecto de fondo difuminado */}
+      {/* Efecto de fondo difuminado (Blur) */}
       {isLoaded && !isError && (
         <div className="absolute inset-0 z-0 select-none pointer-events-none opacity-40 blur-3xl scale-125">
-          {canUseNextImage ? (
-            <Image 
-              src={displaySrc} 
-              alt="" 
-              fill
-              className="object-cover"
-              sizes="10vw"
-              quality={10}
-            />
-          ) : (
-            <img 
-              src={displaySrc} 
-              alt="" 
-              className="w-full h-full object-cover" 
-            />
-          )}
+          <img 
+            src={displaySrc} 
+            alt="" 
+            className="w-full h-full object-cover" 
+            onError={(e) => e.target.style.display = 'none'}
+          />
         </div>
       )}
 
-      {/* Imagen Principal u Overlay de Error */}
+      {/* Imagen Principal */}
       {isError ? (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900">
-           <Image 
+           <img 
             src={currentFallback} 
-            alt="Fallback" 
-            fill
-            unoptimized
-            className="object-cover opacity-40 blur-[2px]" 
+            alt="Error Fallback" 
+            className="absolute inset-0 w-full h-full object-cover opacity-40 blur-[2px]" 
            />
            <div className="relative z-20 flex flex-col items-center justify-center p-8 text-center bg-black/40 backdrop-blur-sm w-full h-full">
               <img src="/icon.png" alt="Logo IP" className="w-12 h-12 mb-3 grayscale brightness-200 opacity-60" />
@@ -104,9 +81,9 @@ export default function PremiumImage({
         </div>
       ) : (
         <>
-          {canUseNextImage ? (
+          {useNextImage ? (
             <Image 
-              src={src || currentFallback} 
+              src={displaySrc} 
               alt={alt || "Noticia"} 
               fill
               priority={priority}
@@ -117,7 +94,7 @@ export default function PremiumImage({
             />
           ) : (
             <img 
-              src={src || currentFallback} 
+              src={displaySrc} 
               alt={alt || "Noticia"} 
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
               onLoad={() => setIsLoaded(true)}
