@@ -136,9 +136,24 @@ export default function Header() {
 
         {/* Utility Bar */}
         <div className="border-b border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">
-          <div className="max-w-6xl mx-auto px-4 md:px-8 flex justify-between items-center">
-            <div className="text-[10px] font-semibold text-gray-800 uppercase italic tracking-widest">{currentDate}</div>
-            <div className="flex items-center gap-8">
+          <div className="max-w-6xl mx-auto px-4 md:px-8 flex justify-between items-center gap-4">
+            <div className="text-[10px] font-semibold text-gray-800 uppercase italic tracking-widest shrink-0">{currentDate}</div>
+            
+            {/* Ticker dinámico */}
+            <div className="flex-1 overflow-hidden hidden lg:flex items-center gap-3 border-l border-r border-gray-100 px-6">
+              <span className="bg-red-700 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 shrink-0">
+                HOY
+              </span>
+              <div className="overflow-hidden flex-1 relative h-4">
+                <div className="absolute inset-0 animate-marquee whitespace-nowrap text-[10px] text-gray-600 font-bold uppercase tracking-tight flex items-center">
+                  {tickerItems.length > 0 
+                    ? tickerItems.map(n => n.title).join('   •   ')
+                    : 'Mantente informado con Imperio Público   •   Noticias en tiempo real   •   La verdad sin filtros'}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-8 shrink-0">
               <ServiceWidgets />
               <div className="h-4 w-px bg-gray-200"></div>
               <form onSubmit={handleSearch} className="relative group flex items-center">
