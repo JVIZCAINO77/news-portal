@@ -1,9 +1,11 @@
 
 'use client';
 import Image from 'next/image';
-import { useState, useEffect, useRef } from 'react';
-import { optimizeImageUrl } from '@/lib/data';
+import { useState, useEffect } from 'react';
 
+/**
+ * PremiumImage — Componente de imagen ultra-robusto con fallback y optimización híbrida.
+ */
 export default function PremiumImage({ 
   src, 
   alt, 
@@ -32,6 +34,22 @@ export default function PremiumImage({
   const currentFallback = FALLBACKS[category.toLowerCase()] || FALLBACKS.default;
   const displaySrc = isError ? currentFallback : src;
 
+  // Dominios que sabemos que están configurados en next.config.mjs para optimización
+  const isOptimizable = (url) => {
+    if (!url) return false;
+    const allowed = [
+      'cloudinary.com', 
+      'unsplash.com', 
+      'pollinations.ai', 
+      'listindiario.com', 
+      'diariolibre.com', 
+      'elcaribe.com.do', 
+      'hoy.com.do', 
+      'remolacha.net'
+    ];
+    return allowed.some(domain => url.includes(domain));
+  };
+
   return (
     <div className={`relative overflow-hidden bg-slate-900 ${containerClassName}`}>
       
@@ -47,6 +65,7 @@ export default function PremiumImage({
             src={displaySrc} 
             alt="" 
             fill
+            unoptimized={!isOptimizable(displaySrc)}
             className="object-cover"
             sizes="10vw"
             quality={10}
@@ -61,6 +80,7 @@ export default function PremiumImage({
             src={currentFallback} 
             alt="Fallback" 
             fill
+            unoptimized
             className="object-cover opacity-40 blur-[2px]" 
            />
            <div className="relative z-20 flex flex-col items-center justify-center p-8 text-center bg-black/40 backdrop-blur-sm w-full h-full">
@@ -75,6 +95,7 @@ export default function PremiumImage({
           alt={alt || "Noticia"} 
           fill
           priority={priority}
+          unoptimized={!isOptimizable(src)}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
           onLoad={() => setIsLoaded(true)}
@@ -84,4 +105,3 @@ export default function PremiumImage({
     </div>
   );
 }
-
