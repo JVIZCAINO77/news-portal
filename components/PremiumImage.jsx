@@ -43,7 +43,7 @@ export default function PremiumImage({
   // Solo optimizamos lo que sabemos que NO va a fallar
   const shouldOptimize = (url) => {
     if (!url) return false;
-    return url.includes('cloudinary.com') || url.includes('unsplash.com') || url.includes('pollinations.ai');
+    return url.includes('cloudinary.com') || url.includes('unsplash.com');
   };
 
   const useNextImage = shouldOptimize(displaySrc);
