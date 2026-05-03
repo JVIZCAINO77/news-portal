@@ -9,11 +9,11 @@ export const metadata = {
 };
 
 const TEAM = [
-  { name: 'Carlos Mendoza', role: 'Director de Noticias', bio: 'Periodista con 15 años de experiencia en medios nacionales. Especialista en política y economía dominicana.' },
-  { name: 'Valeria Reyes', role: 'Editora de Entretenimiento', bio: 'Comunicadora social apasionada por la cultura y el entretenimiento. Cobertura de la farándula local e internacional.' },
-  { name: 'Marcos Alarcón', role: 'Editor Deportivo', bio: 'Ex deportista y comentarista. Pasión por el béisbol y el fútbol dominicano con análisis profundos.' },
-  { name: 'Elena Torres', role: 'Editora Tecnológica', bio: 'Ingeniera en sistemas reconvertida a periodista digital. Cubre innovación, startups y tendencias tech.' },
-  { name: 'Roberto Silva', role: 'Editor Económico', bio: 'Economista y analista financiero. Cobertura de mercados, finanzas personales y economía dominicana.' },
+  { name: 'Redacción Central', role: 'Dirección Editorial', bio: 'Equipo editorial de noticias generales con experiencia en coberturas nacionales. Especializado en política, economía y actualidad dominicana.' },
+  { name: 'Mesa de Entretenimiento', role: 'Sección Espectáculos', bio: 'Comunicadores sociales apasionados por la cultura y el entretenimiento. Cobertura de la farándula local e internacional.' },
+  { name: 'Mesa Deportiva', role: 'Sección Deportes', bio: 'Análisis y cobertura del béisbol, fútbol y los grandes eventos deportivos de la República Dominicana y el mundo.' },
+  { name: 'Redacción Tecnológica', role: 'Sección Tecnología', bio: 'Periodistas digitales especializados en innovación, startups y tendencias tecnológicas con impacto en el país.' },
+  { name: 'Redacción Económica', role: 'Sección Economía', bio: 'Analistas de mercados, finanzas y economía dominicana con enfoque en el ciudadano y el sector productivo nacional.' },
 ];
 
 export default function NosotrosPage() {

@@ -11,17 +11,21 @@ export function useArticle(slug) {
   useEffect(() => {
     if (!slug) return;
 
+    // AbortController para evitar state updates en componentes desmontados
+    const controller = new AbortController();
     const supabase = createClient();
 
     async function fetchData() {
       setLoading(true);
 
-      // Fetch the article by slug
+      // Fetch del artículo — select('*') necesario aquí porque se renderiza el content completo
       const { data: articleData, error: articleError } = await supabase
         .from('articles')
         .select('*')
         .eq('slug', slug)
         .single();
+
+      if (controller.signal.aborted) return;
 
       if (articleError || !articleData) {
         setArticle(null);
@@ -31,26 +35,32 @@ export function useArticle(slug) {
 
       setArticle(articleData);
 
-      // Increment view count (Simple update, ignoring potential race conditions for now)
-      // Note: Ideally this should be an RPC, but we'll use a direct update for simplicity
-      await supabase
-        .from('articles')
-        .update({ views: (articleData.views || 0) + 1 })
-        .eq('id', articleData.id);
+      // Incrementar vistas via API segura (atómica, sin race condition)
+      // Usamos nuestro endpoint /api/articles/view que usa RPC o update server-side
+      fetch('/api/articles/view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+        signal: controller.signal,
+      }).catch(() => {}); // Silencioso — las vistas no deben bloquear UX
 
-      // Fetch latest articles excluding the current one
+      // Artículos relacionados — solo campos de tarjeta, sin content
       const { data: latestData } = await supabase
         .from('articles')
-        .select('*')
+        .select('id, title, slug, excerpt, image, imageAlt, category, author, publishedAt, featured, trending')
         .neq('slug', slug)
         .order('publishedAt', { ascending: false })
         .limit(6);
+
+      if (controller.signal.aborted) return;
 
       setLatest(latestData || []);
       setLoading(false);
     }
 
     fetchData();
+
+    return () => controller.abort();
   }, [slug]);
 
   return { article, latest, loading };
