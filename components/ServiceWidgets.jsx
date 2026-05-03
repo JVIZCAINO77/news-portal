@@ -22,10 +22,11 @@ export default function ServiceWidgets() {
     const interval = setInterval(updateTime, 30000); // actualizar cada 30s
 
     // Intentar obtener tasas reales de cambio (API pública gratuita)
+    const controller = new AbortController();
     const fetchRates = async () => {
       try {
         const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=DOP,EUR', {
-          next: { revalidate: 3600 } // Cachear 1 hora
+          signal: controller.signal,
         });
         if (!res.ok) return;
         const data = await res.json();
@@ -43,13 +44,18 @@ export default function ServiceWidgets() {
             },
           });
         }
-      } catch {
-        // Silently fall back to reference rates
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          // Silently fall back to reference rates
+        }
       }
     };
     fetchRates();
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      controller.abort();
+    };
   }, []);
 
   return (
