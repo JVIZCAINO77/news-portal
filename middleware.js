@@ -46,15 +46,6 @@ export async function middleware(request) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - ads.txt, robots.txt, sitemap.xml (static crawler files)
-     * - images (various formats)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|ads.txt|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  // Solo ejecutar el middleware en rutas /admin — el público no necesita auth
+  matcher: ['/admin/:path*'],
 };

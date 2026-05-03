@@ -1,5 +1,5 @@
 // app/articulo/[slug]/page.js — Estructura Editorial SSR 2.0
-import { getArticleBySlug, getLatestArticles } from '@/lib/serverData';
+import { getArticleBySlug, getRelatedArticles } from '@/lib/serverData';
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import SocialShare from '@/components/SocialShare';
 import AudioReader from '@/components/AudioReader';
@@ -49,9 +49,8 @@ export default async function ArticlePage({ params }) {
 
   if (!article) notFound();
 
-  // Cargar noticias relacionadas (misma categoría o recientes)
-  const latest = await getLatestArticles(10);
-  const related = latest.filter(a => a.id !== article.id).slice(0, 6);
+  // Artículos relacionados: primero de la misma categoría, luego generales
+  const related = await getRelatedArticles(article.id, article.category, 6);
 
   const cleanText = (str) => {
     if (!str) return '';
