@@ -1,6 +1,8 @@
 // app/nosotros/page.js — Página Sobre Nosotros (Imperio Público)
 import { SITE_CONFIG } from '@/lib/data';
 
+export const dynamic = 'force-static';
+
 export const metadata = {
   title: 'Nosotros | Imperio Público',
   description: 'Conoce al equipo editorial de Imperio Público. Información veraz, inmediata y de alta calidad para la comunidad dominicana.',
@@ -16,7 +18,7 @@ const TEAM = [
 
 export default function NosotrosPage() {
   return (
-    <div className="bg-white">
+    <main className="bg-white">
       {/* Encabezado de Página */}
       <header className="bg-gray-50 border-b border-gray-100 py-20 mb-20">
         <div className="max-w-6xl mx-auto px-6">
@@ -95,6 +97,6 @@ export default function NosotrosPage() {
           </a>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

@@ -1,5 +1,7 @@
 import { SITE_CONFIG } from '@/lib/data';
 
+export const dynamic = 'force-static';
+
 export const metadata = {
   title: `Aviso Legal | ${SITE_CONFIG.name}`,
   description: `Términos legales y condiciones de uso de ${SITE_CONFIG.name}.`,

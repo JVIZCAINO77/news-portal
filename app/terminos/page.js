@@ -1,8 +1,9 @@
-export const metadata = { title: 'Términos y Condiciones | Imperio Público' };
+export const metadata = { title: 'Términos y Condiciones | Imperio Público', description: 'Términos y condiciones de uso del portal Imperio Público.' };
+export const dynamic = 'force-static';
 
 export default function Terminos() {
   return (
-    <div className="max-w-4xl mx-auto py-12 px-6 lg:px-8 text-slate-800 min-h-screen bg-white">
+    <main className="max-w-4xl mx-auto py-12 px-6 lg:px-8 text-slate-800 min-h-screen bg-white">
       <h1 className="text-4xl md:text-6xl font-black mb-12 text-red-600 font-serif uppercase tracking-tighter italic">Términos y Condiciones</h1>
       
       <div className="space-y-8 text-lg leading-relaxed font-serif">
@@ -39,6 +40,6 @@ export default function Terminos() {
           <p>Última revisión: 1 de mayo de 2026.</p>
         </section>
       </div>
-    </div>
+    </main>
   );
 }

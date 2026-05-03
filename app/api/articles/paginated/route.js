@@ -2,6 +2,8 @@
 import { getArticlesPaginated } from '@/lib/serverData';
 import { NextResponse } from 'next/server';
 
+export const runtime = 'edge';
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get('limit') || '10');
@@ -9,7 +11,12 @@ export async function GET(request) {
 
   try {
     const articles = await getArticlesPaginated(limit, offset);
-    return NextResponse.json(articles);
+    return NextResponse.json(articles, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        'Vercel-CDN-Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch articles' }, { status: 500 });
   }
