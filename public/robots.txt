@@ -1,9 +1,11 @@
 User-agent: *
 Allow: /
+Allow: /api/proxy-image
 Disallow: /admin/
 Disallow: /api/
 Disallow: /auth/
 Disallow: /buscar?
 
+# Sitemap principal e índice de Google News
 Sitemap: https://imperiopublico.com/sitemap.xml
 Sitemap: https://imperiopublico.com/news-sitemap.xml
