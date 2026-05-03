@@ -1,13 +1,11 @@
-
 'use client';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { optimizeImageUrl } from '@/lib/data';
 
 /**
- * PremiumImage — Componente de imagen ultra-robusto.
- * PRIORIDAD: Que la imagen se vea siempre.
- * ESTRATEGIA: Solo usamos Next.js Image para dominios 100% controlados (Cloudinary, Unsplash).
- * Para todo lo demás (noticias externas), usamos <img> nativo para evitar bloqueos de Next.js.
+ * PremiumImage — Componente de imagen ultra-robusto y optimizado para velocidad.
+ * PRIORIDAD: Carga instantánea y fidelidad visual.
  */
 export default function PremiumImage({ 
   src, 
@@ -20,6 +18,9 @@ export default function PremiumImage({
 }) {
   const [isError, setIsError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
+  const [proxyFailed, setProxyFailed] = useState(false);
+  const timeoutRef = useRef(null);
 
   // Fallbacks estéticos
   const FALLBACKS = {
@@ -36,37 +37,59 @@ export default function PremiumImage({
 
   const currentFallback = FALLBACKS[category.toLowerCase()] || FALLBACKS.default;
   
-  // Forzamos HTTPS para evitar problemas de Mixed Content
-  const safeSrc = src?.startsWith('http://') ? src.replace('http://', 'https://') : src;
+  // Optimizamos la URL de origen
+  const optimizedSrc = optimizeImageUrl(src || currentFallback, width);
+  const tinyBlurSrc = optimizeImageUrl(src || currentFallback, 40); // Miniatura para el blur de fondo
   
-  // Solo optimizamos lo que sabemos que NO va a fallar
+  // Forzamos HTTPS
+  const safeSrc = optimizedSrc.startsWith('http://') ? optimizedSrc.replace('http://', 'https://') : optimizedSrc;
+  
+  // Solo optimizamos con next/image dominios controlados
   const shouldOptimize = (url) => {
     if (!url) return false;
     return url.includes('cloudinary.com') || url.includes('unsplash.com');
   };
 
   const useNextImage = shouldOptimize(safeSrc);
+  const isCloudinary = safeSrc.includes('cloudinary.com');
 
-  // Si no es optimizable y es una URL externa, usamos el proxy para evitar hotlinking
-  const displaySrc = isError 
+  // Si no es optimizable, usamos proxy (excepto si ya falló el proxy o la imagen)
+  const displaySrc = (isError || timedOut) 
     ? currentFallback 
-    : (!useNextImage && safeSrc?.startsWith('http')) 
+    : (!useNextImage && !proxyFailed && safeSrc?.startsWith('http') && !safeSrc.includes('pollinations.ai')) 
       ? `/api/proxy-image?url=${encodeURIComponent(safeSrc)}` 
       : (safeSrc || currentFallback);
 
-  return (
-    <div className={`relative overflow-hidden bg-slate-900 ${containerClassName}`}>
-      
-      {/* Skeleton / Placeholder */}
-      {!isLoaded && !isError && (
-        <div className="absolute inset-0 z-0 bg-slate-800 animate-pulse" />
-      )}
+  // Reset all state when the image source changes (e.g. navigating between articles)
+  useEffect(() => {
+    setIsError(false);
+    setIsLoaded(false);
+    setTimedOut(false);
+    setProxyFailed(false);
+  }, [src]);
 
-      {/* Efecto de fondo difuminado (Blur) */}
-      {isLoaded && !isError && (
-        <div className="absolute inset-0 z-0 select-none pointer-events-none opacity-40 blur-3xl scale-125">
+  // Timeout de seguridad reducido a 8s para mejor UX
+  useEffect(() => {
+    if (!isLoaded && !isError) {
+      timeoutRef.current = setTimeout(() => {
+        if (!isLoaded) {
+          setTimedOut(true);
+        }
+      }, 8000);
+    }
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, [isLoaded, isError]);
+
+  return (
+    <div className={`relative overflow-hidden bg-gray-50 ${containerClassName}`}>
+      
+      {/* 1. Blur Background (Carga ultra-rápida con tiny miniatura) */}
+      {!isError && !timedOut && (
+        <div className="absolute inset-0 z-0 select-none pointer-events-none opacity-60 blur-3xl scale-110">
           <img 
-            src={displaySrc} 
+            src={tinyBlurSrc} 
             alt="" 
             className="w-full h-full object-cover" 
             onError={(e) => e.target.style.display = 'none'}
@@ -74,18 +97,29 @@ export default function PremiumImage({
         </div>
       )}
 
-      {/* Imagen Principal */}
-      {isError ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-900">
+      {/* 2. Skeleton animado (Solo visible si el blur tarda) */}
+      {!isLoaded && !isError && !timedOut && (
+        <div className="absolute inset-0 z-[1] bg-gray-200/50 animate-pulse flex items-center justify-center">
+           <div className="w-8 h-8 border-2 border-red-500/20 border-t-red-600 rounded-full animate-spin"></div>
+        </div>
+      )}
+
+      {/* 3. Imagen Principal o Fallback Premium */}
+      {(isError || timedOut) ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-50 border border-gray-100">
            <img 
             src={currentFallback} 
-            alt="Error Fallback" 
-            className="absolute inset-0 w-full h-full object-cover opacity-40 blur-[2px]" 
+            alt="Fallback" 
+            className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale blur-[2px]" 
            />
-           <div className="relative z-20 flex flex-col items-center justify-center p-8 text-center bg-black/40 backdrop-blur-sm w-full h-full">
-              <img src="/icon.png" alt="Logo IP" className="w-12 h-12 mb-3 grayscale brightness-200 opacity-60" />
-              <span className="text-[8px] font-black uppercase tracking-[0.4em] text-red-500/80 mb-2">Imperio Público</span>
-              <h3 className="text-white/60 font-serif italic text-sm leading-tight max-w-[200px] line-clamp-2">{alt}</h3>
+           <div className="relative z-20 flex flex-col items-center justify-center p-6 text-center w-full h-full">
+              <div className="w-10 h-10 mb-4 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 shadow-sm">
+                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <span className="text-[8px] font-black uppercase tracking-[0.4em] text-red-600/60 mb-2 font-sans">Imperio Público</span>
+              <h3 className="text-gray-900/60 font-serif italic text-[11px] leading-snug max-w-[180px] line-clamp-2">{alt}</h3>
            </div>
         </div>
       ) : (
@@ -97,17 +131,24 @@ export default function PremiumImage({
               fill
               priority={priority}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
+              className={`absolute inset-0 w-full h-full object-contain transition-all duration-700 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} ${className}`} 
               onLoad={() => setIsLoaded(true)}
               onError={() => setIsError(true)}
+              unoptimized={isCloudinary}
             />
           ) : (
             <img 
               src={displaySrc} 
               alt={alt || "Noticia"} 
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'} ${className}`} 
+              className={`absolute inset-0 w-full h-full object-contain transition-all duration-700 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} ${className}`} 
               onLoad={() => setIsLoaded(true)}
-              onError={() => setIsError(true)}
+              onError={() => {
+                if (!useNextImage && !proxyFailed && !isError) {
+                  setProxyFailed(true);
+                } else {
+                  setIsError(true);
+                }
+              }}
               loading={priority ? "eager" : "lazy"}
             />
           )}
@@ -116,3 +157,4 @@ export default function PremiumImage({
     </div>
   );
 }
+

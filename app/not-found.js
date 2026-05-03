@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { getLatestArticles } from '@/lib/serverData';
 import ArticleCard from '@/components/ArticleCard';
 
@@ -6,7 +7,7 @@ export default async function NotFound() {
   const latest = await getLatestArticles(3);
 
   return (
-    <div className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white">
       <div className="flex flex-col items-center justify-center p-6 py-20 text-center">
         <div className="max-w-xl mx-auto">
           <h1 className="text-[8rem] md:text-[12rem] font-black leading-none text-gray-100 tracking-tighter">404</h1>
@@ -29,14 +30,16 @@ export default async function NotFound() {
 
       {latest.length > 0 && (
         <section className="max-w-6xl mx-auto px-6 py-20 border-t border-gray-100">
-          <h3 className="section-title">Te recomendamos leer</h3>
+          <h2 className="section-title">Te recomendamos leer</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-            {latest.map(a => (
-              <ArticleCard key={a.id} article={a} variant="medium" />
-            ))}
+            <Suspense fallback={<div className="col-span-3 h-48 animate-pulse bg-gray-100 rounded" />}>
+              {latest.map(a => (
+                <ArticleCard key={a.id} article={a} variant="medium" />
+              ))}
+            </Suspense>
           </div>
         </section>
       )}
-    </div>
+    </main>
   );
 }

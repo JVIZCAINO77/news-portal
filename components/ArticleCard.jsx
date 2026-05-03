@@ -51,9 +51,9 @@ export default function ArticleCard({ article, variant = 'medium', className = '
       <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden ${className}`}>
         <article className="relative transition-all duration-500 hover:translate-y-[-4px]">
           <header className="mb-4">
-            <h1 className="editorial-title text-3xl md:text-5xl lg:text-7xl group-hover:text-red-700 transition-colors">
+            <h2 className="editorial-title text-3xl md:text-5xl lg:text-7xl group-hover:text-red-700 transition-colors">
                {safeTitle}
-             </h1>
+             </h2>
           </header>
 
           <div className="relative overflow-hidden rounded-2xl shadow-2xl mb-6">
@@ -63,7 +63,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               alt={article.imageAlt || article.title}
               category={article.category}
               containerClassName="w-full aspect-[16/9] md:aspect-[21/9] bg-slate-50"
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
+              className="w-full h-full object-contain transition-transform duration-1000 group-hover:scale-[1.02]"
               width={1280}
             />
           </div>
@@ -96,7 +96,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               alt={article.imageAlt || article.title}
               category={article.category}
               containerClassName="aspect-[4/3] bg-slate-50"
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
               width={600}
             />
           </div>
@@ -143,7 +143,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
               alt={article.title}
               category={article.category}
               containerClassName="w-full h-full"
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
               width={400}
             />
           </div>
@@ -163,7 +163,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
                alt={article.imageAlt || article.title}
                category={article.category}
                                containerClassName="aspect-[16/10] md:max-h-[500px] md:h-full bg-slate-50"
-               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-[1.02]"
+               className="w-full h-full object-contain transition-transform duration-1000 group-hover:scale-[1.02]"
                width={800}
              />
            </div>

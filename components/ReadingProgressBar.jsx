@@ -1,17 +1,26 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { trackArticleScroll } from '@/lib/analytics';
 
-export default function ReadingProgressBar() {
+export default function ReadingProgressBar({ title }) {
   const [completion, setCompletion] = useState(0);
+  const trackedMilestones = useRef(new Set());
 
   useEffect(() => {
     const updateScrollCompletion = () => {
       const currentProgress = window.scrollY;
       const scrollHeight = document.body.scrollHeight - window.innerHeight;
       if (scrollHeight) {
-        setCompletion(
-          Number((currentProgress / scrollHeight).toFixed(2)) * 100
-        );
+        const percent = Number((currentProgress / scrollHeight).toFixed(2)) * 100;
+        setCompletion(percent);
+
+        // Tracking de hitos (25, 50, 75, 90)
+        [25, 50, 75, 90].forEach(milestone => {
+          if (percent >= milestone && !trackedMilestones.current.has(milestone)) {
+            trackedMilestones.current.add(milestone);
+            if (title) trackArticleScroll(title, milestone);
+          }
+        });
       }
     };
 
@@ -20,7 +29,7 @@ export default function ReadingProgressBar() {
     return () => {
       window.removeEventListener('scroll', updateScrollCompletion);
     };
-  }, []);
+  }, [title]);
 
   return (
     <div 
@@ -35,3 +44,4 @@ export default function ReadingProgressBar() {
     </div>
   );
 }
+

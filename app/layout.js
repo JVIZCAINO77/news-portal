@@ -6,8 +6,10 @@ import Footer from '@/components/Footer';
 import CookieConsent from '@/components/CookieConsent';
 import BackToTop from '@/components/BackToTop';
 import { Analytics } from '@vercel/analytics/react';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 import Script from 'next/script';
 import { Inter, Playfair_Display } from 'next/font/google';
+import { Suspense } from 'react';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -88,30 +90,15 @@ export default function RootLayout({ children }) {
         />
         <meta name="google-adsense-account" content={SITE_CONFIG.publisherId} />
         {/* Google Analytics 4 */}
-        {SITE_CONFIG.gaId && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${SITE_CONFIG.gaId}`}
-              strategy="afterInteractive"
-            />
-            <Script id="google-analytics" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${SITE_CONFIG.gaId}', {
-                  page_path: window.location.pathname,
-                });
-              `}
-            </Script>
-          </>
-        )}
+        <Suspense fallback={null}>
+          <GoogleAnalytics gaId={SITE_CONFIG.gaId} />
+        </Suspense>
       </head>
       <body className="min-h-screen flex flex-col font-sans antialiased">
         <Header />
-        <main className="min-h-screen pb-24 md:pb-0" style={{ paddingTop: '2px' }}>
+        <div className="min-h-screen pb-24 md:pb-0" style={{ paddingTop: '2px' }}>
           {children}
-        </main>
+        </div>
         <BackToTop />
         <Footer />
         <CookieConsent />

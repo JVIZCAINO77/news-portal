@@ -12,14 +12,17 @@ export default function ContactoPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Simular envío (mailto link como fallback confiable)
-    await new Promise(r => setTimeout(r, 800));
+    // Abrimos el cliente de correo con los datos prellenados como fallback confiable
+    const subject = encodeURIComponent(`[Imperio Público] ${form.asunto} — ${form.nombre}`);
+    const body = encodeURIComponent(`Nombre: ${form.nombre}\nEmail: ${form.email}\nAsunto: ${form.asunto}\n\nMensaje:\n${form.mensaje}`);
+    window.location.href = `mailto:vizcainosr29@gmail.com?subject=${subject}&body=${body}`;
+    await new Promise(r => setTimeout(r, 600));
     setSent(true);
     setLoading(false);
   };
 
   return (
-    <div className="bg-white">
+    <main className="bg-white">
       {/* Encabezado de Página */}
       <header className="bg-gray-50 border-b border-gray-100 py-20 mb-20">
         <div className="max-w-6xl mx-auto px-6">
@@ -144,6 +147,22 @@ export default function ContactoPage() {
 
               {/* Horario */}
               <div className="bg-slate-50 p-8">
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-4">Horario de Atención</h3>
+                <div className="space-y-2 text-sm font-serif text-slate-600">
+                  <div className="flex justify-between">
+                    <span className="font-bold uppercase text-[10px] tracking-widest">Lunes — Viernes</span>
+                    <span>8:00 AM — 6:00 PM</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-bold uppercase text-[10px] tracking-widest">Sábado</span>
+                    <span>9:00 AM — 1:00 PM</span>
+                  </div>
+                  <div className="flex justify-between text-slate-400">
+                    <span className="font-bold uppercase text-[10px] tracking-widest">Domingo</span>
+                    <span>Cerrado</span>
+                  </div>
+                </div>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-red-600 mt-4">⚠️ Urgencias periodísticas: 24/7</p>
               </div>
 
               {/* Redes Sociales */}
@@ -180,6 +199,6 @@ export default function ContactoPage() {
           </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

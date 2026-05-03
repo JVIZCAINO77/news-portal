@@ -5,6 +5,8 @@ import { getCategoryBySlug } from '@/lib/data';
 import ArticleCard from '@/components/ArticleCard';
 import AdUnit from '@/components/AdUnit';
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const cat = getCategoryBySlug(slug);
@@ -47,12 +49,19 @@ export default async function CategoryPage({ params }) {
   const remainingArticles = articles.slice(2);
 
   return (
-    <div className="bg-white min-h-screen">
+    <main className="bg-white min-h-screen">
       
-      
-      {/* Bloque de contribución editorial deshabilitado temporalmente */}
-
       <div className="max-w-6xl mx-auto px-6 pt-0 pb-20">
+        {/* Cabecera de Categoría */}
+        <div className="border-b-4 border-black pt-8 pb-4 mb-8">
+          <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none">
+            {cat.label}
+          </h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mt-2">
+            Últimas noticias · Imperio Público
+          </p>
+        </div>
+
         {heroArticles.length > 0 ? (
           <div className="flex flex-col gap-8">
              {/* First Highlight */}
@@ -77,7 +86,7 @@ export default async function CategoryPage({ params }) {
                 <aside className="lg:col-span-4 border-l border-gray-100 pl-0 lg:pl-16 space-y-12">
                    <div className="sticky top-32 space-y-12">
                       <div className="bg-white p-0">
-                         <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-black mb-8 pb-3 border-b border-gray-100 italic">Tendencias en {cat.label}</h4>
+                         <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-black mb-8 pb-3 border-b border-gray-100 italic">Tendencias en {cat.label}</h2>
                          <div className="space-y-4">
                             {remainingArticles.slice(0, 6).map(a => (
                               <ArticleCard key={a.id} article={a} variant="minimal" />
@@ -97,6 +106,6 @@ export default async function CategoryPage({ params }) {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }

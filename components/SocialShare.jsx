@@ -1,6 +1,7 @@
 'use client';
 // components/SocialShare.jsx — Herramientas de Viralidad / Compartir
 import { useState, useEffect } from 'react';
+import { trackShare } from '@/lib/analytics';
 
 export default function SocialShare({ url, title }) {
   const [shareUrl, setShareUrl] = useState('');
@@ -67,6 +68,7 @@ export default function SocialShare({ url, title }) {
                 href={ch.href} 
                 target="_blank" 
                 rel="noopener noreferrer"
+                onClick={() => trackShare(ch.name, title)}
                 className={`text-slate-400 transition-all duration-300 transform ${ch.color}`}
                 aria-label={`Compartir en ${ch.name}`}
               >
@@ -75,7 +77,10 @@ export default function SocialShare({ url, title }) {
             ))}
             <div className="h-px w-6 bg-slate-200/20 my-2 self-center"></div>
             <button 
-              onClick={copyToClipboard}
+              onClick={() => {
+                copyToClipboard();
+                trackShare('Copy Link', title);
+              }}
               className={`text-slate-400 transition-all duration-300 transform hover:scale-125 ${copied ? 'text-emerald-500' : 'hover:text-red-600'}`}
               aria-label="Copiar enlace"
             >
@@ -97,6 +102,7 @@ export default function SocialShare({ url, title }) {
                 href={ch.href} 
                 target="_blank" 
                 rel="noopener noreferrer"
+                onClick={() => trackShare(ch.name, title)}
                 className={`transition-all duration-300 ${ch.name === 'WhatsApp' ? 'text-emerald-500 scale-125' : 'text-white/60'}`}
                 aria-label={ch.name}
               >
@@ -105,7 +111,10 @@ export default function SocialShare({ url, title }) {
             ))}
             <div className="w-px h-4 bg-white/10"></div>
             <button 
-              onClick={copyToClipboard}
+              onClick={() => {
+                copyToClipboard();
+                trackShare('Copy Link Mobile', title);
+              }}
               className={`text-[9px] font-black uppercase tracking-widest transition-all ${copied ? 'text-emerald-400' : 'text-white'}`}
               aria-label="Copiar enlace al portapapeles"
             >

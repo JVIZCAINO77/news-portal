@@ -96,7 +96,11 @@ export default async function AdminDashboardPage() {
 
       {/* TRÁFICO — SOLO ADMIN */}
       {isAdmin && (
-        <TrafficDashboard gaId={gaId} realStats={{ totalViews, topCategories }} />
+        <TrafficDashboard 
+          gaId={gaId} 
+          siteUrl={SITE_CONFIG.url}
+          realStats={{ totalViews, topCategories }} 
+        />
       )}
 
       {/* Stats Grid — solo admin ve todos los stats */}

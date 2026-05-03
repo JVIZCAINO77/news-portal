@@ -1,6 +1,7 @@
 'use client';
 // components/AudioReader.jsx — Lector de Artículos con Voz de IA (Nativo)
 import { useState, useEffect, useRef } from 'react';
+import { trackAudioStart } from '@/lib/analytics';
 
 export default function AudioReader({ title, text }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -61,6 +62,7 @@ export default function AudioReader({ title, text }) {
     utteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
     setIsPlaying(true);
+    if (!isPaused) trackAudioStart(title);
   };
 
   const pauseReading = () => {

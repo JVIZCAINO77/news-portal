@@ -7,7 +7,7 @@ import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
 import BreakingTicker from '@/components/BreakingTicker';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60; // Cachear por 1 minuto para carga instantánea, revalidando en background
 
 
 
@@ -198,8 +198,8 @@ export default async function HomePage() {
               <AdUnit format="rectangle" slot="home_sidebar" className="my-0 mb-10" />
               <div className="space-y-8">
                 {pool.slice(8, 12).map((art, idx) => (
-                  <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-5 items-start border-b border-gray-50 pb-6 last:border-0">
-                    <div className="text-3xl font-black text-slate-100 font-serif leading-none">{idx + 1}</div>
+                  <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-5 items-start border-b border-gray-100 pb-6 last:border-0">
+                    <div className="text-3xl font-black text-gray-200 font-serif leading-none shrink-0">{idx + 1}</div>
                     <div className="flex-1">
                       <h3 className="text-[0.95rem] font-bold group-hover:text-red-700 leading-snug">
                         {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}

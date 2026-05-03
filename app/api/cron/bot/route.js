@@ -223,21 +223,48 @@ export async function GET(request) {
     return NextResponse.json({ message: 'Automatización pausada desde el panel de administración.' }, { status: 200 });
   }
 
+  // === CAPA 0: Early Exit si ya alcanzamos los límites ===
   try {
-    // Fecha de hoy en zona horaria de República Dominicana (UTC-4)
     const todayDR = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Santo_Domingo',
       year: 'numeric', month: '2-digit', day: '2-digit'
     }).format(new Date());
 
+    const startOfTodayDR = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
+    const endOfTodayDR   = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
+
+    // Check GLOBAL (Seguridad AdSense)
+    const { count: totalToday } = await supabase
+      .from('articles')
+      .select('*', { count: 'exact', head: true })
+      .gte('publishedAt', startOfTodayDR)
+      .lte('publishedAt', endOfTodayDR);
+    
+    if ((totalToday ?? 0) >= DAILY_LIMIT_GLOBAL) {
+      return NextResponse.json({ message: `Límite GLOBAL diario alcanzado (${totalToday}/${DAILY_LIMIT_GLOBAL}).` }, { status: 200 });
+    }
+
+    // Check por Categoría
+    const { count: countToday } = await supabase
+      .from('articles')
+      .select('*', { count: 'exact', head: true })
+      .eq('category', cat.slug)
+      .gte('publishedAt', startOfTodayDR)
+      .lte('publishedAt', endOfTodayDR);
+
+    if ((countToday ?? 0) >= DAILY_LIMIT_BREAKING) {
+      return NextResponse.json({ message: `Límite de categoría ${cat.slug} alcanzado (${countToday}).` }, { status: 200 });
+    }
+
+    // Si pasamos el check, procedemos con el scraping pesado
     const parser = new Parser({
+      timeout: 5000, // Timeout estricto por fuente
       headers: { 
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
       }
     });
-    // --- MEJORA: Consultar múltiples fuentes para encontrar la mejor tendencia ---
-    // Determinar el feed de Diario Libre según la categoría
+
+    // --- MEJORA: Solo consultar una muestra aleatoria de fuentes para no saturar CPU ---
     let dlFeed = 'portada';
     if (cat.slug === 'economia') dlFeed = 'economia';
     else if (cat.slug === 'deportes') dlFeed = 'deportes';
@@ -263,25 +290,27 @@ export async function GET(request) {
       'https://www.france24.com/es/rss',
       'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
-      'https://www.rtve.es/api/noticias.rss',
-      'https://www.europapress.es/rss/rss.aspx?ch=00066'
+      'https://www.rtve.es/api/noticias.rss'
     ];
 
-    // Ahora usamos TODOS los medios disponibles para mayor diversidad
-    const selectedSources = allSources;
+    // Seleccionamos solo 7 fuentes aleatorias por ejecución para ahorrar CPU
+    const selectedSources = allSources.sort(() => 0.5 - Math.random()).slice(0, 7);
     
-    let pooledItems = [];
-    for (const source of selectedSources) {
+    // Fetch en paralelo para reducir tiempo de ejecución
+    const feedPromises = selectedSources.map(async (source) => {
       try {
         const feedUrl = source.includes('?s=') 
           ? `${source}${encodeURIComponent(cat.query)}` 
           : source;
         const feed = await parser.parseURL(feedUrl);
-        if (feed.items) pooledItems = [...pooledItems, ...feed.items];
+        return feed.items || [];
       } catch (e) {
-        console.error(`[Bot] Error en fuente ${source}:`, e.message);
+        return [];
       }
-    }
+    });
+
+    const results = await Promise.all(feedPromises);
+    let pooledItems = results.flat();
 
     if (pooledItems.length === 0) {
       return NextResponse.json({ message: `Sin noticias disponibles en las fuentes para: ${categoryKey}` }, { status: 200 });
@@ -305,47 +334,7 @@ export async function GET(request) {
       return NextResponse.json({ message: `No hay noticias de HOY (${todayDR}) en las fuentes consultadas para: ${categoryKey}` }, { status: 200 });
     }
 
-    // === CAPA 2: Límite diario con excepción para ÚLTIMA HORA ===
-    const startOfTodayDR = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
-    const endOfTodayDR   = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
-
-    // 2a. Check GLOBAL (Seguridad AdSense)
-    const { data: globalArticles } = await supabase
-      .from('articles')
-      .select('id')
-      .gte('publishedAt', startOfTodayDR)
-      .lte('publishedAt', endOfTodayDR);
-    
-    const totalToday = globalArticles?.length ?? 0;
-    if (totalToday >= DAILY_LIMIT_GLOBAL) {
-      return NextResponse.json({
-        message: `Límite GLOBAL diario alcanzado (${totalToday}/${DAILY_LIMIT_GLOBAL}). Protegiendo AdSense.`
-      }, { status: 200 });
-    }
-
-    // 2b. Check por Categoría
-    const { data: categoryArticles } = await supabase
-      .from('articles')
-      .select('id')
-      .eq('category', cat.slug)
-      .gte('publishedAt', startOfTodayDR)
-      .lte('publishedAt', endOfTodayDR);
-
-    const countToday = categoryArticles?.length ?? 0;
-
-    // Detectar si alguna noticia de hoy es de ÚLTIMA HORA para aumentar el cupo
-    const hasBreakingItem = todaysItems.some(item => isBreakingNews(item.title));
-    const effectiveLimit  = hasBreakingItem ? DAILY_LIMIT_BREAKING : DAILY_LIMIT_NORMAL;
-
-    if (countToday >= effectiveLimit) {
-      return NextResponse.json({
-        message: `Límite de categoría alcanzado: ya hay ${countToday} artículos de ${categoryKey} publicados hoy.`
-      }, { status: 200 });
-    }
-
-    if (hasBreakingItem) {
-      console.log(`[Bot] ⚡ ÚLTIMA HORA detectada en ${categoryKey}. Límite ampliado.`);
-    }
+    // El check de límites ya se hizo en la Capa 0 al inicio.
 
     // === CAPA 3: Deduplicación masiva — obtener todos los links y títulos ya publicados HOY ===
     // Consultamos TODAS las categorías (sin filtro de categoría) para detectar duplicados semánticos cross-categoría

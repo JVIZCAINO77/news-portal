@@ -1,6 +1,7 @@
 // components/NewsletterBox.jsx — Bloque de suscripción Imperio Diario
 'use client';
 import { useState } from 'react';
+import { trackNewsletterSignup } from '@/lib/analytics';
 
 export default function NewsletterBox({ variant = 'default' }) {
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ export default function NewsletterBox({ variant = 'default' }) {
     setTimeout(() => {
       setStatus('success');
       setEmail('');
+      trackNewsletterSignup('Newsletter Box');
     }, 1200);
   };
 
