@@ -11,6 +11,7 @@ import { formatDate, getCategoryBySlug, parseTags, SITE_CONFIG, calculateReading
 import Image from 'next/image';
 import Link from 'next/link';
 import PremiumImage from '@/components/PremiumImage';
+import ViewCounter from '@/components/ViewCounter';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 60; // Revalidar cada minuto para noticias frescas
@@ -116,6 +117,8 @@ export default async function ArticlePage({ params }) {
       <article className="bg-background min-h-screen transition-colors duration-500">
         <ReadingProgressBar title={displayTitle} />
         <SocialShare title={article.title} />
+        {/* Contador de vistas — invisible, fire & forget */}
+        <ViewCounter slug={article.slug} />
         
         <div className="max-w-6xl mx-auto px-6 py-4 md:py-8">
           
