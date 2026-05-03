@@ -22,22 +22,23 @@ export default async function AdminDashboardPage() {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // 1. Obtener conteos reales
-  const { data: allArticles, error: countError } = await supabase
+  // 1. Conteos eficientes — sin traer filas de datos a memoria
+  const { count: articleCount } = await supabase
+    .from('articles')
+    .select('*', { count: 'exact', head: true });
+
+  const { data: viewsData } = await supabase
     .from('articles')
     .select('views, category');
 
-  const articleCount = allArticles?.length || 0;
-  const totalViews = allArticles?.reduce((acc, curr) => acc + (curr.views || 0), 0) || 0;
-  
-  // Obtener categorías únicas
-  const activeCategories = new Set(allArticles?.map(a => a.category)).size;
+  const totalViews = viewsData?.reduce((acc, curr) => acc + (curr.views || 0), 0) || 0;
+  const activeCategories = new Set(viewsData?.map(a => a.category)).size;
 
   const { count: userCount } = await supabaseAdmin
     .from('profiles')
     .select('*', { count: 'exact', head: true });
 
-  // 2. Obtener estado del bot
+  // 2. Estado del bot
   const { data: botSetting } = await supabase
     .from('settings')
     .select('value')
@@ -55,15 +56,15 @@ export default async function AdminDashboardPage() {
   const gaId = SITE_CONFIG.gaId;
 
   const stats = [
-    { label: 'Artículos Totales', value: articleCount },
+    { label: 'Artículos Totales', value: articleCount || 0 },
     { label: 'Equipo Editorial', value: userCount || 0 },
     { label: 'Vistas Totales', value: totalViews.toLocaleString() },
     { label: 'Categorías Activas', value: activeCategories },
   ];
 
-  // Calcular distribución de categorías (Real)
+  // Distribución de vistas por categoría
   const catStats = {};
-  allArticles?.forEach(a => {
+  viewsData?.forEach(a => {
     catStats[a.category] = (catStats[a.category] || 0) + (a.views || 0);
   });
   const topCategories = Object.entries(catStats)

@@ -56,13 +56,16 @@ export default function EditArticlePage() {
       }
     }
     fetchArticle();
-  }, [id, supabase, router]);
+  }, [id]); // No incluir supabase ni router en deps: son estables por render
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     setSaving(true);
 
-    const slug = title.toLowerCase()
+    const slug = title
+      .toLowerCase()
+      .normalize('NFD')                    // descompone tildes: á → a + combining accent
+      .replace(/[\u0300-\u036f]/g, '')     // elimina los diacríticos
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
 

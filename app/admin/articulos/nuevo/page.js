@@ -40,7 +40,10 @@ export default function NewArticlePage() {
       .eq('id', user.id)
       .single();
 
-    const slug = title.toLowerCase()
+    const slug = title
+      .toLowerCase()
+      .normalize('NFD')                    // descompone tildes: á → a + combining accent
+      .replace(/[\u0300-\u036f]/g, '')     // elimina los diacríticos (tildes, cedillas)
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)+/g, '');
     
