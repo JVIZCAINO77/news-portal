@@ -84,15 +84,15 @@ export default function MobileMenu({ isOpen, onClose, tickerItems = [] }) {
 
           {/* Sección de Servicio en Móvil */}
           <div className="mt-12 px-6 pt-12 border-t border-gray-100">
-             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 mb-6 italic">Utilidades</p>
+             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 mb-6 italic">Edición Digital</p>
              <div className="bg-slate-50 p-6 rounded-sm space-y-4">
                 <div className="flex justify-between items-center">
-                   <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Dólar USD</span>
-                   <span className="text-xs font-black text-black">C: <span className="text-red-600">59.85</span> / V: <span className="text-red-600">61.20</span></span>
+                   <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">RSS Feed</span>
+                   <a href="/feed.xml" className="text-xs font-black text-red-600 hover:underline">Suscribirse</a>
                 </div>
                 <div className="flex justify-between items-center pt-4 border-t border-gray-200">
-                   <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Santo Domingo</span>
-                   <span className="text-xs font-black text-black">29°C · Soleado</span>
+                   <span className="text-[11px] font-black uppercase tracking-widest text-slate-400">Newsletter</span>
+                   <a href="/newsletter" onClick={onClose} className="text-xs font-black text-red-600 hover:underline">Unirse</a>
                 </div>
              </div>
           </div>
