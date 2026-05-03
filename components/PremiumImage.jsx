@@ -39,7 +39,7 @@ export default function PremiumImage({
   
   // Optimizamos la URL de origen
   const optimizedSrc = optimizeImageUrl(src || currentFallback, width);
-  const tinyBlurSrc = optimizeImageUrl(src || currentFallback, 40); // Miniatura para el blur de fondo
+  const tinyBlurSrc = optimizeImageUrl(src || currentFallback, 40);
   
   // Forzamos HTTPS
   const safeSrc = optimizedSrc.startsWith('http://') ? optimizedSrc.replace('http://', 'https://') : optimizedSrc;
@@ -53,12 +53,18 @@ export default function PremiumImage({
   const useNextImage = shouldOptimize(safeSrc);
   const isCloudinary = safeSrc.includes('cloudinary.com');
 
-  // Si no es optimizable, usamos proxy (excepto si ya falló el proxy o la imagen)
-  const displaySrc = (isError || timedOut) 
-    ? currentFallback 
-    : (!useNextImage && !proxyFailed && safeSrc?.startsWith('http') && !safeSrc.includes('pollinations.ai')) 
-      ? `/api/proxy-image?url=${encodeURIComponent(safeSrc)}` 
-      : (safeSrc || currentFallback);
+  // Cascada de fuentes:
+  // 1º) Cloudinary / Unsplash → next/image optimizado
+  // 2º) Cualquier URL externa → nuestro proxy (/api/proxy-image)
+  // 3º) Si el proxy falló → URL original directa (el browser sí puede cargarla)
+  // 4º) Si todo falló → fallback estético por categoría
+  const displaySrc = (isError || timedOut)
+    ? currentFallback
+    : proxyFailed && safeSrc?.startsWith('http') && !safeSrc.includes('pollinations.ai')
+      ? safeSrc  // Intento 3: URL original directa en el browser
+      : !useNextImage && safeSrc?.startsWith('http') && !safeSrc.includes('pollinations.ai')
+        ? `/api/proxy-image?url=${encodeURIComponent(safeSrc)}` // Intento 2: proxy
+        : (safeSrc || currentFallback); // Intento 1: Cloudinary/Unsplash directo
 
   // Reset all state when the image source changes (e.g. navigating between articles)
   useEffect(() => {
