@@ -5,7 +5,9 @@ export const runtime = 'edge'; // Reducir CPU: Edge Runtime es más ligero que N
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get('limit') || '10');
+  // Máximo 50 — prevenimos abuso tipo ?limit=9999
+  const rawLimit = parseInt(searchParams.get('limit') || '10');
+  const limit = isNaN(rawLimit) ? 10 : Math.min(Math.max(rawLimit, 1), 50);
 
   try {
     const articles = await getLatestArticles(limit);

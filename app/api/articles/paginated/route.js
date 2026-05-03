@@ -6,8 +6,11 @@ export const runtime = 'edge';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get('limit') || '10');
-  const offset = parseInt(searchParams.get('offset') || '0');
+  // Validación: máx 50 artículos por página, offset no puede ser negativo ni absurdo
+  const rawLimit  = parseInt(searchParams.get('limit')  || '10');
+  const rawOffset = parseInt(searchParams.get('offset') || '0');
+  const limit  = isNaN(rawLimit)  ? 10 : Math.min(Math.max(rawLimit,  1), 50);
+  const offset = isNaN(rawOffset) ?  0 : Math.min(Math.max(rawOffset, 0), 10000);
 
   try {
     const articles = await getArticlesPaginated(limit, offset);

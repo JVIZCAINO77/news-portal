@@ -1,7 +1,7 @@
 // app/page.js — Portada Imperio Público — Diseño Periódico Clásico
 import Link from 'next/link';
 import { getDailyTopArticles, getLatestArticles } from '@/lib/serverData';
-import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
+import { SITE_CONFIG, CATEGORIES, formatDate } from '@/lib/data';
 import PremiumImage from '@/components/PremiumImage';
 import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
@@ -221,15 +221,6 @@ export default async function HomePage() {
 
       {/* Newsletter - Full Width */}
       <NewsletterBox />
-
-      <section style={{ backgroundColor: '#111827' }}>
-         {/* Espacio reservado para pie de página o créditos adicionales */}
-      </section>
     </div>
   );
-}
-
-function formatDate(dateStr) {
-  if (!dateStr) return '';
-  return new Date(dateStr).toLocaleDateString('es-DO', { day: 'numeric', month: 'short', year: 'numeric' });
 }
