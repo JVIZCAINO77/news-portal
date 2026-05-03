@@ -1,7 +1,8 @@
 import { getLatestArticles } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
 
-export const dynamic = 'force-dynamic';
+// RSS se actualiza cada 5 min — no necesita ser completamente dinámico
+export const revalidate = 300;
 
 function escapeXml(unsafe) {
   if (!unsafe) return '';

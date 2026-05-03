@@ -2,7 +2,14 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+
+// Misma lógica que PremiumImage: Cloudinary directo, resto por proxy
+const getDisplaySrc = (url) => {
+  if (!url) return null;
+  if (url.includes('cloudinary.com') || url.includes('unsplash.com')) return url;
+  if (url.startsWith('http')) return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+  return url;
+};
 
 export default function LoadMore({ initialOffset = 30 }) {
   const [articles, setArticles] = useState([]);
@@ -54,13 +61,13 @@ export default function LoadMore({ initialOffset = 30 }) {
                 <div className="relative aspect-[16/9] overflow-hidden mb-4 bg-slate-900 border border-gray-100 shadow-md rounded-sm flex items-center justify-center group/img">
                   <div className="absolute inset-0 z-0">
                     <img 
-                      src={art.image} 
+                      src={getDisplaySrc(art.image)} 
                       className="w-full h-full object-cover blur-2xl opacity-40" 
                       alt="" 
                     />
                   </div>
                   <img 
-                    src={art.image} 
+                    src={getDisplaySrc(art.image)} 
                     alt={art.title} 
                     className="relative z-10 w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-110" 
                   />

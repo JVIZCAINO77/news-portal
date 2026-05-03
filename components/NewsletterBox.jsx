@@ -7,17 +7,25 @@ export default function NewsletterBox({ variant = 'default' }) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // idle, loading, success
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email) return;
     setStatus('loading');
     
-    // Simulación de éxito
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error('Error al procesar');
       setStatus('success');
       setEmail('');
       trackNewsletterSignup('Newsletter Box');
-    }, 1200);
+    } catch (_) {
+      setStatus('idle');
+      alert('Hubo un problema. Intenta de nuevo.');
+    }
   };
 
   if (status === 'success') {
