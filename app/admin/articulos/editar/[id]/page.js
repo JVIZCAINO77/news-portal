@@ -31,12 +31,16 @@ export default function EditArticlePage() {
   const supabase = createClient();
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchArticle() {
       const { data, error } = await supabase
         .from('articles')
         .select('*')
         .eq('id', id)
         .single();
+
+      if (controller.signal.aborted) return;
 
       if (error) {
         alert('Error al cargar el artículo');
@@ -56,7 +60,9 @@ export default function EditArticlePage() {
       }
     }
     fetchArticle();
-  }, [id]); // No incluir supabase ni router en deps: son estables por render
+
+    return () => controller.abort();
+  }, [id]); // supabase y router son estables por render
 
   const handleUpdate = async (e) => {
     e.preventDefault();

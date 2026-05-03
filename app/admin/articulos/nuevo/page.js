@@ -26,13 +26,15 @@ export default function NewArticlePage() {
   const [isPreview, setIsPreview] = useState(false);
   
   const router = useRouter();
-  const supabase = createClient();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const supabase = createClient(); // Estable: usa vars de entorno, no re-crea conexión
 
   const handlePublish = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { alert('Sesión expirada. Recarga la página.'); setLoading(false); return; }
     
     const { data: profile } = await supabase
       .from('profiles')
