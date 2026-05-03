@@ -1,38 +1,33 @@
 // components/AdUnit.jsx — Espacio publicitario con reserva de espacio (CLS Prevention)
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { SITE_CONFIG, ADS_SLOTS } from '@/lib/data';
 
 export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
-  const [adLoaded, setAdLoaded] = useState(false);
-
   // Mapeo dinámico: si el slot pasado es una llave de ADS_SLOTS, usar su valor.
   const finalSlot = ADS_SLOTS[slot] || slot;
 
-  // Si los anuncios globales están apagados, esconder silenciosamente este componente
-  if (!SITE_CONFIG.showAds) return null;
-
-  // Dimensiones estándar de anuncios
-
-  const dimensions = {
-    leaderboard: { minHeight: '90px', width: '100%', label: '728 x 90' },
-    rectangle: { minHeight: '250px', width: '100%', label: '300 x 250' },
-    'in-article': { minHeight: '120px', width: '100%', label: 'Native / In-Article' },
-  };
-
-  const style = dimensions[format] || dimensions.rectangle;
-
   useEffect(() => {
-    // Simulación de carga de AdSense
+    // Si los anuncios están apagados, no iniciamos AdSense
+    if (!SITE_CONFIG.showAds) return;
     try {
       if (window.adsbygoogle) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
-        setAdLoaded(true);
       }
     } catch (e) {
       console.error('AdSense Error:', e);
     }
   }, [slot]);
+
+  // Guardia DESPUÉS de todos los hooks (React Rules of Hooks)
+  if (!SITE_CONFIG.showAds) return null;
+
+  const dimensions = {
+    leaderboard:  { minHeight: '90px',  label: '728 x 90' },
+    rectangle:    { minHeight: '250px', label: '300 x 250' },
+    'in-article': { minHeight: '120px', label: 'Native / In-Article' },
+  };
+  const style = dimensions[format] || dimensions.rectangle;
 
   return (
     <div className={`ad-container my-8 ${className}`} style={{ minHeight: style.minHeight }}>

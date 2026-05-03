@@ -123,13 +123,6 @@ export default function SocialShare({ url, title }) {
          </div>
       </div>
 
-      <style jsx>{`
-        .vertical-text {
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-          transform: rotate(180deg);
-        }
-      `}</style>
     </>
   );
 }
