@@ -2,7 +2,7 @@
 import { getLatestArticles } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 1800; // ISR: regenerar cada 30 minutos (Google News indexa las últimas 48h)
 
 function escapeXml(str) {
   if (!str) return '';
