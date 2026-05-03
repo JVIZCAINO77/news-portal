@@ -27,12 +27,14 @@ export default async function AdminDashboardPage() {
     .from('articles')
     .select('*', { count: 'exact', head: true });
 
+  // Suma de vistas por categoría — solo los campos estrictamente necesarios
   const { data: viewsData } = await supabase
     .from('articles')
-    .select('views, category');
+    .select('views, category')
+    .not('views', 'is', null);
 
   const totalViews = viewsData?.reduce((acc, curr) => acc + (curr.views || 0), 0) || 0;
-  const activeCategories = new Set(viewsData?.map(a => a.category)).size;
+  const activeCategories = new Set(viewsData?.map(a => a.category).filter(Boolean)).size;
 
   const { count: userCount } = await supabaseAdmin
     .from('profiles')
@@ -58,17 +60,17 @@ export default async function AdminDashboardPage() {
   const stats = [
     { label: 'Artículos Totales', value: articleCount || 0 },
     { label: 'Equipo Editorial', value: userCount || 0 },
-    { label: 'Vistas Totales', value: totalViews.toLocaleString() },
+    { label: 'Vistas Totales', value: totalViews.toLocaleString('es-DO') },
     { label: 'Categorías Activas', value: activeCategories },
   ];
 
-  // Distribución de vistas por categoría
+  // Distribución de vistas por categoría — Top 3
   const catStats = {};
   viewsData?.forEach(a => {
-    catStats[a.category] = (catStats[a.category] || 0) + (a.views || 0);
+    if (a.category) catStats[a.category] = (catStats[a.category] || 0) + (a.views || 0);
   });
   const topCategories = Object.entries(catStats)
-    .map(([name, count]) => ({ name: name.toUpperCase(), count }))
+    .map(([name, count]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
 
