@@ -7,9 +7,12 @@ export default function BreakingNews() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchBreaking = async () => {
       try {
-        const res = await fetch('/api/articles/latest?limit=1');
+        const res = await fetch('/api/articles/latest?limit=1', { signal: controller.signal });
+        if (!res.ok) return;
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           const latest = data[0];
@@ -24,11 +27,14 @@ export default function BreakingNews() {
           }
         }
       } catch (err) {
-        console.error('Breaking news fetch error:', err);
+        if (err.name !== 'AbortError') {
+          console.error('Breaking news fetch error:', err);
+        }
       }
     };
 
     fetchBreaking();
+    return () => controller.abort();
   }, []);
 
   if (!isVisible || !news) return null;

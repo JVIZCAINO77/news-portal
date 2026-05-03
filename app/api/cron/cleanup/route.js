@@ -30,21 +30,23 @@ export async function GET(request) {
       timestamp: new Date().toISOString()
     };
 
-    // 1. Limpieza de artículos "relleno" antiguos
-    // Borramos artículos de más de 180 días que NO sean destacados ni tendencia
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setDate(sixMonthsAgo.getDate() - 180);
+    // 1. Limpieza SEGURA: solo artículos sin imagen, sin vistas, y sin destacar (probable relleno/error)
+    // NUNCA borramos artículos con imagen o con vistas — esos tienen valor editorial
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     
     const { count: deletedArticles, error: err1 } = await supabase
       .from('articles')
       .delete({ count: 'exact' })
-      .lt('publishedAt', sixMonthsAgo.toISOString())
+      .lt('publishedAt', ninetyDaysAgo.toISOString())
       .eq('featured', false)
-      .eq('trending', false);
+      .eq('trending', false)
+      .is('image', null)     // Sin imagen = contenido de baja calidad
+      .eq('views', 0);       // Sin vistas = nadie lo ha leído
 
     if (!err1) report.articlesDeleted = deletedArticles || 0;
 
-    // 2. Limpieza de borradores huérfanos o muy antiguos (> 30 días)
+    // 2. Limpieza de borradores huérfanos o muy antiguos (>30 días sin publicar)
     const oneMonthAgo = new Date();
     oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
 
