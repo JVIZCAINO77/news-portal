@@ -31,7 +31,7 @@ export default async function AdminLayout({ children }) {
 
     const { data: profileData } = await supabaseAdmin
       .from('profiles')
-      .select('*')
+      .select('role, full_name, avatar_url')
       .eq('id', user.id)
       .single();
 

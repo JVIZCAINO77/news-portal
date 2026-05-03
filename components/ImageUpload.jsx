@@ -90,9 +90,35 @@ export default function ImageUpload({ value, onChange, label = "Imagen Destacada
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={async (e) => {
+            const url = e.target.value.trim();
+            // Solo procesar si es una URL externa (no Cloudinary ni interna)
+            if (!url || url.includes('cloudinary.com') || url.startsWith('/')) return;
+            if (!url.startsWith('http')) return;
+            setLoading(true);
+            try {
+              const res = await fetch('/api/internalize-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url }),
+              });
+              if (res.ok) {
+                const { cloudinaryUrl } = await res.json();
+                if (cloudinaryUrl) onChange(cloudinaryUrl);
+              }
+              // Si falla, mantenemos la URL original (sin bloquear al editor)
+            } catch (_) {
+              // Silently keep the original URL
+            } finally {
+              setLoading(false);
+            }
+          }}
           placeholder="https://ejemplo.com/imagen.jpg"
           className="w-full px-4 py-3 bg-slate-50 border border-gray-100 font-bold text-[10px] outline-none focus:border-red-600 transition-all"
         />
+        <p className="mt-1 text-[8px] text-slate-300 uppercase tracking-widest font-bold">
+          Las URLs se internalizan a Cloudinary automáticamente al pegar.
+        </p>
       </div>
 
       {/* Botón para insertar en el cuerpo del artículo */}

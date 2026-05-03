@@ -2,7 +2,8 @@
 import { getAllArticles } from '@/lib/serverData';
 import { CATEGORIES, SITE_CONFIG } from '@/lib/data';
 
-export const dynamic = 'force-dynamic';
+// Google rastrea el sitemap cada pocas horas — ISR 1h es más que suficiente
+export const revalidate = 3600;
 
 export default async function sitemap() {
   // Rutas estáticas base
