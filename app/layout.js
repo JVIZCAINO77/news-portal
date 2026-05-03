@@ -63,6 +63,10 @@ export const metadata = {
     statusBarStyle: 'default',
     title: SITE_CONFIG.name,
   },
+  other: {
+    // Verificación de cuenta Google AdSense
+    'google-adsense-account': SITE_CONFIG.publisherId,
+  },
 };
 
 export const viewport = {
@@ -81,14 +85,6 @@ export default function RootLayout({ children }) {
         {/* RSS Feed autodiscovery */}
         <link rel="alternate" type="application/rss+xml" title={`${SITE_CONFIG.name} — Últimas Noticias`} href="/feed.xml" />
         
-        {/* Google AdSense Script */}
-        <Script 
-          async 
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE_CONFIG.adsenseId}`}
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
-        <meta name="google-adsense-account" content={SITE_CONFIG.publisherId} />
         {/* Google Analytics 4 */}
         <Suspense fallback={null}>
           <GoogleAnalytics gaId={SITE_CONFIG.gaId} />
@@ -103,6 +99,13 @@ export default function RootLayout({ children }) {
         <Footer />
         <CookieConsent />
         <Analytics />
+        {/* Google AdSense — fuera de <head> para que strategy=lazyOnload funcione correctamente */}
+        <Script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE_CONFIG.adsenseId}`}
+          crossOrigin="anonymous"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );

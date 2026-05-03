@@ -41,18 +41,25 @@ export default function Header() {
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
 
-    const fetchTicker = async () => {
+    const fetchTicker = async (signal) => {
       try {
-        const res = await fetch('/api/articles/latest?limit=10');
+        const res = await fetch('/api/articles/latest?limit=10', { signal });
+        if (!res.ok) return;
         const data = await res.json();
         setTickerItems(data);
       } catch (err) {
-        console.error('Ticker fetch error:', err);
+        if (err.name !== 'AbortError') {
+          console.error('Ticker fetch error:', err);
+        }
       }
     };
-    fetchTicker();
+    const controller = new AbortController();
+    fetchTicker(controller.signal);
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      controller.abort(); // cancelar el fetch si el componente se desmonta
+    };
   }, []);
 
   const handleSearch = (e) => {
