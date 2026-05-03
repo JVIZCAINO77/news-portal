@@ -620,24 +620,20 @@ Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin t
       console.warn('[Scraper Warning] No se pudo extraer imagen real:', err.message);
     }
 
-    // MEJORA: Generación de Imagen por IA como Fallback si no se encontró imagen real
-    if (!finalImageUrl) {
-      console.log(`[Bot] Generando imagen por IA como fallback para: ${articleData.title}`);
-      const topicTags = Array.isArray(articleData.tags) ? articleData.tags.join(', ') : '';
-      const visualPrompt = `high-end editorial news photography for an article titled "${articleData.title}". Subject: ${topicTags}. Professional journalistic style, cinematic lighting, 8k resolution, realistic, wide shot, 16:9 aspect ratio.`;
-      finalImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(visualPrompt)}?width=1280&height=720&nologo=true&seed=${Date.now()}`;
-    }
-
+    // Intentar internalizar la imagen real a Cloudinary
     if (finalImageUrl) {
       console.log(`[Bot] Internalizando imagen: ${finalImageUrl.slice(0, 60)}...`);
       finalImageUrl = await internalizeImage(finalImageUrl);
+    }
 
-      // Guardia: si internalizeImage falló y la URL sigue siendo externa,
-      // la mantenemos. Gracias a nuestra mejora en PremiumImage.jsx, 
-      // el frontend podrá mostrarla usando <img> nativo sin errores de dominio.
-      if (finalImageUrl && !finalImageUrl.includes('cloudinary.com')) {
-        console.warn('[Bot] ⚠️ internalizeImage falló — se usará la URL original como respaldo');
-      }
+    // Si no hay imagen (no se encontró, el dominio bloquea, o el upload falló) → imagen de IA
+    if (!finalImageUrl) {
+      console.log(`[Bot] Generando imagen por IA para: ${articleData.title}`);
+      const topicTags = Array.isArray(articleData.tags) ? articleData.tags.join(', ') : '';
+      const visualPrompt = `high-end editorial news photography for an article titled "${articleData.title}". Subject: ${topicTags}. Professional journalistic style, cinematic lighting, 8k resolution, realistic, wide shot, 16:9 aspect ratio.`;
+      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(visualPrompt)}?width=1280&height=720&nologo=true&seed=${Date.now()}`;
+      // Subir la imagen de IA a Cloudinary también (Pollinations no tiene hotlink protection)
+      finalImageUrl = await internalizeImage(pollinationsUrl) || pollinationsUrl;
     }
 
     let sourceName = 'Fuente Externa';
