@@ -4,163 +4,162 @@ import { useState, useEffect, useRef } from 'react';
 import { optimizeImageUrl } from '@/lib/data';
 
 /**
- * PremiumImage — Componente de imagen ultra-robusto y optimizado para velocidad.
- * PRIORIDAD: Carga instantánea y fidelidad visual.
+ * PremiumImage — Componente de imagen ultra-robusto para Imperio Público.
+ * Estrategia de carga:
+ *   1. Cloudinary/Unsplash → next/image optimizado (CDN instantáneo)
+ *   2. Cualquier URL externa → /api/proxy-image (bypassea hotlink protection)
+ *   3. Si el proxy falla → imagen de fallback de categoría (Unsplash, siempre disponible)
+ * 
+ * NUNCA muestra el placeholder roto de "imagen no encontrada".
  */
-export default function PremiumImage({ 
-  src, 
-  alt, 
-  category = "",
-  className = "", 
-  containerClassName = "", 
+
+const FALLBACKS = {
+  deportes:        'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200&auto=format&fit=crop',
+  economia:        'https://images.unsplash.com/photo-1611974714851-eb60516746e3?q=80&w=1200&auto=format&fit=crop',
+  internacional:   'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?q=80&w=1200&auto=format&fit=crop',
+  entretenimiento: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1200&auto=format&fit=crop',
+  sucesos:         'https://images.unsplash.com/photo-1563206767-5b18f218e7de?q=80&w=1200&auto=format&fit=crop',
+  tecnologia:      'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?q=80&w=1200&auto=format&fit=crop',
+  salud:           'https://images.unsplash.com/photo-1505751172107-573225a91200?q=80&w=1200&auto=format&fit=crop',
+  cultura:         'https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=1200&auto=format&fit=crop',
+  politica:        'https://images.unsplash.com/photo-1541872703-74c5e44368f9?q=80&w=1200&auto=format&fit=crop',
+  noticias:        'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop',
+  opinion:         'https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop',
+  tendencias:      'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?q=80&w=1200&auto=format&fit=crop',
+  default:         'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop',
+};
+
+function getFallback(category) {
+  return FALLBACKS[(category || '').toLowerCase()] || FALLBACKS.default;
+}
+
+/**
+ * Determina si una URL debe ir directamente a next/image (CDN propio)
+ * o via nuestro proxy de imágenes externas.
+ */
+function resolveDisplaySrc(src, category, width) {
+  if (!src) return getFallback(category);
+
+  const optimized = optimizeImageUrl(src, width);
+  const safe = optimized.startsWith('http://') ? optimized.replace('http://', 'https://') : optimized;
+
+  // Cloudinary y Unsplash: CDN directo, siempre disponible
+  if (safe.includes('cloudinary.com') || safe.includes('unsplash.com')) {
+    return { url: safe, mode: 'next-image' };
+  }
+
+  // Pollinations.ai: CDN de IA, también accesible directamente
+  if (safe.includes('pollinations.ai') || safe.includes('image.pollinations.ai')) {
+    return { url: safe, mode: 'img' };
+  }
+
+  // Cualquier otra URL externa → nuestro proxy
+  if (safe.startsWith('http')) {
+    return { url: `/api/proxy-image?url=${encodeURIComponent(safe)}`, mode: 'img' };
+  }
+
+  // URLs relativas o locales
+  return { url: safe, mode: 'img' };
+}
+
+export default function PremiumImage({
+  src,
+  alt,
+  category = '',
+  className = '',
+  containerClassName = '',
   priority = false,
-  width = 1200
+  width = 1200,
 }) {
-  const [isError, setIsError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [timedOut, setTimedOut] = useState(false);
-  const [proxyFailed, setProxyFailed] = useState(false);
+  const fallback = getFallback(category);
+  const resolved = resolveDisplaySrc(src, category, width);
+
+  // Estado: null = cargando, true = cargado, false = error → usar fallback
+  const [status, setStatus] = useState(null);
+  const [currentSrc, setCurrentSrc] = useState(resolved.url);
+  const [mode, setMode] = useState(resolved.mode);
   const timeoutRef = useRef(null);
 
-  // Fallbacks estéticos
-  const FALLBACKS = {
-    deportes: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1000&auto=format&fit=crop',
-    economia: 'https://images.unsplash.com/photo-1611974714851-eb60516746e3?q=80&w=1000&auto=format&fit=crop',
-    internacional: 'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?q=80&w=1000&auto=format&fit=crop',
-    entretenimiento: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1000&auto=format&fit=crop',
-    sucesos: 'https://images.unsplash.com/photo-1563206767-5b18f218e7de?q=80&w=1000&auto=format&fit=crop',
-    tecnologia: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?q=80&w=1000&auto=format&fit=crop',
-    salud: 'https://images.unsplash.com/photo-1505751172107-573225a91200?q=80&w=1000&auto=format&fit=crop',
-    cultura: 'https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=1000&auto=format&fit=crop',
-    default: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1000&auto=format&fit=crop'
+  // Reset cuando cambia el src (navegación entre artículos)
+  useEffect(() => {
+    const r = resolveDisplaySrc(src, category, width);
+    setCurrentSrc(r.url);
+    setMode(r.mode);
+    setStatus(null);
+  }, [src]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Timeout de seguridad: si la imagen tarda más de 12s → mostrar fallback de categoría
+  useEffect(() => {
+    if (status !== null) return; // ya cargó o ya falló
+    timeoutRef.current = setTimeout(() => {
+      setCurrentSrc(fallback);
+      setMode('img');
+      setStatus(null); // reinicia para que el fallback intente cargar
+    }, 12000);
+    return () => clearTimeout(timeoutRef.current);
+  }, [status, fallback]);
+
+  const handleLoad = () => {
+    clearTimeout(timeoutRef.current);
+    setStatus(true);
   };
 
-  const currentFallback = FALLBACKS[category.toLowerCase()] || FALLBACKS.default;
-  
-  // Optimizamos la URL de origen
-  const optimizedSrc = optimizeImageUrl(src || currentFallback, width);
-  const tinyBlurSrc = optimizeImageUrl(src || currentFallback, 40);
-  
-  // Forzamos HTTPS
-  const safeSrc = optimizedSrc.startsWith('http://') ? optimizedSrc.replace('http://', 'https://') : optimizedSrc;
-  
-  // Solo optimizamos con next/image dominios controlados
-  const shouldOptimize = (url) => {
-    if (!url) return false;
-    return url.includes('cloudinary.com') || url.includes('unsplash.com');
-  };
-
-  const useNextImage = shouldOptimize(safeSrc);
-  const isCloudinary = safeSrc.includes('cloudinary.com');
-
-  // Cascada de fuentes:
-  // 1º) Cloudinary / Unsplash → next/image optimizado
-  // 2º) Cualquier URL externa → nuestro proxy (/api/proxy-image)
-  // 3º) Si el proxy falló → URL original directa (el browser sí puede cargarla)
-  // 4º) Si todo falló → fallback estético por categoría
-  const displaySrc = (isError || timedOut)
-    ? currentFallback
-    : proxyFailed && safeSrc?.startsWith('http') && !safeSrc.includes('pollinations.ai')
-      ? safeSrc  // Intento 3: URL original directa en el browser
-      : !useNextImage && safeSrc?.startsWith('http') && !safeSrc.includes('pollinations.ai')
-        ? `/api/proxy-image?url=${encodeURIComponent(safeSrc)}` // Intento 2: proxy
-        : (safeSrc || currentFallback); // Intento 1: Cloudinary/Unsplash directo
-
-  // Reset all state when the image source changes (e.g. navigating between articles)
-  useEffect(() => {
-    setIsError(false);
-    setIsLoaded(false);
-    setTimedOut(false);
-    setProxyFailed(false);
-  }, [src]);
-
-  // Timeout de seguridad reducido a 8s para mejor UX
-  useEffect(() => {
-    if (!isLoaded && !isError) {
-      timeoutRef.current = setTimeout(() => {
-        if (!isLoaded) {
-          setTimedOut(true);
-        }
-      }, 8000);
+  const handleError = () => {
+    clearTimeout(timeoutRef.current);
+    // Si el proxy falló, intentamos directamente con la URL original
+    if (currentSrc.includes('/api/proxy-image')) {
+      const originalUrl = new URL(currentSrc, 'https://x.com').searchParams.get('url');
+      if (originalUrl) {
+        setCurrentSrc(originalUrl);
+        setMode('img');
+        setStatus(null);
+        return;
+      }
     }
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    };
-  }, [isLoaded, isError]);
+    // Si ya estamos en el fallback de categoría y aún falla → no hacer nada más
+    if (currentSrc === fallback) {
+      setStatus(true); // igual mostramos lo que hay
+      return;
+    }
+    // En cualquier otro caso → fallback de categoría (Unsplash, siempre disponible)
+    setCurrentSrc(fallback);
+    setMode('img');
+    setStatus(null);
+  };
+
+  const isCloudinary = currentSrc.includes('cloudinary.com');
 
   return (
-    <div className={`relative overflow-hidden bg-gray-50 ${containerClassName}`}>
-      
-      {/* 1. Blur Background (Carga ultra-rápida con tiny miniatura) */}
-      {!isError && !timedOut && (
-        <div className="absolute inset-0 z-0 select-none pointer-events-none opacity-60 blur-3xl scale-110">
-          <img 
-            src={tinyBlurSrc} 
-            alt="" 
-            className="w-full h-full object-cover" 
-            onError={(e) => e.target.style.display = 'none'}
-          />
-        </div>
+    <div className={`relative overflow-hidden bg-gray-100 ${containerClassName}`}>
+
+      {/* Skeleton animado mientras carga */}
+      {status === null && (
+        <div className="absolute inset-0 z-[1] bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse" />
       )}
 
-      {/* 2. Skeleton animado (Solo visible si el blur tarda) */}
-      {!isLoaded && !isError && !timedOut && (
-        <div className="absolute inset-0 z-[1] bg-gray-200/50 animate-pulse flex items-center justify-center">
-           <div className="w-8 h-8 border-2 border-red-500/20 border-t-red-600 rounded-full animate-spin"></div>
-        </div>
-      )}
-
-      {/* 3. Imagen Principal o Fallback Premium */}
-      {(isError || timedOut) ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-50 border border-gray-100">
-           <img 
-            src={currentFallback} 
-            alt="Fallback" 
-            className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale blur-[2px]" 
-           />
-           <div className="relative z-20 flex flex-col items-center justify-center p-6 text-center w-full h-full">
-              <div className="w-10 h-10 mb-4 rounded-full bg-gray-100 flex items-center justify-center border border-gray-200 shadow-sm">
-                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <span className="text-[8px] font-black uppercase tracking-[0.4em] text-red-600/60 mb-2 font-sans">Imperio Público</span>
-              <h3 className="text-gray-900/60 font-serif italic text-[11px] leading-snug max-w-[180px] line-clamp-2">{alt}</h3>
-           </div>
-        </div>
+      {/* Imagen principal */}
+      {mode === 'next-image' ? (
+        <Image
+          src={currentSrc}
+          alt={alt || 'Noticia'}
+          fill
+          priority={priority}
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
+          onLoad={handleLoad}
+          onError={handleError}
+          unoptimized={isCloudinary}
+        />
       ) : (
-        <>
-          {useNextImage ? (
-            <Image 
-              src={displaySrc} 
-              alt={alt || "Noticia"} 
-              fill
-              priority={priority}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className={`absolute inset-0 w-full h-full object-contain transition-all duration-700 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} ${className}`} 
-              onLoad={() => setIsLoaded(true)}
-              onError={() => setIsError(true)}
-              unoptimized={isCloudinary}
-            />
-          ) : (
-            <img 
-              src={displaySrc} 
-              alt={alt || "Noticia"} 
-              className={`absolute inset-0 w-full h-full object-contain transition-all duration-700 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'} ${className}`} 
-              onLoad={() => setIsLoaded(true)}
-              onError={() => {
-                if (!useNextImage && !proxyFailed && !isError) {
-                  setProxyFailed(true);
-                } else {
-                  setIsError(true);
-                }
-              }}
-              loading={priority ? "eager" : "lazy"}
-            />
-          )}
-        </>
+        <img
+          src={currentSrc}
+          alt={alt || 'Noticia'}
+          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
+          onLoad={handleLoad}
+          onError={handleError}
+          loading={priority ? 'eager' : 'lazy'}
+        />
       )}
     </div>
   );
 }
-
