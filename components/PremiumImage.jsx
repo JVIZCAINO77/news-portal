@@ -109,19 +109,22 @@ export default function PremiumImage({
 
   const handleError = () => {
     clearTimeout(timeoutRef.current);
+    const safeCurrent = currentSrc || '';
     // Si el proxy falló, intentamos directamente con la URL original
-    if (currentSrc.includes('/api/proxy-image')) {
-      const originalUrl = new URL(currentSrc, 'https://x.com').searchParams.get('url');
-      if (originalUrl) {
-        setCurrentSrc(originalUrl);
-        setMode('img');
-        setStatus(null);
-        return;
-      }
+    if (safeCurrent.includes('/api/proxy-image')) {
+      try {
+        const originalUrl = new URL(safeCurrent, 'https://x.com').searchParams.get('url');
+        if (originalUrl) {
+          setCurrentSrc(originalUrl);
+          setMode('img');
+          setStatus(null);
+          return;
+        }
+      } catch (_) { /* ignore */ }
     }
     // Si ya estamos en el fallback de categoría y aún falla → no hacer nada más
-    if (currentSrc === fallback) {
-      setStatus(true); // igual mostramos lo que hay
+    if (safeCurrent === fallback) {
+      setStatus(true);
       return;
     }
     // En cualquier otro caso → fallback de categoría (Unsplash, siempre disponible)
@@ -130,7 +133,7 @@ export default function PremiumImage({
     setStatus(null);
   };
 
-  const isCloudinary = currentSrc.includes('cloudinary.com');
+  const isCloudinary = (currentSrc || '').includes('cloudinary.com');
 
   return (
     <div className={`relative overflow-hidden bg-gray-100 ${containerClassName}`}>
@@ -155,7 +158,7 @@ export default function PremiumImage({
         />
       ) : (
         <img
-          src={currentSrc}
+          src={currentSrc || fallback}
           alt={alt || 'Noticia'}
           className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
           onLoad={handleLoad}
