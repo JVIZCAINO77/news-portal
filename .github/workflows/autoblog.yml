@@ -14,7 +14,7 @@ jobs:
       - name: Ejecutar Agente Redactor (Vía API Endpoint para todas las categorías)
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
-          NEXT_PUBLIC_SITE_URL: "https://news-portal-rosy-kappa.vercel.app" # Reemplazar si usan otro dominio primario
+          NEXT_PUBLIC_SITE_URL: "https://www.imperiopublico.com"
         run: |
           CATEGORIES="noticias entretenimiento deportes tecnologia economia salud opinion cultura sucesos tendencias internacional politica"
           for cat in $CATEGORIES; do
@@ -34,3 +34,21 @@ jobs:
             echo "⏱️ Pausando 65 segundos (anti rate-limit de Google Gemini)..."
             sleep 65
           done
+
+      - name: Auto-Reparación de Imágenes (Mantenimiento)
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          NEXT_PUBLIC_SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "====================================="
+          echo "⚙️ Iniciando Fase de Auto-Reparación"
+          echo "====================================="
+          
+          # Llamar al endpoint de reparación (lote de 20 imágenes)
+          REPAIR_STATUS=$(curl -s -X POST "$NEXT_PUBLIC_SITE_URL/api/admin/repair-images?secret=$CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"limit": 20}')
+          
+          echo "📊 Resultado del Mantenimiento:"
+          echo "$REPAIR_STATUS"
+
