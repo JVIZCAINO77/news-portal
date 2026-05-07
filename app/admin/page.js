@@ -8,6 +8,7 @@ import Link from 'next/link';
 import AutomationToggle from '@/components/AutomationToggle';
 import AgentsDashboard from '@/components/AgentsDashboard';
 import TrafficDashboard from '@/components/TrafficDashboard';
+import ImageRepairButton from '@/components/ImageRepairButton';
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -120,6 +121,11 @@ export default async function AdminDashboardPage() {
 
       {/* Panel de Agentes — solo admin */}
       {isAdmin && <AgentsDashboard botEnabled={botSetting?.value === true} />}
+
+      {/* Reparación de Imágenes — solo admin */}
+      {isAdmin && (
+        <ImageRepairButton cronSecret={process.env.CRON_SECRET} />
+      )}
 
       {/* Quick Actions */}
       <div className={`grid grid-cols-1 gap-8 ${isAdmin ? 'md:grid-cols-3' : 'md:grid-cols-1'}`}>
