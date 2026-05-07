@@ -38,9 +38,12 @@ function getFallback(category) {
  * o via nuestro proxy de imágenes externas.
  */
 function resolveDisplaySrc(src, category, width) {
-  if (!src) return getFallback(category);
+  // SIEMPRE devuelve { url, mode } — nunca un string
+  if (!src) return { url: getFallback(category), mode: 'img' };
 
   const optimized = optimizeImageUrl(src, width);
+  if (!optimized) return { url: getFallback(category), mode: 'img' };
+  
   const safe = optimized.startsWith('http://') ? optimized.replace('http://', 'https://') : optimized;
 
   // Cloudinary y Unsplash: CDN directo, siempre disponible
@@ -58,8 +61,8 @@ function resolveDisplaySrc(src, category, width) {
     return { url: `/api/proxy-image?url=${encodeURIComponent(safe)}`, mode: 'img' };
   }
 
-  // URLs relativas o locales
-  return { url: safe, mode: 'img' };
+  // URLs relativas, /icon.png, etc.
+  return { url: safe || getFallback(category), mode: 'img' };
 }
 
 export default function PremiumImage({
