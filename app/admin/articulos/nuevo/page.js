@@ -122,23 +122,23 @@ export default function NewArticlePage() {
           <div className="lg:col-span-8 space-y-10">
              <div className="bg-white p-10 space-y-8 border border-gray-100 shadow-sm">
                <div>
-                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Titular de Impacto</label>
+                 <label className="block text-[15px] font-bold text-[#2d3748] mb-2">Titular de Impacto</label>
                  <input
                    type="text"
                    value={title}
                    onChange={(e) => setTitle(e.target.value)}
-                   className="w-full text-3xl font-black text-black border-0 border-b-2 border-gray-100 focus:border-red-600 focus:outline-none py-4 placeholder:text-slate-100"
+                   className="w-full text-3xl font-bold text-gray-900 border-0 border-b-2 border-gray-200 focus:border-red-600 focus:outline-none py-4 placeholder:text-gray-400 transition-colors"
                    placeholder="Escribe el titular aquí..."
                    required
                  />
                </div>
 
                <div>
-                 <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Bajada / Resumen Ejecutivo</label>
+                 <label className="block text-[15px] font-bold text-[#2d3748] mb-2">Bajada / Resumen Ejecutivo</label>
                  <textarea
                    value={excerpt}
                    onChange={(e) => setExcerpt(e.target.value)}
-                   className="w-full text-lg font-serif italic text-slate-500 border-0 border-b border-gray-100 focus:border-red-600 focus:outline-none py-4 min-h-[100px] placeholder:text-slate-100"
+                   className="w-full text-lg font-medium text-gray-700 border-0 border-b border-gray-200 focus:border-red-600 focus:outline-none py-4 min-h-[100px] placeholder:text-gray-400 transition-colors"
                    placeholder="Un breve resumen de la noticia..."
                    required
                  />
@@ -161,7 +161,7 @@ export default function NewArticlePage() {
           <div className="lg:col-span-4 space-y-8">
              <div className="bg-white p-10 border border-gray-100 shadow-sm space-y-8">
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Sección Editorial</label>
+                  <label className="block text-[14px] font-bold text-[#2d3748] mb-3">Sección Editorial</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
@@ -179,7 +179,7 @@ export default function NewArticlePage() {
                 />
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Firma (Autor)</label>
+                  <label className="block text-[14px] font-bold text-[#2d3748] mb-3">Firma (Autor)</label>
                   <input
                     type="text"
                     value={author}
@@ -190,7 +190,7 @@ export default function NewArticlePage() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Hashtags / Etiquetas</label>
+                  <label className="block text-[14px] font-bold text-[#2d3748] mb-3">Hashtags / Etiquetas</label>
                   <input
                     type="text"
                     value={tags}
@@ -204,7 +204,7 @@ export default function NewArticlePage() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">URL de la Fuente (Opcional)</label>
+                  <label className="block text-[14px] font-bold text-[#2d3748] mb-3">URL de la Fuente (Opcional)</label>
                   <input
                     type="url"
                     value={sourceLink}
