@@ -139,7 +139,7 @@ export default function Header() {
             <ul className="flex items-center justify-center overflow-x-auto no-scrollbar py-0.5">
               {CATEGORIES.filter(cat => cat.slug !== 'noticias').map((cat) => (
                 <li key={cat.slug} className="flex-shrink-0">
-                  <Link href={`/categoria/${cat.slug}`} className="block px-3 py-2 text-[14px] font-bold text-white/90 hover:text-white transition-all whitespace-nowrap">
+                  <Link href={`/categoria/${cat.slug}`} className="block px-4 py-2.5 text-[16px] md:text-[18px] font-bold text-white/90 hover:text-white transition-all whitespace-nowrap">
                     {cat.label}
                   </Link>
                 </li>
