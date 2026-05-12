@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
 const VALID_CATEGORIES = [
-  'noticias', 'politica', 'economia', 'internacional',
+  'policia', 'politica', 'economia', 'internacional',
   'deportes', 'sucesos', 'salud', 'entretenimiento',
   'cultura', 'tecnologia', 'tendencias', 'opinion',
 ];
@@ -29,7 +29,7 @@ export async function POST(request) {
 
   // 2. Obtener categoría del cuerpo de la petición
   const body = await request.json().catch(() => ({}));
-  const category = body.category || 'noticias';
+  const category = body.category || 'policia';
 
   if (!VALID_CATEGORIES.includes(category)) {
     return NextResponse.json({ error: `Categoría inválida: ${category}` }, { status: 400 });

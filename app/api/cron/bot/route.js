@@ -116,8 +116,8 @@ function semanticOverlap(setA, setB) {
 const SEMANTIC_THRESHOLD = 0.35; // 35% de palabras en común → duplicado semántico
 
 const CATEGORIES = {
-  noticias: {
-    slug: 'noticias', author: 'Redacción Central', style: 'periodístico objetivo y formal',
+  policia: {
+    slug: 'policia', author: 'Sección Policial', style: 'periodístico, policial y formal',
     feeds: [
       'https://www.diariolibre.com/rss/portada.xml',
       'https://acento.com.do/feed/?s=nacional',
@@ -266,7 +266,7 @@ const TOPIC_BLOCKLIST = {
   internacional:  ['presidente abinader','senado dominicano','camara de diputados',
                    'ayuntamiento de','alcalde de rd','abinader'],
   opinion:        [],
-  noticias:       [],
+  policia:        ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','futbol','pib','inflacion','deporte'],
 };
 
 const TOPIC_ALLOWLIST = {
@@ -300,7 +300,7 @@ const TOPIC_ALLOWLIST = {
                    'latinoamerica','onu','biden','trump','guerra','conflicto','diplomacia',
                    'cumbre','tratado','extranjero','global','migración'],
   opinion:        ['opinion','editorial','columna','analisis','punto de vista','perspectiva'],
-  noticias:       [], // sección general, sin restricción de allowlist
+  policia:        ['policia','denuncia','ley','crimen','arresto','delito','tribunal','juez','fiscal','dicrim','dncd','justicia','carcel','preso','pn','fiscalia','abogado','condena','robo','asalto','homicidio','asesinato','banda','operativo'],
 };
 
 /**
