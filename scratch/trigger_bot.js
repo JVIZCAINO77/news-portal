@@ -1,21 +1,12 @@
-const categories = [
-  'noticias', 'entretenimiento', 'deportes', 'tecnologia', 'economia',
-  'salud', 'cultura', 'opinion', 'sucesos', 'tendencias', 'internacional', 'politica'
-];
-
-async function run() {
-  for (const cat of categories) {
-    try {
-      console.log(`Buscando noticias para categoría: ${cat}...`);
-      const res = await fetch(`http://localhost:3000/api/cron/bot?category=${cat}`, {
-        headers: { 'X-Manual-Trigger': 'true' }
-      });
-      const data = await res.json();
-      console.log(`[${cat}] Response:`, data);
-    } catch (err) {
-      console.error(`[${cat}] Error:`, err.message);
-    }
+async function runBot() {
+  console.log("Triggering bot for 'noticias'...");
+  const url = `https://news-portal-rosy-kappa.vercel.app/api/cron/bot?category=noticias`;
+  try {
+    const res = await fetch(url, { headers: { 'X-Manual-Trigger': 'true' } });
+    const data = await res.json();
+    console.log(JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error(err);
   }
 }
-
-run();
+runBot();

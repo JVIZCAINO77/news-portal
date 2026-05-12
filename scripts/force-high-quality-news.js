@@ -83,7 +83,7 @@ Responde EXCLUSIVAMENTE en formato JSON:
 { "title": "...", "excerpt": "...", "content": "...", "tags": ["Tag1", "Tag2"] }`;
 
     const result = await ai.models.generateContent({
-      model: 'gemini-1.5-flash-latest',
+      model: 'gemini-2.0-flash',
       contents: prompt
     });
     
@@ -99,7 +99,7 @@ Responde EXCLUSIVAMENTE en formato JSON:
         content: data.content,
         category: cat.slug,
         author: 'Redacción Imperio Público',
-        image: selected.enclosure?.url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80',
+        image: selected.enclosure?.url || selected['media:content']?.url || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&q=80',
         publishedAt: new Date().toISOString(),
         slug: data.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
         tags: data.tags

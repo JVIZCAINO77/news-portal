@@ -14,16 +14,16 @@ export async function createEditorUser(formData) {
   const supabaseServer = await createServerClient();
   const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
 
-  if (!currentUser) throw new Error('No autorizado');
+  if (!currentUser) return { error: 'No autorizado: Sesión no encontrada.' };
 
-  const { data: profile } = await supabaseServer
+  const { data: profile, error: roleError } = await supabaseServer
     .from('profiles')
     .select('role')
     .eq('id', currentUser.id)
     .single();
 
-  if (profile?.role !== 'admin') {
-    throw new Error('Solo los administradores pueden crear usuarios.');
+  if (roleError || profile?.role !== 'admin') {
+    return { error: 'Acceso denegado: Solo los administradores pueden crear usuarios.' };
   }
 
   // 2. Cliente de Supabase con Service Role (Gestión de Auth)

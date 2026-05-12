@@ -95,9 +95,10 @@ export default function PremiumImage({
   useEffect(() => {
     if (status !== null) return; // ya cargó o ya falló
     timeoutRef.current = setTimeout(() => {
+      console.warn('[PremiumImage] Timeout reached, showing fallback');
       setCurrentSrc(fallback);
       setMode('img');
-      setStatus(null); // reinicia para que el fallback intente cargar
+      setStatus(true); // Hacer visible el fallback inmediatamente
     }, 12000);
     return () => clearTimeout(timeoutRef.current);
   }, [status, fallback]);
@@ -128,9 +129,10 @@ export default function PremiumImage({
       return;
     }
     // En cualquier otro caso → fallback de categoría (Unsplash, siempre disponible)
+    console.warn('[PremiumImage] Loading error, showing fallback');
     setCurrentSrc(fallback);
     setMode('img');
-    setStatus(null);
+    setStatus(true); // Hacer visible el fallback inmediatamente
   };
 
   const isCloudinary = (currentSrc || '').includes('cloudinary.com');

@@ -2,6 +2,7 @@ import { getLatestArticles } from '@/lib/serverData';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'edge'; // Reducir CPU: Edge Runtime es más ligero que Node.js serverless
+export const dynamic = 'force-dynamic';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

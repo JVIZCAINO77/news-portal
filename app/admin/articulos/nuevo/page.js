@@ -144,16 +144,15 @@ export default function NewArticlePage() {
                  />
                </div>
 
-               <div>
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Cuerpo de la Noticia (Redacción Visual)</label>
+               <div className="pt-2">
+                  <label className="block text-[15px] font-bold text-[#2d3748] mb-3">
+                    Contenido <span className="text-red-500">*</span>
+                  </label>
                   <VisualEditor 
                     content={content} 
                     onChange={setContent} 
                     onPasting={setPasting} 
                   />
-                  <p className="mt-4 text-[9px] text-slate-400 font-bold uppercase tracking-tight">
-                    Modo Editorial Activo — Arrastra imágenes o pégalas directamente. Las fotos se verán al instante.
-                  </p>
                </div>
              </div>
           </div>

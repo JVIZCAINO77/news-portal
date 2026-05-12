@@ -22,7 +22,7 @@ export default function AvisoLegal() {
             En cumplimiento del deber de información general, se hace constar que el dominio <strong>{SITE_CONFIG.url}</strong> es propiedad de <strong>Imperio Público</strong>, con domicilio en Santo Domingo, República Dominicana.
           </p>
           <p>
-            Contacto: <a href={`mailto:info@imperiopublico.com`}>info@imperiopublico.com</a>
+            Contacto: <a href="mailto:jvizcaino242@gmail.com">jvizcaino242@gmail.com</a>
           </p>
         </section>
 

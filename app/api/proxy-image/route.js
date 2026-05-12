@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
 
 /**
  * Proxy de imágenes ultra-optimizado para Imperio Público 2.0.

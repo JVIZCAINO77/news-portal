@@ -90,7 +90,7 @@ export default function NosotrosPage() {
             Siempre buscamos periodistas apasionados y comprometidos con la verdad.
           </p>
           <a
-            href="mailto:redaccion@imperiopublico.com"
+            href="mailto:vizcainosr29@gmail.com"
             className="inline-block bg-red-600 text-white px-10 py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all"
           >
             Escríbenos

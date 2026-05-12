@@ -78,10 +78,10 @@ export default function Header() {
       <section className="w-full bg-white py-2 md:py-4 border-b border-gray-100 relative">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           {/* Mobile Actions Overlay - REINFORCED CLICKABILITY */}
-          <div className="md:hidden absolute inset-0 flex justify-between items-center px-4 pointer-events-none z-[60]">
+          <div className="md:hidden absolute inset-0 flex justify-between items-center px-6 pointer-events-none z-[60]">
             <button 
               onClick={() => setIsMenuOpen(true)}
-              className="w-10 h-10 flex items-center justify-center bg-black text-white rounded-sm pointer-events-auto shadow-lg active:scale-95 transition-transform"
+              className="w-12 h-12 flex items-center justify-center bg-black text-white rounded-full pointer-events-auto shadow-2xl active:scale-90 transition-all border-2 border-white/20"
               aria-label="Abrir menú"
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -90,11 +90,11 @@ export default function Header() {
             </button>
             <button 
               onClick={() => setIsMenuOpen(true)}
-              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-100 text-black rounded-sm pointer-events-auto shadow-lg active:scale-95 transition-transform"
+              className="w-12 h-12 flex items-center justify-center bg-white border border-gray-100 text-black rounded-full pointer-events-auto shadow-2xl active:scale-90 transition-all"
               aria-label="Buscar noticias"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </button>
           </div>
@@ -170,16 +170,21 @@ export default function Header() {
             <div className="flex items-center gap-8 shrink-0">
               <ServiceWidgets />
               <div className="h-4 w-px bg-gray-200"></div>
-              <form onSubmit={handleSearch} className="relative group flex items-center">
+              <form onSubmit={handleSearch} className="relative group flex items-center bg-gray-100/80 rounded-full px-3 py-1 border border-transparent focus-within:border-red-600 focus-within:bg-white transition-all">
                 <input 
                   type="text"
                   placeholder="BUSCAR..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-gray-100/50 border-b border-gray-200 focus:border-red-600 outline-none px-3 py-1 text-[10px] font-black uppercase tracking-widest w-24 focus:w-48 transition-all duration-500 placeholder:text-gray-400"
+                  className="bg-transparent outline-none text-[10px] font-black uppercase tracking-widest w-24 focus:w-48 transition-all duration-500 placeholder:text-gray-400"
                 />
-                <button type="submit" className="ml-2 text-black hover:text-red-600 transition-colors">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button 
+                  type="submit" 
+                  onClick={handleSearch}
+                  className="ml-2 p-1 text-black hover:text-red-600 transition-colors active:scale-90"
+                  aria-label="Ejecutar búsqueda"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>

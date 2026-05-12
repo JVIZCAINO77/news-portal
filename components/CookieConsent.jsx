@@ -8,41 +8,72 @@ export default function CookieConsent() {
   useEffect(() => {
     const consent = localStorage.getItem('cookie-consent');
     if (!consent) {
-      setShowBanner(true);
+      // Pequeño delay para no bloquear el LCP
+      const timer = setTimeout(() => setShowBanner(true), 800);
+      return () => clearTimeout(timer);
     }
   }, []);
 
-  const acceptCookies = () => {
-    localStorage.setItem('cookie-consent', 'true');
+  const acceptAll = () => {
+    localStorage.setItem('cookie-consent', 'all');
     setShowBanner(false);
+  };
+
+  const acceptEssential = () => {
+    localStorage.setItem('cookie-consent', 'essential');
+    setShowBanner(false);
+    // Cuando rechaza cookies publicitarias, intentamos deshabilitar anuncios personalizados
+    if (typeof window !== 'undefined' && window.googletag) {
+      try {
+        window.googletag.pubads().setRequestNonPersonalizedAds(1);
+      } catch (_) {}
+    }
   };
 
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[9999] p-4 md:p-6 animate-in fade-in slide-in-from-bottom-10 duration-700">
-      <div className="max-w-4xl mx-auto bg-black text-white p-6 md:p-8 shadow-2xl border border-white/10 rounded-sm">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex-1 text-center md:text-left">
-            <h3 className="text-xs font-black uppercase tracking-[0.3em] mb-3 text-red-600">Aviso de Privacidad</h3>
-            <p className="text-[13px] font-serif leading-relaxed text-gray-300">
-              En <strong className="text-white italic">Imperio Público</strong> utilizamos cookies propias y de terceros (como Google AdSense) para mejorar tu experiencia y mostrarte publicidad personalizada. 
-              Al continuar navegando, aceptas nuestra <Link href="/privacidad" className="underline hover:text-red-500 transition-colors">Política de Privacidad</Link> y el uso de estas tecnologías.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <button
-              onClick={acceptCookies}
-              className="bg-red-600 text-white px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all"
-            >
-              Aceptar y Continuar
-            </button>
-            <Link
-              href="/privacidad"
-              className="border border-white/20 text-white px-8 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all text-center"
-            >
-              Saber más
-            </Link>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Aviso de cookies"
+      className="fixed bottom-0 left-0 right-0 z-[9999] p-3 md:p-5"
+    >
+      <div className="max-w-5xl mx-auto bg-black text-white shadow-2xl border border-white/10 rounded-sm">
+        <div className="p-5 md:p-7">
+          <div className="flex flex-col md:flex-row md:items-center gap-5">
+            {/* Texto */}
+            <div className="flex-1">
+              <h3 className="text-[11px] font-black uppercase tracking-[0.3em] mb-2 text-red-500">
+                🍪 Aviso de Privacidad y Cookies
+              </h3>
+              <p className="text-[13px] font-serif leading-relaxed text-gray-300">
+                Usamos cookies propias y de terceros (incluyendo <strong className="text-white">Google AdSense</strong> y <strong className="text-white">Google Analytics</strong>) para mejorar tu experiencia y mostrar publicidad relevante. Puedes elegir entre aceptar todas las cookies o solo las esenciales.{' '}
+                <Link href="/privacidad" className="underline hover:text-red-400 transition-colors whitespace-nowrap">
+                  Más información
+                </Link>
+              </p>
+            </div>
+
+            {/* Botones */}
+            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+              {/* Rechazar / Solo esenciales */}
+              <button
+                onClick={acceptEssential}
+                id="cookie-reject-btn"
+                className="border border-white/30 text-white/80 px-5 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all text-center rounded-sm"
+              >
+                Solo Esenciales
+              </button>
+              {/* Aceptar todo */}
+              <button
+                onClick={acceptAll}
+                id="cookie-accept-btn"
+                className="bg-red-600 text-white px-6 py-2.5 text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded-sm"
+              >
+                Aceptar Todas
+              </button>
+            </div>
           </div>
         </div>
       </div>

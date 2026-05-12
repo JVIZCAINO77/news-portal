@@ -55,7 +55,7 @@ async function updateProfile(userId, fullName) {
 }
 
 // Credenciales solicitadas por el usuario
-const ADMIN_EMAIL = 'admin@imperiopublico.com';
+const ADMIN_EMAIL = 'vizcainosr29@gmail.com';
 const ADMIN_PASS = 'ImperioAdmin2026!';
 const ADMIN_NAME = 'Director General';
 

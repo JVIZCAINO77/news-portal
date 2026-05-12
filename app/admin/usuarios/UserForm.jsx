@@ -27,7 +27,7 @@ export default function UserForm() {
     const formData = new FormData(event.target);
     const result = await createEditorUser(formData);
 
-    if (result.error) {
+    if (result?.error) {
       setError(result.error);
     } else {
       setSuccess(true);

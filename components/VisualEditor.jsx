@@ -11,7 +11,7 @@ import { uploadToCloudinary } from '@/lib/upload';
 import { useState, useEffect } from 'react';
 
 /**
- * VisualEditor — Editor WYSIWYG de alto impacto para Imperio Público
+ * VisualEditor — Editor WYSIWYG rediseñado (Estilo Clean SaaS)
  */
 export default function VisualEditor({ content, onChange, onPasting }) {
   const [isPasting, setIsPasting] = useState(false);
@@ -24,16 +24,16 @@ export default function VisualEditor({ content, onChange, onPasting }) {
       Image.configure({
         allowBase64: true,
         HTMLAttributes: {
-          class: 'editor-image rounded-xl shadow-lg border border-slate-200 transition-all hover:ring-4 hover:ring-red-600/20 cursor-nwse-resize',
+          class: 'editor-image rounded-lg shadow-sm border border-gray-200 my-4 max-w-full h-auto',
         },
       }),
       Placeholder.configure({
-        placeholder: 'Comienza a redactar tu primicia aquí...',
+        placeholder: 'Escribe el contenido de la noticia...',
       }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-red-600 underline font-bold cursor-pointer hover:text-black transition-colors',
+          class: 'text-blue-600 underline cursor-pointer',
         },
       }),
       TextAlign.configure({
@@ -43,7 +43,6 @@ export default function VisualEditor({ content, onChange, onPasting }) {
     content: content,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      // Devolvemos el HTML para una representación fiel
       onChange(editor.getHTML());
     },
     editorProps: {
@@ -56,19 +55,18 @@ export default function VisualEditor({ content, onChange, onPasting }) {
             const file = item.getAsFile();
             if (file) {
               uploadImage(file);
-              return true; // Indicamos que hemos manejado el pegado
+              return true;
             }
           }
         }
         return false;
       },
       attributes: {
-        class: 'prose prose-slate max-w-none focus:outline-none min-h-[500px] font-poppins p-8 text-lg leading-relaxed text-black bg-white border border-gray-100 shadow-sm transition-all focus:border-red-600',
+        class: 'prose prose-slate max-w-none focus:outline-none min-h-[350px] p-6 text-[15px] leading-relaxed text-[#2d3748] bg-white',
       },
     },
   });
 
-  // Sincronizar contenido si cambia externamente (ej: al cargar en editar)
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
       editor.commands.setContent(content);
@@ -102,97 +100,122 @@ export default function VisualEditor({ content, onChange, onPasting }) {
 
   if (!editor) return null;
 
+  const imageCount = (editor.getHTML().match(/<img/g) || []).length;
+
   return (
-    <div className="relative border-4 border-black">
-      {/* Barra de Herramientas Premium (Panel de Edición Completo) */}
-      <div className="flex flex-wrap items-center gap-1 p-2 bg-black text-white border-b-4 border-black sticky top-0 z-20">
+    <div className="relative border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm">
+      {/* Barra de Herramientas Estilo Clean */}
+      <div className="flex flex-wrap items-center gap-1 px-4 py-3 bg-[#f8fafc] border-b border-gray-200 sticky top-0 z-20">
+        
         <ToolbarButton 
           active={editor.isActive('bold')} 
           onClick={() => editor.chain().focus().toggleBold().run()}
-          icon="B" label="Negrita" 
+          icon={<span className="font-serif font-bold text-[15px]">B</span>} 
+          title="Negrita" 
         />
         <ToolbarButton 
           active={editor.isActive('italic')} 
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          icon="I" label="Cursiva" 
+          icon={<span className="font-serif italic text-[15px]">I</span>} 
+          title="Cursiva" 
         />
         <ToolbarButton 
           active={editor.isActive('underline')} 
           onClick={() => editor.chain().focus().toggleUnderline().run()}
-          icon="U" label="Subrayado" 
-          className="underline decoration-2"
+          icon={<span className="font-serif underline decoration-2 text-[15px]">U</span>} 
+          title="Subrayado" 
         />
         
-        <div className="w-[1px] h-6 bg-zinc-800 mx-2" />
+        <div className="w-[1px] h-5 bg-gray-300 mx-2" />
 
+        <ToolbarButton 
+          active={editor.isActive('heading', { level: 1 })} 
+          onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+          icon={<span className="font-bold text-[13px]">H1</span>} 
+          title="Título 1" 
+        />
         <ToolbarButton 
           active={editor.isActive('heading', { level: 2 })} 
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          icon="H2" label="Título" 
+          icon={<span className="font-bold text-[13px]">H2</span>} 
+          title="Título 2" 
         />
+        <ToolbarButton 
+          active={editor.isActive('heading', { level: 3 })} 
+          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          icon={<span className="font-bold text-[13px]">H3</span>} 
+          title="Título 3" 
+        />
+
+        <div className="w-[1px] h-5 bg-gray-300 mx-2" />
+
         <ToolbarButton 
           active={editor.isActive('bulletList')} 
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          icon="• Lista" label="Lista" 
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+          } 
+          title="Lista con viñetas" 
+        />
+        <ToolbarButton 
+          active={editor.isActive('orderedList')} 
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          icon={
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="10" y1="6" x2="21" y2="6"></line><line x1="10" y1="12" x2="21" y2="12"></line><line x1="10" y1="18" x2="21" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 10h2"></path><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"></path></svg>
+          } 
+          title="Lista numerada" 
         />
         <ToolbarButton 
           active={editor.isActive('blockquote')} 
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          icon="Cita" label="Cita" 
+          icon={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
+          } 
+          title="Cita" 
         />
 
-        <div className="w-[1px] h-6 bg-zinc-800 mx-2" />
-
-        <ToolbarButton 
-          active={editor.isActive({ textAlign: 'left' })} 
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          icon="←" label="Izquierda" 
-        />
-        <ToolbarButton 
-          active={editor.isActive({ textAlign: 'center' })} 
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          icon="↔" label="Centro" 
-        />
-        <ToolbarButton 
-          active={editor.isActive({ textAlign: 'right' })} 
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          icon="→" label="Derecha" 
-        />
-        <ToolbarButton 
-          active={editor.isActive({ textAlign: 'justify' })} 
-          onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-          icon="≡" label="Justificar" 
-        />
-
-        <div className="w-[1px] h-6 bg-zinc-800 mx-2" />
+        <div className="w-[1px] h-5 bg-gray-300 mx-2" />
 
         <ToolbarButton 
           active={editor.isActive('link')} 
           onClick={setLink}
-          icon="🔗" label="Enlace" 
+          icon={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+          } 
+          title="Enlace" 
         />
         
-        <button
-          type="button"
+        <ToolbarButton 
           onClick={() => {
             const url = window.prompt('Pega la URL de la imagen:');
             if (url) editor.chain().focus().setImage({ src: url }).run();
           }}
-          className="px-4 py-2 text-[9px] font-black uppercase tracking-widest hover:bg-red-600 transition-colors flex items-center gap-2"
-        >
-          📷 Imagen
-        </button>
+          icon={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          } 
+          title="Insertar Imagen"
+        />
 
-        <div className="flex-1" />
+        <div className="w-[1px] h-5 bg-gray-300 mx-2" />
 
         <ToolbarButton 
           onClick={() => editor.chain().focus().undo().run()}
-          icon="↶" label="Deshacer" 
+          icon={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+          } 
+          title="Deshacer" 
         />
         <ToolbarButton 
           onClick={() => editor.chain().focus().redo().run()}
-          icon="↷" label="Rehacer" 
+          icon={
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
+          } 
+          title="Rehacer" 
         />
+
+        <div className="ml-auto text-[13px] text-gray-500 font-medium px-2">
+          Imágenes: {imageCount}/5
+        </div>
       </div>
 
       {/* Área del Editor */}
@@ -201,31 +224,23 @@ export default function VisualEditor({ content, onChange, onPasting }) {
       {/* Overlay de Carga */}
       {isPasting && (
         <div className="absolute inset-0 bg-white/60 z-30 flex flex-col items-center justify-center backdrop-blur-[2px]">
-          <div className="w-12 h-12 border-4 border-black border-t-red-600 rounded-full animate-spin mb-4 shadow-2xl"></div>
-          <p className="bg-black text-white px-6 py-3 text-[10px] font-black uppercase tracking-[0.4em]">Subiendo Imagen...</p>
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin mb-3 shadow-sm"></div>
+          <p className="text-gray-600 font-medium text-sm">Procesando imagen...</p>
         </div>
       )}
-
-      {/* Guía de ajuste de tamaño */}
-      <div className="bg-slate-50 p-4 border-t border-gray-100 flex justify-between items-center">
-         <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight">
-            Diseño Editorial Activo — Las imágenes se ajustan automáticamente al ancho del texto.
-         </p>
-         <p className="text-[9px] font-black uppercase tracking-widest text-black italic">Visual Editor 2.0</p>
-      </div>
     </div>
   );
 }
 
-function ToolbarButton({ active, onClick, icon, label }) {
+function ToolbarButton({ active, onClick, icon, title }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors ${
-        active ? 'bg-red-600 text-white' : 'hover:bg-zinc-900 text-zinc-400'
+      className={`w-8 h-8 flex items-center justify-center rounded transition-colors text-gray-600 hover:bg-gray-200 hover:text-gray-900 ${
+        active ? 'bg-gray-200 text-gray-900 shadow-inner' : ''
       }`}
-      title={label}
+      title={title}
     >
       {icon}
     </button>

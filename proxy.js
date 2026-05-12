@@ -3,9 +3,12 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 
 export default async function proxy(request) {
-  let response = NextResponse.next({
-    request,
-  });
+  // Salvaguarda: solo procesar si es ruta de administración
+  if (!request.nextUrl.pathname.startsWith('/admin')) {
+    return NextResponse.next();
+  }
+
+  let response = NextResponse.next();
 
   // Si faltan variables críticas, pasamos la petición pero logueamos el error
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
@@ -22,12 +25,8 @@ export default async function proxy(request) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            request.cookies.set(name, value)
-          );
-          response = NextResponse.next({
-            request,
-          });
+          // En Next.js 16 Proxy, request.cookies es de solo lectura.
+          // Solo seteamos en la respuesta para el cliente.
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           );

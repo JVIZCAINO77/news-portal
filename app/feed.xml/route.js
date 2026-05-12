@@ -58,7 +58,7 @@ export async function GET() {
     <description>${SITE_CONFIG.description}</description>
     <language>es-DO</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <managingEditor>info@imperiopublico.com (${SITE_CONFIG.name})</managingEditor>
+    <managingEditor>vizcainosr29@gmail.com (${SITE_CONFIG.name})</managingEditor>
     <image>
       <url>${SITE_CONFIG.url}/og-image.png</url>
       <title>${SITE_CONFIG.name}</title>

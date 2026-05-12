@@ -1,11 +1,24 @@
 User-agent: *
 Allow: /
+Allow: /ads.txt
 Allow: /api/proxy-image
 Disallow: /admin/
 Disallow: /api/
 Disallow: /auth/
 Disallow: /buscar?
 
-# Sitemap principal e índice de Google News
-Sitemap: https://imperiopublico.com/sitemap.xml
-Sitemap: https://imperiopublico.com/news-sitemap.xml
+# Reglas específicas para el bot de AdSense
+User-agent: AdsBot-Google
+Allow: /ads.txt
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
+Allow: /ads.txt
+Allow: /
+
+# Fichero ads.txt — obligatorio para Google AdSense
+# Accesible en: https://www.imperiopublico.com/ads.txt
+
+# Sitemaps
+Sitemap: https://www.imperiopublico.com/sitemap.xml
+Sitemap: https://www.imperiopublico.com/news-sitemap.xml

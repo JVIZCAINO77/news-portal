@@ -41,6 +41,9 @@ export async function generateMetadata({ params }) {
       description: article.excerpt,
       images: [article.image],
     },
+    alternates: {
+      canonical: `${SITE_CONFIG.url}/articulo/${slug}`,
+    },
   };
 }
 
@@ -266,6 +269,7 @@ export default async function ArticlePage({ params }) {
                         <Link 
                           key={idx} 
                           href={`/buscar?q=${encodeURIComponent(tag)}`}
+                          rel="nofollow"
                           className="border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-500 uppercase hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
                         >
                           #{tag}
@@ -300,7 +304,7 @@ export default async function ArticlePage({ params }) {
                     </p>
                     
                     <div className="flex items-center justify-center md:justify-start gap-4 pt-2">
-                      <a href={`mailto:${article.author_email || 'info@imperiopublico.com'}`} className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-600 shadow-sm transition-all hover:scale-110" title="Email">
+                      <a href={`mailto:${article.author_email || 'jvizcaino242@gmail.com'}`} className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-600 shadow-sm transition-all hover:scale-110" title="Email">
                         <span className="font-bold text-lg">@</span>
                       </a>
                       <a href={SITE_CONFIG.social.twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-black hover:border-black shadow-sm transition-all hover:scale-110" title="X (Twitter)">
