@@ -135,11 +135,11 @@ export default function Header() {
       <div className="sticky top-0 z-[100] shadow-md w-full bg-white">
         {/* Primary Navigation - Red Bar */}
         <nav className="w-full bg-[#bb1b21] border-b border-black/10 relative z-50">
-          <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="w-full max-w-[1600px] mx-auto px-2 md:px-4">
             <ul className="flex items-center justify-center overflow-x-auto no-scrollbar py-0.5">
               {CATEGORIES.filter(cat => cat.slug !== 'noticias').map((cat) => (
                 <li key={cat.slug} className="flex-shrink-0">
-                  <Link href={`/categoria/${cat.slug}`} className="block px-4 py-2.5 text-[16px] md:text-[18px] font-bold text-white/90 hover:text-white transition-all whitespace-nowrap">
+                  <Link href={`/categoria/${cat.slug}`} className="block px-3 md:px-4 py-2.5 text-[16px] md:text-[18px] font-bold text-white/90 hover:text-white transition-all whitespace-nowrap">
                     {cat.label}
                   </Link>
                 </li>
