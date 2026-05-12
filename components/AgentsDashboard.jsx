@@ -4,16 +4,6 @@ import { useState } from 'react';
 
 const AGENTS = [
   {
-    category: 'noticias',
-    label: 'Noticias Generales',
-    author: 'Redacción Central',
-    scheduleUTC: '11:00 UTC',
-    scheduleRD: '7:00 AM RD',
-    icon: '📰',
-    color: 'border-l-red-600',
-    bg: 'bg-red-50',
-  },
-  {
     category: 'politica',
     label: 'Política',
     author: 'Mesa Política',
@@ -112,17 +102,7 @@ const AGENTS = [
     icon: '🔥',
     color: 'border-l-rose-600',
     bg: 'bg-rose-50',
-  },
-  {
-    category: 'opinion',
-    label: 'Opinión',
-    author: 'Dirección Editorial',
-    scheduleUTC: '22:00 UTC',
-    scheduleRD: '6:00 PM RD',
-    icon: '✍️',
-    color: 'border-l-amber-600',
-    bg: 'bg-amber-50',
-  },
+  }
 ];
 
 export default function AgentsDashboard({ botEnabled }) {

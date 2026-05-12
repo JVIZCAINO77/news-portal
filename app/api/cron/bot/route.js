@@ -187,15 +187,7 @@ const CATEGORIES = {
       'https://www.rtve.es/api/noticias.rss',
     ],
   },
-  opinion: {
-    slug: 'opinion', author: 'Dirección Editorial', style: 'reflexivo, analítico y profundo',
-    feeds: [
-      'https://www.diariolibre.com/rss/opinion.xml',
-      'https://acento.com.do/feed/?s=opinion',
-      'https://elnacional.com.do/feed/?s=opinion',
-      'https://hoy.com.do/feed/?s=opinion',
-    ],
-  },
+
   sucesos: {
     slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso',
     feeds: [
@@ -265,7 +257,7 @@ const TOPIC_BLOCKLIST = {
                    'homicidio','asesinato','beisbol','partido politico'],
   internacional:  ['presidente abinader','senado dominicano','camara de diputados',
                    'ayuntamiento de','alcalde de rd','abinader'],
-  opinion:        [],
+
   policia:        ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','futbol','pib','inflacion','deporte'],
 };
 
@@ -299,7 +291,7 @@ const TOPIC_ALLOWLIST = {
   internacional:  ['internacional','mundo','eeuu','estados unidos','europa','china','rusia',
                    'latinoamerica','onu','biden','trump','guerra','conflicto','diplomacia',
                    'cumbre','tratado','extranjero','global','migración'],
-  opinion:        ['opinion','editorial','columna','analisis','punto de vista','perspectiva'],
+
   policia:        ['policia','denuncia','ley','crimen','arresto','delito','tribunal','juez','fiscal','dicrim','dncd','justicia','carcel','preso','pn','fiscalia','abogado','condena','robo','asalto','homicidio','asesinato','banda','operativo'],
 };
 
