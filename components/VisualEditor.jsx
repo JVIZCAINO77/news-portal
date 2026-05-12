@@ -62,7 +62,7 @@ export default function VisualEditor({ content, onChange, onPasting }) {
         return false;
       },
       attributes: {
-        class: 'prose prose-slate max-w-none focus:outline-none min-h-[350px] p-6 text-[15px] leading-relaxed text-[#2d3748] bg-white',
+        class: 'prose prose-slate max-w-none focus:outline-none min-h-[700px] p-6 text-[15px] leading-relaxed text-[#2d3748] bg-white',
       },
     },
   });
