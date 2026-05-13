@@ -117,25 +117,64 @@ function semanticOverlap(setA, setB) {
 const SEMANTIC_THRESHOLD = 0.35; // 35% de palabras en común → duplicado semántico
 
 const CATEGORIES = {
+  // ─── SECCIONES NACIONALES (Prioridad absoluta — somos un medio dominicano) ─────
+  noticias: {
+    slug: 'noticias', author: 'Redacción Nacional', style: 'periodístico, claro y objetivo',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://acento.com.do/feed/',
+      'https://hoy.com.do/feed/',
+      'https://elcaribe.com.do/feed/',
+      'https://cdn.com.do/feed/',
+      'https://noticiassin.com/feed/',
+      'https://elnacional.com.do/feed/',
+      'https://almomento.net/feed/',
+    ],
+  },
+  politica: {
+    slug: 'politica', author: 'Mesa Política', style: 'neutral, objetivo y analítico',
+    feeds: [
+      'https://acento.com.do/feed/?s=politica',
+      'https://elcaribe.com.do/feed/?s=politica',
+      'https://hoy.com.do/feed/?s=politica',
+      'https://cdn.com.do/feed/?s=politica',
+      'https://noticiassin.com/feed/?s=politica',
+      'https://elnacional.com.do/feed/?s=politica',
+      'https://www.diariolibre.com/rss/portada.xml',
+    ],
+  },
+  economia: {
+    slug: 'economia', author: 'Redacción Económica', style: 'serio, financiero y accesible',
+    feeds: [
+      'https://www.diariolibre.com/rss/economia.xml',
+      'https://acento.com.do/feed/?s=economia',
+      'https://elcaribe.com.do/feed/?s=economia',
+      'https://hoy.com.do/feed/?s=economia',
+      'https://cdn.com.do/feed/?s=economia',
+      'https://elnacional.com.do/feed/?s=economia',
+    ],
+  },
+  sucesos: {
+    slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso',
+    feeds: [
+      'https://acento.com.do/feed/?s=sucesos',
+      'https://almomento.net/feed/',
+      'https://cdn.com.do/feed/?s=sucesos',
+      'https://noticiassin.com/feed/?s=sucesos',
+      'https://elnacional.com.do/feed/?s=sucesos',
+      'https://hoy.com.do/feed/?s=accidente',
+    ],
+  },
   policia: {
     slug: 'policia', author: 'Sección Policial', style: 'periodístico, policial y formal',
     feeds: [
       'https://www.diariolibre.com/rss/portada.xml',
-      'https://acento.com.do/feed/?s=nacional',
+      'https://acento.com.do/feed/?s=policia',
       'https://almomento.net/feed/',
-      'https://noticiassin.com/feed/?s=nacional',
-      'https://elnacional.com.do/feed/?s=',
-      'https://hoy.com.do/feed/?s=noticias',
-    ],
-  },
-  entretenimiento: {
-    slug: 'entretenimiento', author: 'Sección Espectáculos', style: 'dinámico y ameno',
-    feeds: [
-      'https://www.diariolibre.com/rss/revista.xml',
-      'https://acento.com.do/feed/?s=farandula',
-      'https://remolacha.net/feed/',
-      'https://hoy.com.do/feed/?s=farándula',
-      'https://elnacional.com.do/feed/?s=espectaculos',
+      'https://noticiassin.com/feed/?s=policia',
+      'https://elnacional.com.do/feed/?s=policia',
+      'https://hoy.com.do/feed/?s=policia',
+      'https://cdn.com.do/feed/?s=crimen',
     ],
   },
   deportes: {
@@ -148,6 +187,48 @@ const CATEGORIES = {
       'https://cdn.com.do/feed/?s=deportes',
     ],
   },
+  salud: {
+    slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable',
+    feeds: [
+      'https://acento.com.do/feed/?s=salud',
+      'https://hoy.com.do/feed/?s=salud',
+      'https://elcaribe.com.do/feed/?s=salud',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://www.bbc.com/mundo/index.xml',
+    ],
+  },
+  cultura: {
+    slug: 'cultura', author: 'Sección Cultural', style: 'elegante y descriptivo',
+    feeds: [
+      'https://www.diariolibre.com/rss/revista.xml',
+      'https://acento.com.do/feed/?s=cultura',
+      'https://hoy.com.do/feed/?s=cultura',
+      'https://elnacional.com.do/feed/?s=cultura',
+      'https://elcaribe.com.do/feed/?s=cultura',
+    ],
+  },
+  entretenimiento: {
+    slug: 'entretenimiento', author: 'Sección Espectáculos', style: 'dinámico y ameno',
+    feeds: [
+      'https://www.diariolibre.com/rss/revista.xml',
+      'https://acento.com.do/feed/?s=farandula',
+      'https://remolacha.net/feed/',
+      'https://hoy.com.do/feed/?s=farandula',
+      'https://elnacional.com.do/feed/?s=espectaculos',
+    ],
+  },
+  tendencias: {
+    slug: 'tendencias', author: 'Mesa de Tendencias', style: 'ágil y moderno',
+    feeds: [
+      'https://remolacha.net/feed/',
+      'https://acento.com.do/feed/?s=viral',
+      'https://elnacional.com.do/feed/?s=tendencias',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://www.bbc.com/mundo/index.xml',
+    ],
+  },
+
+  // ─── SECCIONES CON ALCANCE GLOBAL ────────────────────────────────────────────
   tecnologia: {
     slug: 'tecnologia', author: 'Redacción Tecnológica', style: 'informativo y vanguardista',
     feeds: [
@@ -158,75 +239,17 @@ const CATEGORIES = {
       'https://www.france24.com/es/rss',
     ],
   },
-  economia: {
-    slug: 'economia', author: 'Redacción Económica', style: 'serio y financiero',
-    feeds: [
-      'https://www.diariolibre.com/rss/economia.xml',
-      'https://acento.com.do/feed/?s=economia',
-      'https://elcaribe.com.do/feed/?s=economia',
-      'https://hoy.com.do/feed/?s=economia',
-      'https://cdn.com.do/feed/?s=economia',
-    ],
-  },
-  salud: {
-    slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable',
-    feeds: [
-      'https://acento.com.do/feed/?s=salud',
-      'https://cnnespanol.cnn.com/feed/',
-      'https://www.bbc.com/mundo/index.xml',
-      'https://hoy.com.do/feed/?s=salud',
-      'https://rss.dw.com/xml/rss-es-all',
-    ],
-  },
-  cultura: {
-    slug: 'cultura', author: 'Sección Cultural', style: 'elegante y descriptivo',
-    feeds: [
-      'https://www.diariolibre.com/rss/revista.xml',
-      'https://acento.com.do/feed/?s=cultura',
-      'https://hoy.com.do/feed/?s=cultura',
-      'https://elnacional.com.do/feed/?s=cultura',
-      'https://www.rtve.es/api/noticias.rss',
-    ],
-  },
 
-  sucesos: {
-    slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso',
-    feeds: [
-      'https://acento.com.do/feed/?s=sucesos',
-      'https://almomento.net/feed/',
-      'https://cdn.com.do/feed/?s=sucesos',
-      'https://deultimominuto.net/feed/?s=',
-      'https://noticiassin.com/feed/?s=policia',
-    ],
-  },
-  tendencias: {
-    slug: 'tendencias', author: 'Mesa de Tendencias', style: 'ágil y moderno',
-    feeds: [
-      'https://remolacha.net/feed/',
-      'https://cnnespanol.cnn.com/feed/',
-      'https://www.bbc.com/mundo/index.xml',
-      'https://acento.com.do/feed/?s=viral',
-      'https://elnacional.com.do/feed/?s=tendencias',
-    ],
-  },
+  // ─── INTERNACIONAL: Solo noticias de ALTO IMPACTO MUNDIAL ────────────────────
+  // Fuentes: CNN, BBC, France24, DW — las más confiables y de mayor alcance.
+  // Filtro adicional: solo pasan noticias con palabras de impacto global.
   internacional: {
-    slug: 'internacional', author: 'Redacción Internacional', style: 'global y analítico',
+    slug: 'internacional', author: 'Redacción Internacional', style: 'global, analítico y contextualizado para audiencia dominicana',
     feeds: [
       'https://cnnespanol.cnn.com/feed/',
       'https://www.france24.com/es/rss',
       'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
-      'https://www.rtve.es/api/noticias.rss',
-    ],
-  },
-  politica: {
-    slug: 'politica', author: 'Mesa Política', style: 'neutral y objetivo',
-    feeds: [
-      'https://acento.com.do/feed/?s=politica',
-      'https://elcaribe.com.do/feed/?s=politica',
-      'https://hoy.com.do/feed/?s=política',
-      'https://cdn.com.do/feed/?s=politica',
-      'https://noticiassin.com/feed/?s=politica',
     ],
   },
 };
@@ -287,11 +310,19 @@ const TOPIC_ALLOWLIST = {
   sucesos:        ['detenido','arrestado','capturado','homicidio','asesinado','robo',
                    'accidente','incendio','crimen','policia','autoridades','investigacion',
                    'victima','sospechoso','fugitivo','delito','herido','muerto','matan'],
-  tendencias:     ['viral','tendencia','redes sociales','tiktok','instagram','twitter',
-                   'youtube','influencer','meme','trending','popular','hashtag'],
-  internacional:  ['internacional','mundo','eeuu','estados unidos','europa','china','rusia',
-                   'latinoamerica','onu','biden','trump','guerra','conflicto','diplomacia',
-                   'cumbre','tratado','extranjero','global','migración'],
+  // Internacional: SOLO noticias de ALTO IMPACTO MUNDIAL
+  internacional:  [
+    'trump','biden','putin','xi jinping','zelensky','macron','netanyahu',
+    'eeuu','estados unidos','rusia','china','israel','iran','ucrania','palestina',
+    'union europea','corea del norte','arabia saudita',
+    'onu','otan','nato','g7','g20','fmi','banco mundial','cumbre mundial',
+    'guerra','conflicto armado','ataque militar','bombardeo','invasion',
+    'acuerdo de paz','cesefuego','crisis nuclear',
+    'aranceles','crisis global','recesion mundial','petroleo','opep',
+    'reserva federal','tasas de interes',
+    'terremoto','tsunami','erupcion volcanica',
+    'pandemia','emergencia sanitaria',
+  ],
 
   policia:        ['policia','denuncia','ley','crimen','arresto','delito','tribunal','juez','fiscal','dicrim','dncd','justicia','carcel','preso','pn','fiscalia','abogado','condena','robo','asalto','homicidio','asesinato','banda','operativo'],
 };
