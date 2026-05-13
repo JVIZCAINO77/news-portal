@@ -563,115 +563,161 @@ export async function GET(request) {
       .slice(0, 80);
     const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
-    const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
-    // gemini-2.0-flash-lite: cuota SEPARADA de gemini-2.0-flash, más ligero y rápido
-    // gemini-2.0-flash: modelo principal con 1500 req/día en free tier
-    // NO usar gemini-1.5-flash — no está disponible en v1beta
-    const models = ['gemini-2.0-flash-lite', 'gemini-2.0-flash'];
-
-    const prompt = `Eres el editor de la sección "${cat.slug.toUpperCase()}" de "Imperio Público", un medio digital de élite reconocido por su profundidad periodística y rigor analítico.
+    // ─── PROMPT EDITORIAL ─────────────────────────────────────────────────────
+    const prompt = `Eres el editor de la sección "${cat.slug.toUpperCase()}" de "Imperio Público", un medio digital de élite.
 
 --- DATOS DE LA NOTICIA ---
 Fecha: ${todayDR}
-SECCIÓN ASIGNADA (FIJA, NO CAMBIAR): ${cat.slug.toUpperCase()}
+SECCIÓN ASIGNADA (FIJA): ${cat.slug.toUpperCase()}
 Titular de fuente: ${news.title}
 Resumen de fuente: ${news.contentSnippet || 'Sin resumen disponible'}
 --------------------------
 
-REGLAS EDITORIALES CRÍTICAS (MANDATORIAS):
-1. SECCIÓN: Tu artículo se publicará EXCLUSIVAMENTE en la sección "${cat.slug.toUpperCase()}". No debes cambiarla. Redacta el contenido enfocado en ese ángulo editorial.
+REGLAS EDITORIALES CRÍTICAS:
+1. SECCIÓN: Redacta enfocado en el ángulo "${cat.slug.toUpperCase()}".
 2. IDIOMA: Español neutro y profesional.
-3. VALOR AGREGADO (E-E-A-T): 
-   - El artículo DEBE incluir un análisis del impacto de la noticia para la sociedad o el sector relacionado.
-   - Proporciona contexto histórico o antecedentes si son relevantes para entender el hecho.
-4. ESTRUCTURA SEO PREMIUM: 
-   - Primer párrafo: Debe enganchar al lector con los datos clave (qué, quién, dónde, cuándo) integrando palabras clave de forma natural.
-   - Usa al menos 3 subtítulos (##) analíticos y atractivos.
-   - Usa **negritas** para resaltar datos estadísticos, nombres propios y declaraciones clave.
-5. TÍTULO (campo "title"): 
-   - Debe ser original, potente y optimizado para SEO (50-70 caracteres). 
-   - Evita el sensacionalismo barato; busca la autoridad informativa.
-6. CONTENIDO (campo "content"):
-   - MÍNIMO 550 palabras. Si el resumen es corto, expande con análisis, implicaciones futuras y contexto general del tema.
-   - Estilo: ${cat.style}.
-   - PROHIBIDO: Frases genéricas de IA como "En el dinámico mundo de hoy", "Es importante destacar", etc.
-7. EXCERPT (campo "excerpt"):
-   - Meta-descripción perfecta de 155 caracteres que incite al clic por su valor informativo.
+3. Incluye análisis del impacto y contexto histórico relevante.
+4. Estructura: primer párrafo enganchador, al menos 3 subtítulos (##), **negritas** en datos clave.
+5. TÍTULO: original, SEO, 50-70 caracteres.
+6. CONTENIDO: MÍNIMO 600 palabras. Estilo: ${cat.style}. PROHIBIDO frases genéricas de IA.
+7. EXCERPT: meta-descripción de 155 caracteres.
 
-PASO 1 — EVALUACIÓN:
-- Si la noticia es vieja (>48h), trivial o sin relevancia pública → responde exactamente: IRRELEVANTE.
+Si la noticia es trivial o sin relevancia pública → responde exactamente: IRRELEVANTE
 
-PASO 2 — FORMATO DE RESPUESTA:
-Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin texto adicional):
-{ "title": "<titular_autoridad>", "excerpt": "<gancho_informativo>", "content": "<contenido_analitico_extenso_markdown>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
+Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
+{ "title": "<titular>", "excerpt": "<gancho>", "content": "<artículo markdown>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
 
+    // ─── MULTI-PROVEEDOR IA ───────────────────────────────────────────────────
+    // PRIORIDAD 1: Gemini (todas las claves × todos los modelos con cuotas independientes)
+    const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
+    const geminiModels = [
+      'gemini-2.5-flash-preview-05-20', // Nuevo modelo — cuota propia independiente
+      'gemini-2.0-flash-lite',           // Cuota separada de flash principal
+      'gemini-2.0-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-flash-8b',
+    ];
 
-    // ─── ROTACIÓN DE CLAVES Y MODELOS ─────────────────────────────────────────
-    // Prueba CADA clave con CADA modelo antes de rendirse.
-    // Esto garantiza que mientras cualquier clave tenga cuota disponible, el bot funciona.
     let rawText = '';
     let aiSuccess = false;
+
+    // Intentar Gemini — cada clave con cada modelo
     for (const key of keys) {
       if (aiSuccess) break;
-      for (const model of models) {
+      for (const model of geminiModels) {
         try {
-          console.log(`[Bot] Probando clave ...${key.slice(-6)} con modelo ${model}`);
-          const ai = new GoogleGenAI({ apiKey: key });
-          const aiResponse = await ai.models.generateContent({ model, contents: prompt });
-          rawText = aiResponse.text || '';
-          if (rawText) {
-            console.log(`[Bot] ✅ Éxito con clave ...${key.slice(-6)} / ${model}`);
+          console.log(`[Bot] Probando Gemini ...${key.slice(-6)} / ${model}`);
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+          });
+          const data = await res.json();
+          if (data.error) {
+            const isQuota = data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED';
+            const isInvalid = data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT';
+            const isNotFound = data.error.code === 404;
+            console.log(`[Bot] ⚠️ Gemini ${model} (...${key.slice(-6)}): ${isQuota ? 'cuota agotada' : isInvalid ? 'clave inválida' : isNotFound ? 'modelo no encontrado' : data.error.message}`);
+            if (isInvalid) break;
+            continue;
+          }
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (text) {
+            console.log(`[Bot] ✅ Gemini éxito: ...${key.slice(-6)} / ${model}`);
+            rawText = text;
             aiSuccess = true;
             break;
           }
-        } catch (keyErr) {
-          const isQuota = keyErr.message?.includes('429') || keyErr.message?.includes('Quota') || keyErr.message?.includes('RESOURCE_EXHAUSTED');
-          const isInvalid = keyErr.message?.includes('API key not valid') || keyErr.status === 400;
-          if (isQuota) {
-            console.log(`[Bot] ⚠️ Cuota agotada: clave ...${key.slice(-6)} / ${model}`);
-          } else if (isInvalid) {
-            console.log(`[Bot] ❌ Clave inválida: ...${key.slice(-6)} — se omite.`);
-            break; // Pasar a la siguiente clave, no tiene sentido probar otro modelo con esta
-          } else {
-            console.log(`[Bot] ❌ Error inesperado (${model}): ${keyErr.message?.slice(0, 80)}`);
-          }
+        } catch (e) {
+          console.log(`[Bot] ❌ Gemini error (${model}): ${e.message?.slice(0, 80)}`);
         }
       }
     }
 
-    // Si todos los modelos y claves de Gemini fallaron → intentar Pollinations como último recurso
-    // IMPORTANTE: si Pollinations también falla, el artículo NO se publica. Nunca se publica sin reescribir.
+    // PRIORIDAD 2: Pollinations AI (gratuito, sin cuota)
     if (!aiSuccess) {
-      console.log('[Bot] ⚠️ Gemini sin cuota. Intentando Pollinations (timeout 25s)...');
+      console.log('[Bot] ⚠️ Gemini sin cuota. Intentando Pollinations...');
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 25000); // 25s — dentro del límite de Vercel
-        const shortPrompt = `Eres periodista de Imperio Público. Noticia sección ${cat.slug.toUpperCase()}: "${news.title}". Resumen disponible: "${(news.contentSnippet||'').slice(0,250)}". Escribe artículo en español mínimo 500 palabras con 3 subtítulos ##. Responde SOLO JSON: {"title":"titular 50-70 chars","excerpt":"resumen max 150 chars","content":"artículo markdown","tags":["T1","T2","T3"],"impact_level":"high"}`;
+        const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s — generoso
         const polRes = await fetch('https://text.pollinations.ai/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
           body: JSON.stringify({
             messages: [
-              { role: 'system', content: 'Eres un periodista profesional. Responde ÚNICAMENTE con JSON válido, sin texto extra ni bloques de código.' },
-              { role: 'user', content: shortPrompt }
+              { role: 'system', content: 'Eres un periodista profesional. Responde ÚNICAMENTE con JSON válido, sin bloques de código.' },
+              { role: 'user', content: prompt }
             ],
             model: 'openai',
-            jsonMode: true,
             seed: Math.floor(Math.random() * 99999),
           }),
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
-        if (!polRes.ok) throw new Error(`Pollinations HTTP ${polRes.status}`);
-        rawText = await polRes.text();
-        if (rawText) console.log('[Bot] ✅ Pollinations respondió correctamente.');
+        if (polRes.ok) {
+          const txt = await polRes.text();
+          if (txt && txt.length > 200) {
+            console.log('[Bot] ✅ Pollinations respondió correctamente.');
+            rawText = txt;
+            aiSuccess = true;
+          }
+        }
       } catch (pollinationsError) {
-        // ── CANDADO DE SEGURIDAD ─────────────────────────────────────────────────
-        // Ninguna IA está disponible. El artículo se descarta. NUNCA se publica
-        // contenido sin reescribir para cumplir con AdSense y estándares editoriales.
-        console.log(`[Bot] 🔒 CANDADO ACTIVADO: ninguna IA disponible. Artículo descartado (no publicar sin reescritura).`);
-        throw new Error('Sin IA disponible: todas las cuotas de Gemini agotadas y Pollinations sin respuesta. Artículo descartado por política editorial.');
+        console.log(`[Bot] ⚠️ Pollinations falló: ${pollinationsError.message?.slice(0, 60)}`);
       }
+    }
+
+    // PRIORIDAD 3: OpenRouter modelos gratuitos (última línea de defensa)
+    if (!aiSuccess) {
+      console.log('[Bot] ⚠️ Pollinations sin respuesta. Intentando OpenRouter (gratuito)...');
+      const FREE_MODELS_OR = [
+        'mistralai/mistral-7b-instruct:free',
+        'meta-llama/llama-3.2-3b-instruct:free',
+        'google/gemma-2-9b-it:free',
+      ];
+      for (const orModel of FREE_MODELS_OR) {
+        if (aiSuccess) break;
+        try {
+          console.log(`[Bot] Probando OpenRouter (${orModel.split('/')[1].split(':')[0]})...`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
+          const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'HTTP-Referer': 'https://imperiopublico.com',
+              'X-Title': 'Imperio Público Bot',
+            },
+            body: JSON.stringify({
+              model: orModel,
+              messages: [
+                { role: 'system', content: 'Eres periodista profesional. Responde ÚNICAMENTE con JSON válido.' },
+                { role: 'user', content: prompt }
+              ],
+              max_tokens: 2000,
+            }),
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+          if (orRes.ok) {
+            const orData = await orRes.json();
+            const orText = orData.choices?.[0]?.message?.content || '';
+            if (orText && orText.length > 200) {
+              console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió.`);
+              rawText = orText;
+              aiSuccess = true;
+            }
+          }
+        } catch (orErr) {
+          console.log(`[Bot] ⚠️ OpenRouter (${orModel}) falló: ${orErr.message?.slice(0, 60)}`);
+        }
+      }
+    }
+
+    // Si TODOS los proveedores fallaron → candado estricto
+    if (!aiSuccess) {
+      console.log(`[Bot] 🔒 CANDADO ACTIVADO: todos los proveedores de IA fallaron. Artículo omitido.`);
+      throw new Error('Sin IA disponible: Gemini agotado, Pollinations y OpenRouter fallaron. Artículo omitido por política AdSense.');
     }
 
     const cleanedText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
@@ -687,15 +733,37 @@ Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin t
       articleData = JSON.parse(cleanedText);
     } catch (parseError) {
       const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error(`Respuesta de IA no válida: no JSON format`);
-      }
-      try {
-        articleData = JSON.parse(jsonMatch[0]);
-      } catch (innerError) {
-        throw new Error(`Respuesta de IA no válida: JSON malformed`);
+      if (jsonMatch) {
+        try { articleData = JSON.parse(jsonMatch[0]); } catch {}
       }
     }
+
+    // Rescate si el parseo JSON falló (Pollinations AI suele devolver texto en Markdown directo)
+    if (!articleData || typeof articleData !== 'object') {
+      const lines = cleanedText.split('\n');
+      let title = news.title;
+      if (lines[0] && /^#+\s*/.test(lines[0])) {
+        title = lines[0].replace(/^#+\s*/, '').trim();
+        lines.shift();
+      }
+      const content = lines.join('\n').trim();
+      if (content.length > 400) {
+        articleData = {
+          title,
+          excerpt: content.slice(0, 155).replace(/\n/g, ' '),
+          content,
+          tags: [cat.slug],
+          impact_level: 'medium'
+        };
+      } else {
+        throw new Error(`Respuesta de IA no válida: no JSON format y texto muy corto`);
+      }
+    }
+
+    // Mapear traducciones de claves al español que a veces hace la IA
+    if (!articleData.title && articleData.titulo) articleData.title = articleData.titulo;
+    if (!articleData.content && articleData.contenido) articleData.content = articleData.contenido;
+    if (!articleData.excerpt && articleData.resumen) articleData.excerpt = articleData.resumen;
 
     if (!articleData.title || !articleData.content) {
       throw new Error('La IA no devolvió los campos requeridos.');

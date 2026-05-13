@@ -109,56 +109,9 @@ function semanticOverlap(setA, setB) {
   return intersection / new Set([...setA, ...setB]).size;
 }
 
-// ─── GENERADOR DE ARTÍCULO CON POLLINATIONS ──────────────────────────────────
-async function generateWithPollinations(cat, news, todayDR) {
-  const systemMsg = `Eres un periodista profesional de "Imperio Público", portal de noticias dominicano. 
-Siempre respondes ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin bloques de código markdown.`;
-
-  const userMsg = `Escribe un artículo periodístico sobre esta noticia en la sección ${cat.slug.toUpperCase()}:
-Titular: ${news.title}
-Resumen: ${(news.contentSnippet || '').slice(0, 300)}
-
-El artículo debe tener mínimo 500 palabras en Markdown, con 3 subtítulos (##) y negritas (**dato**).
-Estilo: ${cat.style}.
-
-Responde SOLO con este JSON (sin markdown, sin comentarios):
-{"title":"titular de 50-70 caracteres","excerpt":"resumen de máximo 150 caracteres","content":"artículo completo en Markdown aquí","tags":["Tag1","Tag2","Tag3"],"impact_level":"high"}`;
-
-  console.log(`    → Generando con Pollinations (openai)...`);
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 90000);
-
-  try {
-    const res = await fetch('https://text.pollinations.ai/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
-      body: JSON.stringify({
-        messages: [
-          { role: 'system', content: systemMsg },
-          { role: 'user', content: userMsg }
-        ],
-        model: 'openai',
-        jsonMode: true,
-        seed: Math.floor(Math.random() * 99999),
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
-    if (!res.ok) throw new Error(`Pollinations HTTP ${res.status}`);
-    const raw = await res.text();
-    return raw;
-  } catch (e) {
-    clearTimeout(timeoutId);
-    throw new Error(`Pollinations falló: ${e.message}`);
-  }
-}
-
-// ─── INTENTAR CON GEMINI PRIMERO ─────────────────────────────────────────────
-async function generateWithGemini(cat, news, todayDR) {
-  const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
-  const models = ['gemini-2.0-flash-lite', 'gemini-2.0-flash'];
-  
-  const prompt = `Eres editor de "Imperio Público", portal de noticias dominicano de élite.
+// ─── PROMPT COMPARTIDO ────────────────────────────────────────────────────────
+function buildPrompt(cat, news, todayDR) {
+  return `Eres editor de "Imperio Público", portal de noticias dominicano de élite.
 
 NOTICIA: "${news.title}"
 RESUMEN: "${(news.contentSnippet || '').slice(0, 400)}"
@@ -166,12 +119,27 @@ SECCIÓN: ${cat.slug.toUpperCase()}
 ESTILO: ${cat.style}
 FECHA: ${todayDR}
 
-Escribe un artículo periodístico profesional en español con mínimo 500 palabras.
+Escribe un artículo periodístico profesional en español con MÍNIMO 600 palabras.
 Usa Markdown con 3 subtítulos ## y negritas para datos clave. NO uses frases genéricas de IA.
 Si la noticia es trivial o irrelevante, responde exactamente: IRRELEVANTE
 
-Responde SOLO con JSON válido:
-{"title":"titular SEO 50-70 chars","excerpt":"resumen 150 chars máximo","content":"artículo Markdown","tags":["Tag1","Tag2","Tag3"],"impact_level":"high"}`;
+Responde SOLO con JSON válido (sin bloques de código, sin texto extra):
+{"title":"titular SEO 50-70 chars","excerpt":"resumen 150 chars máximo","content":"artículo Markdown completo","tags":["Tag1","Tag2","Tag3"],"impact_level":"high"}`;
+}
+
+// ─── PROVEEDOR 1: GEMINI ──────────────────────────────────────────────────────
+async function generateWithGemini(cat, news, todayDR) {
+  const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
+  // Incluimos todos los modelos Gemini gratuitos disponibles (cuotas independientes)
+  const models = [
+    'gemini-2.5-flash-preview-05-20', // Nuevo — cuota propia independiente
+    'gemini-2.0-flash-lite',           // Cuota propia independiente
+    'gemini-2.0-flash',
+    'gemini-1.5-flash-latest',
+    'gemini-1.5-flash-8b',
+  ];
+
+  const prompt = buildPrompt(cat, news, todayDR);
 
   for (const key of keys) {
     for (const model of models) {
@@ -185,21 +153,136 @@ Responde SOLO con JSON válido:
         if (data.error) {
           const isQuota = data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED';
           const isInvalid = data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT';
-          console.log(`    ⚠️ Gemini ${model} (clave ...${key.slice(-6)}): ${isQuota ? 'cuota agotada' : isInvalid ? 'clave inválida' : data.error.message}`);
-          if (isInvalid) break;
+          const isNotFound = data.error.code === 404;
+          console.log(`    ⚠️ Gemini ${model} (...${key.slice(-6)}): ${isQuota ? 'cuota agotada' : isInvalid ? 'clave inválida' : isNotFound ? 'modelo no encontrado' : data.error.message}`);
+          if (isInvalid) break; // Clave inválida → pasar a siguiente clave
+          if (isNotFound) continue; // Modelo no disponible → probar siguiente modelo
           continue;
         }
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
         if (text) {
-          console.log(`    ✅ Gemini ${model} (clave ...${key.slice(-6)}) respondió`);
+          console.log(`    ✅ Gemini ${model} (...${key.slice(-6)}) respondió`);
           return text;
         }
       } catch (e) {
-        console.log(`    ❌ Gemini error: ${e.message.slice(0, 60)}`);
+        console.log(`    ❌ Gemini error (${model}): ${e.message.slice(0, 60)}`);
       }
     }
   }
-  return null; // Todas las claves de Gemini fallaron
+  return null;
+}
+
+// ─── PROVEEDOR 2: POLLINATIONS AI ────────────────────────────────────────────
+async function generateWithPollinations(cat, news, todayDR) {
+  const prompt = buildPrompt(cat, news, todayDR);
+  const systemMsg = `Eres un periodista profesional de "Imperio Público", portal de noticias dominicano. 
+Siempre respondes ÚNICAMENTE con un objeto JSON válido, sin texto adicional, sin bloques de código markdown.`;
+
+  console.log(`    → Intentando Pollinations AI...`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout generoso
+
+  try {
+    const res = await fetch('https://text.pollinations.ai/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemMsg },
+          { role: 'user', content: prompt }
+        ],
+        model: 'openai', // Usar modelo openai que es más estable
+        seed: Math.floor(Math.random() * 99999),
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.text();
+    if (raw && raw.length > 200) {
+      console.log(`    ✅ Pollinations respondió (${raw.length} chars)`);
+      return raw;
+    }
+    throw new Error('Respuesta vacía o muy corta');
+  } catch (e) {
+    clearTimeout(timeoutId);
+    console.log(`    ⚠️ Pollinations falló: ${e.message.slice(0, 60)}`);
+    return null;
+  }
+}
+
+// ─── PROVEEDOR 3: OPENROUTER (modelos gratuitos) ─────────────────────────────
+async function generateWithOpenRouter(cat, news, todayDR) {
+  // OpenRouter ofrece modelos gratuitos sin necesidad de API key de pago
+  // Documentación: https://openrouter.ai/docs/free-models
+  const FREE_MODELS = [
+    'mistralai/mistral-7b-instruct:free',
+    'meta-llama/llama-3.2-3b-instruct:free',
+    'google/gemma-2-9b-it:free',
+    'microsoft/phi-3-mini-128k-instruct:free',
+  ];
+
+  const prompt = buildPrompt(cat, news, todayDR);
+
+  for (const model of FREE_MODELS) {
+    console.log(`    → Intentando OpenRouter (${model.split('/')[1].split(':')[0]})...`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://imperiopublico.com',
+          'X-Title': 'Imperio Público Bot',
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: 'Eres un periodista profesional. Responde ÚNICAMENTE con JSON válido.' },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 2000,
+        }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errText.slice(0, 80)}`);
+      }
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || '';
+      if (text && text.length > 200) {
+        console.log(`    ✅ OpenRouter (${model}) respondió`);
+        return text;
+      }
+    } catch (e) {
+      clearTimeout(timeoutId);
+      console.log(`    ⚠️ OpenRouter (${model}) falló: ${e.message.slice(0, 60)}`);
+    }
+  }
+  return null;
+}
+
+// ─── ORQUESTADOR DE IA — prueba todos los proveedores en orden ───────────────
+async function generateArticle(cat, news, todayDR) {
+  // 1. Gemini (cuota más generosa, prioridad más alta)
+  let result = await generateWithGemini(cat, news, todayDR);
+  if (result) return result;
+
+  // 2. Pollinations AI (gratuito, sin límite de cuota)
+  result = await generateWithPollinations(cat, news, todayDR);
+  if (result) return result;
+
+  // 3. OpenRouter modelos gratuitos (última línea de defensa)
+  result = await generateWithOpenRouter(cat, news, todayDR);
+  if (result) return result;
+
+  // Si todo falló → candado activado
+  console.log(`[Bot] 🔒 CANDADO ACTIVADO: todos los proveedores de IA fallaron. Artículo omitido (no publicar sin reescritura real).`);
+  throw new Error('Sin IA disponible: Gemini agotado, Pollinations y OpenRouter fallaron. Artículo omitido por política de AdSense estricta.');
 }
 
 // ─── PUBLICAR UN ARTÍCULO ─────────────────────────────────────────────────────
@@ -219,13 +302,8 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
 
   console.log(`  📰 Procesando: "${news.title.slice(0, 70)}"`);
 
-  // Intentar Gemini primero, luego Pollinations
-  let rawText = await generateWithGemini(cat, news, todayDR);
-  if (!rawText) {
-    rawText = await generateWithPollinations(cat, news, todayDR);
-  }
-
-  if (!rawText) throw new Error('Ninguna IA respondió');
+  // Intentar con todos los proveedores de IA en orden (Gemini → Pollinations → OpenRouter)
+  const rawText = await generateArticle(cat, news, todayDR);
 
   // Parsear respuesta
   const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
@@ -238,9 +316,37 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
     articleData = JSON.parse(cleaned);
   } catch {
     const match = cleaned.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('JSON inválido en respuesta de IA');
-    articleData = JSON.parse(match[0]);
+    if (match) {
+      try { articleData = JSON.parse(match[0]); } catch {}
+    }
   }
+
+  // Rescate si el parseo JSON falló (Pollinations AI suele devolver texto en Markdown directo)
+  if (!articleData || typeof articleData !== 'object') {
+    const lines = cleaned.split('\n');
+    let title = news.title;
+    if (lines[0] && /^#+\s*/.test(lines[0])) {
+      title = lines[0].replace(/^#+\s*/, '').trim();
+      lines.shift();
+    }
+    const content = lines.join('\n').trim();
+    if (content.length > 400) {
+      articleData = {
+        title,
+        excerpt: content.slice(0, 155).replace(/\n/g, ' '),
+        content,
+        tags: [cat.slug],
+        impact_level: 'medium'
+      };
+    } else {
+      throw new Error('JSON inválido en respuesta de IA');
+    }
+  }
+
+  // Mapear traducciones de claves al español que a veces hace la IA
+  if (!articleData.title && articleData.titulo) articleData.title = articleData.titulo;
+  if (!articleData.content && articleData.contenido) articleData.content = articleData.contenido;
+  if (!articleData.excerpt && articleData.resumen) articleData.excerpt = articleData.resumen;
 
   if (!articleData.title || !articleData.content) throw new Error('Campos faltantes en respuesta');
 
