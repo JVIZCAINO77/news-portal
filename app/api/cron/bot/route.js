@@ -121,6 +121,7 @@ const CATEGORIES = {
   noticias: {
     slug: 'noticias', author: 'Redacción Nacional', style: 'periodístico, claro y objetivo',
     feeds: [
+      // Grandes medios dominicanos
       'https://www.diariolibre.com/rss/portada.xml',
       'https://acento.com.do/feed/',
       'https://hoy.com.do/feed/',
@@ -129,6 +130,12 @@ const CATEGORIES = {
       'https://noticiassin.com/feed/',
       'https://elnacional.com.do/feed/',
       'https://almomento.net/feed/',
+      // Fuentes complementarias verídicas (menos conocidas pero confiables)
+      'https://elnuevodiario.com.do/feed/',
+      'https://z101digital.com/feed/',
+      'https://eldia.com.do/feed/',
+      'https://periodicodigital.com.do/feed/',
+      'https://lainformacion.com.do/feed/',
     ],
   },
   politica: {
@@ -141,6 +148,10 @@ const CATEGORIES = {
       'https://noticiassin.com/feed/?s=politica',
       'https://elnacional.com.do/feed/?s=politica',
       'https://www.diariolibre.com/rss/portada.xml',
+      // Complementarias
+      'https://elnuevodiario.com.do/feed/',
+      'https://clavedigital.com.do/feed/',
+      'https://eldia.com.do/feed/',
     ],
   },
   economia: {
@@ -152,6 +163,10 @@ const CATEGORIES = {
       'https://hoy.com.do/feed/?s=economia',
       'https://cdn.com.do/feed/?s=economia',
       'https://elnacional.com.do/feed/?s=economia',
+      // Complementarias
+      'https://z101digital.com/feed/',
+      'https://lainformacion.com.do/feed/',
+      'https://elnuevodiario.com.do/feed/',
     ],
   },
   sucesos: {
@@ -163,6 +178,10 @@ const CATEGORIES = {
       'https://noticiassin.com/feed/?s=sucesos',
       'https://elnacional.com.do/feed/?s=sucesos',
       'https://hoy.com.do/feed/?s=accidente',
+      // Complementarias
+      'https://elnuevodiario.com.do/feed/',
+      'https://z101digital.com/feed/',
+      'https://eldia.com.do/feed/',
     ],
   },
   policia: {
@@ -175,6 +194,10 @@ const CATEGORIES = {
       'https://elnacional.com.do/feed/?s=policia',
       'https://hoy.com.do/feed/?s=policia',
       'https://cdn.com.do/feed/?s=crimen',
+      // Complementarias — cobertura policial/judicial
+      'https://judicial.net.do/feed/',
+      'https://z101digital.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
     ],
   },
   deportes: {
@@ -185,6 +208,9 @@ const CATEGORIES = {
       'https://elnacional.com.do/feed/?s=deportes',
       'https://hoy.com.do/feed/?s=deportes',
       'https://cdn.com.do/feed/?s=deportes',
+      // Complementarias
+      'https://z101digital.com/feed/?s=deportes',
+      'https://elnuevodiario.com.do/feed/',
     ],
   },
   salud: {
@@ -195,6 +221,9 @@ const CATEGORIES = {
       'https://elcaribe.com.do/feed/?s=salud',
       'https://cnnespanol.cnn.com/feed/',
       'https://www.bbc.com/mundo/index.xml',
+      // Complementarias
+      'https://elnuevodiario.com.do/feed/',
+      'https://lainformacion.com.do/feed/',
     ],
   },
   cultura: {
@@ -205,6 +234,9 @@ const CATEGORIES = {
       'https://hoy.com.do/feed/?s=cultura',
       'https://elnacional.com.do/feed/?s=cultura',
       'https://elcaribe.com.do/feed/?s=cultura',
+      // Complementarias — cultura dominicana
+      'https://areítodigital.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
     ],
   },
   entretenimiento: {
@@ -215,6 +247,9 @@ const CATEGORIES = {
       'https://remolacha.net/feed/',
       'https://hoy.com.do/feed/?s=farandula',
       'https://elnacional.com.do/feed/?s=espectaculos',
+      // Complementarias
+      'https://z101digital.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
     ],
   },
   tendencias: {
@@ -241,8 +276,6 @@ const CATEGORIES = {
   },
 
   // ─── INTERNACIONAL: Solo noticias de ALTO IMPACTO MUNDIAL ────────────────────
-  // Fuentes: CNN, BBC, France24, DW — las más confiables y de mayor alcance.
-  // Filtro adicional: solo pasan noticias con palabras de impacto global.
   internacional: {
     slug: 'internacional', author: 'Redacción Internacional', style: 'global, analítico y contextualizado para audiencia dominicana',
     feeds: [
@@ -253,6 +286,8 @@ const CATEGORIES = {
     ],
   },
 };
+
+
 
 // ─── VALIDADOR TEMÁTICO — BLOCKLIST + ALLOWLIST ───────────────────────────────
 // BLOCKLIST: palabras que NUNCA deben aparecer en esa sección.
