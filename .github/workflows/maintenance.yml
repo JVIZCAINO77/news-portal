@@ -1,0 +1,67 @@
+name: 🛠️ Mantenimiento Automático Semanal
+
+on:
+  schedule:
+    # Cada domingo a las 3:00 AM RD (7:00 AM UTC)
+    - cron: '0 7 * * 0'
+  workflow_dispatch: # Permite ejecutar manualmente
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: 🔍 Auditoría y Reclasificación de Artículos
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "====================================="
+          echo "🔍 Fase 1: Auditoría de categorías"
+          echo "====================================="
+          RESULT=$(curl -s --max-time 60 \
+            -X POST "$SITE_URL/api/admin/audit-categories?secret=$CRON_SECRET" \
+            -H "Content-Type: application/json")
+          echo "📊 Resultado: $RESULT"
+
+      - name: 🖼️ Reparación de Imágenes
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "====================================="
+          echo "🖼️ Fase 2: Reparación de imágenes"
+          echo "====================================="
+          RESULT=$(curl -s --max-time 60 \
+            -X POST "$SITE_URL/api/admin/repair-images?secret=$CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"limit": 50}')
+          echo "📊 Resultado: $RESULT"
+
+      - name: 🧹 Limpieza de Duplicados
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "====================================="
+          echo "🧹 Fase 3: Limpieza de duplicados"
+          echo "====================================="
+          RESULT=$(curl -s --max-time 60 \
+            -X POST "$SITE_URL/api/admin/cleanup?secret=$CRON_SECRET" \
+            -H "Content-Type: application/json")
+          echo "📊 Resultado: $RESULT"
+
+      - name: 📊 Reporte de Salud del Sistema
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "====================================="
+          echo "📊 Fase 4: Reporte de salud"
+          echo "====================================="
+          RESULT=$(curl -s --max-time 30 \
+            "$SITE_URL/api/admin/health?secret=$CRON_SECRET")
+          echo "📊 Estado del sistema:"
+          echo "$RESULT"
+          echo ""
+          echo "✅ Mantenimiento semanal completado."
