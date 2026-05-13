@@ -671,9 +671,12 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     if (!aiSuccess) {
       console.log('[Bot] ⚠️ Pollinations sin respuesta. Intentando OpenRouter (gratuito)...');
       const FREE_MODELS_OR = [
-        'mistralai/mistral-7b-instruct:free',
-        'meta-llama/llama-3.2-3b-instruct:free',
-        'google/gemma-2-9b-it:free',
+        'openai/gpt-oss-120b:free',
+        'openai/gpt-oss-20b:free',
+        'nvidia/nemotron-3-super-120b-a12b:free',
+        'z-ai/glm-4.5-air:free',
+        'minimax/minimax-m2.5:free',
+        'nvidia/nemotron-3-nano-30b-a3b:free',
       ];
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
@@ -685,6 +688,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`,
               'HTTP-Referer': 'https://imperiopublico.com',
               'X-Title': 'Imperio Público Bot',
             },

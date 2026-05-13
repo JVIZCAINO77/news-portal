@@ -216,10 +216,12 @@ async function generateWithOpenRouter(cat, news, todayDR) {
   // OpenRouter ofrece modelos gratuitos sin necesidad de API key de pago
   // Documentación: https://openrouter.ai/docs/free-models
   const FREE_MODELS = [
-    'mistralai/mistral-7b-instruct:free',
-    'meta-llama/llama-3.2-3b-instruct:free',
-    'google/gemma-2-9b-it:free',
-    'microsoft/phi-3-mini-128k-instruct:free',
+    'openai/gpt-oss-120b:free',           // OpenAI OSS 120B — $0, activo
+    'openai/gpt-oss-20b:free',            // OpenAI OSS 20B — $0, activo
+    'nvidia/nemotron-3-super-120b-a12b:free', // NVIDIA — $0, activo
+    'z-ai/glm-4.5-air:free',              // Z.ai GLM — $0, activo
+    'minimax/minimax-m2.5:free',          // MiniMax — $0, activo
+    'nvidia/nemotron-3-nano-30b-a3b:free', // NVIDIA Nano — $0, activo
   ];
 
   const prompt = buildPrompt(cat, news, todayDR);
@@ -234,6 +236,7 @@ async function generateWithOpenRouter(cat, news, todayDR) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`,
           'HTTP-Referer': 'https://imperiopublico.com',
           'X-Title': 'Imperio Público Bot',
         },
