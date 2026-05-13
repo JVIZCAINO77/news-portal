@@ -2,53 +2,64 @@ name: Auto-Blogger Diario
 
 on:
   schedule:
-    # Ejecuta el flujo automáticamente cada 3 horas sin excepción para mantener 
-    # una publicación dinámica (8 veces al día x 8 categorías).
-    - cron: '0 */3 * * *'
-  workflow_dispatch: # Permite ejecutar el bot manualmente desde la página de GitHub
+    # Ejecuta cada 2 horas para máxima frecuencia de publicación
+    - cron: '0 */2 * * *'
+  workflow_dispatch: # Permite ejecutar manualmente desde GitHub
 
 jobs:
   publish_article:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
-      - name: Ejecutar Agente Redactor (Vía API Endpoint para todas las categorías)
+      - name: Ejecutar Agente Redactor — Todas las categorías
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
-          NEXT_PUBLIC_SITE_URL: "https://www.imperiopublico.com"
+          SITE_URL: "https://www.imperiopublico.com"
         run: |
-          CATEGORIES="noticias entretenimiento deportes tecnologia economia salud opinion cultura sucesos tendencias internacional politica"
+          CATEGORIES="noticias politica deportes economia sucesos internacional entretenimiento tecnologia salud cultura tendencias policia"
+          TOTAL=0
+          FAILED=0
+
           for cat in $CATEGORIES; do
             echo "====================================="
-            echo "🚀 Lanzando Agente Remoto para: $cat"
+            echo "🚀 Procesando sección: $cat"
             echo "====================================="
-            
-            # Ejecutar CURL contra Vercel en la nube
-            HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" -X GET "$NEXT_PUBLIC_SITE_URL/api/cron/bot?category=$cat" -H "Authorization: Bearer $CRON_SECRET")
-            
-            if [ "$HTTP_STATUS" != "200" ]; then
-              echo "⚠️ Falló la categoría $cat con status $HTTP_STATUS, continuando con la siguiente..."
+
+            HTTP_STATUS=$(curl \
+              --silent \
+              --max-time 55 \
+              --retry 2 \
+              --retry-delay 5 \
+              --output /dev/null \
+              --write-out "%{http_code}" \
+              -X GET "$SITE_URL/api/cron/bot?category=$cat" \
+              -H "Authorization: Bearer $CRON_SECRET")
+
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "✅ Éxito: $cat (HTTP $HTTP_STATUS)"
+              TOTAL=$((TOTAL + 1))
             else
-              echo "✅ Éxito para $cat"
+              echo "⚠️ Omitida: $cat (HTTP $HTTP_STATUS)"
+              FAILED=$((FAILED + 1))
             fi
-            
-            echo "⏱️ Pausando 65 segundos (anti rate-limit de Google Gemini)..."
-            sleep 65
+
+            echo "⏳ Pausa 30s antes de la siguiente categoría..."
+            sleep 30
           done
 
-      - name: Auto-Reparación de Imágenes (Mantenimiento)
+          echo ""
+          echo "════════════════════════════════"
+          echo "📊 RESUMEN: $TOTAL éxitos / $FAILED fallos"
+          echo "════════════════════════════════"
+
+      - name: Auto-Reparación de Imágenes
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
-          NEXT_PUBLIC_SITE_URL: "https://www.imperiopublico.com"
+          SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "====================================="
-          echo "⚙️ Iniciando Fase de Auto-Reparación"
-          echo "====================================="
-          
-          # Llamar al endpoint de reparación (lote de 20 imágenes)
-          REPAIR_STATUS=$(curl -s -X POST "$NEXT_PUBLIC_SITE_URL/api/admin/repair-images?secret=$CRON_SECRET" \
+          echo "⚙️ Iniciando Auto-Reparación de imágenes..."
+          RESULT=$(curl -s --max-time 30 \
+            -X POST "$SITE_URL/api/admin/repair-images?secret=$CRON_SECRET" \
             -H "Content-Type: application/json" \
             -d '{"limit": 20}')
-          
-          echo "📊 Resultado del Mantenimiento:"
-          echo "$REPAIR_STATUS"
-
+          echo "📊 Resultado: $RESULT"

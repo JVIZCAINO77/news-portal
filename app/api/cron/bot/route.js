@@ -297,29 +297,34 @@ const TOPIC_ALLOWLIST = {
 
 /**
  * Verifica si el ítem del RSS es temáticamente apto para la sección.
- * Requiere: (1) ninguna palabra del BLOCKLIST y (2) al menos una del ALLOWLIST.
+ * BLINDAJE ESTRICTO:
+ *   (1) NINGUNA palabra del BLOCKLIST puede aparecer.
+ *   (2) Al menos 1 hit en el TÍTULO, o 2+ hits en el texto completo.
  */
 function isOnTopicForCategory(item, categorySlug) {
   const blocklist = TOPIC_BLOCKLIST[categorySlug] || [];
   const allowlist = TOPIC_ALLOWLIST[categorySlug] || [];
 
-  const text = `${item.title || ''} ${item.contentSnippet || ''}`
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+  const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const text = norm(`${item.title || ''} ${item.contentSnippet || ''}`);
+  const titleOnly = norm(item.title || '');
 
-  // Verificar BLOCKLIST: si aparece alguna palabra prohibida → descartar
-  const blocked = blocklist.some(w =>
-    text.includes(w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
-  );
+  // 1. BLOCKLIST: rechazar inmediatamente si aparece palabra prohibida
+  const blocked = blocklist.some(w => text.includes(norm(w)));
   if (blocked) return false;
 
-  // Verificar ALLOWLIST: debe existir al menos UNA palabra temática (si hay lista)
-  if (allowlist.length === 0) return true; // sin restricción (noticias / opinion)
-  return allowlist.some(w =>
-    text.includes(w.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''))
-  );
+  // 2. Sin ALLOWLIST = sin restricción temática
+  if (allowlist.length === 0) return true;
+
+  // 3. Hit en TÍTULO = señal fuerte → 1 basta
+  const titleHit = allowlist.some(w => titleOnly.includes(norm(w)));
+  if (titleHit) return true;
+
+  // 4. Solo en snippet → necesita 2+ hits
+  const hits = allowlist.filter(w => text.includes(norm(w))).length;
+  return hits >= 2;
 }
+
 
 export async function GET(request) {
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
@@ -591,11 +596,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // PRIORIDAD 1: Gemini (todas las claves × todos los modelos con cuotas independientes)
     const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
     const geminiModels = [
-      'gemini-2.5-flash-preview-05-20', // Nuevo modelo — cuota propia independiente
-      'gemini-2.0-flash-lite',           // Cuota separada de flash principal
-      'gemini-2.0-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-1.5-flash-8b',
+      'gemini-3.1-flash-lite',
+      'gemini-3-flash-preview',
+      'gemini-2.5-flash-lite',
+      'gemini-flash-latest',
+      'gemini-pro-latest',
     ];
 
     let rawText = '';
