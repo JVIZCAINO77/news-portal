@@ -7,6 +7,7 @@ import CookieConsent from '@/components/CookieConsent';
 import BackToTop from '@/components/BackToTop';
 import { Analytics } from '@vercel/analytics/react';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import PushSubscribeButton from '@/components/PushSubscribeButton';
 import Script from 'next/script';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { Suspense } from 'react';
@@ -111,7 +112,23 @@ export default function RootLayout({ children }) {
         <BackToTop />
         <Footer />
         <CookieConsent />
+        {/* Push Notifications — genera audiencia recurrente */}
+        <PushSubscribeButton />
         <Analytics />
+        {/* Service Worker para push + offline */}
+        <Script
+          id="register-sw"
+          strategy="lazyOnload"
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js').catch(() => {});
+                });
+              }
+            `,
+          }}
+        />
         {/* Google AdSense — fuera de <head> para que strategy=lazyOnload funcione correctamente */}
         <Script
           async

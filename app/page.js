@@ -220,6 +220,47 @@ export default async function HomePage() {
 
       </main>
 
+      {/* ── LO MÁS LEÍDO ─────────────────────────────────────────── */}
+      <section className="max-w-6xl mx-auto px-4 md:px-8 py-12 border-t-4 border-black">
+        <div className="flex items-center gap-4 mb-8">
+          <span className="w-3 h-3 bg-red-600 rounded-full animate-pulse" />
+          <h2 className="text-[0.7rem] font-black uppercase tracking-[0.4em]">Lo más leído hoy</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          {pool.slice(0, 5).map((art, idx) => (
+            <Link
+              key={art.id}
+              href={`/articulo/${art.slug}`}
+              className="group flex flex-col gap-3 hover:opacity-80 transition-opacity"
+            >
+              <div className="relative">
+                <span className="absolute -top-3 -left-2 text-7xl font-black text-slate-100 leading-none select-none z-0 font-serif">
+                  {idx + 1}
+                </span>
+                <PremiumImage
+                  src={art.image}
+                  alt={art.title}
+                  category={art.category}
+                  containerClassName="aspect-[4/3] rounded-xl overflow-hidden relative z-10 shadow-md"
+                  className="w-full h-full object-contain"
+                  width={400}
+                />
+              </div>
+              <div>
+                {art.category?.toLowerCase() !== 'noticias' && (
+                  <span className="text-[0.55rem] font-black uppercase tracking-[0.2em] text-red-600 block mb-1">
+                    {art.category}
+                  </span>
+                )}
+                <h3 className="text-sm font-black leading-tight group-hover:text-red-700 transition-colors line-clamp-3">
+                  {art.title}
+                </h3>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* Newsletter - Full Width */}
       <NewsletterBox />
     </div>
