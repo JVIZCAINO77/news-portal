@@ -11,13 +11,12 @@ import { SITE_CONFIG } from '@/lib/data';
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// Google AdSense penaliza sitios que publican en exceso sin suficiente calidad.
-// Para aprobación AdSense: max 10 artículos/día, 1 por categoría normal.
-// Para sitios YA aprobados: se puede subir a 2 por categoría / 15 total.
-// REGLA DE ORO: calidad > cantidad. Un artículo largo y original vale más que 5 cortos.
-const DAILY_LIMIT_GLOBAL   = 10; // TOTAL diario — conservador para aprobación AdSense
-const DAILY_LIMIT_NORMAL   = 1;  // 1 artículo por categoría/día (máxima calidad)
-const DAILY_LIMIT_BREAKING = 3;  // Máximo para ÚLTIMA HORA (urgente + siempre por IA)
+// OBJETIVO: 1 artículo por sección por día = 12 secciones = 12 art/día máximo.
+// Esto es óptimo para AdSense: suficiente frescura sin parecer spam.
+// Si el sitio ya está aprobado, se puede subir DAILY_LIMIT_NORMAL a 2.
+const DAILY_LIMIT_GLOBAL   = 12; // 1 por cada una de las 12 secciones del portal
+const DAILY_LIMIT_NORMAL   = 1;  // Mínimo 1 artículo por sección al día (garantizado)
+const DAILY_LIMIT_BREAKING = 3;  // Máximo para ÚLTIMA HORA urgente
 
 // ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
 // Longitud mínima que debe tener el contenido generado por la IA.
@@ -670,26 +669,28 @@ REGLAS EDITORIALES ADICIONALES:
 Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 { "title": "<titular original>", "excerpt": "<gancho propio>", "content": "<artículo markdown original>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
 
-    // ─── MULTI-PROVEEDOR IA ───────────────────────────────────────────────────
-    // PRIORIDAD 1: Gemini (todas las claves × todos los modelos con cuotas independientes)
+    // ─── MULTI-PROVEEDOR IA — ROTACIÓN INTELIGENTE (STICKY KEY) ───────────────
+    // Usar siempre la MISMA clave hasta que se agote por completo (todos los modelos = 429).
+    // Solo entonces pasar a la siguiente clave. Así conservamos los créditos Pro.
     const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
     const geminiModels = [
-      'gemini-3.1-flash-lite',
-      'gemini-3-flash-preview',
       'gemini-2.5-flash-lite',
-      'gemini-flash-latest',
-      'gemini-pro-latest',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-flash-8b',
+      'gemini-1.5-pro',
     ];
 
     let rawText = '';
     let aiSuccess = false;
 
-    // Intentar Gemini — cada clave con cada modelo
     for (const key of keys) {
       if (aiSuccess) break;
+      let keyExhausted = true;
+
       for (const model of geminiModels) {
         try {
-          console.log(`[Bot] Probando Gemini ...${key.slice(-6)} / ${model}`);
+          console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model}`);
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -697,11 +698,20 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           });
           const data = await res.json();
           if (data.error) {
-            const isQuota = data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED';
-            const isInvalid = data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT';
+            const isQuota    = data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED';
+            const isInvalid  = data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT';
             const isNotFound = data.error.code === 404;
-            console.log(`[Bot] ⚠️ Gemini ${model} (...${key.slice(-6)}): ${isQuota ? 'cuota agotada' : isInvalid ? 'clave inválida' : isNotFound ? 'modelo no encontrado' : data.error.message}`);
-            if (isInvalid) break;
+            const isDenied   = data.error.code === 403;
+            if (isInvalid || isDenied) {
+              console.log(`[Bot] ❌ Clave inválida/denegada ...${key.slice(-6)} — saltando`);
+              keyExhausted = true;
+              break;
+            }
+            if (isQuota || isNotFound) {
+              console.log(`[Bot] ⚠️ ${isQuota ? 'Cuota agotada' : 'Modelo N/A'}: ...${key.slice(-6)} / ${model}`);
+              continue;
+            }
+            console.log(`[Bot] ⚠️ Error Gemini: ${data.error.message?.slice(0, 60)}`);
             continue;
           }
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -709,12 +719,15 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             console.log(`[Bot] ✅ Gemini éxito: ...${key.slice(-6)} / ${model}`);
             rawText = text;
             aiSuccess = true;
+            keyExhausted = false;
             break;
           }
         } catch (e) {
-          console.log(`[Bot] ❌ Gemini error (${model}): ${e.message?.slice(0, 80)}`);
+          console.log(`[Bot] ❌ Gemini error de red (${model}): ${e.message?.slice(0, 60)}`);
         }
       }
+      // Si la clave aún puede servir (no agotada) pero algo más falló, no saltar
+      if (!keyExhausted && !aiSuccess) break;
     }
 
     // PRIORIDAD 2: Pollinations AI (gratuito, sin cuota)
