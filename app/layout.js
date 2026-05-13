@@ -82,18 +82,15 @@ export default function RootLayout({ children }) {
         {/* Forzar modo claro antes de que React hidrate — evita el flash negro */}
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.remove('dark');localStorage.removeItem('theme');` }} />
 
-        {/* ── Preconnect a dominios críticos — reduce latencia de conexión ── */}
-        {/* Google Fonts */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        {/* ── Preconnect — MÁXIMO 4, solo los más críticos ── */}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Google AdSense & Analytics */}
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
-        {/* Imágenes CDN */}
         <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
-        {/* DNS prefetch para fuentes dominicanas */}
+        {/* DNS prefetch para el resto (más barato, sin límite) */}
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://www.diariolibre.com" />
         <link rel="dns-prefetch" href="https://acento.com.do" />
 

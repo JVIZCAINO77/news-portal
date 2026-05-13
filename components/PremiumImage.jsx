@@ -69,7 +69,10 @@ export default function PremiumImage({
   const fallback = getFallback(category);
   const resolved = resolveDisplaySrc(src, category, width);
 
-  const [status, setStatus] = useState(null);
+  // CLAVE LCP: Imágenes priority empiezan visibles (status=true) para evitar
+  // el "retraso de renderizado" de 2s que provoca el LCP alto.
+  // Imágenes lazy usan skeleton (status=null) hasta que cargan.
+  const [status, setStatus] = useState(priority ? true : null);
   const [currentSrc, setCurrentSrc] = useState(resolved.url);
   const [mode, setMode] = useState(resolved.mode);
   const timeoutRef = useRef(null);
@@ -132,7 +135,7 @@ export default function PremiumImage({
   return (
     <div className={`relative overflow-hidden bg-gray-100 ${containerClassName}`}>
 
-      {/* Skeleton animado mientras carga */}
+      {/* Skeleton — solo para imágenes lazy (no priority) */}
       {status === null && (
         <div className="absolute inset-0 z-[1] bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse" />
       )}
@@ -146,7 +149,7 @@ export default function PremiumImage({
           priority={priority}
           fetchPriority={priority ? 'high' : 'auto'}
           sizes={imgSizes}
-          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
+          className={`absolute inset-0 w-full h-full object-contain ${priority ? '' : `transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'}`} ${className}`}
           onLoad={handleLoad}
           onError={handleError}
           unoptimized={isCloudinary}
@@ -155,7 +158,9 @@ export default function PremiumImage({
         <img
           src={currentSrc || fallback}
           alt={alt || 'Noticia'}
-          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
+          width={width}
+          height={Math.round(width * 0.5625)}
+          className={`absolute inset-0 w-full h-full object-contain ${priority ? '' : `transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'}`} ${className}`}
           onLoad={handleLoad}
           onError={handleError}
           loading={priority ? 'eager' : 'lazy'}
