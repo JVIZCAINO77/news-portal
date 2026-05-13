@@ -81,15 +81,31 @@ export default function RootLayout({ children }) {
       <head>
         {/* Forzar modo claro antes de que React hidrate — evita el flash negro */}
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.remove('dark');localStorage.removeItem('theme');` }} />
-        
+
+        {/* ── Preconnect a dominios críticos — reduce latencia de conexión ── */}
+        {/* Google Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Google AdSense & Analytics */}
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.google-analytics.com" crossOrigin="anonymous" />
+        {/* Imágenes CDN */}
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        {/* DNS prefetch para fuentes dominicanas */}
+        <link rel="dns-prefetch" href="https://www.diariolibre.com" />
+        <link rel="dns-prefetch" href="https://acento.com.do" />
+
         {/* RSS Feed autodiscovery */}
         <link rel="alternate" type="application/rss+xml" title={`${SITE_CONFIG.name} — Últimas Noticias`} href="/feed.xml" />
-        
+
         {/* Google Analytics 4 */}
         <Suspense fallback={null}>
           <GoogleAnalytics gaId={SITE_CONFIG.gaId} />
         </Suspense>
       </head>
+
       <body className="min-h-screen flex flex-col font-sans antialiased">
         <Header />
         <div className="min-h-screen pb-24 md:pb-0" style={{ paddingTop: '2px' }}>

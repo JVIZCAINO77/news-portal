@@ -9,7 +9,7 @@ import { optimizeImageUrl } from '@/lib/data';
  *   1. Cloudinary/Unsplash → next/image optimizado (CDN instantáneo)
  *   2. Cualquier URL externa → /api/proxy-image (bypassea hotlink protection)
  *   3. Si el proxy falla → imagen de fallback de categoría (Unsplash, siempre disponible)
- * 
+ *
  * NUNCA muestra el placeholder roto de "imagen no encontrada".
  */
 
@@ -26,6 +26,7 @@ const FALLBACKS = {
   noticias:        'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop',
   opinion:         'https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop',
   tendencias:      'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?q=80&w=1200&auto=format&fit=crop',
+  policia:         'https://images.unsplash.com/photo-1589391886645-d51941baf7fb?q=80&w=1200&auto=format&fit=crop',
   default:         'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop',
 };
 
@@ -33,35 +34,26 @@ function getFallback(category) {
   return FALLBACKS[(category || '').toLowerCase()] || FALLBACKS.default;
 }
 
-/**
- * Determina si una URL debe ir directamente a next/image (CDN propio)
- * o via nuestro proxy de imágenes externas.
- */
 function resolveDisplaySrc(src, category, width) {
-  // SIEMPRE devuelve { url, mode } — nunca un string
   if (!src) return { url: getFallback(category), mode: 'img' };
 
   const optimized = optimizeImageUrl(src, width);
   if (!optimized) return { url: getFallback(category), mode: 'img' };
-  
+
   const safe = optimized.startsWith('http://') ? optimized.replace('http://', 'https://') : optimized;
 
-  // Cloudinary y Unsplash: CDN directo, siempre disponible
   if (safe.includes('cloudinary.com') || safe.includes('unsplash.com')) {
     return { url: safe, mode: 'next-image' };
   }
 
-  // Pollinations.ai: CDN de IA, también accesible directamente
   if (safe.includes('pollinations.ai') || safe.includes('image.pollinations.ai')) {
     return { url: safe, mode: 'img' };
   }
 
-  // Cualquier otra URL externa → nuestro proxy
   if (safe.startsWith('http')) {
     return { url: `/api/proxy-image?url=${encodeURIComponent(safe)}`, mode: 'img' };
   }
 
-  // URLs relativas, /icon.png, etc.
   return { url: safe || getFallback(category), mode: 'img' };
 }
 
@@ -77,13 +69,11 @@ export default function PremiumImage({
   const fallback = getFallback(category);
   const resolved = resolveDisplaySrc(src, category, width);
 
-  // Estado: null = cargando, true = cargado, false = error → usar fallback
   const [status, setStatus] = useState(null);
   const [currentSrc, setCurrentSrc] = useState(resolved.url);
   const [mode, setMode] = useState(resolved.mode);
   const timeoutRef = useRef(null);
 
-  // Reset cuando cambia el src (navegación entre artículos)
   useEffect(() => {
     const r = resolveDisplaySrc(src, category, width);
     setCurrentSrc(r.url);
@@ -91,15 +81,14 @@ export default function PremiumImage({
     setStatus(null);
   }, [src]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Timeout de seguridad: si la imagen tarda más de 12s → mostrar fallback de categoría
+  // Timeout reducido a 5s (antes 12s) — mejora el LCP significativamente
   useEffect(() => {
-    if (status !== null) return; // ya cargó o ya falló
+    if (status !== null) return;
     timeoutRef.current = setTimeout(() => {
-      console.warn('[PremiumImage] Timeout reached, showing fallback');
       setCurrentSrc(fallback);
-      setMode('img');
-      setStatus(true); // Hacer visible el fallback inmediatamente
-    }, 12000);
+      setMode('next-image'); // Usar next/image para el fallback (optimización AVIF)
+      setStatus(true);
+    }, 5000);
     return () => clearTimeout(timeoutRef.current);
   }, [status, fallback]);
 
@@ -111,7 +100,6 @@ export default function PremiumImage({
   const handleError = () => {
     clearTimeout(timeoutRef.current);
     const safeCurrent = currentSrc || '';
-    // Si el proxy falló, intentamos directamente con la URL original
     if (safeCurrent.includes('/api/proxy-image')) {
       try {
         const originalUrl = new URL(safeCurrent, 'https://x.com').searchParams.get('url');
@@ -123,19 +111,23 @@ export default function PremiumImage({
         }
       } catch (_) { /* ignore */ }
     }
-    // Si ya estamos en el fallback de categoría y aún falla → no hacer nada más
     if (safeCurrent === fallback) {
       setStatus(true);
       return;
     }
-    // En cualquier otro caso → fallback de categoría (Unsplash, siempre disponible)
-    console.warn('[PremiumImage] Loading error, showing fallback');
     setCurrentSrc(fallback);
-    setMode('img');
-    setStatus(true); // Hacer visible el fallback inmediatamente
+    setMode('next-image');
+    setStatus(true);
   };
 
   const isCloudinary = (currentSrc || '').includes('cloudinary.com');
+
+  // Responsive sizes según el ancho solicitado
+  const imgSizes = width >= 1200
+    ? '(max-width: 390px) 390px, (max-width: 768px) 100vw, (max-width: 1280px) 50vw, 1200px'
+    : width >= 800
+    ? '(max-width: 390px) 390px, (max-width: 768px) 100vw, (max-width: 1280px) 50vw, 800px'
+    : '(max-width: 390px) 200px, (max-width: 768px) 50vw, 400px';
 
   return (
     <div className={`relative overflow-hidden bg-gray-100 ${containerClassName}`}>
@@ -152,8 +144,9 @@ export default function PremiumImage({
           alt={alt || 'Noticia'}
           fill
           priority={priority}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
+          fetchPriority={priority ? 'high' : 'auto'}
+          sizes={imgSizes}
+          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
           onLoad={handleLoad}
           onError={handleError}
           unoptimized={isCloudinary}
@@ -162,12 +155,16 @@ export default function PremiumImage({
         <img
           src={currentSrc || fallback}
           alt={alt || 'Noticia'}
-          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
+          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'} ${className}`}
           onLoad={handleLoad}
           onError={handleError}
           loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+          decoding={priority ? 'sync' : 'async'}
         />
       )}
     </div>
   );
 }
+
+
