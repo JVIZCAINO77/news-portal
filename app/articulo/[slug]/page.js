@@ -126,7 +126,7 @@ export default async function ArticlePage({ params }) {
         <div className="max-w-6xl mx-auto px-6 py-4 md:py-8">
           
           {/* 1. CABECERA EDITORIAL */}
-          <header className="mb-4 md:mb-10 border-b-[3px] border-black pb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <header className="mb-4 md:mb-10 border-b-[3px] border-black pb-6">
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 {article.category?.toLowerCase() !== 'noticias' && (
@@ -159,13 +159,15 @@ export default async function ArticlePage({ params }) {
             
             <div className="lg:col-span-8 space-y-6">
               
-              <figure className="mb-10 group animate-in fade-in zoom-in-95 duration-1000 delay-200">
+              <figure className="mb-10 group">
                 <PremiumImage 
                   src={article.image} 
                   alt={article.imageAlt || article.title}
+                  category={article.category}
                   containerClassName="w-full min-h-[300px] md:min-h-[500px] max-h-[85vh] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.3)] rounded-3xl border border-slate-100 group-hover:border-red-100 transition-colors"
                   className="w-full h-full object-contain transition-transform group-hover:scale-[1.01] duration-1000"
                   priority={true}
+                  width={1200}
                 />
                 {article.imageAlt && (
                   <figcaption className="mt-4 text-center overline-label !text-slate-400 italic">

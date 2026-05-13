@@ -22,12 +22,12 @@ export default function GoogleAnalytics({ gaId }) {
   return (
     <>
       <Script
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
       />
       <Script
         id="gtag-init"
-        strategy="afterInteractive"
+        strategy="lazyOnload"
         dangerouslySetInnerHTML={{
           __html: `
             window.dataLayer = window.dataLayer || [];
@@ -35,6 +35,7 @@ export default function GoogleAnalytics({ gaId }) {
             gtag('js', new Date());
             gtag('config', '${gaId}', {
               page_path: window.location.pathname,
+              send_page_view: false,
             });
           `,
         }}

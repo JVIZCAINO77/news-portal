@@ -54,11 +54,13 @@ export default function Header() {
       }
     };
     const controller = new AbortController();
-    fetchTicker(controller.signal);
+    // Delay 2s — el ticker es decorativo, no debe competir con el LCP
+    const timer = setTimeout(() => fetchTicker(controller.signal), 2000);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      controller.abort(); // cancelar el fetch si el componente se desmonta
+      clearTimeout(timer);
+      controller.abort();
     };
   }, []);
 

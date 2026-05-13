@@ -97,6 +97,7 @@ export default async function HomePage() {
                       containerClassName="w-full min-h-[350px] md:min-h-[500px] max-h-[650px] mb-[16px] shadow-xl border border-gray-100 rounded-sm group/img"
                       className="w-auto h-auto max-w-full max-h-[650px] object-contain transition-transform duration-700 group-hover/img:scale-[1.01] shadow-2xl"
                       priority={true}
+                      width={1280}
                     />
                   )}
                   

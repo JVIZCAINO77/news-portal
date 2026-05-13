@@ -16,11 +16,9 @@ export default function BreakingNews() {
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {
           const latest = data[0];
-          // Solo mostrar si es muy reciente (menos de 2 horas)
           const published = new Date(latest.publishedAt);
           const now = new Date();
           const diffHours = (now - published) / (1000 * 60 * 60);
-          
           if (diffHours < 2 || latest.trending) {
             setNews(latest);
             setIsVisible(true);
@@ -33,14 +31,15 @@ export default function BreakingNews() {
       }
     };
 
-    fetchBreaking();
-    return () => controller.abort();
+    // Delay 1s para no competir con recursos LCP del primer render
+    const timer = setTimeout(() => fetchBreaking(), 1000);
+    return () => { clearTimeout(timer); controller.abort(); };
   }, []);
 
   if (!isVisible || !news) return null;
 
   return (
-    <div className="bg-red-700 text-white py-1.5 md:py-2 px-4 animate-in fade-in slide-in-from-top duration-700">
+    <div className="bg-red-700 text-white py-1.5 md:py-2 px-4 animate-in fade-in duration-500">
       <div className="max-w-6xl mx-auto flex items-center gap-3 md:gap-4">
         <span className="bg-white text-red-700 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-sm shrink-0 flex items-center gap-1.5 shadow-sm">
           <span className="w-1.5 h-1.5 bg-red-700 rounded-full animate-ping"></span>
