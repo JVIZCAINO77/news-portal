@@ -105,7 +105,9 @@ export default function Header() {
                 src="/icon.png" 
                 alt="Logo IP" 
                 fill
-                priority={true}
+                priority
+                fetchPriority="high"
+                sizes="(max-width: 768px) 48px, (max-width: 1024px) 80px, 96px"
                 className="object-contain mix-blend-multiply" 
               />
             </div>
