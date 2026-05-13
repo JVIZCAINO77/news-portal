@@ -2,8 +2,8 @@ name: Auto-Blogger Diario
 
 on:
   schedule:
-    # Ejecuta cada 2 horas para máxima frecuencia de publicación
-    - cron: '0 */2 * * *'
+    # Ejecuta cada 3 horas — ritmo natural de publicación para AdSense
+    - cron: '0 */3 * * *'
   workflow_dispatch: # Permite ejecutar manualmente desde GitHub
 
 jobs:

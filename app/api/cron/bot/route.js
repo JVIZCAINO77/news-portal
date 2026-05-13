@@ -11,12 +11,13 @@ import { SITE_CONFIG } from '@/lib/data';
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// Google AdSense requiere contenido ORIGINAL, de calidad y publicado con consistencia.
-// Recomendación editorial: 2-3 artículos por categoría, máximo 12-15 por día.
-// Más de 15 artículos/día en un sitio nuevo puede interpretarse como contenido spam.
-const DAILY_LIMIT_GLOBAL   = 12; // TOTAL diario — óptimo para AdSense (calidad > cantidad)
-const DAILY_LIMIT_NORMAL   = 2;  // Artículos reescritos por categoría/día
-const DAILY_LIMIT_BREAKING = 4;  // Máximo para ÚLTIMA HORA (siempre reescrita por IA)
+// Google AdSense penaliza sitios que publican en exceso sin suficiente calidad.
+// Para aprobación AdSense: max 10 artículos/día, 1 por categoría normal.
+// Para sitios YA aprobados: se puede subir a 2 por categoría / 15 total.
+// REGLA DE ORO: calidad > cantidad. Un artículo largo y original vale más que 5 cortos.
+const DAILY_LIMIT_GLOBAL   = 10; // TOTAL diario — conservador para aprobación AdSense
+const DAILY_LIMIT_NORMAL   = 1;  // 1 artículo por categoría/día (máxima calidad)
+const DAILY_LIMIT_BREAKING = 3;  // Máximo para ÚLTIMA HORA (urgente + siempre por IA)
 
 // ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
 // Longitud mínima que debe tener el contenido generado por la IA.
