@@ -635,29 +635,40 @@ export async function GET(request) {
       .slice(0, 80);
     const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
-    // ─── PROMPT EDITORIAL ─────────────────────────────────────────────────────
-    const prompt = `Eres el editor de la sección "${cat.slug.toUpperCase()}" de "Imperio Público", un medio digital de élite.
+    // ─── PROMPT EDITORIAL — PERIODISMO ORIGINAL ─────────────────────────────
+    const prompt = `Eres el redactor jefe de la sección "${cat.slug.toUpperCase()}" de **Imperio Público**, un medio digital dominicano de élite con estándares editoriales propios.
 
---- DATOS DE LA NOTICIA ---
+--- REFERENCIA INFORMATIVA (solo para extraer los hechos) ---
 Fecha: ${todayDR}
-SECCIÓN ASIGNADA (FIJA): ${cat.slug.toUpperCase()}
-Titular de fuente: ${news.title}
-Resumen de fuente: ${news.contentSnippet || 'Sin resumen disponible'}
---------------------------
+SECCIÓN: ${cat.slug.toUpperCase()}
+Titular de referencia: ${news.title}
+Resumen de referencia: ${news.contentSnippet || 'Sin resumen disponible'}
+--------------------------------------------------------------
 
-REGLAS EDITORIALES CRÍTICAS:
-1. SECCIÓN: Redacta enfocado en el ángulo "${cat.slug.toUpperCase()}".
-2. IDIOMA: Español neutro y profesional.
-3. Incluye análisis del impacto y contexto histórico relevante.
-4. Estructura: primer párrafo enganchador, al menos 3 subtítulos (##), **negritas** en datos clave.
-5. TÍTULO: original, SEO, 50-70 caracteres.
-6. CONTENIDO: MÍNIMO 600 palabras. Estilo: ${cat.style}. PROHIBIDO frases genéricas de IA.
-7. EXCERPT: meta-descripción de 155 caracteres.
+⚠️ REGLA FUNDAMENTAL — LEY DE REDACCIÓN ORIGINAL:
+Tú NO copias. Tú NO traduces. Tú NO parafraseas directamente.
+Usas la información de la fuente ÚNICAMENTE para conocer los HECHOS.
+Luego escribes tu PROPIO artículo con:
+  • Tu PROPIA voz editorial (estilo Imperio Público)
+  • Tu PROPIA estructura narrativa
+  • Tu PROPIO ángulo y enfoque periodístico
+  • Tu PROPIO análisis e interpretación del impacto
+Si alguien compara tu artículo con la fuente original, deben leer como dos piezas completamente distintas.
 
-Si la noticia es trivial o sin relevancia pública → responde exactamente: IRRELEVANTE
+REGLAS EDITORIALES ADICIONALES:
+1. SECCIÓN: Enfoca el ángulo en "${cat.slug.toUpperCase()}". Estilo: ${cat.style}.
+2. IDIOMA: Español dominicano profesional, natural y fluido.
+3. Primer párrafo: impactante, que enganche al lector en las primeras dos líneas.
+4. Estructura: al menos 3 subtítulos (##) que guíen la lectura.
+5. Usa **negritas** en datos clave, cifras y nombres importantes.
+6. TÍTULO: Original, atractivo, SEO-optimizado. Entre 50-70 caracteres. NO copies el título de la fuente.
+7. CONTENIDO: MÍNIMO 600 palabras. Incluye contexto histórico, impacto local o regional, y perspectiva.
+8. EXCERPT: Meta-descripción propia de 155 caracteres máximo.
+9. PROHIBIDO: frases genéricas de IA ("En conclusión...", "Es importante destacar...", "Cabe mencionar...").
+10. Si la noticia es trivial o sin relevancia pública → responde exactamente: IRRELEVANTE
 
 Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
-{ "title": "<titular>", "excerpt": "<gancho>", "content": "<artículo markdown>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
+{ "title": "<titular original>", "excerpt": "<gancho propio>", "content": "<artículo markdown original>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
 
     // ─── MULTI-PROVEEDOR IA ───────────────────────────────────────────────────
     // PRIORIDAD 1: Gemini (todas las claves × todos los modelos con cuotas independientes)
