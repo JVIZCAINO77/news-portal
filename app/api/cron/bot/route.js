@@ -777,7 +777,8 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
         try {
-          console.log(`[Bot] Probando OpenRouter (${orModel.split('/')[1].split(':')[0]})...`);
+          const orModelName = (orModel.split('/')[1] || orModel).split(':')[0];
+          console.log(`[Bot] Probando OpenRouter (${orModelName})...`);
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000);
           const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -1141,7 +1142,8 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         .split(/\s+/)
         .filter(w => w.length > 3)
         .slice(0, 5)
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+        .map(w => { const s = String(w || ''); return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''; })
+        .filter(Boolean);
       cleanedTags = [cat.slug.charAt(0).toUpperCase() + cat.slug.slice(1), ...titleWords];
     }
 

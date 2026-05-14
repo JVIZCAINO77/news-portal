@@ -71,7 +71,7 @@ export default async function AdminDashboardPage() {
     if (a.category) catStats[a.category] = (catStats[a.category] || 0) + (a.views || 0);
   });
   const topCategories = Object.entries(catStats)
-    .map(([name, count]) => ({ name: name.charAt(0).toUpperCase() + name.slice(1), count }))
+    .map(([name, count]) => { const n = String(name || ''); return { name: n.charAt(0).toUpperCase() + n.slice(1), count }; })
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
 
@@ -81,7 +81,7 @@ export default async function AdminDashboardPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
           <h2 className="text-5xl font-black uppercase tracking-tighter mb-2 italic">
-            Hola, {user.email.split('@')[0]}
+            Hola, {(user.email || 'Usuario').split('@')[0]}
           </h2>
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
             Imperio Público Editorial Control Center

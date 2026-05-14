@@ -1,23 +1,25 @@
 /**
  * app/api/og/route.js
  * ─────────────────────────────────────────────────────────────────────────────
- * Genera la miniatura de redes sociales estilo "Imperio Público" para cada
- * artículo. URL: /api/og?slug=article-slug
+ * Genera la miniatura cinematic-editorial de redes sociales para Imperio Público.
+ * URL: /api/og?slug=article-slug
  *
- * Diseño: fondo granate oscuro, foto del artículo, banda con título, logo IP.
- * Formato 1080×1080 (cuadrado, óptimo para Instagram + Facebook).
+ * Formato: 1080×1350 vertical Instagram (portrait).
+ * Diseño: Foto full-bleed + gradiente dramático + logo top-left + líneas
+ * decorativas blancas + badge categoría + titular serif grande + extracto + botón.
  */
 
 import { ImageResponse } from 'next/og';
 import { createClient } from '@supabase/supabase-js';
 
-export const runtime = 'nodejs'; // Necesita Node.js para Supabase
+export const runtime = 'nodejs';
 
-const SITE_URL  = process.env.NEXT_PUBLIC_SITE_URL || 'https://imperiopublico.com';
-const BRAND     = '#7A0020'; // Granate oscuro Imperio Público
-const BRAND_RED = '#C0001A'; // Rojo vibrante (etiqueta + botón)
-const WIDTH     = 1080;
-const HEIGHT    = 1080;
+const BRAND      = '#3A0009';   // Granate oscuro profundo
+const BRAND_MID  = '#5C0015';   // Granate medio
+const BRAND_RED  = '#C0001A';   // Rojo vibrante CTA
+const GOLD       = '#C9A84C';   // Acento dorado
+const WIDTH      = 1080;
+const HEIGHT     = 1350;
 
 export async function GET(request) {
   try {
@@ -28,7 +30,7 @@ export async function GET(request) {
       return new Response('Missing slug', { status: 400 });
     }
 
-    // Obtener datos del artículo desde Supabase
+    // ── Datos del artículo ──────────────────────────────────────────────────
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -43,13 +45,10 @@ export async function GET(request) {
       return new Response('Article not found', { status: 404 });
     }
 
-    // Preparar datos
-    const title    = article.title   || 'Imperio Público';
-    const excerpt  = (article.excerpt || '').slice(0, 120);
-    const category = (article.category || 'Noticias').toUpperCase();
+    const title    = String(article.title   || 'Imperio Público');
+    const excerpt  = String(article.excerpt || '').slice(0, 145);
     const imageUrl = article.image?.split('?')[0] || null;
 
-    // Mapeo de categoría a etiqueta
     const categoryLabel = {
       politica:       'POLÍTICA',
       deportes:       'DEPORTES',
@@ -62,83 +61,226 @@ export async function GET(request) {
       salud:          'SALUD',
       cultura:        'CULTURA',
       tendencias:     'TENDENCIAS',
-    }[article.category?.toLowerCase()] || 'TEMA DEL DÍA';
+    }[String(article.category || '').toLowerCase()] || 'TEMA DEL DÍA';
+
+    // ── Fuente Playfair Display (serif elegante) ────────────────────────────
+    let playfairFont = null;
+    try {
+      const fontRes = await fetch(
+        'https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff',
+        { signal: AbortSignal.timeout(4000) }
+      );
+      if (fontRes.ok) playfairFont = await fontRes.arrayBuffer();
+    } catch (_) { /* fallback a Georgia */ }
+
+    // ── Dots decorativos (grilla 5×5) ───────────────────────────────────────
+    const dots25 = Array.from({ length: 25 });
+
+    // ── Tamaño de fuente adaptativo ─────────────────────────────────────────
+    const titleLen    = title.length;
+    const titleFontSz = titleLen > 80 ? 52 : titleLen > 55 ? 62 : 72;
+    const titleCapped = titleLen > 130 ? title.slice(0, 127) + '…' : title;
+    const excerptCapped = excerpt.length > 130 ? excerpt.slice(0, 127) + '…' : excerpt;
+
+    const serifFamily = playfairFont ? 'Playfair, Georgia, serif' : 'Georgia, serif';
 
     return new ImageResponse(
       (
+        /* ── CANVAS ────────────────────────────────────────────────────── */
         <div
           style={{
             width: `${WIDTH}px`,
             height: `${HEIGHT}px`,
-            display: 'flex',
-            flexDirection: 'column',
-            backgroundColor: BRAND,
-            fontFamily: 'Georgia, serif',
             position: 'relative',
+            display: 'flex',
+            backgroundColor: BRAND,
             overflow: 'hidden',
           }}
         >
-          {/* ── FOTO DEL ARTÍCULO (parte superior ~60%) ── */}
-          <div
-            style={{
-              width: '100%',
-              height: '640px',
-              display: 'flex',
-              position: 'relative',
-              overflow: 'hidden',
-            }}
-          >
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt=""
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center top',
-                }}
-              />
-            ) : (
-              <div style={{ width: '100%', height: '100%', backgroundColor: '#3a0010', display: 'flex' }} />
-            )}
-
-            {/* Degradado inferior sobre la foto para legibilidad */}
-            <div
+          {/* ── CAPA 1: Foto full-bleed ── */}
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt=""
               style={{
                 position: 'absolute',
-                bottom: 0,
+                top: 0,
                 left: 0,
-                right: 0,
-                height: '280px',
-                background: 'linear-gradient(to bottom, transparent, rgba(90,0,20,0.92))',
-                display: 'flex',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center 20%',
               }}
             />
-
-            {/* ── LOGO IP en esquina superior izquierda ── */}
+          ) : (
             <div
               style={{
                 position: 'absolute',
-                top: '24px',
-                left: '24px',
+                top: 0, left: 0, right: 0, bottom: 0,
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-                background: 'rgba(90,0,20,0.65)',
-                padding: '8px 14px 10px',
-                borderLeft: '4px solid #C0001A',
+                background: `linear-gradient(160deg, ${BRAND_MID} 0%, ${BRAND} 100%)`,
               }}
+            />
+          )}
+
+          {/* ── CAPA 2: Gradiente overlay — top sutil, fondo dramático ── */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              display: 'flex',
+              background:
+                'linear-gradient(to bottom,' +
+                'rgba(30,0,6,0.10) 0%,' +
+                'rgba(30,0,6,0.18) 25%,' +
+                'rgba(35,0,8,0.55) 45%,' +
+                'rgba(35,0,8,0.82) 62%,' +
+                'rgba(30,0,6,0.95) 78%,' +
+                'rgba(26,0,5,0.99) 100%)',
+            }}
+          />
+
+          {/* ── CAPA 3: Vignette lateral (bordes oscuros cinematográficos) ── */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              display: 'flex',
+              background:
+                'radial-gradient(ellipse at center, transparent 55%, rgba(10,0,2,0.55) 100%)',
+            }}
+          />
+
+          {/* ── CAPA 4: Líneas curvas blancas (decorativas) ── */}
+          <svg
+            width={WIDTH}
+            height={HEIGHT}
+            viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
+            style={{ position: 'absolute', top: 0, left: 0, display: 'flex' }}
+          >
+            {/* Línea curva principal — diagonal descendente */}
+            <path
+              d={`M -60 ${HEIGHT * 0.38} Q ${WIDTH * 0.30} ${HEIGHT * 0.52} ${WIDTH * 0.72} ${HEIGHT * 0.44}`}
+              stroke="rgba(255,255,255,0.09)"
+              strokeWidth="1.5"
+              fill="none"
+            />
+            {/* Segunda curva — más suave */}
+            <path
+              d={`M ${WIDTH * 0.15} ${HEIGHT * 0.30} Q ${WIDTH * 0.55} ${HEIGHT * 0.50} ${WIDTH + 40} ${HEIGHT * 0.42}`}
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth="1"
+              fill="none"
+            />
+            {/* Línea tenue inferior */}
+            <path
+              d={`M 0 ${HEIGHT * 0.60} Q ${WIDTH * 0.4} ${HEIGHT * 0.57} ${WIDTH} ${HEIGHT * 0.63}`}
+              stroke="rgba(255,255,255,0.05)"
+              strokeWidth="1"
+              fill="none"
+            />
+            {/* Acento rojo sutil — diagonal */}
+            <path
+              d={`M 0 ${HEIGHT * 0.68} Q ${WIDTH * 0.25} ${HEIGHT * 0.65} ${WIDTH * 0.50} ${HEIGHT * 0.67}`}
+              stroke={`rgba(192,0,26,0.30)`}
+              strokeWidth="2"
+              fill="none"
+            />
+          </svg>
+
+          {/* ── CAPA 5: Patrón de puntos decorativos — esquina derecha ── */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 68,
+              right: 52,
+              display: 'flex',
+              flexWrap: 'wrap',
+              width: '82px',
+              gap: '9px',
+              opacity: 0.28,
+            }}
+          >
+            {dots25.map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  backgroundColor: 'white',
+                  display: 'flex',
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* ── CAPA 6: Patrón de puntos — izquierda media ── */}
+          <div
+            style={{
+              position: 'absolute',
+              top: HEIGHT * 0.40,
+              left: 32,
+              display: 'flex',
+              flexWrap: 'wrap',
+              width: '56px',
+              gap: '8px',
+              opacity: 0.18,
+            }}
+          >
+            {Array.from({ length: 16 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: '5px',
+                  height: '5px',
+                  borderRadius: '50%',
+                  backgroundColor: 'white',
+                  display: 'flex',
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+          </div>
+
+          {/* ── CAPA 7: Logo top-left ── */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '48px',
+              left: '52px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+            }}
+          >
+            {/* Corona SVG */}
+            <svg
+              width="38"
+              height="34"
+              viewBox="0 0 50 44"
+              fill="none"
+              style={{ display: 'flex' }}
             >
+              <path d="M4 34L11 14L20 28L25 8L30 28L39 14L46 34H4Z" fill="white" />
+              <circle cx="4"  cy="13" r="4" fill="white" />
+              <circle cx="25" cy="6"  r="4" fill="white" />
+              <circle cx="46" cy="13" r="4" fill="white" />
+              <rect x="2" y="35" width="46" height="6" rx="2.5" fill="white" />
+            </svg>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <div
                 style={{
                   fontSize: '22px',
                   fontWeight: 'bold',
                   color: 'white',
-                  letterSpacing: '2px',
+                  letterSpacing: '2.5px',
                   textTransform: 'uppercase',
-                  display: 'flex',
                   lineHeight: '1',
+                  display: 'flex',
+                  fontFamily: serifFamily,
                 }}
               >
                 IMPERIO PÚBLICO
@@ -146,109 +288,124 @@ export async function GET(request) {
               <div
                 style={{
                   fontSize: '10px',
-                  color: '#C9A84C',
-                  letterSpacing: '2.5px',
+                  color: GOLD,
+                  letterSpacing: '3px',
                   display: 'flex',
-                  marginTop: '3px',
                   textTransform: 'uppercase',
+                  fontFamily: 'Arial, sans-serif',
                 }}
               >
                 TU PERIÓDICO, TU VOZ
               </div>
             </div>
-
-            {/* ── ETIQUETA DE CATEGORÍA ── */}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: '80px',
-                left: '32px',
-                backgroundColor: BRAND_RED,
-                color: 'white',
-                fontSize: '18px',
-                fontWeight: 'bold',
-                letterSpacing: '1.5px',
-                padding: '6px 18px',
-                display: 'flex',
-              }}
-            >
-              {categoryLabel}
-            </div>
           </div>
 
-          {/* ── PANEL INFERIOR: Título + Extracto + Botón ── */}
+          {/* ── CAPA 8: Contenido inferior (badge + titular + extracto + botón) ── */}
           <div
             style={{
-              flex: 1,
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
-              padding: '28px 36px 30px',
-              backgroundColor: BRAND,
+              padding: '0 56px 64px',
             }}
           >
-            {/* Título del artículo */}
+            {/* Línea separadora dorada */}
             <div
               style={{
-                fontSize: title.length > 60 ? '38px' : '46px',
-                fontWeight: 'bold',
-                color: 'white',
-                lineHeight: '1.2',
+                width: '56px',
+                height: '3px',
+                backgroundColor: GOLD,
                 display: 'flex',
-                flexWrap: 'wrap',
-                letterSpacing: '-0.5px',
+                marginBottom: '22px',
+                opacity: 0.85,
               }}
-            >
-              {title.length > 100 ? title.slice(0, 97) + '…' : title}
-            </div>
+            />
 
-            {/* Extracto */}
-            {excerpt && (
-              <div
-                style={{
-                  fontSize: '20px',
-                  color: 'rgba(255,255,255,0.80)',
-                  lineHeight: '1.45',
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  marginTop: '12px',
-                }}
-              >
-                {excerpt.length > 110 ? excerpt.slice(0, 107) + '…' : excerpt}
-              </div>
-            )}
-
-            {/* Fila inferior: botón + URL */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginTop: '20px',
-              }}
-            >
-              {/* Botón LEER MÁS */}
+            {/* Badge de categoría */}
+            <div style={{ display: 'flex', marginBottom: '20px' }}>
               <div
                 style={{
                   backgroundColor: BRAND_RED,
                   color: 'white',
-                  fontSize: '18px',
+                  fontSize: '14px',
                   fontWeight: 'bold',
-                  letterSpacing: '1.5px',
-                  padding: '10px 28px',
+                  letterSpacing: '2.5px',
+                  padding: '7px 20px',
                   display: 'flex',
+                  textTransform: 'uppercase',
+                  fontFamily: 'Arial, sans-serif',
+                }}
+              >
+                {categoryLabel}
+              </div>
+            </div>
+
+            {/* Titular principal — serif dramático */}
+            <div
+              style={{
+                fontSize: `${titleFontSz}px`,
+                fontWeight: 'bold',
+                color: 'white',
+                lineHeight: '1.18',
+                display: 'flex',
+                flexWrap: 'wrap',
+                letterSpacing: '-0.8px',
+                marginBottom: '18px',
+                fontFamily: serifFamily,
+                textShadow: '0 2px 20px rgba(0,0,0,0.6)',
+              }}
+            >
+              {titleCapped}
+            </div>
+
+            {/* Extracto / descripción */}
+            {excerptCapped && (
+              <div
+                style={{
+                  fontSize: '19px',
+                  color: 'rgba(255,255,255,0.75)',
+                  lineHeight: '1.55',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  marginBottom: '30px',
+                  fontFamily: 'Arial, sans-serif',
+                  letterSpacing: '0.1px',
+                }}
+              >
+                {excerptCapped}
+              </div>
+            )}
+
+            {/* Botón LEER MÁS */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+              <div
+                style={{
+                  backgroundColor: BRAND_RED,
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: 'bold',
+                  letterSpacing: '3px',
+                  padding: '14px 38px',
+                  display: 'flex',
+                  textTransform: 'uppercase',
+                  fontFamily: 'Arial, sans-serif',
                 }}
               >
                 LEER MÁS
               </div>
 
-              {/* URL del sitio */}
+              {/* Dominio del sitio */}
               <div
                 style={{
-                  fontSize: '18px',
-                  color: 'rgba(255,255,255,0.55)',
-                  letterSpacing: '1px',
+                  fontSize: '13px',
+                  color: 'rgba(255,255,255,0.35)',
+                  letterSpacing: '1.5px',
                   display: 'flex',
+                  fontFamily: 'Arial, sans-serif',
+                  textTransform: 'uppercase',
                 }}
               >
                 imperiopublico.com
@@ -256,14 +413,14 @@ export async function GET(request) {
             </div>
           </div>
 
-          {/* ── BORDE INFERIOR ── */}
+          {/* ── BORDE INFERIOR ROJO ── */}
           <div
             style={{
               position: 'absolute',
               bottom: 0,
               left: 0,
               right: 0,
-              height: '4px',
+              height: '5px',
               backgroundColor: BRAND_RED,
               display: 'flex',
             }}
@@ -273,8 +430,11 @@ export async function GET(request) {
       {
         width: WIDTH,
         height: HEIGHT,
+        fonts: playfairFont
+          ? [{ name: 'Playfair', data: playfairFont, weight: 700, style: 'normal' }]
+          : [],
         headers: {
-          'Cache-Control': 'public, max-age=86400, s-maxage=86400', // Cache 24h
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
         },
       }
     );

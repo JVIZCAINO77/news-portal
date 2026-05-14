@@ -118,7 +118,7 @@ export default async function AdminLayout({ children }) {
               />
             ) : (
               <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-black text-lg">
-                {(profile?.full_name || user?.email || '?')[0].toUpperCase()}
+                {(profile?.full_name || user?.email || '?').charAt(0).toUpperCase() || '?'}
               </div>
             )}
             <div className="overflow-hidden">
