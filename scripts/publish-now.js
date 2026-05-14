@@ -166,13 +166,24 @@ function semanticOverlap(setA, setB) {
  * Extrae entidades (palabras con mayuscula inicial, 4+ chars) del titulo.
  * Detecta el mismo evento aunque cambie la redaccion: "Guyana" aparece en ambos.
  */
+
+// Entidades demasiado genéricas para discriminar eventos (excluidas de la Capa 4)
+const GENERIC_ENTITIES = new Set([
+  'republica','dominicana','dominicano','dominicanos','dominicanas',
+  'estados','unidos','eeuu','america','americana','americana',
+  'mundo','pais','paises','gobierno','presidente','nacional',
+  'nueva','nuevo','gran','grandes','primer','primera',
+  'santo','domingo','santiago','haiti','haitiano',
+]);
+
 function extractEntities(title) {
   if (!title) return new Set();
   const entities = new Set();
   for (const w of title.split(/\s+/)) {
     const clean = w.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
     if (clean.length >= 4 && /^[A-ZÁÉÍÓÚÑ]/.test(clean)) {
-      entities.add(clean.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+      const norm = clean.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      if (!GENERIC_ENTITIES.has(norm)) entities.add(norm);
     }
   }
   return entities;
