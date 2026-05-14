@@ -10,6 +10,17 @@ require('dotenv').config({ path: '.env.local' });
 const { createClient } = require('@supabase/supabase-js');
 const Parser = require('rss-parser');
 
+// ── AUTO-POST EN REDES SOCIALES ───────────────────────────────────────────────
+// Importación dinámica de ESM (lib/social.js usa export)
+async function postToSocialMedia(article) {
+  try {
+    const { postToSocialMedia: _post } = await import('../lib/social.js');
+    await _post(article);
+  } catch (e) {
+    console.warn('[Social] Error al auto-publicar en RRSS:', e.message);
+  }
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -132,11 +143,11 @@ async function generateWithGemini(cat, news, todayDR) {
   const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
   // Incluimos todos los modelos Gemini gratuitos disponibles (cuotas independientes)
   const models = [
-    'gemini-2.5-flash-preview-05-20', // Nuevo — cuota propia independiente
-    'gemini-2.0-flash-lite',           // Cuota propia independiente
-    'gemini-2.0-flash',
-    'gemini-1.5-flash-latest',
-    'gemini-1.5-flash-8b',
+    'gemini-3.1-flash-lite',
+    'gemini-3-flash-preview',
+    'gemini-2.5-flash-lite',
+    'gemini-flash-latest',
+    'gemini-pro-latest',
   ];
 
   const prompt = buildPrompt(cat, news, todayDR);
@@ -411,6 +422,9 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
   // Actualizar sets de deduplicación para esta sesión
   publishedLinks.add(news.link);
   publishedKeywordSets.push(candidateKws);
+
+  // AUTO-POST en Redes Sociales (no bloqueante — si falla no interrumpe el bot)
+  await postToSocialMedia(newArticle);
 
   return { success: true, id: inserted.id, title: inserted.title };
 }

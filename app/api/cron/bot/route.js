@@ -1182,8 +1182,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       const articleUrl = `${SITE_CONFIG.url}/articulo/${slug}`;
       await notifyGoogleIndexing(articleUrl);
       
-      // AUTO-POST: Redes Sociales
-      await postToSocialMedia(newArticle);
+      // AUTO-POST EN REDES: Desactivado — el admin controla cuándo publicar en redes
+      // desde el panel de administración con el botón "📢 Publicar en Redes".
+      // Para reactivar el auto-post, descomentar la línea siguiente:
+      // await postToSocialMedia(newArticle);
     } catch (indexErr) {
       console.warn('[Bot] No se pudo notificar a servicios externos:', indexErr.message);
     }

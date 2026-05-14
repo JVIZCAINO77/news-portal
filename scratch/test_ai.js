@@ -6,22 +6,27 @@ dotenv.config({ path: path.resolve(__dirname, '../.env.local') });
 
 async function testAI() {
   const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
-  const selectedKey = keys[0];
-  const ai = new GoogleGenAI({ apiKey: selectedKey });
+  const models = ['gemini-3.1-flash-lite', 'gemini-3-flash-preview', 'gemini-flash-latest'];
+  
+  const prompt = `Escribe un titular breve sobre tecnología.`;
 
-  const prompt = `PASO 3 — FORMATO DE RESPUESTA:
-Tu respuesta debe ser EXCLUSIVAMENTE un objeto JSON válido. Sin bloques de código, sin texto adicional antes ni después.
-Esquema obligatorio:
-{ "title": "<titular_generado>", "excerpt": "<excerpt_generado>", "content": "<contenido_generado>", "tags": ["tag1", "tag2"] }`;
-
-  try {
-    const aiResponse = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: prompt,
-    });
-    console.log("Response:", aiResponse.text);
-  } catch (e) {
-    console.error("Error:", e.message);
+  for (const key of keys) {
+    let success = false;
+    for (const model of models) {
+      if (success) break;
+      console.log(`Intentando ${model} con clave ...${key.slice(-4)}`);
+      const ai = new GoogleGenAI({ apiKey: key });
+      try {
+        const aiResponse = await ai.models.generateContent({
+          model,
+          contents: prompt,
+        });
+        console.log(`✅ Éxito (...${key.slice(-4)}): ${aiResponse.text.slice(0, 50)}...`);
+        success = true;
+      } catch (e) {
+        console.error(`❌ Falló (...${key.slice(-4)}):`, e.message.slice(0, 50));
+      }
+    }
   }
 }
 

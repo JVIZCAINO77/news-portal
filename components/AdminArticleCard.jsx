@@ -4,6 +4,74 @@ import Link from 'next/link';
 import { useState } from 'react';
 import DeleteArticleButton from './DeleteArticleButton';
 
+// ── Botón de Publicar en Redes Sociales ──
+function SocialPublishButton({ articleId }) {
+  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [msg, setMsg]       = useState('');
+
+  async function handlePublish() {
+    if (status === 'loading') return;
+    setStatus('loading');
+    setMsg('');
+    try {
+      const res = await fetch('/api/admin/post-social', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleId }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus('success');
+        setMsg(data.message || 'Publicado en redes.');
+        // Reset después de 4 segundos
+        setTimeout(() => setStatus('idle'), 4000);
+      } else {
+        setStatus('error');
+        setMsg(data.error || 'Error al publicar.');
+        setTimeout(() => setStatus('idle'), 4000);
+      }
+    } catch (e) {
+      setStatus('error');
+      setMsg('Error de red.');
+      setTimeout(() => setStatus('idle'), 4000);
+    }
+  }
+
+  const styles = {
+    idle:    'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700',
+    loading: 'bg-slate-300 text-slate-500 cursor-not-allowed',
+    success: 'bg-green-600 text-white',
+    error:   'bg-red-600 text-white',
+  };
+
+  const labels = {
+    idle:    '📢 Publicar en Redes',
+    loading: '⏳ Publicando...',
+    success: '✅ Publicado',
+    error:   '❌ Error',
+  };
+
+  return (
+    <div className="w-full mt-1">
+      <button
+        onClick={handlePublish}
+        disabled={status === 'loading'}
+        className={`w-full text-[9px] font-black uppercase tracking-widest px-3 py-2 transition-all ${styles[status]}`}
+        title={msg || 'Publicar este artículo en Facebook e Instagram ahora'}
+      >
+        {labels[status]}
+      </button>
+      {msg && status !== 'idle' && (
+        <p className={`text-[8px] font-bold mt-1 text-center leading-tight ${
+          status === 'success' ? 'text-green-600' : 'text-red-500'
+        }`}>
+          {msg.slice(0, 60)}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function ArticleThumb({ image, title }) {
   const [imgError, setImgError] = useState(false);
 
@@ -90,21 +158,25 @@ export default function AdminArticleCard({ article, isAdmin }) {
         )}
 
         {/* ── ACCIONES ── */}
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-50 mt-auto">
-          <Link
-            href={`/articulo/${article.slug || ''}`}
-            target="_blank"
-            className="flex-1 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 border border-slate-100 px-3 py-2 hover:bg-slate-50 transition-colors"
-          >
-            Ver
-          </Link>
-          <Link
-            href={`/admin/articulos/editar/${article.id}`}
-            className="flex-1 text-center text-[9px] font-black uppercase tracking-widest bg-black text-white px-3 py-2 hover:bg-red-600 transition-colors"
-          >
-            Editar
-          </Link>
-          {isAdmin && <DeleteArticleButton id={article.id} />}
+        <div className="flex flex-col gap-2 pt-3 border-t border-slate-50 mt-auto">
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/articulo/${article.slug || ''}`}
+              target="_blank"
+              className="flex-1 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 border border-slate-100 px-3 py-2 hover:bg-slate-50 transition-colors"
+            >
+              Ver
+            </Link>
+            <Link
+              href={`/admin/articulos/editar/${article.id}`}
+              className="flex-1 text-center text-[9px] font-black uppercase tracking-widest bg-black text-white px-3 py-2 hover:bg-red-600 transition-colors"
+            >
+              Editar
+            </Link>
+            {isAdmin && <DeleteArticleButton id={article.id} />}
+          </div>
+          {/* Botón de publicación manual en redes — solo admins */}
+          {isAdmin && <SocialPublishButton articleId={article.id} />}
         </div>
       </div>
     </div>
