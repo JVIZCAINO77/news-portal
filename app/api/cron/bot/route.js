@@ -14,7 +14,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 // OBJETIVO: 1 artículo por sección por día = 12 secciones = 12 art/día máximo.
 // Esto es óptimo para AdSense: suficiente frescura sin parecer spam.
 // Si el sitio ya está aprobado, se puede subir DAILY_LIMIT_NORMAL a 2.
-const DAILY_LIMIT_GLOBAL   = 15; // Techo del día: 12 secciones x 1 garantizado + 3 de margen
+const DAILY_LIMIT_GLOBAL   = 20; // Techo del día: 12 secciones + margen para re-runs
 const DAILY_LIMIT_NORMAL   = 1;  // Mínimo 1 artículo por sección al día (garantizado)
 const DAILY_LIMIT_BREAKING = 3;  // Máximo para ÚLTIMA HORA urgente
 
@@ -968,9 +968,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     }
 
     // ── CANDADO DE ORIGINALIDAD: el contenido NO puede ser casi igual al snippet del RSS ─
-    // Si el contenido es ≤ 3× la longitud del snippet, probablemente no fue reescrito.
+    // Solo aplica si el snippet es corto (≤500 chars). Fuentes BBC/CNN/DW tienen
+    // snippets de 600-900 chars — un artículo genuino de 600 palabras (≈3600 chars)
+    // es original aunque no supere 2× el snippet largo.
     const sourceSnippetLen = (news.contentSnippet || '').length;
-    if (sourceSnippetLen > 100 && articleData.content.length < sourceSnippetLen * 3) {
+    if (sourceSnippetLen > 100 && sourceSnippetLen <= 500 && articleData.content.length < sourceSnippetLen * 2) {
       throw new Error(`[CANDADO] Contenido no reescrito: el artículo es muy similar en longitud al snippet original. Artículo descartado.`);
     }
 

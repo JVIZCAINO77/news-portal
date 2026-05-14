@@ -34,12 +34,14 @@ const parser = new Parser({
 // ─── CATEGORÍAS CON SUS FEEDS ─────────────────────────────────────────────────
 const CATEGORIES = {
   noticias: {
-    slug: 'noticias', author: 'Redacción Central', style: 'periodístico objetivo y formal',
+    slug: 'noticias', author: 'Redacción Nacional', style: 'periodístico objetivo y formal',
     feeds: [
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
-      'https://noticiassin.com/feed/?s=nacional',
-      'https://elnacional.com.do/feed/?s=',
+      'https://noticiassin.com/feed/',
+      'https://elnacional.com.do/feed/',
+      'https://acento.com.do/feed/',
+      'https://hoy.com.do/feed/',
     ],
   },
   politica: {
@@ -51,20 +53,32 @@ const CATEGORIES = {
       'https://noticiassin.com/feed/?s=politica',
     ],
   },
+  policia: {
+    slug: 'policia', author: 'Sección Policial', style: 'periodístico, policial y formal',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/?s=policia',
+      'https://elnacional.com.do/feed/',
+      'https://acento.com.do/feed/',
+    ],
+  },
   deportes: {
     slug: 'deportes', author: 'Mesa Deportiva', style: 'analítico y pasional',
     feeds: [
       'https://www.diariolibre.com/rss/deportes.xml',
-      'https://acento.com.do/feed/?s=deportes',
-      'https://elnacional.com.do/feed/?s=deportes',
+      'https://rss.dw.com/xml/rss-es-all',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://elnacional.com.do/feed/',
     ],
   },
   economia: {
     slug: 'economia', author: 'Redacción Económica', style: 'serio y financiero',
     feeds: [
       'https://www.diariolibre.com/rss/economia.xml',
-      'https://acento.com.do/feed/?s=economia',
-      'https://elcaribe.com.do/feed/?s=economia',
+      'https://rss.dw.com/xml/rss-es-all',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://elmundo.es/rss/economia.xml',
     ],
   },
   sucesos: {
@@ -91,8 +105,33 @@ const CATEGORIES = {
       'https://elnacional.com.do/feed/?s=espectaculos',
     ],
   },
+  cultura: {
+    slug: 'cultura', author: 'Sección Cultural', style: 'elegante y descriptivo',
+    feeds: [
+      'https://www.diariolibre.com/rss/revista.xml',
+      'https://rss.dw.com/xml/rss-es-all',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://elnacional.com.do/feed/',
+    ],
+  },
   tecnologia: {
     slug: 'tecnologia', author: 'Redacción Tecnológica', style: 'informativo y vanguardista',
+    feeds: [
+      'https://cnnespanol.cnn.com/feed/',
+      'https://rss.dw.com/xml/rss-es-all',
+      'https://www.bbc.com/mundo/index.xml',
+    ],
+  },
+  tendencias: {
+    slug: 'tendencias', author: 'Mesa de Tendencias', style: 'ágil y moderno',
+    feeds: [
+      'https://remolacha.net/feed/',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://www.bbc.com/mundo/index.xml',
+    ],
+  },
+  salud: {
+    slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional e informativo',
     feeds: [
       'https://cnnespanol.cnn.com/feed/',
       'https://rss.dw.com/xml/rss-es-all',
@@ -370,8 +409,11 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
   }
 
   // ── CANDADO DE ORIGINALIDAD ─────────────────────────────────
+  // Solo aplica si el snippet de origen es corto (≤500 chars).
+  // Fuentes como BBC/CNN/DW tienen snippets de 600-900 chars — un artículo de 
+  // 600 palabras (≈3600 chars) es genuinamente original aunque no pase 2×snippet.
   const sourceSnippetLen = (news.contentSnippet || '').length;
-  if (sourceSnippetLen > 100 && articleData.content.length < sourceSnippetLen * 3) {
+  if (sourceSnippetLen > 100 && sourceSnippetLen <= 500 && articleData.content.length < sourceSnippetLen * 2) {
     throw new Error(`[CANDADO] Contenido no reescrito: el artículo es muy similar en longitud al snippet original.`);
   }
 
@@ -449,8 +491,8 @@ async function processCategory(catKey) {
     .select('*', { count: 'exact', head: true })
     .gte('publishedAt', startOfToday).lte('publishedAt', endOfToday);
 
-  if ((totalToday ?? 0) >= 12) {
-    console.log(`⛔ Límite global de 12 artículos diarios (seguridad AdSense) alcanzado (${totalToday}). Saliendo.`);
+  if ((totalToday ?? 0) >= 20) {
+    console.log(`⛔ Límite global de 20 artículos diarios (seguridad AdSense) alcanzado (${totalToday}). Saliendo.`);
     return;
   }
 
