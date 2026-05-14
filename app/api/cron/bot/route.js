@@ -1233,7 +1233,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       category: cat.slug,   // ← SIEMPRE la sección del agente, sin excepción
       author: cat.author,   // ← SIEMPRE el autor de la sección
       image: finalImageUrl,
-      imageAlt: `Imagen para: ${articleData.title}`,
+      imageAlt: articleData.title,
       source_link: news.link,
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),

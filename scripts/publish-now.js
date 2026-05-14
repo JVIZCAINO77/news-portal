@@ -427,6 +427,57 @@ async function generateArticle(cat, news, todayDR) {
   throw new Error('Sin IA disponible: Gemini agotado, Pollinations y OpenRouter fallaron. Artículo omitido por política de AdSense estricta.');
 }
 
+// ─── INTERNALIZAR IMAGEN A CLOUDINARY ────────────────────────────────────────
+/**
+ * Descarga imageUrl y la sube a Cloudinary con firma segura.
+ * Retorna la URL permanente de Cloudinary, o null si falla.
+ * Garantiza que las imágenes NUNCA se rompan para los lectores.
+ */
+async function uploadToCloudinary(imageUrl, slug) {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const apiKey    = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  if (!cloudName || !apiKey || !apiSecret) return null;
+
+  const controller = new AbortController();
+  const timeoutId  = setTimeout(() => controller.abort(), 25000);
+  try {
+    const imgRes = await fetch(imageUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'image/*,*/*' },
+      signal: controller.signal, redirect: 'follow',
+    });
+    clearTimeout(timeoutId);
+    if (!imgRes.ok) { console.log(`  ⚠️ [Cloudinary] Descarga falló: HTTP ${imgRes.status}`); return null; }
+    const ct = imgRes.headers.get('content-type') || 'image/jpeg';
+    if (!ct.startsWith('image/')) { console.log(`  ⚠️ [Cloudinary] No es imagen: ${ct}`); return null; }
+
+    const buf    = await imgRes.arrayBuffer();
+    const b64    = Buffer.from(buf).toString('base64');
+    const ts     = Math.round(Date.now() / 1000);
+    const crypto = require('crypto');
+    const sig    = crypto.createHash('sha1').update(`folder=imperio-publico/bot&public_id=${slug}&timestamp=${ts}${apiSecret}`).digest('hex');
+
+    const fd = new FormData();
+    fd.append('file', `data:${ct};base64,${b64}`);
+    fd.append('folder', 'imperio-publico/bot');
+    fd.append('public_id', slug);
+    fd.append('timestamp', ts.toString());
+    fd.append('api_key', apiKey);
+    fd.append('signature', sig);
+    fd.append('overwrite', 'true');
+
+    const up = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: fd });
+    if (!up.ok) { console.log(`  ⚠️ [Cloudinary] Upload falló: ${(await up.text()).slice(0,100)}`); return null; }
+    const ud = await up.json();
+    console.log(`  ☁️ [Cloudinary] Imagen permanente: ${ud.secure_url}`);
+    return ud.secure_url;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    console.log(`  ⚠️ [Cloudinary] Error: ${err.message.slice(0, 80)}`);
+    return null;
+  }
+}
+
 // ─── PUBLICAR UN ARTÍCULO ─────────────────────────────────────────────────────
 async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywordSets, publishedTitles) {
   // ── DEDUPLICACIÓN ESTRICTA (4 capas) ──────────────────────────────────────
@@ -515,11 +566,15 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
     .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '').slice(0, 80);
   const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
-  // Imagen de Pollinations (IA)
+  // Imagen: genera con Pollinations y la internaliza a Cloudinary de inmediato
   const topicTags = Array.isArray(articleData.tags) ? articleData.tags.join(', ') : cat.slug;
-  const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
+  const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
     `high-end editorial news photography for "${articleData.title}". ${topicTags}. Professional journalistic style, cinematic lighting, 8k, realistic, wide shot, 16:9. NO TEXT NO LETTERS.`
   )}?width=1280&height=720&nologo=true&seed=${Date.now()}`;
+  console.log(`  🖼️  Internalizando imagen a Cloudinary...`);
+  const cloudUrl = await uploadToCloudinary(pollinationsUrl, slug);
+  const imageUrl = cloudUrl || pollinationsUrl;
+  if (!cloudUrl) console.log(`  ℹ️  Cloudinary no disponible — usando Pollinations como fallback.`);
 
   // Tags limpios
   let cleanedTags = Array.isArray(articleData.tags)
@@ -536,7 +591,7 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
     category: cat.slug,
     author: cat.author,
     image: imageUrl,
-    imageAlt: `Imagen para: ${articleData.title}`,
+    imageAlt: articleData.title,
     source_link: news.link,
     publishedAt: new Date().toISOString(),
     updated_at: new Date().toISOString(),

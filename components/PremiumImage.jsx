@@ -14,20 +14,20 @@ import { optimizeImageUrl } from '@/lib/data';
  */
 
 const FALLBACKS = {
-  deportes:        'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=1200&auto=format&fit=crop',
-  economia:        'https://images.unsplash.com/photo-1611974714851-eb60516746e3?q=80&w=1200&auto=format&fit=crop',
-  internacional:   'https://images.unsplash.com/photo-1521295121783-8a321d551ad2?q=80&w=1200&auto=format&fit=crop',
-  entretenimiento: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1200&auto=format&fit=crop',
-  sucesos:         'https://images.unsplash.com/photo-1563206767-5b18f218e7de?q=80&w=1200&auto=format&fit=crop',
-  tecnologia:      'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?q=80&w=1200&auto=format&fit=crop',
-  salud:           'https://images.unsplash.com/photo-1505751172107-573225a91200?q=80&w=1200&auto=format&fit=crop',
-  cultura:         'https://images.unsplash.com/photo-1518998053901-5348d3961a04?q=80&w=1200&auto=format&fit=crop',
-  politica:        'https://images.unsplash.com/photo-1541872703-74c5e44368f9?q=80&w=1200&auto=format&fit=crop',
-  noticias:        'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop',
+  deportes:        'https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=1200&auto=format&fit=crop',
+  economia:        'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1200&auto=format&fit=crop',
+  internacional:   'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop',
+  entretenimiento: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=1200&auto=format&fit=crop',
+  sucesos:         'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop',
+  tecnologia:      'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop',
+  salud:           'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=1200&auto=format&fit=crop',
+  cultura:         'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1200&auto=format&fit=crop',
+  politica:        'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?q=80&w=1200&auto=format&fit=crop',
+  noticias:        'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1200&auto=format&fit=crop',
   opinion:         'https://images.unsplash.com/photo-1455390582262-044cdead277a?q=80&w=1200&auto=format&fit=crop',
-  tendencias:      'https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?q=80&w=1200&auto=format&fit=crop',
-  policia:         'https://images.unsplash.com/photo-1589391886645-d51941baf7fb?q=80&w=1200&auto=format&fit=crop',
-  default:         'https://images.unsplash.com/photo-1504711434969-e33886168f5c?q=80&w=1200&auto=format&fit=crop',
+  tendencias:      'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1200&auto=format&fit=crop',
+  policia:         'https://images.unsplash.com/photo-1453873531674-2151bcd01707?q=80&w=1200&auto=format&fit=crop',
+  default:         'https://images.unsplash.com/photo-1495020689067-958852a7765e?q=80&w=1200&auto=format&fit=crop',
 };
 
 function getFallback(category) {
@@ -76,22 +76,26 @@ export default function PremiumImage({
   const [currentSrc, setCurrentSrc] = useState(resolved.url);
   const [mode, setMode] = useState(resolved.mode);
   const timeoutRef = useRef(null);
+  // Guardamos la última src procesada para evitar resets innecesarios
+  const prevSrcRef = useRef(src);
 
   useEffect(() => {
+    if (src === prevSrcRef.current) return; // misma URL → no resetear
+    prevSrcRef.current = src;
     const r = resolveDisplaySrc(src, category, width);
     setCurrentSrc(r.url);
     setMode(r.mode);
-    setStatus(null);
+    setStatus(null); // Solo resetea si realmente cambió la imagen
   }, [src]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Timeout reducido a 5s (antes 12s) — mejora el LCP significativamente
+  // Timeout de 3s — si la imagen no carga, mostrar fallback de categoría
   useEffect(() => {
     if (status !== null) return;
     timeoutRef.current = setTimeout(() => {
       setCurrentSrc(fallback);
       setMode('next-image'); // Usar next/image para el fallback (optimización AVIF)
       setStatus(true);
-    }, 5000);
+    }, 3000);
     return () => clearTimeout(timeoutRef.current);
   }, [status, fallback]);
 
@@ -103,21 +107,13 @@ export default function PremiumImage({
   const handleError = () => {
     clearTimeout(timeoutRef.current);
     const safeCurrent = currentSrc || '';
-    if (safeCurrent.includes('/api/proxy-image')) {
-      try {
-        const originalUrl = new URL(safeCurrent, 'https://x.com').searchParams.get('url');
-        if (originalUrl) {
-          setCurrentSrc(originalUrl);
-          setMode('img');
-          setStatus(null);
-          return;
-        }
-      } catch (_) { /* ignore */ }
-    }
+    // Si ya estamos mostrando el fallback, no hacer nada más
     if (safeCurrent === fallback) {
       setStatus(true);
       return;
     }
+    // Ir directamente al fallback de categoría (no reintentar la URL original
+    // porque si el proxy falló, la URL original tampoco cargará)
     setCurrentSrc(fallback);
     setMode('next-image');
     setStatus(true);
