@@ -66,11 +66,18 @@ export async function GET(request) {
     // ── Fuente Playfair Display (serif elegante) ────────────────────────────
     let playfairFont = null;
     try {
-      const fontRes = await fetch(
-        'https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff',
-        { signal: AbortSignal.timeout(4000) }
-      );
-      if (fontRes.ok) playfairFont = await fontRes.arrayBuffer();
+      const fontCtrl  = new AbortController();
+      const fontTimer = setTimeout(() => fontCtrl.abort(), 3500);
+      try {
+        const fontRes = await fetch(
+          'https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff',
+          { signal: fontCtrl.signal }
+        );
+        clearTimeout(fontTimer);
+        if (fontRes.ok) playfairFont = await fontRes.arrayBuffer();
+      } catch (_) {
+        clearTimeout(fontTimer);
+      }
     } catch (_) { /* fallback a Georgia */ }
 
     // ── Dots decorativos (grilla 5×5) ───────────────────────────────────────
@@ -434,7 +441,7 @@ export async function GET(request) {
           ? [{ name: 'Playfair', data: playfairFont, weight: 700, style: 'normal' }]
           : [],
         headers: {
-          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+          'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=60',
         },
       }
     );
