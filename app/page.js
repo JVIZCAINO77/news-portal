@@ -169,11 +169,9 @@ export default async function HomePage() {
                         className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
                       />
                     )}
-                    {art.category?.toLowerCase() !== 'noticias' && (
-                      <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
-                        {art.category}
+                    <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
+                        {art.category === 'noticias' ? 'Nacional' : art.category}
                       </span>
-                    )}
                     <h2 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-4">
                       {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                     </h2>
@@ -205,11 +203,9 @@ export default async function HomePage() {
                       <h3 className="text-[0.95rem] font-bold group-hover:text-red-700 leading-snug">
                         {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
                       </h3>
-                      {art.category?.toLowerCase() !== 'noticias' && (
-                        <span className="text-[0.55rem] text-[#bb1b21] font-bold uppercase tracking-widest mt-2 block">
-                          {art.category}
+                      <span className="text-[0.55rem] text-[#bb1b21] font-bold uppercase tracking-widest mt-2 block">
+                          {art.category === 'noticias' ? 'Nacional' : art.category}
                         </span>
-                      )}
                     </div>
                   </Link>
                 ))}
@@ -227,7 +223,7 @@ export default async function HomePage() {
           <h2 className="text-[0.7rem] font-black uppercase tracking-[0.4em]">Lo más leído hoy</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {pool.slice(0, 5).map((art, idx) => (
+          {(pool.length > 5 ? pool.slice(5, 10) : pool.slice(0, 5)).map((art, idx) => (
             <Link
               key={art.id}
               href={`/articulo/${art.slug}`}
@@ -247,11 +243,9 @@ export default async function HomePage() {
                 />
               </div>
               <div>
-                {art.category?.toLowerCase() !== 'noticias' && (
                   <span className="text-[0.55rem] font-black uppercase tracking-[0.2em] text-red-600 block mb-1">
-                    {art.category}
+                    {art.category === 'noticias' ? 'Nacional' : art.category}
                   </span>
-                )}
                 <h3 className="text-sm font-black leading-tight group-hover:text-red-700 transition-colors line-clamp-3">
                   {art.title}
                 </h3>

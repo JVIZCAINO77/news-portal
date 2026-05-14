@@ -1,11 +1,12 @@
-const categories = ['noticias', 'entretenimiento', 'deportes', 'tecnologia', 'economia', 'sucesos', 'tendencias', 'politica', 'internacional'];
+// PRIORIDAD: noticias (Nacional) va PRIMERO — es la sección más importante del portal
+const categories = ['noticias', 'politica', 'sucesos', 'policia', 'deportes', 'economia', 'entretenimiento', 'tecnologia', 'tendencias', 'internacional', 'salud', 'cultura'];
 
 async function triggerBots() {
   console.log("🚀 Iniciando oleada de publicación masiva (anti-repetición activado)...");
   for (const cat of categories) {
     try {
       console.log(`\n⏳ Ejecutando agente para: ${cat}...`);
-      const url = `https://news-portal-rosy-kappa.vercel.app/api/cron/bot?category=${cat}`;
+      const url = `https://www.imperiopublico.com/api/cron/bot?category=${cat}`;
       const response = await fetch(url, { headers: { 'X-Manual-Trigger': 'true' } });
       const data = await response.json();
       if (response.ok) {

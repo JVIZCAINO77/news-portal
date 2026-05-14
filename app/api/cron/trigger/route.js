@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
 const VALID_CATEGORIES = [
-  'politica', 'policia', 'deportes', 'tecnologia', 'sucesos',
+  'noticias', 'politica', 'policia', 'deportes', 'tecnologia', 'sucesos',
   'entretenimiento', 'tendencias', 'economia', 'internacional',
   'salud', 'cultura'
 ];

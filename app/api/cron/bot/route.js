@@ -14,7 +14,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 // OBJETIVO: 1 artículo por sección por día = 12 secciones = 12 art/día máximo.
 // Esto es óptimo para AdSense: suficiente frescura sin parecer spam.
 // Si el sitio ya está aprobado, se puede subir DAILY_LIMIT_NORMAL a 2.
-const DAILY_LIMIT_GLOBAL   = 12; // 1 por cada una de las 12 secciones del portal
+const DAILY_LIMIT_GLOBAL   = 15; // Techo del día: 12 secciones x 1 garantizado + 3 de margen
 const DAILY_LIMIT_NORMAL   = 1;  // Mínimo 1 artículo por sección al día (garantizado)
 const DAILY_LIMIT_BREAKING = 3;  // Máximo para ÚLTIMA HORA urgente
 
