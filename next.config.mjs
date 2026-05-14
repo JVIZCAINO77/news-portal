@@ -37,8 +37,7 @@ const nextConfig = {
   },
   // ─── Compresión HTTP ──────────────────────────────────────────────────────
   compress: true,
-  // ─── Optimización de fuentes ──────────────────────────────────────────────
-  optimizeFonts: true,
+  // Nota: optimizeFonts está habilitado por defecto en Next.js 13+ y no necesita configuración explícita
   async headers() {
     return [
       {
@@ -70,11 +69,12 @@ const nextConfig = {
         source: '/:file(favicon|icon|logo|og-image)(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
-      // ─── Fuentes Next.js — inmutables ─────────────────────────────────────
-      {
+      // ─── Assets Next.js estáticos — inmutables (solo producción) ─────────────
+      // Nota: en dev Next.js gestiona su propio Cache-Control para /_next/static
+      ...( process.env.NODE_ENV === 'production' ? [{
         source: '/_next/static/(.*)',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
-      },
+      }] : []),
       // ─── Cabeceras de Seguridad HTTP para todas las rutas ─────────────────
       {
         source: '/(.*)',
