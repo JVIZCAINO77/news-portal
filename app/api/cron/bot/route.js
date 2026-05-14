@@ -171,12 +171,12 @@ function sharesCriticalEntities(titleA, titleB) {
   const entA = extractEntities(titleA);
   const entB = extractEntities(titleB);
   if (entA.size === 0 || entB.size === 0) return false;
-  return [...entA].filter(e => entB.has(e)).length >= 1;
+  return [...entA].filter(e => entB.has(e)).length >= 2;
 }
 
 // Umbral Jaccard: 25% de overlap detecta el mismo evento con distintas palabras
 // (ej: "Guyana firma contrato" vs "RD incursiona en bloques de Guyana" = 30% overlap)
-const SEMANTIC_THRESHOLD = 0.15;
+const SEMANTIC_THRESHOLD = 0.25;
 
 const CATEGORIES = {
   // ─── SECCIONES NACIONALES (Prioridad absoluta — somos un medio dominicano) ─────
