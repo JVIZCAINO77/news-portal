@@ -86,6 +86,33 @@ const STOP_WORDS = new Set([
  * @param {string} title
  * @returns {Set<string>}
  */
+
+/**
+ * Stemming básico en español: recorta sufijos comunes para agrupar
+ * palabras de la misma raíz (ej: petroleros/petrolera/petróleo → petrole).
+ */
+function stemWord(word) {
+  if (word.length <= 5) return word;
+  // Sufijos de mayor a menor (orden importa)
+  const suffixes = [
+    'aciones','ización','amiento','imientos','amiento',
+    'adores','adora','adores','antes','antes',
+    'iendo','ando','ación','arios','arias',
+    'mente','istas','ista','osos','osas',
+    'eros','eras','eros','ismo','ista',
+    'ado','ada','ados','adas','ido','ida','idos','idas',
+    'ando','iendo','aron','aron',
+    'era','ero','ura','ura',
+    'es','os','as',
+  ];
+  for (const s of suffixes) {
+    if (word.endsWith(s) && word.length - s.length >= 4) {
+      return word.slice(0, word.length - s.length);
+    }
+  }
+  return word;
+}
+
 function extractKeywords(title) {
   if (!title) return new Set();
   const normalized = title
@@ -95,7 +122,7 @@ function extractKeywords(title) {
     .replace(/[^a-z0-9\s]/g, ' ')
     .trim();
   return new Set(
-    normalized.split(/\s+/).filter(w => w.length > 3 && !STOP_WORDS.has(w))
+    normalized.split(/\s+/).filter(w => w.length > 3 && !STOP_WORDS.has(w)).map(stemWord)
   );
 }
 
@@ -144,12 +171,12 @@ function sharesCriticalEntities(titleA, titleB) {
   const entA = extractEntities(titleA);
   const entB = extractEntities(titleB);
   if (entA.size === 0 || entB.size === 0) return false;
-  return [...entA].filter(e => entB.has(e)).length >= 2;
+  return [...entA].filter(e => entB.has(e)).length >= 1;
 }
 
 // Umbral Jaccard: 25% de overlap detecta el mismo evento con distintas palabras
 // (ej: "Guyana firma contrato" vs "RD incursiona en bloques de Guyana" = 30% overlap)
-const SEMANTIC_THRESHOLD = 0.25;
+const SEMANTIC_THRESHOLD = 0.15;
 
 const CATEGORIES = {
   // ─── SECCIONES NACIONALES (Prioridad absoluta — somos un medio dominicano) ─────
