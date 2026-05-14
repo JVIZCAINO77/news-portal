@@ -146,6 +146,9 @@ const STOP_WORDS = new Set([
   'fue','era','ser','estar','tiene','hay','como','pero','mas','ya','si','no','ni',
 ]);
 
+// Umbral Jaccard: 25% de overlap detecta el mismo evento con distintas palabras
+const SEMANTIC_THRESHOLD = 0.25;
+
 function extractKeywords(title) {
   if (!title) return new Set();
   const normalized = title.toLowerCase()
@@ -157,6 +160,54 @@ function semanticOverlap(setA, setB) {
   if (setA.size === 0 || setB.size === 0) return 0;
   const intersection = [...setA].filter(k => setB.has(k)).length;
   return intersection / new Set([...setA, ...setB]).size;
+}
+
+/**
+ * Extrae entidades (palabras con mayuscula inicial, 4+ chars) del titulo.
+ * Detecta el mismo evento aunque cambie la redaccion: "Guyana" aparece en ambos.
+ */
+function extractEntities(title) {
+  if (!title) return new Set();
+  const entities = new Set();
+  for (const w of title.split(/\s+/)) {
+    const clean = w.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
+    if (clean.length >= 4 && /^[A-ZÁÉÍÓÚÑ]/.test(clean)) {
+      entities.add(clean.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+    }
+  }
+  return entities;
+}
+
+/** Retorna true si 2 titulos comparten 2+ entidades nombradas (mismo evento). */
+function sharesCriticalEntities(titleA, titleB) {
+  const entA = extractEntities(titleA);
+  const entB = extractEntities(titleB);
+  if (entA.size === 0 || entB.size === 0) return false;
+  return [...entA].filter(e => entB.has(e)).length >= 2;
+}
+
+/**
+ * Deduplicacion en 4 capas:
+ *   1. Link exacto
+ *   2. Titulo normalizado exacto
+ *   3. Overlap semantico Jaccard >= 25%
+ *   4. Entidades nombradas compartidas (2+)
+ */
+function isAlreadyCovered(title, link, publishedLinks, publishedKeywordSets, publishedTitles) {
+  if (publishedLinks.has(link)) return { covered: true, reason: 'link duplicado' };
+
+  const normTitle = (title || '').toLowerCase().normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim();
+  if (publishedTitles.has(normTitle)) return { covered: true, reason: 'titulo duplicado' };
+
+  const candidateKws = extractKeywords(title);
+  if (publishedKeywordSets.some(kws => semanticOverlap(candidateKws, kws) >= SEMANTIC_THRESHOLD))
+    return { covered: true, reason: 'duplicado semantico (Jaccard ' + SEMANTIC_THRESHOLD*100 + '%)' };
+
+  if ([...publishedTitles].some(t => sharesCriticalEntities(title, t)))
+    return { covered: true, reason: 'mismo evento (entidades compartidas)' };
+
+  return { covered: false };
 }
 
 // ─── PROMPT COMPARTIDO ────────────────────────────────────────────────────────
@@ -339,14 +390,11 @@ async function generateArticle(cat, news, todayDR) {
 }
 
 // ─── PUBLICAR UN ARTÍCULO ─────────────────────────────────────────────────────
-async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywordSets) {
-  // Verificar deduplicación
-  if (publishedLinks.has(news.link)) {
-    return { skipped: true, reason: 'link duplicado' };
-  }
-  const candidateKws = extractKeywords(news.title);
-  if (publishedKeywordSets.some(kws => semanticOverlap(candidateKws, kws) >= 0.35)) {
-    return { skipped: true, reason: 'semanticamente duplicado' };
+async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywordSets, publishedTitles) {
+  // ── DEDUPLICACIÓN ESTRICTA (4 capas) ──────────────────────────────────────
+  const dupCheck = isAlreadyCovered(news.title, news.link, publishedLinks, publishedKeywordSets, publishedTitles);
+  if (dupCheck.covered) {
+    return { skipped: true, reason: dupCheck.reason };
   }
 
   // Verificar en BD histórica
@@ -461,9 +509,10 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
   const { data: inserted, error } = await supabase.from('articles').insert(newArticle).select('id, title').single();
   if (error) throw new Error(`Error BD: ${error.message}`);
 
-  // Actualizar sets de deduplicación para esta sesión
+  // Actualizar sets de dedup globales (compartidos entre TODAS las categorias)
   publishedLinks.add(news.link);
-  publishedKeywordSets.push(candidateKws);
+  publishedKeywordSets.push(extractKeywords(articleData.title));
+  publishedTitles.add((articleData.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim());
 
   // AUTO-POST en Redes Sociales (no bloqueante — si falla no interrumpe el bot)
   await postToSocialMedia(newArticle);
@@ -472,7 +521,7 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
 }
 
 // ─── PROCESAR UNA CATEGORÍA ───────────────────────────────────────────────────
-async function processCategory(catKey) {
+async function processCategory(catKey, todayDR, startOfToday, endOfToday, publishedLinks, publishedKeywordSets, publishedTitles) {
   const cat = CATEGORIES[catKey];
   if (!cat) { console.log(`❌ Categoría desconocida: ${catKey}`); return; }
 
@@ -480,19 +529,13 @@ async function processCategory(catKey) {
   console.log(`📂 CATEGORÍA: ${catKey.toUpperCase()}`);
   console.log(`═══════════════════════════════════════`);
 
-  const todayDR = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
-  }).format(new Date());
-  const startOfToday = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
-  const endOfToday = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
-
-  // Verificar límites diarios (Ajustado a 12 globales para AdSense)
+  // Verificar limites diarios
   const { count: totalToday } = await supabase.from('articles')
     .select('*', { count: 'exact', head: true })
     .gte('publishedAt', startOfToday).lte('publishedAt', endOfToday);
 
   if ((totalToday ?? 0) >= 20) {
-    console.log(`⛔ Límite global de 20 artículos diarios (seguridad AdSense) alcanzado (${totalToday}). Saliendo.`);
+    console.log(`⛔ Limite global de 20 articulos diarios alcanzado (${totalToday}). Saliendo.`);
     return;
   }
 
@@ -502,16 +545,12 @@ async function processCategory(catKey) {
     .gte('publishedAt', startOfToday).lte('publishedAt', endOfToday);
 
   if ((catCount ?? 0) >= 2) {
-    console.log(`ℹ️ Ya hay ${catCount} artículos de ${catKey} hoy. Saltando.`);
+    console.log(`ℹ️ Ya hay ${catCount} articulos de ${catKey} hoy. Saltando.`);
     return;
   }
 
-  // Cargar artículos publicados hoy para deduplicación
-  const { data: publishedToday } = await supabase.from('articles')
-    .select('source_link, title').gte('publishedAt', startOfToday).lte('publishedAt', endOfToday);
-
-  const publishedLinks = new Set((publishedToday || []).map(a => a.source_link).filter(Boolean));
-  const publishedKeywordSets = (publishedToday || []).map(a => extractKeywords(a.title)).filter(s => s.size > 0);
+  // NOTA: publishedLinks/KeywordSets/Titles vienen como parametros — NO se recargan aqui.
+  // Esto garantiza dedup cross-categoria dentro de la misma sesion de ejecucion.
 
   // Obtener noticias de los feeds
   let pooledItems = [];
@@ -548,7 +587,7 @@ async function processCategory(catKey) {
     if (published >= 1) break; // 1 por categoría en este run
 
     try {
-      const result = await publishArticle(cat, item, todayDR, publishedLinks, publishedKeywordSets);
+      const result = await publishArticle(cat, item, todayDR, publishedLinks, publishedKeywordSets, publishedTitles);
       if (result.success) {
         console.log(`  ✅ PUBLICADO: "${result.title?.slice(0, 60)}"`);
         published++;
@@ -570,19 +609,49 @@ async function main() {
   const args = process.argv.slice(2);
   const categoriesToRun = args.length > 0 ? args : Object.keys(CATEGORIES);
 
-  console.log('🚀 Imperio Público — Publicación Manual de Noticias');
-  console.log(`📅 ${new Date().toLocaleString('es-DO', { timeZone: 'America/Santo_Domingo' })}`);
-  console.log(`📂 Categorías: ${categoriesToRun.join(', ')}\n`);
+  console.log('Imperio Publico - Publicacion Manual de Noticias');
+  console.log(new Date().toLocaleString('es-DO', { timeZone: 'America/Santo_Domingo' }));
+  console.log('Categorias: ' + categoriesToRun.join(', ') + '\n');
+
+  // ── ESTADO GLOBAL DE DEDUP ────────────────────────────────────────────────────
+  // Se carga UNA SOLA VEZ desde la BD y se comparte entre TODAS las categorias.
+  // Si 'sucesos' publica sobre Guyana, 'policia' NO puede publicar el mismo tema.
+  const todayDR = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+  const startOfToday = new Date(todayDR + 'T00:00:00-04:00').toISOString();
+  const endOfToday   = new Date(todayDR + 'T23:59:59-04:00').toISOString();
+
+  const { data: todayInDB } = await supabase
+    .from('articles').select('source_link, title')
+    .gte('publishedAt', startOfToday).lte('publishedAt', endOfToday);
+
+  const publishedLinks       = new Set((todayInDB || []).map(a => a.source_link).filter(Boolean));
+  const publishedKeywordSets = (todayInDB || []).map(a => extractKeywords(a.title)).filter(s => s.size > 0);
+  const publishedTitles      = new Set(
+    (todayInDB || []).map(a =>
+      (a.title || '').toLowerCase().normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
+    ).filter(Boolean)
+  );
+
+  console.log('[DEDUP] Estado inicial: ' +
+    publishedLinks.size + ' links | ' +
+    publishedKeywordSets.length + ' temas | ' +
+    publishedTitles.size + ' titulos ya publicados hoy');
 
   for (const catKey of categoriesToRun) {
-    await processCategory(catKey);
+    await processCategory(
+      catKey, todayDR, startOfToday, endOfToday,
+      publishedLinks, publishedKeywordSets, publishedTitles
+    );
     if (categoriesToRun.length > 1) {
-      console.log(`\n⏳ Esperando 5 segundos antes de la siguiente categoría...`);
+      console.log('\nEsperando 5 segundos antes de la siguiente categoria...');
       await new Promise(r => setTimeout(r, 5000));
     }
   }
 
-  console.log('\n\n🎉 ¡Proceso completado!');
+  console.log('\n\nProceso completado!');
 }
 
 main().catch(console.error);

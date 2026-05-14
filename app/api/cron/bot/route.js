@@ -112,8 +112,33 @@ function semanticOverlap(setA, setB) {
   return intersection / union;
 }
 
-// Umbral mínimo de solapamiento para considerar dos noticias "el mismo evento"
-const SEMANTIC_THRESHOLD = 0.35; // 35% de palabras en común → duplicado semántico
+/**
+ * Extrae entidades nombradas (palabras con mayúscula inicial, 4+ chars) del título.
+ * Detecta el mismo evento aunque cambie la redacción: "Guyana" aparece en ambos.
+ */
+function extractEntities(title) {
+  if (!title) return new Set();
+  const entities = new Set();
+  for (const w of title.split(/\s+/)) {
+    const clean = w.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, '');
+    if (clean.length >= 4 && /^[A-ZÁÉÍÓÚÑ]/.test(clean)) {
+      entities.add(clean.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+    }
+  }
+  return entities;
+}
+
+/** true si 2 títulos comparten 2+ entidades nombradas (= cubre el mismo evento). */
+function sharesCriticalEntities(titleA, titleB) {
+  const entA = extractEntities(titleA);
+  const entB = extractEntities(titleB);
+  if (entA.size === 0 || entB.size === 0) return false;
+  return [...entA].filter(e => entB.has(e)).length >= 2;
+}
+
+// Umbral Jaccard: 25% de overlap detecta el mismo evento con distintas palabras
+// (ej: "Guyana firma contrato" vs "RD incursiona en bloques de Guyana" = 30% overlap)
+const SEMANTIC_THRESHOLD = 0.25;
 
 const CATEGORIES = {
   // ─── SECCIONES NACIONALES (Prioridad absoluta — somos un medio dominicano) ─────
@@ -613,7 +638,17 @@ export async function GET(request) {
       );
       if (semanticDuplicate) {
         const overlap = Math.round(semanticOverlap(candidateKeywords, semanticDuplicate) * 100);
-        console.log(`[Bot] 🔁 Duplicado SEMÁNTICO (${overlap}% overlap): "${item.title.slice(0, 60)}" ya cubierto hoy.`);
+        console.log(`[Bot] 🔁 Duplicado SEMÁNTICO (${overlap}% Jaccard): "${item.title.slice(0, 60)}" ya cubierto hoy.`);
+        continue;
+      }
+
+      // 4e. Deduplicación por ENTIDADES NOMBRADAS — detecta el mismo evento con distinto titular
+      // Si 2 artículos comparten 2+ entidades (países, personas, org.), son el mismo evento.
+      const entityDuplicate = publishedTitles && [...publishedTitles].find(
+        t => sharesCriticalEntities(item.title, t)
+      );
+      if (entityDuplicate) {
+        console.log(`[Bot] 🔁 Duplicado por ENTIDADES: "${item.title.slice(0, 60)}" cubre el mismo evento que "${entityDuplicate.slice(0, 50)}"`);
         continue;
       }
 
