@@ -2,7 +2,7 @@ import { getLatestArticles } from '@/lib/serverData';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'edge'; // Reducir CPU: Edge Runtime es más ligero que Node.js serverless
-export const dynamic = 'force-dynamic';
+// NOTA: NO usar force-dynamic — el CDN gestiona el caché con s-maxage=60 en los headers.
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

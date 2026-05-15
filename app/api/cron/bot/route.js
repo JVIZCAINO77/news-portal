@@ -7,16 +7,20 @@ import { notifyGoogleIndexing } from '@/lib/indexing';
 import { postToSocialMedia } from '@/lib/social';
 import { SITE_CONFIG } from '@/lib/data';
 
+// ─── LÍMITE DE DURACIÓN ───────────────────────────────────────────────
+// Previene funciones "zombie" que consumen CPU sin límite.
+// Vercel Hobby: máx 60s. Vercel Pro: puede subirse hasta 300s.
+export const maxDuration = 60;
+
 // Token secreto para evitar ataques externos, manejado por Vercel
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
 // OBJETIVO: 1 artículo por sección por día = 12 secciones = 12 art/día máximo.
-// Esto es óptimo para AdSense: suficiente frescura sin parecer spam.
-// Si el sitio ya está aprobado, se puede subir DAILY_LIMIT_NORMAL a 2.
-const DAILY_LIMIT_GLOBAL   = 20; // Techo del día: 12 secciones + margen para re-runs
-const DAILY_LIMIT_NORMAL   = 1;  // Mínimo 1 artículo por sección al día (garantizado)
-const DAILY_LIMIT_BREAKING = 3;  // Máximo para ÚLTIMA HORA urgente
+// 10 secciones nacionales vs 2 globales/internacional → más nacional que internacional.
+const DAILY_LIMIT_GLOBAL   = 12; // Techo del día: 12 secciones = 12 artículos exactos
+const DAILY_LIMIT_NORMAL   = 1;  // Exactamente 1 artículo por sección al día
+const DAILY_LIMIT_BREAKING = 1;  // Máximo por sección (incluso Última Hora)
 
 // ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
 // Longitud mínima que debe tener el contenido generado por la IA.

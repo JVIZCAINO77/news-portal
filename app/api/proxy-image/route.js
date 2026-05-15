@@ -2,7 +2,8 @@
 import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
+// NOTA: NO usar force-dynamic — las imágenes ya tienen headers immutable (s-maxage=31536000).
+// El CDN las cachea permanentemente sin re-ejecutar esta función.
 
 /**
  * Proxy de imágenes ultra-optimizado para Imperio Público 2.0.

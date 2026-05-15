@@ -3,7 +3,7 @@ import { getArticlesPaginated } from '@/lib/serverData';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'edge';
-export const dynamic = 'force-dynamic';
+// NOTA: NO usar force-dynamic — el CDN gestiona el caché con s-maxage=60 en los headers.
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

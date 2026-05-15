@@ -14,6 +14,26 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 
+// ─── CACHÉ DE FUENTE EN MEMORIA ───────────────────────────────────────────────
+// La fuente Playfair se descarga UNA SOLA VEZ por instancia "tibia".
+// Elimina el fetch de 3.5s que antes ocurría en cada petición a /api/og.
+let _playfairFont = null;
+
+async function getPlayfairFont() {
+  if (_playfairFont) return _playfairFont; // Ya cargada → reutilizar inmediatamente
+  try {
+    const ctrl  = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 4000);
+    const res = await fetch(
+      'https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff',
+      { signal: ctrl.signal }
+    );
+    clearTimeout(timer);
+    if (res.ok) _playfairFont = await res.arrayBuffer();
+  } catch (_) { /* fallback a Georgia */ }
+  return _playfairFont;
+}
+
 const BRAND      = '#3A0009';   // Granate oscuro profundo
 const BRAND_MID  = '#5C0015';   // Granate medio
 const BRAND_RED  = '#C0001A';   // Rojo vibrante CTA
@@ -63,22 +83,8 @@ export async function GET(request) {
       tendencias:     'TENDENCIAS',
     }[String(article.category || '').toLowerCase()] || 'TEMA DEL DÍA';
 
-    // ── Fuente Playfair Display (serif elegante) ────────────────────────────
-    let playfairFont = null;
-    try {
-      const fontCtrl  = new AbortController();
-      const fontTimer = setTimeout(() => fontCtrl.abort(), 3500);
-      try {
-        const fontRes = await fetch(
-          'https://fonts.gstatic.com/s/playfairdisplay/v30/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKdFvUDQ.woff',
-          { signal: fontCtrl.signal }
-        );
-        clearTimeout(fontTimer);
-        if (fontRes.ok) playfairFont = await fontRes.arrayBuffer();
-      } catch (_) {
-        clearTimeout(fontTimer);
-      }
-    } catch (_) { /* fallback a Georgia */ }
+    // ── Fuente Playfair Display — cacheada en memoria del proceso ──────────
+    const playfairFont = await getPlayfairFont();
 
     // ── Dots decorativos (grilla 5×5) ───────────────────────────────────────
     const dots25 = Array.from({ length: 25 });
@@ -441,7 +447,9 @@ export async function GET(request) {
           ? [{ name: 'Playfair', data: playfairFont, weight: 700, style: 'normal' }]
           : [],
         headers: {
-          'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=60',
+          // 24h de caché — la imagen OG no cambia salvo que se edite el artículo.
+          // stale-while-revalidate permite regenerar en background sin bloquear al usuario.
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',
         },
       }
     );
