@@ -31,7 +31,7 @@ export const metadata = {
     template: `%s | ${SITE_CONFIG.name}`,
   },
   description: SITE_CONFIG.description,
-  keywords: ['noticias', 'dominicana', 'actualidad', 'internacionales', 'deportes', 'economía', 'tecnología', 'imperio público'],
+  keywords: ['noticias dominicanas', 'noticias república dominicana', 'actualidad dominicana', 'noticias rdo', 'noticias hoy', 'internacionales', 'deportes', 'economía dominicana', 'tecnología', 'política dominicana', 'sucesos', 'policia', 'entretenimiento', 'imperio público', 'imperiopublico', 'noticias en vivo'],
   authors: [{ name: SITE_CONFIG.name }],
   creator: SITE_CONFIG.name,
   publisher: SITE_CONFIG.name,
@@ -83,17 +83,18 @@ export default function RootLayout({ children }) {
         {/* Forzar modo claro antes de que React hidrate — evita el flash negro */}
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.remove('dark');localStorage.removeItem('theme');` }} />
 
-        {/* ── Preconnect — MÁXIMO 4, solo los más críticos ── */}
+        {/* ── Preconnect — críticos para LCP y recursos above-the-fold ── */}
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://images.unsplash.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href={`https://${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '')}`} crossOrigin="anonymous" />
         {/* DNS prefetch para el resto (más barato, sin límite) */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-        <link rel="dns-prefetch" href="https://www.diariolibre.com" />
-        <link rel="dns-prefetch" href="https://acento.com.do" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        {/* Preload del logo — elemento LCP en mobile */}
+        <link rel="preload" as="image" href="/icon.png" fetchPriority="high" />
 
         {/* RSS Feed autodiscovery */}
         <link rel="alternate" type="application/rss+xml" title={`${SITE_CONFIG.name} — Últimas Noticias`} href="/feed.xml" />

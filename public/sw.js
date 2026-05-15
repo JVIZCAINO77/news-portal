@@ -1,14 +1,36 @@
-// public/sw.js — Service Worker para Web Push Notifications
-// Este archivo DEBE estar en /public/ para que sea accesible desde la raíz del sitio
+// public/sw.js — Service Worker Imperio Público — Estrategia Cache optimizada
+// Versión del caché — incrementar cuando cambie el SW para invalidar el caché viejo
+const CACHE_VERSION = 'v3';
+const CACHE_PAGES   = `imperiopublico-pages-${CACHE_VERSION}`;
+const CACHE_ASSETS  = `imperiopublico-assets-${CACHE_VERSION}`;
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Instalado - Imperio Público');
+  console.log('[SW] Instalado - Imperio Público', CACHE_VERSION);
+  // Pre-caché del shell (página offline de emergencia)
+  event.waitUntil(
+    caches.open(CACHE_ASSETS).then(cache => {
+      return cache.addAll([
+        '/icon.png',
+        '/logo.png',
+        '/manifest.json',
+      ]).catch(() => {}); // Fallar silenciosamente si alguno no existe
+    })
+  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activado - Imperio Público');
-  event.waitUntil(clients.claim());
+  console.log('[SW] Activado - Imperio Público', CACHE_VERSION);
+  // Limpiar cachés viejos
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key.startsWith('imperiopublico-') && !key.endsWith(CACHE_VERSION))
+          .map(key => { console.log('[SW] Eliminando caché viejo:', key); return caches.delete(key); })
+      )
+    ).then(() => clients.claim())
+  );
 });
 
 // Manejar notificaciones push recibidas del servidor
@@ -33,13 +55,13 @@ self.addEventListener('push', (event) => {
       dateOfArrival: Date.now(),
     },
     actions: [
-      { action: 'open', title: '📰 Leer noticia', icon: '/icon.png' },
+      { action: 'open', title: '\uD83D\uDCF0 Leer noticia', icon: '/icon.png' },
       { action: 'dismiss', title: 'Cerrar' },
     ],
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || '🚨 Nueva noticia — Imperio Público', options)
+    self.registration.showNotification(data.title || '\uD83D\uDEA8 Nueva noticia — Imperio Público', options)
   );
 });
 
@@ -53,13 +75,11 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Si el sitio ya está abierto, hacer focus
       for (const client of clientList) {
         if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
-      // Si no está abierto, abrir nueva ventana
       if (clients.openWindow) {
         return clients.openWindow(urlToOpen);
       }
@@ -67,32 +87,52 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Estrategia de caché: Network First para artículos, Cache First para assets
+// ── Estrategia de Caché Dual ─────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
-  // Solo interceptar requests del mismo origen
-  if (!event.request.url.startsWith(self.location.origin)) return;
+  const { request } = event;
+  const url = new URL(request.url);
 
-  // Ignorar API calls (no cachear)
-  if (event.request.url.includes('/api/')) return;
+  // Solo interceptar GET del mismo origen
+  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) return;
 
-  // Ignorar POST requests
-  if (event.request.method !== 'GET') return;
+  // No cachear llamadas API — siempre frescas
+  if (url.pathname.startsWith('/api/')) return;
 
-  event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Cachear respuestas válidas de páginas HTML
-        if (response.ok && event.request.mode === 'navigate') {
-          const responseClone = response.clone();
-          caches.open('imperiopublico-pages-v1').then((cache) => {
-            cache.put(event.request, responseClone);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Offline: intentar servir desde caché
-        return caches.match(event.request);
-      })
-  );
+  // Cache-First para assets estáticos (_next/static, iconos, imágenes públicas)
+  const isStaticAsset = url.pathname.startsWith('/_next/static/') ||
+                        url.pathname.startsWith('/_next/image') ||
+                        /\.(png|jpg|jpeg|webp|avif|ico|svg|woff2?|css|js)$/.test(url.pathname);
+
+  if (isStaticAsset) {
+    event.respondWith(
+      caches.open(CACHE_ASSETS).then(cache =>
+        cache.match(request).then(cached => {
+          if (cached) return cached;
+          return fetch(request).then(response => {
+            if (response.ok) cache.put(request, response.clone());
+            return response;
+          }).catch(() => cached);
+        })
+      )
+    );
+    return;
+  }
+
+  // Network-First para páginas HTML (noticias siempre frescas)
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_PAGES).then(cache => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() =>
+          // Fallback offline: intentar servir desde caché
+          caches.match(request).then(cached => cached || caches.match('/'))
+        )
+    );
+  }
 });

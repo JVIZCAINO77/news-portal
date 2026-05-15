@@ -12,7 +12,19 @@ export default async function sitemap() {
       url: SITE_CONFIG.url,
       lastModified: new Date(),
       changeFrequency: 'always',
-      priority: 1,
+      priority: 1.0,
+    },
+    {
+      url: `${SITE_CONFIG.url}/nosotros`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${SITE_CONFIG.url}/contacto`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.4,
     },
   ];
 
@@ -21,7 +33,7 @@ export default async function sitemap() {
     url: `${SITE_CONFIG.url}/categoria/${cat.slug}`,
     lastModified: new Date(),
     changeFrequency: 'hourly',
-    priority: 0.8,
+    priority: 0.85,
   }));
 
   // Artículos individuales — con fallback seguro si Supabase falla en build
@@ -31,12 +43,13 @@ export default async function sitemap() {
     const now = Date.now();
     articleRoutes = articles.map((article) => {
       const ageMs = now - new Date(article.publishedAt).getTime();
-      const isRecent = ageMs < 7 * 24 * 60 * 60 * 1000; // menos de 7 días
+      const isToday   = ageMs < 24 * 60 * 60 * 1000;       // menos de 24h
+      const isRecent  = ageMs < 7 * 24 * 60 * 60 * 1000;   // menos de 7 días
       return {
         url: `${SITE_CONFIG.url}/articulo/${article.slug}`,
         lastModified: new Date(article.publishedAt),
-        changeFrequency: isRecent ? 'daily' : 'weekly',
-        priority: isRecent ? 0.9 : 0.6,
+        changeFrequency: isToday ? 'hourly' : isRecent ? 'daily' : 'weekly',
+        priority: isToday ? 0.95 : isRecent ? 0.85 : 0.65,
       };
     });
   } catch (err) {

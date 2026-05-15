@@ -1,11 +1,18 @@
 // app/categoria/[slug]/page.js — Página de Categoría (Imperio Público 2.0)
 import { notFound } from 'next/navigation';
 import { getArticlesByCategory } from '@/lib/serverData';
-import { getCategoryBySlug } from '@/lib/data';
+import { getCategoryBySlug, CATEGORIES } from '@/lib/data';
 import ArticleCard from '@/components/ArticleCard';
 import AdUnit from '@/components/AdUnit';
 
-export const revalidate = 60;
+// ISR: revalidar cada 5 minutos — balance entre frescura y velocidad
+export const revalidate = 300;
+
+// Pre-renderiza las 12 categorías en build time (SSG).
+// Se sirven desde el CDN de Vercel como HTML estático — carga instantánea.
+export function generateStaticParams() {
+  return CATEGORIES.map((cat) => ({ slug: cat.slug }));
+}
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
