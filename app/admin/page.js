@@ -1,4 +1,5 @@
 // app/admin/page.js — Dashboard Overview (Imperio Público 2.0)
+// force-dynamic: stats en tiempo real, no cacheado
 export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
@@ -32,7 +33,8 @@ export default async function AdminDashboardPage() {
   const { data: viewsData } = await supabase
     .from('articles')
     .select('views, category')
-    .not('views', 'is', null);
+    .not('views', 'is', null)
+    .limit(5000); // Techo de seguridad: evita saturar memoria con muchos artículos
 
   const totalViews = viewsData?.reduce((acc, curr) => acc + (curr.views || 0), 0) || 0;
   const activeCategories = new Set(viewsData?.map(a => a.category).filter(Boolean)).size;
@@ -124,7 +126,7 @@ export default async function AdminDashboardPage() {
 
       {/* Reparación de Imágenes — solo admin */}
       {isAdmin && (
-        <ImageRepairButton cronSecret={process.env.CRON_SECRET} />
+        <ImageRepairButton />
       )}
 
       {/* Quick Actions */}

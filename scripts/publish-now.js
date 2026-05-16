@@ -271,11 +271,11 @@ async function generateWithGemini(cat, news, todayDR) {
   const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
   // Incluimos todos los modelos Gemini gratuitos disponibles (cuotas independientes)
   const models = [
-    'gemini-3.1-flash-lite',
-    'gemini-3-flash-preview',
     'gemini-2.5-flash-lite',
-    'gemini-flash-latest',
-    'gemini-pro-latest',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
+    'gemini-1.5-flash-8b',
+    'gemini-1.5-pro',
   ];
 
   const prompt = buildPrompt(cat, news, todayDR);
@@ -555,8 +555,9 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
   }
 
   // Verificar que el AI title tenga alguna relación semántica con el titular fuente
+  const sourceKws = extractKeywords(news.title);
   const aiKws = extractKeywords(articleData.title);
-  if (aiKws.size > 0 && candidateKws.size > 0 && semanticOverlap(candidateKws, aiKws) === 0) {
+  if (aiKws.size > 0 && sourceKws.size > 0 && semanticOverlap(sourceKws, aiKws) === 0) {
     throw new Error('Alucinación: el título generado no tiene relación con la fuente');
   }
 
@@ -607,8 +608,8 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
   publishedKeywordSets.push(extractKeywords(articleData.title));
   publishedTitles.add((articleData.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim());
 
-  // AUTO-POST en Redes Sociales (no bloqueante — si falla no interrumpe el bot)
-  await postToSocialMedia(newArticle);
+  // AUTO-POST en Redes Sociales: DESACTIVADO — publicación manual desde el panel admin.
+  // Para activar puntualmente: await postToSocialMedia(newArticle);
 
   return { success: true, id: inserted.id, title: inserted.title };
 }
@@ -627,8 +628,8 @@ async function processCategory(catKey, todayDR, startOfToday, endOfToday, publis
     .select('*', { count: 'exact', head: true })
     .gte('publishedAt', startOfToday).lte('publishedAt', endOfToday);
 
-  if ((totalToday ?? 0) >= 20) {
-    console.log(`⛔ Limite global de 20 articulos diarios alcanzado (${totalToday}). Saliendo.`);
+  if ((totalToday ?? 0) >= 12) {
+    console.log(`⛔ Limite global de 12 articulos diarios alcanzado (${totalToday}). Saliendo.`);
     return;
   }
 
@@ -637,8 +638,8 @@ async function processCategory(catKey, todayDR, startOfToday, endOfToday, publis
     .eq('category', cat.slug)
     .gte('publishedAt', startOfToday).lte('publishedAt', endOfToday);
 
-  if ((catCount ?? 0) >= 2) {
-    console.log(`ℹ️ Ya hay ${catCount} articulos de ${catKey} hoy. Saltando.`);
+  if ((catCount ?? 0) >= 1) {
+    console.log(`ℹ️ Ya hay ${catCount} articulo(s) de ${catKey} hoy. Saltando (1 por sección).`);
     return;
   }
 

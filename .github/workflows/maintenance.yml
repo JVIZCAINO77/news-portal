@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: 🔍 Auditoría y Reclasificación de Artículos
         env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "====================================="
@@ -26,7 +26,7 @@ jobs:
 
       - name: 🖼️ Reparación de Imágenes
         env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "====================================="
@@ -40,20 +40,20 @@ jobs:
 
       - name: 🧹 Limpieza de Duplicados
         env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "====================================="
           echo "🧹 Fase 3: Limpieza de duplicados"
           echo "====================================="
           RESULT=$(curl -s --max-time 60 \
-            -X POST "$SITE_URL/api/admin/cleanup?secret=$CRON_SECRET" \
-            -H "Content-Type: application/json")
+            -X GET "$SITE_URL/api/cron/cleanup" \
+            -H "Authorization: Bearer $CRON_SECRET")
           echo "📊 Resultado: $RESULT"
 
       - name: 📊 Reporte de Salud del Sistema
         env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET || 'pulso-bot-secret-2026' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "====================================="

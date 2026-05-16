@@ -2,13 +2,14 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 /**
  * API de Mantenimiento Automático para Imperio Público.
  * Objetivo: Mantener la base de datos esbelta y rápida.
- * Se recomienda ejecutar esto 1 vez al mes.
+ * Se ejecuta automáticamente cada 2 horas via selfcheck.yml.
+ * También puede llamarse manualmente desde maintenance.yml.
  */
 export async function GET(request) {
   const authHeader = request.headers.get('authorization');

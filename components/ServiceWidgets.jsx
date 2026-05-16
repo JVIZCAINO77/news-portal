@@ -1,3 +1,4 @@
+'use client';
 // components/ServiceWidgets.jsx — Información de Servicio (Clima y Divisas)
 'use client';
 import { useEffect, useState } from 'react';

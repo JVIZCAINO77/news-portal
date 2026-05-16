@@ -1,11 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
 // ─── REGLAS DE CLASIFICACIÓN ─────────────────────────────────────────────────
 const CATEGORY_KEYWORDS = {
   deportes:        ['deporte','béisbol','beisbol','fútbol','futbol','baloncesto','nba','mlb','pelotero','atleta','jugador','equipo','partido','torneo','campeonato','liga','gol','jonrón','jonron','pitcher','cancha','estadio','boxeo','tenis','ciclismo','medalla','olímpico','mundial','nfl','mls'],
@@ -64,10 +59,17 @@ export async function POST(request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
   try {
     const { data: articles } = await supabase
       .from('articles')
-      .select('id, title, excerpt, category, tags');
+      .select('id, title, excerpt, category, tags')
+      .order('publishedAt', { ascending: false })
+      .limit(500); // Seguridad: no cargar más de 500 filas de golpe
 
     let fixed = 0;
     const corrections = [];

@@ -1,3 +1,4 @@
+'use client';
 // components/LoadMore.jsx — Botón de Paginación Editorial (Imperio Público 2.0)
 'use client';
 import { useState } from 'react';

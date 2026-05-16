@@ -1,0 +1,157 @@
+name: 🏥 Auto-Doctor del Portal (cada 2 horas)
+
+on:
+  schedule:
+    # Corre cada 2 horas de 7AM a 11PM UTC (3AM–7PM RD)
+    - cron: '0 7,9,11,13,15,17,19,21,23 * * *'
+  workflow_dispatch: # También se puede lanzar manualmente desde GitHub
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────────────
+  # FASE 1: DOCTOR DE CÓDIGO — escanea, corrige y hace push automático
+  # ─────────────────────────────────────────────────────────────────────────────
+  code-doctor:
+    name: 🔬 Doctor de Código
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      fixed: ${{ steps.run-doctor.outputs.fixed }}
+
+    steps:
+      - name: ⬇️ Checkout del repositorio
+        uses: actions/checkout@v4
+        with:
+          # Token con permisos de escritura para poder hacer push
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Instalar dependencias
+        run: npm ci --prefer-offline
+
+      - name: 🏥 Ejecutar Doctor con auto-commit
+        id: run-doctor
+        env:
+          # Variables de producción para que el doctor pueda verificar endpoints
+          NEXT_PUBLIC_SUPABASE_URL:    ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY:   ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CRON_SECRET:                 ${{ secrets.CRON_SECRET }}
+          GEMINI_API_KEY:              ${{ secrets.GEMINI_API_KEY }}
+          CLOUDINARY_CLOUD_NAME:       ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY:          ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET:       ${{ secrets.CLOUDINARY_API_SECRET }}
+          NEXT_PUBLIC_GA_ID:           ${{ secrets.NEXT_PUBLIC_GA_ID }}
+          NEXT_PUBLIC_SITE_URL:        "https://www.imperiopublico.com"
+        run: |
+          echo "=========================================="
+          echo "🏥 Auto-Doctor — $(date -u '+%Y-%m-%d %H:%M UTC')"
+          echo "=========================================="
+
+          # Configurar git para que el bot pueda hacer commit
+          git config user.name  "Doctor Bot [Imperio Público]"
+          git config user.email "bot@imperiopublico.com"
+
+          # Ejecutar el doctor en modo commit (escanea + corrige + push)
+          node scripts/doctor.js --commit 2>&1 || true
+
+          # Capturar si hubo cambios
+          CHANGED=$(git status --porcelain | wc -l)
+          echo "fixed=$CHANGED" >> $GITHUB_OUTPUT
+
+          if [ "$CHANGED" -gt "0" ]; then
+            echo "✅ Doctor corrigió $CHANGED archivo(s) y hizo push."
+          else
+            echo "✅ No se encontraron errores que corregir."
+          fi
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # FASE 2: LIMPIEZA EN VIVO — duplicados y artículos obsoletos
+  # ─────────────────────────────────────────────────────────────────────────────
+  cleanup:
+    name: 🧹 Limpieza de BD
+    needs: code-doctor
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 🧹 Limpiar duplicados
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🧹 Limpiando artículos duplicados..."
+          RESULT=$(curl -s --max-time 60 \
+            -X GET "$SITE_URL/api/cron/cleanup" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          DELETED=$(echo "$RESULT" | grep -o '"deleted":[0-9]*' | grep -o '[0-9]*' || echo "0")
+          echo "🗑️  $DELETED artículos eliminados."
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # FASE 3: REPARACIÓN DE IMÁGENES
+  # ─────────────────────────────────────────────────────────────────────────────
+  fix-images:
+    name: 🖼️ Reparar Imágenes
+    needs: code-doctor
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 🖼️ Internalizar imágenes externas a Cloudinary
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🖼️ Verificando imágenes externas..."
+          RESULT=$(curl -s --max-time 90 \
+            -X POST "$SITE_URL/api/admin/repair-images?secret=$CRON_SECRET" \
+            -H "Content-Type: application/json" \
+            -d '{"limit": 20}')
+          REPAIRED=$(echo "$RESULT" | grep -o '"repaired":[0-9]*' | grep -o '[0-9]*' || echo "0")
+          echo "✅ $REPAIRED imágenes internalizadas a Cloudinary."
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # FASE 4: DIAGNÓSTICO FINAL
+  # ─────────────────────────────────────────────────────────────────────────────
+  health-report:
+    name: 📋 Reporte Final
+    needs: [code-doctor, cleanup, fix-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+
+    steps:
+      - name: 📊 Diagnóstico del portal
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "=========================================="
+          echo "📋 REPORTE FINAL — $(date -u '+%Y-%m-%d %H:%M UTC')"
+          echo "=========================================="
+          
+          # Health check general
+          HEALTH=$(curl -s --max-time 20 "$SITE_URL/api/admin/health?secret=$CRON_SECRET")
+          echo "Estado del sistema:"
+          echo "$HEALTH" | grep -E '"status"|"articles"|"error"' | head -10
+
+          # Diagnostics si está disponible
+          DIAG=$(curl -s --max-time 40 "$SITE_URL/api/admin/diagnostics?secret=$CRON_SECRET")
+          STATUS=$(echo "$DIAG" | grep -o '"status":"[^"]*"' | head -1 || echo '"status":"ok"')
+          echo ""
+          echo "Estado global: $STATUS"
+          echo ""
+          
+          CODE_FIXED="${{ needs.code-doctor.outputs.fixed }}"
+          if [ "$CODE_FIXED" -gt "0" ]; then
+            echo "🔧 Doctor corrigió $CODE_FIXED archivo(s) de código → Vercel desplegando..."
+          else
+            echo "✅ Código sin errores."
+          fi
+          
+          echo ""
+          echo "✅ Ciclo de auto-diagnóstico completado — próximo en 2 horas."

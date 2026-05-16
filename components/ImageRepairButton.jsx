@@ -1,7 +1,9 @@
 'use client';
 import { useState } from 'react';
 
-export default function ImageRepairButton({ cronSecret }) {
+// SEGURIDAD: cronSecret NO se pasa al cliente.
+// Las llamadas pasan por /api/admin/repair-proxy que lee CRON_SECRET en el servidor.
+export default function ImageRepairButton() {
   const [status, setStatus] = useState('idle'); // idle | scanning | repairing | done | error
   const [stats, setStats] = useState(null);
   const [progress, setProgress] = useState({ repaired: 0, ai: 0, failed: 0, batches: 0 });
@@ -10,7 +12,7 @@ export default function ImageRepairButton({ cronSecret }) {
     setStatus('scanning');
     setStats(null);
     try {
-      const res = await fetch(`/api/admin/repair-images?secret=${cronSecret}`);
+      const res = await fetch('/api/admin/repair-proxy?action=scan');
       const data = await res.json();
       setStats(data.summary);
       setStatus('idle');
@@ -30,7 +32,7 @@ export default function ImageRepairButton({ cronSecret }) {
 
     try {
       while (remaining > 0 && batches < 30) {
-        const res = await fetch(`/api/admin/repair-images?secret=${cronSecret}`, {
+        const res = await fetch('/api/admin/repair-proxy?action=repair', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ limit: 10 }),
@@ -45,7 +47,7 @@ export default function ImageRepairButton({ cronSecret }) {
         if (remaining > 0) await new Promise(r => setTimeout(r, 1500));
       }
       // Re-scan final
-      const finalRes = await fetch(`/api/admin/repair-images?secret=${cronSecret}`);
+      const finalRes = await fetch('/api/admin/repair-proxy?action=scan');
       const finalData = await finalRes.json();
       setStats(finalData.summary);
       setStatus('done');

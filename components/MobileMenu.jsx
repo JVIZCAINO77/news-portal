@@ -1,3 +1,4 @@
+'use client';
 // components/MobileMenu.jsx — Panel Lateral Premium para Móvil
 'use client';
 import Link from 'next/link';

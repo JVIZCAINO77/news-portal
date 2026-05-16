@@ -179,15 +179,7 @@
   background: var(--primary);
 }
 
-/* Animations */
-@keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-.animate-marquee {
-  display: inline-block;
-  animation: marquee 30s linear infinite;
-}
+
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {

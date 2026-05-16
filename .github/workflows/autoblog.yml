@@ -1,30 +1,29 @@
 name: 🤖 Auto-Blogger Diario — Imperio Público
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ESTRATEGIA: 1 categoría por hora, distribuidas a lo largo del día.
-# Elimina el pico de CPU simultáneo que causaba el Fluid Active CPU alto.
-# Cada job dura ~30-60s máximo (limitado por maxDuration del bot).
-# Plan gratuito de Vercel: NO usa vercel.json/crons — usa GitHub Actions gratis.
+# ESTRATEGIA: 1 categoría cada 30 minutos — natural, no agresivo.
+# 12 categorías × 30 min = publica de 7:00AM a 12:30PM RD (tarde limpia).
+# Cada artículo tiene su espacio propio en Google News y RRSS.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    - cron: '0 11 * * *'   # 07:00 AM RD (UTC-4) → Noticias Nacionales
-    - cron: '0 12 * * *'   # 08:00 AM RD         → Política
-    - cron: '0 13 * * *'   # 09:00 AM RD         → Economía
-    - cron: '0 14 * * *'   # 10:00 AM RD         → Deportes
-    - cron: '0 15 * * *'   # 11:00 AM RD         → Sucesos
-    - cron: '0 16 * * *'   # 12:00 PM RD         → Policía
-    - cron: '0 17 * * *'   # 01:00 PM RD         → Entretenimiento
-    - cron: '0 18 * * *'   # 02:00 PM RD         → Cultura
-    - cron: '0 19 * * *'   # 03:00 PM RD         → Salud
-    - cron: '0 20 * * *'   # 04:00 PM RD         → Tendencias
-    - cron: '0 21 * * *'   # 05:00 PM RD         → Tecnología
-    - cron: '0 22 * * *'   # 06:00 PM RD         → Internacional
+    - cron: '0 11 * * *'    # 07:00 AM RD → Noticias Nacionales
+    - cron: '30 11 * * *'   # 07:30 AM RD → Política
+    - cron: '0 12 * * *'    # 08:00 AM RD → Economía
+    - cron: '30 12 * * *'   # 08:30 AM RD → Deportes
+    - cron: '0 13 * * *'    # 09:00 AM RD → Sucesos
+    - cron: '30 13 * * *'   # 09:30 AM RD → Policía
+    - cron: '0 14 * * *'    # 10:00 AM RD → Entretenimiento
+    - cron: '30 14 * * *'   # 10:30 AM RD → Cultura
+    - cron: '0 15 * * *'    # 11:00 AM RD → Salud
+    - cron: '30 15 * * *'   # 11:30 AM RD → Tendencias
+    - cron: '0 16 * * *'    # 12:00 PM RD → Tecnología
+    - cron: '30 16 * * *'   # 12:30 PM RD → Internacional
   workflow_dispatch:
     inputs:
       category:
-        description: 'Categoría a publicar (dejar vacío = todas en secuencia)'
+        description: 'Categoría a publicar (dejar vacío = todas)'
         required: false
         default: ''
 
@@ -48,9 +47,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 08:00 AM RD — Política ──────────────────────────────────────────────
+  # ─── 07:30 AM RD — Política ──────────────────────────────────────────────
   politica:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 12 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 11 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -67,9 +66,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 09:00 AM RD — Economía ──────────────────────────────────────────────
+  # ─── 08:00 AM RD — Economía ──────────────────────────────────────────────
   economia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 13 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 12 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -86,9 +85,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 10:00 AM RD — Deportes ──────────────────────────────────────────────
+  # ─── 08:30 AM RD — Deportes ──────────────────────────────────────────────
   deportes:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 14 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 12 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -105,9 +104,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 11:00 AM RD — Sucesos ───────────────────────────────────────────────
+  # ─── 09:00 AM RD — Sucesos ───────────────────────────────────────────────
   sucesos:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 15 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 13 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -124,9 +123,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 12:00 PM RD — Policía ───────────────────────────────────────────────
+  # ─── 09:30 AM RD — Policía ───────────────────────────────────────────────
   policia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 16 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 13 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -143,9 +142,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 01:00 PM RD — Entretenimiento ───────────────────────────────────────
+  # ─── 10:00 AM RD — Entretenimiento ───────────────────────────────────────
   entretenimiento:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 17 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 14 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -162,9 +161,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 02:00 PM RD — Cultura ───────────────────────────────────────────────
+  # ─── 10:30 AM RD — Cultura ───────────────────────────────────────────────
   cultura:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 18 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 14 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -181,9 +180,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 03:00 PM RD — Salud ─────────────────────────────────────────────────
+  # ─── 11:00 AM RD — Salud ─────────────────────────────────────────────────
   salud:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 19 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 15 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -200,9 +199,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 04:00 PM RD — Tendencias ────────────────────────────────────────────
+  # ─── 11:30 AM RD — Tendencias ────────────────────────────────────────────
   tendencias:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 20 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 15 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -219,9 +218,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 05:00 PM RD — Tecnología ────────────────────────────────────────────
+  # ─── 12:00 PM RD — Tecnología ────────────────────────────────────────────
   tecnologia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 21 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 16 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -238,9 +237,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 06:00 PM RD — Internacional ─────────────────────────────────────────
+  # ─── 12:30 PM RD — Internacional ─────────────────────────────────────────
   internacional:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 22 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 16 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

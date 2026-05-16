@@ -1,3 +1,4 @@
+'use client';
 // components/BreakingTicker.jsx — Cintillo de Último Minuto dinámico
 'use client';
 import { useEffect, useState } from 'react';

@@ -3,6 +3,8 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import AdminArticleCard from '@/components/AdminArticleCard';
+
+export const revalidate = 60; // ISR: revalidar cada 60s
 import { createClient } from '@supabase/supabase-js';
 
 export default async function AdminArticlesPage() {

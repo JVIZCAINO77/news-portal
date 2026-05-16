@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 // Rate limit simple: usamos el slug como clave de control en el header
 export async function POST(request) {
@@ -21,10 +21,16 @@ export async function POST(request) {
     const { error } = await supabase.rpc('increment_views', { article_slug: slug });
 
     if (error) {
-      // Fallback: update directo si la función RPC no existe
+      // Fallback: leer el valor actual e incrementar manualmente
+      const { data: cur } = await supabase
+        .from('articles')
+        .select('views')
+        .eq('slug', slug)
+        .maybeSingle();
+
       const { error: updateError } = await supabase
         .from('articles')
-        .update({ views: supabase.sql`views + 1` })
+        .update({ views: (cur?.views || 0) + 1 })
         .eq('slug', slug);
 
       if (updateError) {

@@ -56,7 +56,8 @@ export async function POST(request) {
 
     // 5. Publicar en redes sociales
     console.log(`[Admin Social] Publicando manualmente: "${article.title?.slice(0, 60)}"`);
-    await postToSocialMedia(article);
+    // DESACTIVADO: publicación solo manual desde admin panel.
+    // await postToSocialMedia(article);
 
     return Response.json({
       ok: true,

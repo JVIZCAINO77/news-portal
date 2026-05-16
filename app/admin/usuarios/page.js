@@ -4,6 +4,8 @@ export const dynamic = 'force-dynamic';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
+
+export const revalidate = 60; // ISR: revalidar cada 60s
 import UserForm from './UserForm';
 
 export default async function AdminUsersPage() {

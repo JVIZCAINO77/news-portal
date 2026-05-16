@@ -145,7 +145,7 @@ export default function PremiumImage({
           priority={priority}
           fetchPriority={priority ? 'high' : 'auto'}
           sizes={imgSizes}
-          className={`absolute inset-0 w-full h-full object-contain ${priority ? '' : `transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'}`} ${className}`}
+          className={`absolute inset-0 w-full h-full object-cover ${priority ? '' : `transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'}`} ${className}`}
           onLoad={handleLoad}
           onError={handleError}
           unoptimized={isCloudinary}
@@ -156,7 +156,7 @@ export default function PremiumImage({
           alt={alt || 'Noticia'}
           width={width}
           height={Math.round(width * 0.5625)}
-          className={`absolute inset-0 w-full h-full object-contain ${priority ? '' : `transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'}`} ${className}`}
+          className={`absolute inset-0 w-full h-full object-cover ${priority ? '' : `transition-opacity duration-300 ${status ? 'opacity-100' : 'opacity-0'}`} ${className}`}
           onLoad={handleLoad}
           onError={handleError}
           loading={priority ? 'eager' : 'lazy'}

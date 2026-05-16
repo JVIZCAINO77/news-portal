@@ -19,8 +19,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 // OBJETIVO: 1 artículo por sección por día = 12 secciones = 12 art/día máximo.
 // 10 secciones nacionales vs 2 globales/internacional → más nacional que internacional.
 const DAILY_LIMIT_GLOBAL   = 12; // Techo del día: 12 secciones = 12 artículos exactos
-const DAILY_LIMIT_NORMAL   = 1;  // Exactamente 1 artículo por sección al día
-const DAILY_LIMIT_BREAKING = 1;  // Máximo por sección (incluso Última Hora)
+const DAILY_LIMIT_PER_CAT  = 1;  // Exactamente 1 artículo por sección al día
 
 // ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
 // Longitud mínima que debe tener el contenido generado por la IA.
@@ -460,11 +459,16 @@ function isOnTopicForCategory(item, categorySlug) {
 
 
 export async function GET(request) {
+  // X-Manual-Trigger solo exime del header Authorization cuando viene del trigger interno.
+  // Aún así se valida CRON_SECRET para bloquear llamadas externas que inyecten el header.
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
+  const adminId = request.headers.get('X-Admin-Id');
 
-  if (!isManualTrigger && CRON_SECRET) {
+  if (CRON_SECRET) {
     const authHeader = request.headers.get('authorization');
-    if (authHeader !== `Bearer ${CRON_SECRET}`) {
+    // Permitir disparo manual si viene del trigger interno con un adminId válido (UUID)
+    const isInternalAdmin = isManualTrigger && adminId && /^[0-9a-f-]{36}$/i.test(adminId);
+    if (!isInternalAdmin && authHeader !== `Bearer ${CRON_SECRET}`) {
       return NextResponse.json({ error: 'No autorizado. Se requiere token CRON.' }, { status: 401 });
     }
   }
@@ -521,7 +525,7 @@ export async function GET(request) {
       .gte('publishedAt', startOfTodayDR)
       .lte('publishedAt', endOfTodayDR);
 
-    if ((countToday ?? 0) >= DAILY_LIMIT_BREAKING) {
+    if ((countToday ?? 0) >= DAILY_LIMIT_PER_CAT) {
       return NextResponse.json({ message: `Límite de categoría ${cat.slug} alcanzado (${countToday}).` }, { status: 200 });
     }
 
@@ -768,11 +772,15 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       for (const model of geminiModels) {
         try {
           console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model}`);
+          const gemCtrl = new AbortController();
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 25000); // 25s por modelo
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+            signal: gemCtrl.signal,
           });
+          clearTimeout(gemTimer);
           const data = await res.json();
           if (data.error) {
             const isQuota    = data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED';
@@ -1066,11 +1074,14 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 
       // Prioridad 2: Scrapping del HTML original
       if (!finalImageUrl) {
-        const redirectRes = await fetch(news.link, { 
-          redirect: 'follow', 
+        const htmlCtrl  = new AbortController();
+        const htmlTimer = setTimeout(() => htmlCtrl.abort(), 8000); // 8s real timeout
+        const redirectRes = await fetch(news.link, {
+          redirect: 'follow',
           headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' },
-          timeout: 8000
+          signal: htmlCtrl.signal,
         });
+        clearTimeout(htmlTimer);
         const html = await redirectRes.text();
         
         // Patrones de anuncios y elementos no deseados (Blacklist extendida)

@@ -39,14 +39,7 @@ export default async function SearchPage({ searchParams }) {
       {/* Rejilla de Resultados */}
       <section className="max-w-6xl mx-auto px-6 py-20">
         {results.length > 0 ? (
-          <Suspense fallback={
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-64 bg-gray-100 animate-pulse rounded" />
-              ))}
-            </div>
-          }>
-            <div className="flex flex-col gap-12">
+          <div className="flex flex-col gap-12">
               {/* Primer resultado en formato ancho destacado */}
               <ArticleCard article={results[0]} variant="wide" />
               {/* Resto en grilla de 3 columnas */}
@@ -58,7 +51,6 @@ export default async function SearchPage({ searchParams }) {
                 </div>
               )}
             </div>
-          </Suspense>
         ) : (
           <div className="py-20 text-center space-y-10">
             <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
