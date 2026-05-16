@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Requiere: npm install tweetsodium (solo si quieres auto-provisionar secretos en GitHub)
+// Si no está instalado, el doctor solo reporta, no auto-provisiona.
 /**
  * scripts/doctor.js — Auto-Doctor Autónomo de Imperio Público
  * =============================================================
@@ -124,6 +126,9 @@ function checkEnv() {
     'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3', 'NEXT_PUBLIC_GA_ID',
     'NEXT_PUBLIC_ADSENSE_ID', 'FACEBOOK_ACCESS_TOKEN', 'FACEBOOK_PAGE_ID',
     'NEXT_PUBLIC_SITE_URL',
+    // Para que el doctor pueda auto-provisionar secretos en GitHub Actions:
+    'GITHUB_TOKEN',  // Personal Access Token con scope: repo (secrets:write)
+    'GH_REPO',       // ej: JVIZCAINO77/news-portal
   ];
   required.forEach(v => process.env[v] ? OK(`${v} ✓`) : (ERR(`${v} → FALTA`), stats.errors++));
   
@@ -502,6 +507,184 @@ function checkDeps() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// SECCIÓN 7 — SINCRONIZACIÓN DE SECRETOS EN GITHUB ACTIONS
+// Verifica que los secretos críticos existan en el repo remoto.
+// Si GITHUB_TOKEN y GH_REPO están configurados, puede auto-provisionar los faltantes.
+// ═══════════════════════════════════════════════════════════════════════════════
+async function checkGithubSecrets() {
+  HEAD('🔐 Secretos de GitHub Actions');
+
+  const GH_TOKEN = process.env.GITHUB_TOKEN;
+  const GH_REPO  = process.env.GH_REPO || 'JVIZCAINO77/news-portal';
+
+  // Secretos que DEBEN existir en GitHub Actions para que el workflow funcione
+  const REQUIRED_GH_SECRETS = [
+    { name: 'CRON_SECRET',                 localKey: 'CRON_SECRET' },
+    { name: 'GEMINI_API_KEY',              localKey: 'GEMINI_API_KEY' },
+    { name: 'NEXT_PUBLIC_SUPABASE_URL',    localKey: 'NEXT_PUBLIC_SUPABASE_URL' },
+    { name: 'SUPABASE_SERVICE_ROLE_KEY',   localKey: 'SUPABASE_SERVICE_ROLE_KEY' },
+    { name: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', localKey: 'NEXT_PUBLIC_SUPABASE_ANON_KEY' },
+  ];
+
+  if (!GH_TOKEN) {
+    WARN('GITHUB_TOKEN no configurado — solo verificando secretos locales.');
+    WARN('Para auto-provisionar secretos en GitHub, agrega GITHUB_TOKEN a .env.local');
+    WARN('(Personal Access Token con permisos: repo → secrets)');
+    stats.warned++;
+    // Aun así reportamos el estado local de cada secreto
+    for (const s of REQUIRED_GH_SECRETS) {
+      process.env[s.localKey]
+        ? OK(`${s.name} → presente localmente`)
+        : ERR(`${s.name} → FALTA localmente y no se puede verificar en GitHub sin GITHUB_TOKEN`);
+    }
+    return;
+  }
+
+  // 1. Obtener lista de secretos que existen actualmente en el repo
+  let existingSecrets = new Set();
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 10000);
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/actions/secrets`, {
+      headers: {
+        Authorization: `Bearer ${GH_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+      signal: ctrl.signal,
+    });
+    if (!res.ok) {
+      ERR(`GitHub API error: HTTP ${res.status} — verifica que GITHUB_TOKEN tenga permisos de escritura en secrets`);
+      stats.errors++;
+      return;
+    }
+    const data = await res.json();
+    (data.secrets || []).forEach(s => existingSecrets.add(s.name));
+    OK(`GitHub API conectada — ${existingSecrets.size} secreto(s) encontrado(s) en el repo`);
+  } catch (e) {
+    WARN(`No se pudo consultar la API de GitHub: ${e.message}`);
+    stats.warned++;
+    return;
+  }
+
+  // 2. Obtener la public key del repo (necesaria para cifrar nuevos secretos)
+  let repoPublicKey = null;
+  let repoKeyId     = null;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_REPO}/actions/secrets/public-key`, {
+      headers: {
+        Authorization: `Bearer ${GH_TOKEN}`,
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    });
+    if (res.ok) {
+      const pk = await res.json();
+      repoPublicKey = pk.key;
+      repoKeyId     = pk.key_id;
+    }
+  } catch {}
+
+  // 3. Verificar cada secreto crítico y auto-provisionar si falta
+  for (const s of REQUIRED_GH_SECRETS) {
+    if (existingSecrets.has(s.name)) {
+      OK(`${s.name} → ✓ existe en GitHub Actions`);
+      continue;
+    }
+
+    // El secreto NO existe en GitHub
+    const localValue = process.env[s.localKey];
+    if (!localValue) {
+      ERR(`${s.name} → FALTA en GitHub Actions y tampoco está en .env.local`);
+      stats.errors++;
+      continue;
+    }
+
+    // Intentar auto-provisionar usando tweetsodium (cifrado requerido por GitHub API)
+    if (DRY) {
+      WARN(`[DRY] ${s.name} → falta en GitHub Actions, se crearía con valor local`);
+      stats.warned++;
+      continue;
+    }
+
+    let sodium;
+    try { sodium = require('tweetsodium'); } catch {
+      WARN(`${s.name} → falta en GitHub, pero 'tweetsodium' no está instalado.`);
+      WARN(`  Instala con: npm install tweetsodium   (luego vuelve a correr el doctor)`);
+      WARN(`  O créalo manualmente en: https://github.com/${GH_REPO}/settings/secrets/actions/new`);
+      stats.warned++;
+      continue;
+    }
+
+    if (!repoPublicKey) {
+      WARN(`${s.name} → No se pudo obtener la clave pública del repo para cifrar`);
+      stats.warned++;
+      continue;
+    }
+
+    try {
+      // Cifrar el secreto con la public key del repo (formato requerido por GitHub)
+      const messageBytes  = Buffer.from(localValue);
+      const keyBytes      = Buffer.from(repoPublicKey, 'base64');
+      const encryptedBytes = sodium.seal(messageBytes, keyBytes);
+      const encryptedValue = Buffer.from(encryptedBytes).toString('base64');
+
+      const putRes = await fetch(
+        `https://api.github.com/repos/${GH_REPO}/actions/secrets/${s.name}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${GH_TOKEN}`,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ encrypted_value: encryptedValue, key_id: repoKeyId }),
+        }
+      );
+
+      if (putRes.status === 201 || putRes.status === 204) {
+        FIX(`${s.name} → ✅ AUTO-PROVISIONADO en GitHub Actions desde .env.local`);
+        stats.fixed++;
+      } else {
+        const errBody = await putRes.text();
+        ERR(`${s.name} → No se pudo crear en GitHub (HTTP ${putRes.status}): ${errBody.slice(0, 80)}`);
+        stats.errors++;
+      }
+    } catch (e) {
+      ERR(`${s.name} → Error al cifrar/enviar: ${e.message}`);
+      stats.errors++;
+    }
+  }
+
+  // 4. Verificar también que el bot endpoint responde correctamente con el token
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret) {
+    try {
+      const testUrl = 'https://www.imperiopublico.com/api/cron/bot?category=noticias';
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 12000);
+      const res = await fetch(testUrl, {
+        headers: { Authorization: `Bearer ${cronSecret}` },
+        signal: ctrl.signal,
+      });
+      if (res.ok) {
+        OK(`Bot endpoint → HTTP ${res.status} (token CRON válido)`);
+      } else if (res.status === 401) {
+        ERR(`Bot endpoint → HTTP 401 — CRON_SECRET en Vercel NO coincide con .env.local`);
+        ERR(`  Ve a: https://vercel.com/dashboard → Project → Settings → Environment Variables`);
+        ERR(`  Actualiza CRON_SECRET al valor: ${cronSecret}`);
+        stats.errors++;
+      } else {
+        WARN(`Bot endpoint → HTTP ${res.status} (no es error de auth, puede ser normal)`);
+      }
+    } catch (e) {
+      WARN(`Bot endpoint → No se pudo verificar: ${e.message}`);
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // MAIN
 // ═══════════════════════════════════════════════════════════════════════════════
 async function main() {
@@ -517,6 +700,7 @@ async function main() {
   checkFiles();
   checkDeps();
   scanAndFix();
+  await checkGithubSecrets();   // ← Sección 7: verifica + auto-provisiona secretos en GitHub
   await checkEndpoints();
   autoCommitAndPush(); // Auto git push si hay correcciones (solo con --commit)
 
