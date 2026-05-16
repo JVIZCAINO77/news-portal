@@ -467,7 +467,40 @@ const TOPIC_ALLOWLIST = {
   sucesos:        ['detenido','arrestado','capturado','homicidio','asesinado','robo',
                    'accidente','incendio','crimen','policia','autoridades','investigacion',
                    'victima','sospechoso','fugitivo','delito','herido','muerto','matan'],
-  // Internacional: SOLO noticias de ALTO IMPACTO MUNDIAL
+
+  // ── POLICÍA: operativos, arrestos, investigaciones criminales, seguridad ciudadana ──
+  policia:        ['policia','denuncia','crimen','arresto','delito','tribunal','juez',
+                   'fiscal','dicrim','dncd','justicia','carcel','preso','pn','fiscalia',
+                   'abogado','condena','robo','asalto','homicidio','asesinato','banda',
+                   'operativo','investigacion criminal','detenido','capturado','imputado'],
+
+  // ── TENDENCIAS: viral, redes sociales, cultura pop, curiosidades ─────────────
+  tendencias:     ['viral','trending','tendencia','redes sociales','tiktok','instagram',
+                   'twitter','youtube','famoso','popular','meme','record','impactante',
+                   'sorprendente','curioso','increible','fenomeno','generacion','joven'],
+
+  // ── NOTICIAS (Nacional): política dominicana, economía local, actualidad social ─
+  // NO incluye geopolítica pura — eso va en Internacional
+  noticias:       [
+    // Política nacional
+    'abinader','gobierno dominicano','ministerio','diputado','senado','congreso',
+    'jce','elecciones','municipio','alcalde','partido politico','pld','prm',
+    'fuerza del pueblo','leonel','danilo','reforma','ley dominicana',
+    // Economía nacional
+    'economia dominicana','banco central','pib dominicano','inflacion rd',
+    'dolar en rd','exportaciones dominicanas','presupuesto nacional',
+    'zona franca','turismo dominicano','inversiones en rd',
+    // Actualidad y sociedad dominicana
+    'dominicano','dominicana','republica dominicana','santo domingo','santiago',
+    'haiti','frontera','coee','digesett','intrant','proconsumidor',
+    'educacion dominicana','salud publica rd','seguridad social',
+    'desempleo','pobreza','migracion','haitianos','extradicion',
+    // Temas sociales generales
+    'comunidad','barrio','familia','sociedad','juventud','mujeres',
+    'derechos','protesta','huelga','manifestacion',
+  ],
+
+  // ── INTERNACIONAL: geopolítica, guerras, economía mundial, conflictos ─────────
   internacional:  [
     'trump','biden','putin','xi jinping','zelensky','macron','netanyahu',
     'eeuu','estados unidos','rusia','china','israel','iran','ucrania','palestina',
@@ -480,8 +513,6 @@ const TOPIC_ALLOWLIST = {
     'terremoto','tsunami','erupcion volcanica',
     'pandemia','emergencia sanitaria',
   ],
-
-  policia:        ['policia','denuncia','ley','crimen','arresto','delito','tribunal','juez','fiscal','dicrim','dncd','justicia','carcel','preso','pn','fiscalia','abogado','condena','robo','asalto','homicidio','asesinato','banda','operativo'],
 };
 
 /**

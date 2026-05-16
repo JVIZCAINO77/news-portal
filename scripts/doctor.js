@@ -31,13 +31,13 @@ if (require('fs').existsSync(require('path').join(__dirname, '..', '.env.local')
   require('dotenv').config({ path: require('path').join(__dirname, '..', '.env.local') });
 }
 
-const fs     = require('fs');
-const path   = require('path');
+const fs = require('fs');
+const path = require('path');
 const { execSync } = require('child_process');
 
-const DRY    = process.argv.includes('--dry');
+const DRY = process.argv.includes('--dry');
 const COMMIT = process.argv.includes('--commit'); // Auto git commit + push tras correcciones
-const ROOT   = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..');
 
 // ── Git helpers ───────────────────────────────────────────────────────────────
 function gitExec(cmd) {
@@ -52,7 +52,7 @@ function autoCommitAndPush() {
 
   HEAD('📤 Auto-Commit y Push a GitHub');
   const timestamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  const changed   = (status.match(/\n/g) || []).length + 1;
+  const changed = (status.match(/\n/g) || []).length + 1;
 
   gitExec('git config user.name "Doctor Bot [Imperio Público]"');
   gitExec('git config user.email "bot@imperiopublico.com"');
@@ -79,21 +79,21 @@ const C = {
   reset: '\x1b[0m', red: '\x1b[31m', green: '\x1b[32m',
   yellow: '\x1b[33m', cyan: '\x1b[36m', bold: '\x1b[1m', dim: '\x1b[2m',
 };
-const log   = m => console.log(m);
-const OK    = m => console.log(`${C.green}  ✅ ${m}${C.reset}`);
-const WARN  = m => console.log(`${C.yellow}  ⚠️  ${m}${C.reset}`);
-const ERR   = m => console.log(`${C.red}  ❌ ${m}${C.reset}`);
-const FIX   = m => console.log(`${C.cyan}  🔧 ${m}${C.reset}`);
-const HEAD  = m => console.log(`\n${C.bold}${m}${C.reset}`);
+const log = m => console.log(m);
+const OK = m => console.log(`${C.green}  ✅ ${m}${C.reset}`);
+const WARN = m => console.log(`${C.yellow}  ⚠️  ${m}${C.reset}`);
+const ERR = m => console.log(`${C.red}  ❌ ${m}${C.reset}`);
+const FIX = m => console.log(`${C.cyan}  🔧 ${m}${C.reset}`);
+const HEAD = m => console.log(`\n${C.bold}${m}${C.reset}`);
 
 // ── Contadores ────────────────────────────────────────────────────────────────
 const stats = { fixed: 0, warned: 0, errors: 0, skipped: 0 };
 
 // ── Utilidades de archivo ─────────────────────────────────────────────────────
-const read  = f => { try { return fs.readFileSync(f, 'utf8'); } catch { return null; } };
+const read = f => { try { return fs.readFileSync(f, 'utf8'); } catch { return null; } };
 const write = (f, c) => { if (!DRY) { fs.writeFileSync(f, c, 'utf8'); stats.fixed++; } };
 const exist = f => fs.existsSync(f);
-const rel   = f => path.relative(ROOT, f);
+const rel = f => path.relative(ROOT, f);
 
 function walk(dirs, exts = ['.js', '.jsx', '.ts', '.tsx']) {
   const SKIP = ['node_modules', '.git', '.next', 'out', 'dist', 'scratch', 'brain'];
@@ -131,7 +131,7 @@ function checkEnv() {
     'GH_REPO',       // ej: JVIZCAINO77/news-portal
   ];
   required.forEach(v => process.env[v] ? OK(`${v} ✓`) : (ERR(`${v} → FALTA`), stats.errors++));
-  
+
   // Cloudinary: aceptar NEXT_PUBLIC_ como fallback
   cloudinary.forEach(v => {
     const fallback = process.env[`NEXT_PUBLIC_${v}`];
@@ -144,7 +144,7 @@ function checkEnv() {
       stats.errors++;
     }
   });
-  
+
   optional.forEach(v => process.env[v] ? OK(`${v} ✓ (opcional)`) : WARN(`${v} → no configurada`));
 }
 
@@ -205,7 +205,7 @@ const RULES = [
     sev: 'error',
     test: c => /process\.env\.CRON_SECRET\s*\|\|\s*['"`][^'"` ]{4,}['"`]/.test(c),
     fix: c => c.replace(/process\.env\.CRON_SECRET\s*\|\|\s*['"`][^'"` ]+['"`]/g,
-                        'process.env.CRON_SECRET'),
+      'process.env.CRON_SECRET'),
   },
 
   // ── 4. runtime: 'edge' con Supabase Service Role ─────────────────────────────
@@ -277,10 +277,10 @@ const RULES = [
     test: (c, fp = '') => {
       if (!fp.includes(`${path.sep}components${path.sep}`)) return false;
       const usesHooks = c.includes('useState') || c.includes('useEffect') ||
-                        c.includes('useCallback') || c.includes('useRef') ||
-                        c.includes('useRouter') || c.includes('usePathname');
+        c.includes('useCallback') || c.includes('useRef') ||
+        c.includes('useRouter') || c.includes('usePathname');
       const hasDirective = c.trimStart().startsWith("'use client'") ||
-                           c.trimStart().startsWith('"use client"');
+        c.trimStart().startsWith('"use client"');
       return usesHooks && !hasDirective;
     },
     fix: c => `'use client';\n${c}`,
@@ -439,7 +439,7 @@ function scanAndFix() {
 async function checkEndpoints() {
   HEAD('🌐 Endpoints en Vivo');
 
-  const SITE   = 'https://www.imperiopublico.com';
+  const SITE = 'https://www.imperiopublico.com';
   const SECRET = process.env.CRON_SECRET;
 
   if (!SECRET) {
@@ -448,13 +448,13 @@ async function checkEndpoints() {
   }
 
   const endpoints = [
-    { name: 'Sitio principal',   url: SITE },
-    { name: 'Feed RSS',          url: `${SITE}/feed.xml` },
-    { name: 'Sitemap XML',       url: `${SITE}/sitemap.xml` },
+    { name: 'Sitio principal', url: SITE },
+    { name: 'Feed RSS', url: `${SITE}/feed.xml` },
+    { name: 'Sitemap XML', url: `${SITE}/sitemap.xml` },
     ...(SECRET ? [
-      { name: 'Health',          url: `${SITE}/api/admin/health?secret=${SECRET}` },
-      { name: 'Diagnostics',     url: `${SITE}/api/admin/diagnostics?secret=${SECRET}` },
-      { name: 'Cleanup',         url: `${SITE}/api/cron/cleanup`, headers: { Authorization: `Bearer ${SECRET}` } },
+      { name: 'Health', url: `${SITE}/api/admin/health?secret=${SECRET}` },
+      { name: 'Diagnostics', url: `${SITE}/api/admin/diagnostics?secret=${SECRET}` },
+      { name: 'Cleanup', url: `${SITE}/api/cron/cleanup`, headers: { Authorization: `Bearer ${SECRET}` } },
     ] : []),
   ];
 
@@ -480,7 +480,7 @@ async function checkEndpoints() {
       }
     } catch (e) {
       e.name === 'AbortError'
-        ? WARN(`${ep.name} → Timeout`) 
+        ? WARN(`${ep.name} → Timeout`)
         : WARN(`${ep.name} → ${e.message}`);
       stats.warned++;
     }
@@ -515,14 +515,14 @@ async function checkGithubSecrets() {
   HEAD('🔐 Secretos de GitHub Actions');
 
   const GH_TOKEN = process.env.GITHUB_TOKEN;
-  const GH_REPO  = process.env.GH_REPO || 'JVIZCAINO77/news-portal';
+  const GH_REPO = process.env.GH_REPO || 'JVIZCAINO77/news-portal';
 
   // Secretos que DEBEN existir en GitHub Actions para que el workflow funcione
   const REQUIRED_GH_SECRETS = [
-    { name: 'CRON_SECRET',                 localKey: 'CRON_SECRET' },
-    { name: 'GEMINI_API_KEY',              localKey: 'GEMINI_API_KEY' },
-    { name: 'NEXT_PUBLIC_SUPABASE_URL',    localKey: 'NEXT_PUBLIC_SUPABASE_URL' },
-    { name: 'SUPABASE_SERVICE_ROLE_KEY',   localKey: 'SUPABASE_SERVICE_ROLE_KEY' },
+    { name: 'CRON_SECRET', localKey: 'CRON_SECRET' },
+    { name: 'GEMINI_API_KEY', localKey: 'GEMINI_API_KEY' },
+    { name: 'NEXT_PUBLIC_SUPABASE_URL', localKey: 'NEXT_PUBLIC_SUPABASE_URL' },
+    { name: 'SUPABASE_SERVICE_ROLE_KEY', localKey: 'SUPABASE_SERVICE_ROLE_KEY' },
     { name: 'NEXT_PUBLIC_SUPABASE_ANON_KEY', localKey: 'NEXT_PUBLIC_SUPABASE_ANON_KEY' },
   ];
 
@@ -569,7 +569,7 @@ async function checkGithubSecrets() {
 
   // 2. Obtener la public key del repo (necesaria para cifrar nuevos secretos)
   let repoPublicKey = null;
-  let repoKeyId     = null;
+  let repoKeyId = null;
   try {
     const res = await fetch(`https://api.github.com/repos/${GH_REPO}/actions/secrets/public-key`, {
       headers: {
@@ -581,9 +581,9 @@ async function checkGithubSecrets() {
     if (res.ok) {
       const pk = await res.json();
       repoPublicKey = pk.key;
-      repoKeyId     = pk.key_id;
+      repoKeyId = pk.key_id;
     }
-  } catch {}
+  } catch { }
 
   // 3. Verificar cada secreto crítico y auto-provisionar si falta
   for (const s of REQUIRED_GH_SECRETS) {
@@ -624,8 +624,8 @@ async function checkGithubSecrets() {
 
     try {
       // Cifrar el secreto con la public key del repo (formato requerido por GitHub)
-      const messageBytes  = Buffer.from(localValue);
-      const keyBytes      = Buffer.from(repoPublicKey, 'base64');
+      const messageBytes = Buffer.from(localValue);
+      const keyBytes = Buffer.from(repoPublicKey, 'base64');
       const encryptedBytes = sodium.seal(messageBytes, keyBytes);
       const encryptedValue = Buffer.from(encryptedBytes).toString('base64');
 
@@ -693,7 +693,7 @@ async function main() {
   console.log(`${C.bold}  🏥 AUTO-DOCTOR — IMPERIO PÚBLICO${C.reset}`);
   console.log(`${C.bold}  ${new Date().toLocaleString('es-DO', { timeZone: 'America/Santo_Domingo' })} RD${C.reset}`);
   if (DRY) console.log(`${C.yellow}  MODO DRY: solo reporta, no modifica archivos${C.reset}`);
-  else      console.log(`${C.cyan}  MODO ACTIVO: corrigiendo todo automáticamente${C.reset}`);
+  else console.log(`${C.cyan}  MODO ACTIVO: corrigiendo todo automáticamente${C.reset}`);
   console.log(`${C.bold}${'═'.repeat(58)}${C.reset}`);
 
   checkEnv();
@@ -710,7 +710,7 @@ async function main() {
   console.log(`${C.bold}  📋 REPORTE FINAL (${elapsed}s)${C.reset}`);
   console.log(`${C.bold}${'═'.repeat(58)}${C.reset}`);
 
-  if (stats.fixed  > 0) FIX(`${stats.fixed} corrección(es) aplicadas automáticamente`);
+  if (stats.fixed > 0) FIX(`${stats.fixed} corrección(es) aplicadas automáticamente`);
   if (stats.warned > 0) WARN(`${stats.warned} advertencia(s) — requieren revisión manual`);
   if (stats.errors > 0) ERR(`${stats.errors} error(es) que necesitan atención manual`);
 
