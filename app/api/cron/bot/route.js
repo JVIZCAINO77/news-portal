@@ -523,12 +523,36 @@ const TOPIC_BLOCKLIST = {
   ],
 
   // ── NACIONAL ─────────────────────────────────────────────────────────────────
-  // Solo: República Dominicana — instituciones, gobierno local, vida ciudadana
+  // Solo: vida ciudadana RD — servicios, comunidad, sociedad, migración
+  // Bloquear: todo lo que tiene sección propia más específica
   nacional: [
+    // Geopolítica / internacional
     'trump','putin','zelensky','rusia','ucrania','china','iran','israel',
     'palestina','corea del norte','guerra','ataque militar','bombardeo',
-    'actor','actriz','cantante','concierto','farandula',
-    'beisbol','jonron','mlb','nba','gol','futbol',
+    'eeuu','estados unidos','europa','onu','otan','g7','g20',
+    // Política formal (va a 'politica')
+    'presidente abinader','ministro de','senado dominicano','camara de diputados',
+    'partido politico','proyecto de ley','decreto presidencial','legislacion',
+    'pld','prm','fuerza del pueblo','reforma constitucional','jce','elecciones',
+    // Economía técnica (va a 'economia')
+    'pib','inflacion','banco central','exportacion','importacion',
+    'deficit','reservas internacionales','bolsa de valores','aranceles',
+    // Deportes (va a 'deportes')
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','pelotero',
+    'campeonato','torneo','liga','atleta','estadio','pitcher','boxeo',
+    // Entretenimiento / farándula (va a 'entretenimiento')
+    'actor','actriz','cantante','concierto','farandula','espectaculo',
+    'pelicula','serie','netflix','reggaeton','bachata','merengue','influencer',
+    // Crimen / sucesos graves (va a 'sucesos' o 'policia')
+    'homicidio','asesinado','asesinato','feminicidio','matan','cadaver',
+    'tiroteo','secuestro','narcotráfico','narco','banda criminal',
+    'operativo policial','allanamiento','detenido','arrestado','capturado',
+    // Salud técnica (va a 'salud')
+    'vacuna','pandemia','virus','epidemia','cancer','diabetes','cirugia',
+    'hospital saturado','emergencia sanitaria','oms','clinica privada',
+    // Tecnología (va a 'tecnologia')
+    'inteligencia artificial','chatgpt','openai','samsung','apple','google meta',
+    'ciberseguridad','startup','bitcoin','crypto','drone','robot',
   ],
 
   // ── MEDIO AMBIENTE ────────────────────────────────────────────────────────────

@@ -84,8 +84,33 @@ const CATEGORY_BLOCKLIST = {
   tendencias:      ['pib','inflacion','banco central','reforma constitucional','homicidio'],
   internacional:   ['presidente abinader','senado dominicano','camara de diputados','ayuntamiento de'],
   policia:         ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','pib'],
-  nacional:        ['eeuu','estados unidos','europa','china','rusia','israel','ucrania',
-                    'actor','actriz','cantante','concierto'],
+  nacional:        [
+    // Geopolítica / internacional
+    'trump','putin','zelensky','rusia','ucrania','china','iran','israel',
+    'palestina','corea del norte','guerra','ataque militar','bombardeo',
+    'eeuu','estados unidos','europa','onu','otan',
+    // Política formal
+    'presidente abinader','ministro de','senado dominicano','camara de diputados',
+    'partido politico','proyecto de ley','decreto presidencial','legislacion',
+    'pld','prm','fuerza del pueblo','reforma constitucional','jce','elecciones',
+    // Economía técnica
+    'pib','inflacion','banco central','exportacion','importacion',
+    'deficit','reservas internacionales','bolsa de valores',
+    // Deportes
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','pelotero',
+    'campeonato','torneo','liga','atleta','estadio','pitcher',
+    // Entretenimiento
+    'actor','actriz','cantante','concierto','farandula','espectaculo',
+    'pelicula','serie','netflix','reggaeton','bachata','merengue','influencer',
+    // Crimen grave
+    'homicidio','asesinado','asesinato','feminicidio','matan',
+    'tiroteo','secuestro','narco','banda criminal','operativo policial',
+    // Salud técnica
+    'vacuna','pandemia','virus','epidemia','cancer','diabetes',
+    // Tecnología
+    'inteligencia artificial','chatgpt','openai','samsung','apple',
+    'ciberseguridad','bitcoin','crypto','drone','robot',
+  ],
   'medio-ambiente':['beisbol','jonron','mlb','nba','actor','actriz','cantante'],
 };
 
@@ -100,6 +125,12 @@ function normalize(str) {
 
 function detectBestCategory(article) {
   const text = normalize(`${article.title} ${article.excerpt || ''} ${(article.tags || []).join(' ')}`);
+
+  // Si ya está en una sección comodín válida, NO intentar reclasificar
+  // Nacional y medio-ambiente son sumideros intencionales — no los movemos
+  if (article.category === 'nacional' || article.category === 'medio-ambiente' || article.category === 'noticias') {
+    return article.category;
+  }
   
   const scores = {};
   for (const [cat, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
