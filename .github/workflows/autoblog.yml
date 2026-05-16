@@ -1,25 +1,28 @@
 name: 🤖 Auto-Blogger Diario — Imperio Público
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ESTRATEGIA: 1 categoría cada 30 minutos — natural, no agresivo.
-# 12 categorías × 30 min = publica de 7:00AM a 12:30PM RD (tarde limpia).
-# Cada artículo tiene su espacio propio en Google News y RRSS.
+# ESTRUCTURA OFICIAL IMPERIO PÚBLICO — 11 secciones × 30 min
+# 07:00 AM → Política        07:30 AM → Policía
+# 08:00 AM → Deportes        08:30 AM → Tecnología
+# 09:00 AM → Sucesos         09:30 AM → Entretenimiento
+# 10:00 AM → Tendencias      10:30 AM → Economía
+# 11:00 AM → Internacional   11:30 AM → Salud
+# 12:00 PM → Cultura
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    - cron: '0 11 * * *'    # 07:00 AM RD → Noticias Nacionales
-    - cron: '30 11 * * *'   # 07:30 AM RD → Política
-    - cron: '0 12 * * *'    # 08:00 AM RD → Economía
-    - cron: '30 12 * * *'   # 08:30 AM RD → Deportes
+    - cron: '0 11 * * *'    # 07:00 AM RD → Política
+    - cron: '30 11 * * *'   # 07:30 AM RD → Policía
+    - cron: '0 12 * * *'    # 08:00 AM RD → Deportes
+    - cron: '30 12 * * *'   # 08:30 AM RD → Tecnología
     - cron: '0 13 * * *'    # 09:00 AM RD → Sucesos
-    - cron: '30 13 * * *'   # 09:30 AM RD → Policía
-    - cron: '0 14 * * *'    # 10:00 AM RD → Entretenimiento
-    - cron: '30 14 * * *'   # 10:30 AM RD → Cultura
-    - cron: '0 15 * * *'    # 11:00 AM RD → Salud
-    - cron: '30 15 * * *'   # 11:30 AM RD → Tendencias
-    - cron: '0 16 * * *'    # 12:00 PM RD → Tecnología
-    - cron: '30 16 * * *'   # 12:30 PM RD → Internacional
+    - cron: '30 13 * * *'   # 09:30 AM RD → Entretenimiento
+    - cron: '0 14 * * *'    # 10:00 AM RD → Tendencias
+    - cron: '30 14 * * *'   # 10:30 AM RD → Economía
+    - cron: '0 15 * * *'    # 11:00 AM RD → Internacional
+    - cron: '30 15 * * *'   # 11:30 AM RD → Salud
+    - cron: '0 16 * * *'    # 12:00 PM RD → Cultura
   workflow_dispatch:
     inputs:
       category:
@@ -28,28 +31,9 @@ on:
         default: ''
 
 jobs:
-  # ─── 07:00 AM RD — Noticias Nacionales ───────────────────────────────────
-  noticias:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 11 * * *'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: 📰 Publicar — NOTICIAS
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: "https://www.imperiopublico.com"
-        run: |
-          echo "🚀 Sección: NOTICIAS — $(date -u)"
-          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
-            -X GET "$SITE_URL/api/cron/bot?category=noticias" \
-            -H "Authorization: Bearer $CRON_SECRET")
-          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
-          [ "$HTTP" = "200" ] || exit 1
-
-  # ─── 07:30 AM RD — Política ──────────────────────────────────────────────
+  # ─── 07:00 AM RD — Política ──────────────────────────────────────────────
   politica:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 11 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 11 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -66,28 +50,28 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 08:00 AM RD — Economía ──────────────────────────────────────────────
-  economia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 12 * * *'
+  # ─── 07:30 AM RD — Policía ───────────────────────────────────────────────
+  policia:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 11 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: 💰 Publicar — ECONOMÍA
+      - name: 👮 Publicar — POLICÍA
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: ECONOMÍA — $(date -u)"
+          echo "🚀 Sección: POLICÍA — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
-            -X GET "$SITE_URL/api/cron/bot?category=economia" \
+            -X GET "$SITE_URL/api/cron/bot?category=policia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 08:30 AM RD — Deportes ──────────────────────────────────────────────
+  # ─── 08:00 AM RD — Deportes ──────────────────────────────────────────────
   deportes:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 12 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 12 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -100,6 +84,25 @@ jobs:
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=deportes" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  # ─── 08:30 AM RD — Tecnología ────────────────────────────────────────────
+  tecnologia:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 12 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 💻 Publicar — TECNOLOGÍA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🚀 Sección: TECNOLOGÍA — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=tecnologia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
@@ -123,28 +126,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 09:30 AM RD — Policía ───────────────────────────────────────────────
-  policia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 13 * * *'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: 👮 Publicar — POLICÍA
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: "https://www.imperiopublico.com"
-        run: |
-          echo "🚀 Sección: POLICÍA — $(date -u)"
-          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
-            -X GET "$SITE_URL/api/cron/bot?category=policia" \
-            -H "Authorization: Bearer $CRON_SECRET")
-          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
-          [ "$HTTP" = "200" ] || exit 1
-
-  # ─── 10:00 AM RD — Entretenimiento ───────────────────────────────────────
+  # ─── 09:30 AM RD — Entretenimiento ───────────────────────────────────────
   entretenimiento:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 14 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 13 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -161,47 +145,9 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 10:30 AM RD — Cultura ───────────────────────────────────────────────
-  cultura:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 14 * * *'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: 🎨 Publicar — CULTURA
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: "https://www.imperiopublico.com"
-        run: |
-          echo "🚀 Sección: CULTURA — $(date -u)"
-          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
-            -X GET "$SITE_URL/api/cron/bot?category=cultura" \
-            -H "Authorization: Bearer $CRON_SECRET")
-          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
-          [ "$HTTP" = "200" ] || exit 1
-
-  # ─── 11:00 AM RD — Salud ─────────────────────────────────────────────────
-  salud:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 15 * * *'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: 🏥 Publicar — SALUD
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: "https://www.imperiopublico.com"
-        run: |
-          echo "🚀 Sección: SALUD — $(date -u)"
-          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
-            -X GET "$SITE_URL/api/cron/bot?category=salud" \
-            -H "Authorization: Bearer $CRON_SECRET")
-          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
-          [ "$HTTP" = "200" ] || exit 1
-
-  # ─── 11:30 AM RD — Tendencias ────────────────────────────────────────────
+  # ─── 10:00 AM RD — Tendencias ────────────────────────────────────────────
   tendencias:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 15 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 14 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -218,28 +164,28 @@ jobs:
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 12:00 PM RD — Tecnología ────────────────────────────────────────────
-  tecnologia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 16 * * *'
+  # ─── 10:30 AM RD — Economía ──────────────────────────────────────────────
+  economia:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 14 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: 💻 Publicar — TECNOLOGÍA
+      - name: 💰 Publicar — ECONOMÍA
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: TECNOLOGÍA — $(date -u)"
+          echo "🚀 Sección: ECONOMÍA — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
-            -X GET "$SITE_URL/api/cron/bot?category=tecnologia" \
+            -X GET "$SITE_URL/api/cron/bot?category=economia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 12:30 PM RD — Internacional ─────────────────────────────────────────
+  # ─── 11:00 AM RD — Internacional ─────────────────────────────────────────
   internacional:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 16 * * *'
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 15 * * *'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -252,6 +198,44 @@ jobs:
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=internacional" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  # ─── 11:30 AM RD — Salud ─────────────────────────────────────────────────
+  salud:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 15 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 🏥 Publicar — SALUD
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🚀 Sección: SALUD — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=salud" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  # ─── 12:00 PM RD — Cultura ───────────────────────────────────────────────
+  cultura:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 16 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 🎨 Publicar — CULTURA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🚀 Sección: CULTURA — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=cultura" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1

@@ -182,27 +182,10 @@ function sharesCriticalEntities(titleA, titleB) {
 const SEMANTIC_THRESHOLD = 0.25;
 
 const CATEGORIES = {
-  // ─── SECCIONES NACIONALES (Prioridad absoluta — somos un medio dominicano) ─────
-  noticias: {
-    slug: 'noticias', author: 'Redacción Nacional', style: 'periodístico, claro y objetivo',
-    feeds: [
-      // Grandes medios dominicanos
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://acento.com.do/feed/',
-      'https://hoy.com.do/feed/',
-      'https://elcaribe.com.do/feed/',
-      'https://cdn.com.do/feed/',
-      'https://noticiassin.com/feed/',
-      'https://elnacional.com.do/feed/',
-      'https://almomento.net/feed/',
-      // Fuentes complementarias verídicas (menos conocidas pero confiables)
-      'https://elnuevodiario.com.do/feed/',
-      'https://z101digital.com/feed/',
-      'https://eldia.com.do/feed/',
-      'https://periodicodigital.com.do/feed/',
-      'https://lainformacion.com.do/feed/',
-    ],
-  },
+  // ─── ESTRUCTURA OFICIAL IMPERIO PÚBLICO ──────────────────────────────────────
+  // Orden: Política · Policía · Deportes · Tecnología · Sucesos ·
+  //        Entretenimiento · Tendencias · Economía · Internacional · Salud · Cultura
+
   politica: {
     slug: 'politica', author: 'Mesa Política', style: 'neutral, objetivo y analítico',
     feeds: [
@@ -354,174 +337,293 @@ const CATEGORIES = {
 
 
 
-// ─── VALIDADOR TEMÁTICO — BLOCKLIST + ALLOWLIST ───────────────────────────────
-// BLOCKLIST: palabras que NUNCA deben aparecer en esa sección.
-// ALLOWLIST: al menos UNA de estas palabras DEBE aparecer para que el ítem sea válido.
+// ─── VALIDADOR TEMÁTICO — ESTRUCTURA OFICIAL IMPERIO PÚBLICO ──────────────────
+// Basado en: https://www.imperiopublico.com — Estructura Oficial de Secciones
+//
+// BLOCKLIST: palabras que NUNCA deben aparecer (artículo descartado de inmediato).
+// ALLOWLIST: al menos 1 de estas palabras DEBE aparecer en el TÍTULO del artículo.
+//
+// Secciones oficiales:
+//  política     → Gobierno, presidencia, leyes, partidos, elecciones, funcionarios
+//  policia      → Operativos, arrestos, investigaciones, allanamientos, delitos
+//  deportes     → Béisbol, fútbol, baloncesto, boxeo, atletas, ligas, resultados
+//  tecnologia   → IA, celulares, apps, redes, innovación, ciencia, ciberseguridad
+//  sucesos      → Accidentes, incendios, tragedias, asesinatos, desapariciones
+//  entretenimiento → Música, cine, artistas, influencers, TV, espectáculos
+//  tendencias   → Viral, memes, lifestyle, moda, curiosidades del momento
+//  economia     → Dólar, inflación, negocios, bancos, finanzas, emprendimiento
+//  internacional → Guerras, política extranjera, relaciones internacionales
+//  salud        → Medicina, hospitales, enfermedades, salud pública, bienestar
+//  cultura      → Arte, historia, literatura, tradiciones, educación cultural
+//  noticias     → Actualidad nacional general (comodín dominicano)
+// ─────────────────────────────────────────────────────────────────────────────
 
 const TOPIC_BLOCKLIST = {
-  // ── DEPORTES: solo deporte, sin crimen ni economía ───────────────────────────
-  deportes:       ['homicidio','asesinado','asesinato','detenido','arrestado',
-                   'inflacion','pib','banco central','ministro de',
-                   'iran','ucrania','gaza','rusia','china','israel','trump','biden',
-                   'dolar cae','dolar sube','petroleo','bolsa'],
 
-  // ── ECONOMÍA: sin farándula, deportes ni crimen ──────────────────────────────
-  economia:       ['beisbol','jonron','mlb','nba','partido de futbol',
-                   'actor','actriz','cantante','concierto','farandula','gol','pitcher',
-                   'homicidio','asesinado','detenido','arrestado'],
+  // ── POLÍTICA ─────────────────────────────────────────────────────────────────
+  // Solo: gobierno, leyes, partidos, elecciones, funcionarios dominicanos
+  // Bloquear: deportes, farándula, crimen, geopolítica, economía técnica
+  politica: [
+    'beisbol','jonron','mlb','nba','baloncesto','gol','pitcher','pelotero',
+    'actor','actriz','cantante','concierto','farandula','espectaculo','influencer',
+    'homicidio','asesinado','asesinato','detenido','arrestado','allanamiento',
+    'trump','putin','zelensky','macron','iran','rusia','ucrania','china','israel',
+    'guerra','ataque militar','bombardeo','otan','onu',
+    'pib','inflacion','exportacion','importacion','banco central',
+  ],
 
-  // ── POLÍTICA: sin deportes, farándula ni crimen directo ──────────────────────
-  politica:       ['beisbol','jonron','mlb','nba','actor','actriz','cantante',
-                   'concierto','farandula','homicidio','gol','pitcher','deporte'],
+  // ── POLICÍA ──────────────────────────────────────────────────────────────────
+  // Solo: operativos, arrestos, investigaciones, crimen, seguridad ciudadana
+  // Bloquear: farándula, deportes, economía, geopolítica internacional
+  policia: [
+    'actor','actriz','cantante','concierto','farandula','espectaculo','influencer',
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','deporte','atleta',
+    'pib','inflacion','exportacion','importacion','banco','dolar baja','dolar sube',
+    'trump','putin','rusia','ucrania','china','israel','iran','guerra','otan',
+    'ataque militar','bombardeo','geopolitica',
+  ],
 
-  // ── SALUD: sin política, deporte ni crimen ───────────────────────────────────
-  salud:          ['beisbol','jonron','mlb','presidente abinader','asesinado','homicidio',
-                   'partido politico','gol','pitcher','deporte',
-                   'iran','rusia','ucrania','ataque militar','guerra','bombardeo'],
+  // ── DEPORTES ─────────────────────────────────────────────────────────────────
+  // Solo: béisbol, fútbol, baloncesto, boxeo, atletas, ligas
+  // Bloquear: política, economía, crimen, geopolítica, farándula
+  deportes: [
+    'homicidio','asesinado','asesinato','detenido','arrestado','allanamiento',
+    'pib','inflacion','banco central','exportacion','importacion','presupuesto',
+    'ministro de','senado','diputado','legislacion','reforma',
+    'trump','putin','iran','rusia','ucrania','china','israel','guerra','otan',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+  ],
 
-  // ── ENTRETENIMIENTO: ESTRICTO — solo farándula, espectáculos y cultura pop ───
-  // Bloquear: política, economía, crimen, geopolítica, deportes, sucesos
-  entretenimiento:['presidente abinader','ministro de','pib','inflacion','banco central',
-                   'homicidio','asesinado','tribunal','gol','beisbol','jonron',
-                   'dolar','petroleo','exportacion','importacion','presupuesto',
-                   'iran','rusia','ucrania','china','israel','trump','putin','guerra',
-                   'ataque','bombardeo','onu','otan','crisis global','canal de panama',
-                   'alianza','acuerdo','cumbre','asesinato','detenido','arrestado',
-                   'fiscal','sentencia','condena','crimen','banda criminal',
-                   'sargento','militar','policia nacional','ejercito','swat',
-                   'partido politico','senado','diputado','congreso','legislacion',
-                   'terremoto','tsunami','inundacion','desastre natural'],
+  // ── TECNOLOGÍA ───────────────────────────────────────────────────────────────
+  // Solo: IA, celulares, apps, redes sociales, innovación, ciencia, ciberseguridad
+  // Bloquear: política local, crimen, deportes, farándula
+  tecnologia: [
+    'homicidio','asesinado','asesinato','detenido','arrestado','allanamiento',
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'actor','actriz','cantante','concierto','farandula','espectaculo',
+    'presidente abinader','senado dominicano','diputado','legislacion','elecciones',
+    'partido politico','pld','prm','fuerza del pueblo',
+  ],
 
-  // ── CULTURA: arte, patrimonio, letras dominicanas — sin geopolítica ni economía
-  cultura:        ['beisbol','jonron','mlb','nba','pib','inflacion','banco central',
-                   'homicidio','asesinado','detenido','arrestado',
-                   'iran','rusia','ucrania','china','israel','trump','putin',
-                   'canal de panama','estrategico','geopolitico','alianza militar',
-                   'dolar','petroleo','exportacion','bolsa','reservas',
-                   'sargento','swat','policia','crimen','banda'],
+  // ── SUCESOS ──────────────────────────────────────────────────────────────────
+  // Solo: accidentes, incendios, tragedias, asesinatos, desapariciones, emergencias
+  // Bloquear: política, economía, deportes, farándula, geopolítica
+  sucesos: [
+    'actor','actriz','cantante','concierto','farandula','espectaculo','influencer',
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta','campeonato',
+    'pib','inflacion','banco central','exportacion','importacion','presupuesto',
+    'trump','putin','rusia','ucrania','china','israel','iran','guerra','otan',
+    'ataque militar','bombardeo','geopolitica','crisis global',
+    'senado dominicano','partido politico','legislacion','diputado',
+  ],
 
-  // ── TECNOLOGÍA: sin política, crimen ni deportes ─────────────────────────────
-  tecnologia:     ['homicidio','asesinado','asesinato','detenido por','arrestado por',
-                   'presidente abinader','ministro de','senado dominicano','elecciones',
-                   'votos','partido politico','diputado','senador','beisbol','futbol','gol'],
+  // ── ENTRETENIMIENTO ──────────────────────────────────────────────────────────
+  // Solo: música, cine, artistas, influencers, TV, espectáculos, celebridades
+  // Bloquear: política, economía, crimen, geopolítica, deportes, desastres
+  entretenimiento: [
+    'presidente abinader','ministro de','pib','inflacion','banco central','presupuesto',
+    'exportacion','importacion','deficit','reservas','senado','diputado','legislacion',
+    'homicidio','asesinado','asesinato','detenido','arrestado','allanamiento',
+    'tribunal','fiscal','condena','crimen','banda criminal',
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta','campeonato',
+    'trump','putin','rusia','ucrania','china','israel','iran','guerra','otan',
+    'ataque','bombardeo','invasion','crisis global','terremoto','tsunami','inundacion',
+    'militar','ejercito','policia nacional','swat','sargento',
+    'partido politico','elecciones','reforma constitucional',
+  ],
 
-  // ── SUCESOS: crímenes y accidentes LOCALES — sin economía ni geopolítica ──────
-  sucesos:        ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba',
-                   'futbol','pib','inflacion','dolar','exportacion','importacion',
-                   'iran','rusia','ucrania','china','israel','trump','putin','guerra',
-                   'ataque militar','bombardeo','onu','otan','cumbre','alianza',
-                   'canal de panama','estrategia','geopolitica','petroleo','opep',
-                   'partido politico','senado dominicano','congreso','legislacion',
-                   'sargento campe','campeonato de tiro','tiro deportivo'],
+  // ── TENDENCIAS ───────────────────────────────────────────────────────────────
+  // Solo: viral, memes, lifestyle, moda, curiosidades, redes sociales
+  // Bloquear: política formal, economía técnica, crimen, geopolítica
+  tendencias: [
+    'pib','inflacion','banco central','exportacion','importacion','deficit',
+    'reforma constitucional','proyecto de ley','decreto presidencial',
+    'senado dominicano','partido politico','legislacion',
+    'homicidio','asesinato','asesinado','detenido','allanamiento','crimen',
+    'trump','putin','rusia','ucrania','guerra','otan','ataque militar',
+    'terremoto','tsunami','crisis global',
+  ],
 
-  // ── TENDENCIAS: sin política formal, crimen ni economía técnica ──────────────
-  tendencias:     ['pib','inflacion','banco central','reforma constitucional',
-                   'proyecto de ley','decreto presidencial','senado dominicano',
-                   'homicidio','asesinato','beisbol','partido politico',
-                   'exportacion','importacion','deficit presupuestario'],
+  // ── ECONOMÍA ─────────────────────────────────────────────────────────────────
+  // Solo: dólar, inflación, negocios, bancos, finanzas, emprendimiento
+  // Bloquear: deportes, farándula, crimen
+  economia: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'actor','actriz','cantante','concierto','farandula','espectaculo','influencer',
+    'homicidio','asesinado','asesinato','detenido','arrestado','allanamiento',
+  ],
 
-  // ── INTERNACIONAL: SOLO eventos fuera de RD — bloquear noticias locales ──────
-  internacional:  ['presidente abinader','senado dominicano','camara de diputados',
-                   'ayuntamiento de','alcalde de rd','abinader',
-                   'ministerio de educacion rd','ministerio de salud rd',
-                   'coee','digesett','intrant','jce','pld','prm'],
+  // ── INTERNACIONAL ────────────────────────────────────────────────────────────
+  // Solo: noticias mundiales fuera de RD — geopolítica, guerras, crisis globales
+  // Bloquear: noticias estrictamente locales de RD
+  internacional: [
+    'presidente abinader','senado dominicano','camara de diputados',
+    'ayuntamiento de','alcalde de rd','abinader',
+    'ministerio de educacion rd','ministerio de salud rd',
+    'coee','digesett','intrant','jce','pld','prm','fuerza del pueblo',
+    'leonel fernandez','danilo medina',
+  ],
 
-  // ── NOTICIAS (Nacional): sin geopolítica internacional pura ─────────────────
-  noticias:       ['iran','rusia','ucrania','china','israel','trump','putin','zelensky',
-                   'macron','netanyahu','corea del norte','arabia saudita',
-                   'ataque militar','bombardeo','invasion','guerra nuclear',
-                   'onu declara','otan activa','g7','g20','fmi acuerdo',
-                   'kiev','moscu','washington dc','paris','berlin','beijing'],
+  // ── SALUD ────────────────────────────────────────────────────────────────────
+  // Solo: medicina, hospitales, enfermedades, salud pública, bienestar, alimentación
+  // Bloquear: deportes, política, crimen, geopolítica
+  salud: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'actor','actriz','cantante','concierto','farandula','espectaculo',
+    'presidente abinader','partido politico','elecciones','senado','diputado',
+    'homicidio','asesinado','detenido','arrestado','allanamiento','crimen',
+    'iran','rusia','ucrania','ataque militar','guerra','bombardeo',
+  ],
 
-  // ── POLICÍA: crimen local — sin farándula, deportes ni geopolítica ───────────
-  policia:        ['actor','actriz','cantante','concierto','beisbol','jonron','mlb',
-                   'nba','futbol','pib','inflacion','deporte',
-                   'iran','rusia','ucrania','china','israel','trump','guerra',
-                   'ataque militar','bombardeo','partido politico de espana',
-                   'pp denuncia','psoe','congreso espanol','gobierno espanol',
-                   'canal de panama','petroleo','exportacion','bolsa'],
+  // ── CULTURA ──────────────────────────────────────────────────────────────────
+  // Solo: arte, historia, literatura, tradiciones, educación cultural, eventos
+  // Bloquear: geopolítica, economía técnica, crimen, deportes
+  cultura: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'pib','inflacion','banco central','exportacion','presupuesto','deficit',
+    'homicidio','asesinado','detenido','arrestado','allanamiento','crimen','banda',
+    'iran','rusia','ucrania','china','israel','trump','putin',
+    'ataque militar','bombardeo','guerra','otan','geopolitica',
+    'sargento','swat','policia','fiscal','tribunal',
+  ],
+
+  // ── NOTICIAS (Actualidad Nacional) ───────────────────────────────────────────
+  // Comodín dominicano: política nacional, economía local, temas sociales
+  // Bloquear: geopolítica pura internacional
+  noticias: [
+    'trump','putin','zelensky','macron','netanyahu','xi jinping',
+    'rusia','ucrania','iran','china','israel','palestina',
+    'corea del norte','arabia saudita','union europea',
+    'ataque militar','bombardeo','invasion','guerra nuclear',
+    'onu declara','otan activa','g7 cumbre','g20 cumbre',
+    'kiev','moscu','washington dc','paris','berlin','beijing',
+  ],
 };
 
 const TOPIC_ALLOWLIST = {
-  deportes:       ['deporte','beisbol','futbol','baloncesto','nba','mlb','atleta','jugador',
-                   'equipo','partido','torneo','campeonato','liga','gol','jonron','pitcher',
-                   'pelotero','cancha','estadio','boxeo','tenis','ciclismo','medalla'],
-  economia:       ['economia','economico','financiero','pib','inflacion','banco','dolar',
-                   'mercado','inversion','empresa','comercio','impuesto','presupuesto',
-                   'exportacion','importacion','precio','costo','deficit','reservas'],
-  politica:       ['politica','politico','gobierno','presidente','ministro','diputado',
-                   'senador','partido','elecciones','congreso','legislacion','decreto',
-                   'reforma','municipio','alcalde','gabinete','poder ejecutivo','legislativo'],
-  salud:          ['salud','medico','medica','hospital','enfermedad','vacuna','tratamiento',
-                   'paciente','clinica','medicina','virus','pandemia','cancer','diabetes',
-                   'bienestar','prevencion','nutricion','farmaco','epidemia','sanitario'],
-  entretenimiento:['espectaculo','farandula','actor','actriz','cantante','pelicula','serie',
-                   'concierto','artista','musica','teatro','show','celebridad','estreno',
-                   'nominacion','premio','reggaeton','bachata','merengue','influencer'],
-  cultura:        ['cultura','arte','museo','exposicion','patrimonio','literatura','libro',
-                   'autor','escritor','festival','teatro','danza','folclore','tradicion',
-                   'gastronomia','arquitectura','identidad','artesania'],
-  tecnologia:     ['tecnologia','inteligencia artificial','ia','robot','app','software',
-                   'hardware','digital','internet','ciberseguridad','startup','innovacion',
-                   'samsung','apple','google','meta','openai','computadora','smartphone'],
-  sucesos:        ['detenido','arrestado','capturado','homicidio','asesinado','robo',
-                   'accidente','incendio','crimen','policia','autoridades','investigacion',
-                   'victima','sospechoso','fugitivo','delito','herido','muerto','matan'],
 
-  // ── POLICÍA: operativos, arrestos, investigaciones criminales, seguridad ciudadana ──
-  policia:        ['policia','denuncia','crimen','arresto','delito','tribunal','juez',
-                   'fiscal','dicrim','dncd','justicia','carcel','preso','pn','fiscalia',
-                   'abogado','condena','robo','asalto','homicidio','asesinato','banda',
-                   'operativo','investigacion criminal','detenido','capturado','imputado'],
-
-  // ── TENDENCIAS: viral, redes sociales, cultura pop, curiosidades ─────────────
-  tendencias:     ['viral','trending','tendencia','redes sociales','tiktok','instagram',
-                   'twitter','youtube','famoso','popular','meme','record','impactante',
-                   'sorprendente','curioso','increible','fenomeno','generacion','joven'],
-
-  // ── NOTICIAS (Nacional): política dominicana, economía local, actualidad social ─
-  // NO incluye geopolítica pura — eso va en Internacional
-  noticias:       [
-    // Política nacional
-    'abinader','gobierno dominicano','ministerio','diputado','senado','congreso',
-    'jce','elecciones','municipio','alcalde','partido politico','pld','prm',
-    'fuerza del pueblo','leonel','danilo','reforma','ley dominicana',
-    // Economía nacional
-    'economia dominicana','banco central','pib dominicano','inflacion rd',
-    'dolar en rd','exportaciones dominicanas','presupuesto nacional',
-    'zona franca','turismo dominicano','inversiones en rd',
-    // Actualidad y sociedad dominicana
-    'dominicano','dominicana','republica dominicana','santo domingo','santiago',
-    'haiti','frontera','coee','digesett','intrant','proconsumidor',
-    'educacion dominicana','salud publica rd','seguridad social',
-    'desempleo','pobreza','migracion','haitianos','extradicion',
-    // Temas sociales generales
-    'comunidad','barrio','familia','sociedad','juventud','mujeres',
-    'derechos','protesta','huelga','manifestacion',
+  // ── POLÍTICA ─────────────────────────────────────────────────────────────────
+  politica: [
+    'politica','politico','gobierno','presidencia','presidente','ministro',
+    'diputado','senador','partido','elecciones','congreso','legislacion','decreto',
+    'reforma','municipio','alcalde','gabinete','legislativo','ejecutivo',
+    'abinader','pld','prm','fuerza del pueblo','leonel','danilo','jce',
+    'camara','senado','proyecto de ley','voto','campaña','candidato',
   ],
 
-  // ── INTERNACIONAL: geopolítica, guerras, economía mundial, conflictos ─────────
-  internacional:  [
+  // ── POLICÍA ──────────────────────────────────────────────────────────────────
+  policia: [
+    'policia','operativo','arresto','arrestado','detenido','allanamiento',
+    'investigacion','crimen','delito','tribunal','juez','fiscal',
+    'dicrim','dncd','pn','fiscalia','abogado','condena',
+    'homicidio','asesinato','robo','asalto','banda','capturado','imputado',
+    'seguridad ciudadana','drogas','narcotráfico','carcel','preso',
+  ],
+
+  // ── DEPORTES ─────────────────────────────────────────────────────────────────
+  deportes: [
+    'beisbol','futbol','baloncesto','boxeo','atleta','jugador','equipo',
+    'partido','torneo','campeonato','liga','gol','jonron','pitcher','pelotero',
+    'nba','mlb','cancha','estadio','tenis','ciclismo','medalla','deporte',
+    'voleibol','natacion','atletismo','karate','taekwondo','arbitro',
+  ],
+
+  // ── TECNOLOGÍA ───────────────────────────────────────────────────────────────
+  tecnologia: [
+    'tecnologia','inteligencia artificial','ia','robot','app','aplicacion',
+    'software','hardware','digital','internet','ciberseguridad','startup',
+    'innovacion','samsung','apple','google','meta','openai','computadora',
+    'smartphone','celular','red social','nube','datos','algoritmo',
+    'ciencia','investigacion cientifica','laboratorio','descubrimiento',
+  ],
+
+  // ── SUCESOS ──────────────────────────────────────────────────────────────────
+  sucesos: [
+    'accidente','incendio','tragedia','asesinato','asesinado','homicidio',
+    'desaparecido','emergencia','detenido','arrestado','capturado',
+    'victima','sospechoso','herido','muerto','matan','crimen',
+    'robo','asalto','delito','policia','autoridades','investigacion',
+    'fugitivo','explosión','choque','naufragio','derrumbe',
+  ],
+
+  // ── ENTRETENIMIENTO ──────────────────────────────────────────────────────────
+  entretenimiento: [
+    'musica','cine','artista','actor','actriz','cantante','influencer',
+    'television','espectaculo','celebridad','estreno','pelicula','serie',
+    'concierto','nominacion','premio','reggaeton','bachata','merengue',
+    'farandula','show','teatro','festival de musica','gira','album',
+    'youtuber','tiktoker','instagram','streaming','netflix','hbo',
+  ],
+
+  // ── TENDENCIAS ───────────────────────────────────────────────────────────────
+  tendencias: [
+    'viral','trending','tendencia','meme','lifestyle','moda','curiosidad',
+    'tiktok','instagram','twitter','youtube','famoso','popular',
+    'record','impactante','sorprendente','curioso','increible','fenomeno',
+    'generacion','joven','redes sociales','influencer','challenge',
+    'estilo de vida','nuevo reto','se hace viral','lo que todos hablan',
+  ],
+
+  // ── ECONOMÍA ─────────────────────────────────────────────────────────────────
+  economia: [
+    'economia','economico','financiero','pib','inflacion','banco','dolar',
+    'mercado','inversion','empresa','comercio','impuesto','presupuesto',
+    'exportacion','importacion','precio','costo','deficit','reservas',
+    'negocio','emprendimiento','startup','finanzas','credito','deuda',
+    'turismo','zona franca','produccion','industria','crecimiento economico',
+  ],
+
+  // ── INTERNACIONAL ────────────────────────────────────────────────────────────
+  internacional: [
     'trump','biden','putin','xi jinping','zelensky','macron','netanyahu',
     'eeuu','estados unidos','rusia','china','israel','iran','ucrania','palestina',
     'union europea','corea del norte','arabia saudita',
     'onu','otan','nato','g7','g20','fmi','banco mundial','cumbre mundial',
     'guerra','conflicto armado','ataque militar','bombardeo','invasion',
-    'acuerdo de paz','cesefuego','crisis nuclear',
+    'acuerdo de paz','alto el fuego','crisis nuclear',
     'aranceles','crisis global','recesion mundial','petroleo','opep',
     'reserva federal','tasas de interes',
     'terremoto','tsunami','erupcion volcanica',
-    'pandemia','emergencia sanitaria',
+    'pandemia','emergencia sanitaria','politica exterior',
+  ],
+
+  // ── SALUD ────────────────────────────────────────────────────────────────────
+  salud: [
+    'salud','medico','medica','hospital','enfermedad','vacuna','tratamiento',
+    'paciente','clinica','medicina','virus','pandemia','cancer','diabetes',
+    'bienestar','prevencion','nutricion','farmaco','epidemia','sanitario',
+    'alimentacion','dieta','cirugia','trasplante','emergencia medica',
+    'seguro medico','salud publica','ministerio de salud',
+  ],
+
+  // ── CULTURA ──────────────────────────────────────────────────────────────────
+  cultura: [
+    'cultura','arte','museo','exposicion','patrimonio','literatura','libro',
+    'autor','escritor','festival','danza','folclore','tradicion',
+    'gastronomia','arquitectura','identidad','artesania','historia',
+    'educacion cultural','teatro cultural','evento cultural','pintura',
+    'escultura','poesia','novela','teatro dominicano','identidad cultural',
+  ],
+
+  // ── NOTICIAS (Actualidad Nacional) ───────────────────────────────────────────
+  // Cubre lo dominicano que no encaja en una sección más específica
+  noticias: [
+    'dominicano','dominicana','republica dominicana','santo domingo','santiago',
+    'haiti','frontera','gobierno','ministerio','abinader','senado','congreso',
+    'jce','elecciones','municipio','alcalde','pld','prm','fuerza del pueblo',
+    'banco central','dolar','presupuesto nacional','zona franca',
+    'coee','digesett','intrant','proconsumidor',
+    'comunidad','sociedad','juventud','mujeres','derechos',
+    'protesta','huelga','manifestacion','migracion','extradicion',
   ],
 };
 
 /**
  * Verifica si el ítem del RSS es temáticamente apto para la sección.
- * BLINDAJE ESTRICTO:
+ * BLINDAJE ESTRICTO (Estructura Oficial Imperio Público):
  *   (1) NINGUNA palabra del BLOCKLIST puede aparecer en título+snippet.
- *   (2) Para secciones especializadas: el TÍTULO debe contener al menos 1 palabra del ALLOWLIST.
- *       (no se acepta solo por el snippet — evita falsos positivos)
- *   (3) Para "noticias" (general): 1 hit en título, ó 2+ hits en texto completo.
+ *   (2) El TÍTULO debe contener al menos 1 palabra del ALLOWLIST de la sección.
+ *       Excepción: "noticias" acepta también 2+ hits en el snippet (es la sección general).
  */
 function isOnTopicForCategory(item, categorySlug) {
   const blocklist = TOPIC_BLOCKLIST[categorySlug] || [];
@@ -531,28 +633,24 @@ function isOnTopicForCategory(item, categorySlug) {
   const text      = norm(`${item.title || ''} ${item.contentSnippet || ''}`);
   const titleOnly = norm(item.title || '');
 
-  // 1. BLOCKLIST: rechazar inmediatamente si aparece palabra prohibida en cualquier parte
-  const blocked = blocklist.some(w => text.includes(norm(w)));
-  if (blocked) return false;
+  // 1. BLOCKLIST: rechazar si aparece cualquier palabra prohibida en título o snippet
+  if (blocklist.some(w => text.includes(norm(w)))) return false;
 
-  // 2. Sin ALLOWLIST = sin restricción temática (solo aplica a "noticias" por ahora)
+  // 2. Sin ALLOWLIST definido → sin restricción (no debería ocurrir)
   if (allowlist.length === 0) return true;
 
-  // 3. SECCIONES ESPECIALIZADAS: el TÍTULO debe tener al menos 1 hit del allowlist.
-  //    Así nos aseguramos de que el artículo sea SOBRE ese tema, no solo que lo mencione.
+  // 3. El TÍTULO debe tener hit en el allowlist (garantiza que el artículo SEA sobre el tema)
   const titleHit = allowlist.some(w => titleOnly.includes(norm(w)));
 
   if (categorySlug === 'noticias') {
-    // Noticias es la sección general: acepta si hay hit en título O 2+ en texto
+    // Noticias es el comodín nacional: acepta si hay hit en título O 2+ en texto completo
     if (titleHit) return true;
-    const hits = allowlist.filter(w => text.includes(norm(w))).length;
-    return hits >= 2;
+    return allowlist.filter(w => text.includes(norm(w))).length >= 2;
   }
 
-  // Para TODAS las demás secciones: TÍTULO obligatorio con hit
+  // Todas las demás secciones: el TÍTULO es obligatorio
   return titleHit;
 }
-
 
 export async function GET(request) {
   // X-Manual-Trigger solo exime del header Authorization cuando viene del trigger interno.
