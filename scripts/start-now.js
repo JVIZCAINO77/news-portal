@@ -4,16 +4,16 @@ require('dotenv').config({ path: '.env.local' });
 
 const categories = [
   // ─── SECCIONES NACIONALES (10) ──────────────────────────────────
-  'noticias',        // General nacional
+  'nacional',        // Noticias generales de RD
   'politica',        // Política dominicana
   'sucesos',         // Sucesos nacionales
-  'policia',         // Policíal / judicial
+  'policia',         // Policial / judicial
   'deportes',        // Deportes (RD-centrado)
   'economia',        // Economía nacional
   'entretenimiento', // Espectáculos / farándula
   'cultura',         // Cultura dominicana
   'salud',           // Salud pública
-  'tendencias',      // Tendencias / viral
+  'medio-ambiente',  // Medio ambiente y clima
   // ─── SECCIONES GLOBALES (2) ───────────────────────────────────
   'tecnologia',      // Tecnología / IA (alcance mundial)
   'internacional',   // Solo noticias de alto impacto mundial

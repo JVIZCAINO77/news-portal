@@ -1,6 +1,6 @@
 'use client';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SITE_CONFIG, CATEGORIES } from '@/lib/data';
@@ -8,13 +8,19 @@ import * as ga from '@/lib/analytics';
 import ServiceWidgets from './ServiceWidgets';
 import MobileMenu from './MobileMenu';
 import BreakingNews from './BreakingNews';
+import MegaMenu from './MegaMenu';
+
+// Secciones principales visibles en la barra roja
+const NAV_MAIN = ['politica','policia','deportes','tecnologia','sucesos','entretenimiento','economia','internacional','salud','cultura'];
 
 export default function Header() {
   const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isExtraOpen, setIsExtraOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentDate, setCurrentDate] = useState('');
+  const dropdownRef = useRef(null);
   const [tickerItems, setTickerItems] = useState([]);
 
   useEffect(() => {
@@ -79,27 +85,7 @@ export default function Header() {
       {/* 1. Static Branding Section */}
       <section className="w-full bg-white py-2 md:py-4 border-b border-gray-100 relative">
         <div className="max-w-6xl mx-auto px-4 md:px-8">
-          {/* Mobile Actions Overlay - REINFORCED CLICKABILITY */}
-          <div className="md:hidden absolute inset-0 flex justify-between items-center px-6 pointer-events-none z-[60]">
-            <button 
-              onClick={() => setIsMenuOpen(true)}
-              className="w-12 h-12 flex items-center justify-center bg-black text-white rounded-full pointer-events-auto shadow-2xl active:scale-90 transition-all border-2 border-white/20"
-              aria-label="Abrir menú"
-            >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <button 
-              onClick={() => setIsMenuOpen(true)}
-              className="w-12 h-12 flex items-center justify-center bg-white border border-gray-100 text-black rounded-full pointer-events-auto shadow-2xl active:scale-90 transition-all"
-              aria-label="Buscar noticias"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </div>
+          {/* Mobile overlay buttons — hidden, nav bar hamburger handles this */}
 
           <a href="/" className="flex items-center justify-center flex-row gap-6 md:gap-10 hover:opacity-90 transition-opacity">
             <div className="relative h-12 md:h-20 lg:h-24 w-12 md:w-20 lg:w-24">
@@ -139,18 +125,44 @@ export default function Header() {
       <div className="sticky top-0 z-[100] shadow-md w-full bg-white">
         {/* Primary Navigation - Red Bar */}
         <nav className="w-full bg-[#bb1b21] border-b border-black/10 relative z-50">
-          <div className="w-full max-w-[1600px] mx-auto px-2 md:px-4">
-            <ul className="flex items-center justify-center overflow-x-auto no-scrollbar py-0.5">
-              {CATEGORIES.filter(cat => cat.slug !== 'noticias').map((cat) => (
-                <li key={cat.slug} className="flex-shrink-0">
-                  <Link href={`/categoria/${cat.slug}`} className="block px-3 md:px-4 py-2.5 text-[16px] md:text-[18px] font-bold text-white/90 hover:text-white transition-all whitespace-nowrap">
-                    {cat.label}
-                  </Link>
-                </li>
-              ))}
+          <div className="w-full max-w-[1600px] mx-auto px-2 md:px-4 flex items-center">
+            {/* ─── Botón Hamburguesa Amarillo — IZQUIERDA ─── */}
+            <button
+              id="nav-extra-toggle"
+              onClick={() => setIsExtraOpen(v => !v)}
+              aria-expanded={isExtraOpen}
+              aria-haspopup="true"
+              aria-label="Todas las secciones"
+              className="flex-shrink-0 flex items-center justify-center w-12 h-10 mr-2 transition-all active:scale-90 hover:scale-105"
+              style={{ backgroundColor: '#111', borderRadius: '4px', border: '2px solid rgba(255,255,255,0.7)', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}
+            >
+              <svg width="22" height="17" viewBox="0 0 22 17" fill="none">
+                <rect y="0"   width="22" height="3" rx="1.5" fill="#fff"/>
+                <rect y="7"   width="22" height="3" rx="1.5" fill="#fff"/>
+                <rect y="14"  width="22" height="3" rx="1.5" fill="#fff"/>
+
+              </svg>
+            </button>
+
+            {/* Main nav links */}
+            <ul className="flex items-center justify-center flex-1 overflow-x-auto no-scrollbar py-0.5">
+              {CATEGORIES
+                .filter(cat => NAV_MAIN.includes(cat.slug))
+                .sort((a, b) => NAV_MAIN.indexOf(a.slug) - NAV_MAIN.indexOf(b.slug))
+                .map((cat) => (
+                  <li key={cat.slug} className="flex-shrink-0">
+                    <Link href={`/categoria/${cat.slug}`} className="block px-3 md:px-4 py-2.5 text-[16px] md:text-[18px] font-bold text-white/90 hover:text-white transition-all whitespace-nowrap">
+                      {cat.label}
+                    </Link>
+                  </li>
+                ))
+              }
             </ul>
           </div>
         </nav>
+
+        {/* ─── Mega Menu (posicionado bajo el sticky wrapper) ─── */}
+        <MegaMenu isOpen={isExtraOpen} onClose={() => setIsExtraOpen(false)} />
 
         {/* Utility Bar */}
         <div className="border-b border-gray-100 py-1.5 hidden md:block bg-slate-50 relative z-40">

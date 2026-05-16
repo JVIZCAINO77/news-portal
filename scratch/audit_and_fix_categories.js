@@ -12,70 +12,86 @@ const supabase = createClient(
 );
 
 // ─── REGLAS DE CLASIFICACIÓN ─────────────────────────────────────────────────
-// Para cada categoría: palabras que DEBEN estar presentes en el título/excerpt
 const CATEGORY_KEYWORDS = {
+  // ── Categorías de barra principal ──────────────────────────────────────────
   deportes: ['deporte','béisbol','beisbol','fútbol','futbol','baloncesto','nba','mlb',
               'pelotero','atleta','jugador','equipo','partido','torneo','campeonato',
               'liga','gol','jonrón','jonron','pitcher','cancha','estadio','boxeo',
-              'tenis','ciclismo','medalla','clasificatoria','mundial','olímpico'],
+              'tenis','ciclismo','medalla','clasificatoria','olímpico','béisbol dominicano'],
   economia: ['economía','economia','económico','financiero','pib','inflación','inflacion',
-             'banco','dólar','dolar','mercado','inversión','inversion','empresa',
+             'banco central','banco','dólar','dolar','mercado','inversión','empresa',
              'comercio','impuesto','presupuesto','exportación','exportacion',
-             'importación','importacion','precio','deficit','reservas','bolsa',
-             'deuda','aranceles','crecimiento económico','desempleo','empleo'],
-  politica: ['política','politica','político','gobierno','presidente','ministro',
+             'precio','deficit','reservas','bolsa','deuda','aranceles','empleo',
+             'desempleo','crecimiento','remesas','hacienda','finanzas'],
+  politica: ['política','politica','político','presidente','ministro',
              'diputado','senador','partido','elecciones','congreso','legislación',
              'decreto','reforma','municipio','alcalde','gabinete','ejecutivo',
-             'legislativo','campaña','voto','candidato'],
+             'legislativo','campaña','voto','candidato','abinader','danilo','leonel'],
   salud: ['salud','médico','medico','hospital','enfermedad','vacuna','tratamiento',
           'paciente','clínica','clinica','medicina','virus','pandemia','cáncer',
-          'cancer','diabetes','bienestar','prevención','prevencion','nutrición',
-          'farmaco','epidemia','sanitario','cirugía','cirugia'],
+          'cancer','diabetes','bienestar','prevención','nutrición','epidemia',
+          'sanitario','cirugía','cirugia','farmacia','oms'],
   entretenimiento: ['espectáculo','espectaculo','farandula','actor','actriz','cantante',
-                    'pelicula','película','serie','concierto','artista','música','musica',
+                    'película','pelicula','serie','concierto','artista','música','musica',
                     'teatro','show','celebridad','estreno','nominación','premio',
-                    'reggaeton','bachata','merengue','influencer','instagram'],
+                    'reggaeton','bachata','merengue','influencer'],
   cultura: ['cultura','arte','museo','exposición','exposicion','patrimonio','literatura',
             'libro','autor','escritor','festival','danza','folclore','tradición',
-            'tradicion','gastronomía','gastronomia','arquitectura','identidad',
-            'artesanía','artesania'],
+            'gastronomía','gastronomia','arquitectura','artesanía','artesania',
+            'identidad cultural','carnaval','semana santa'],
   tecnologia: ['tecnología','tecnologia','inteligencia artificial','ia','robot','app',
                'software','hardware','digital','internet','ciberseguridad','startup',
-               'innovación','innovacion','samsung','apple','google','meta','openai',
-               'computadora','smartphone','chatgpt','drone'],
+               'innovación','samsung','apple','google','meta','openai',
+               'computadora','smartphone','chatgpt','drone','bitcoin','crypto'],
   sucesos: ['detenido','arrestado','capturado','homicidio','asesinado','robo',
-            'accidente','incendio','crimen','policía','policia','autoridades',
-            'investigación','investigacion','víctima','victima','sospechoso',
-            'fugitivo','delito','herido','muerto','matan','secuestro'],
-  tendencias: ['viral','tendencia','redes sociales','tiktok','instagram','twitter',
-               'youtube','influencer','meme','trending','popular','hashtag'],
+            'accidente','incendio','crimen','herido','muerto','matan','secuestro',
+            'víctima','sospechoso','fugitivo','delito','colisión','choque','fallece'],
+  entretenimiento: ['espectáculo','espectaculo','farandula','actor','actriz','cantante',
+                    'película','pelicula','serie','concierto','artista','música','musica',
+                    'teatro','show','celebridad','estreno','nominación','premio',
+                    'reggaeton','bachata','merengue','influencer'],
   internacional: ['internacional','mundial','eeuu','estados unidos','europa','china',
                   'rusia','latinoamérica','latinoamerica','onu','biden','trump',
                   'guerra','conflicto','diplomacia','cumbre','tratado','global',
-                  'extranjero','migracion','migrantes'],
+                  'extranjero','migrantes','migracion','israel','ucrania','haití haiti'],
   policia: ['policía nacional','pn','dncd','dicrim','fiscalía','fiscalia','tribunal',
-            'juez','fiscal','justicia','cárcel','carcel','preso','condena','arresto',
-            'operativo','banda','narco','crimen organizado','denuncia','abogado'],
-  noticias: [], // Noticias es la categoría comodín — acepta todo lo nacional
+            'juez','fiscal','cárcel','carcel','preso','condena','arresto',
+            'operativo','banda','narco','crimen organizado','denuncia','abogado',
+            'fiscalía','ministerio público','juicio'],
+  // ── Nuevas categorías ────────────────────────────────────────────────────
+  nacional: ['república dominicana','dominicano','dominicana','santo domingo',
+             'santiago','san pedro','la romana','barahona','san cristóbal',
+             'región','provincia','municipio','ayuntamiento','intrant',
+             'mesc','mopc','adie','caasd','edenorte','edesur','inapa',
+             'indotel','digesett','senasa','salud pública dominicana'],
+  'medio-ambiente': ['medio ambiente','medioambiente','cambio climático','cambio climatico',
+                     'calentamiento','deforestación','deforestacion','reforestación',
+                     'contaminación','contaminacion','reciclaje','sostenible',
+                     'biodiversidad','parque nacional','cuenca','sequía','sequia',
+                     'huracán','huracan','tormenta tropical','inundación','inundacion',
+                     'ecosistema','flora','fauna','residuos sólidos'],
 };
 
-// Palabras que EXCLUYEN una categoría
 const CATEGORY_BLOCKLIST = {
-  deportes:        ['homicidio','asesinado','asesinato','inflacion','pib','ministro de'],
-  economia:        ['beisbol','jonron','mlb','nba','actor','actriz','cantante','farandula','gol'],
-  politica:        ['beisbol','jonron','mlb','nba','actor','actriz','cantante','farandula','homicidio'],
+  deportes:        ['homicidio','asesinado','inflacion','pib','ministro de gobierno'],
+  economia:        ['beisbol','jonron','mlb','nba','actor','actriz','cantante','homicidio'],
+  politica:        ['beisbol','jonron','mlb','nba','actor','actriz','cantante','homicidio'],
   salud:           ['beisbol','jonron','mlb','presidente abinader','partido politico'],
   entretenimiento: ['presidente abinader','ministro de','pib','inflacion','banco central','homicidio'],
-  cultura:         ['beisbol','jonron','mlb','nba','pib','inflacion','banco central','homicidio'],
-  tecnologia:      ['homicidio','asesinado','presidente abinader','senado dominicano','beisbol'],
-  sucesos:         ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','pib','inflacion'],
-  tendencias:      ['pib','inflacion','banco central','reforma constitucional','homicidio','beisbol'],
+  cultura:         ['beisbol','jonron','mlb','nba','pib','inflacion','banco central'],
+  tecnologia:      ['homicidio','asesinado','presidente abinader','beisbol'],
+  sucesos:         ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','pib'],
+  tendencias:      ['pib','inflacion','banco central','reforma constitucional','homicidio'],
   internacional:   ['presidente abinader','senado dominicano','camara de diputados','ayuntamiento de'],
   policia:         ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','pib'],
-  noticias:        [],
+  nacional:        ['eeuu','estados unidos','europa','china','rusia','israel','ucrania',
+                    'actor','actriz','cantante','concierto'],
+  'medio-ambiente':['beisbol','jonron','mlb','nba','actor','actriz','cantante'],
 };
 
 const VALID_CATEGORIES = Object.keys(CATEGORY_KEYWORDS);
+const FALLBACK_CATEGORY = 'nacional'; // Reemplaza 'noticias' como categoría por defecto
+
 
 function normalize(str) {
   return (str || '').toLowerCase()
@@ -104,7 +120,7 @@ function detectBestCategory(article) {
     .sort(([, a], [, b]) => b - a);
   
   if (ranked.length > 0) return ranked[0][0];
-  return 'noticias'; // fallback
+  return FALLBACK_CATEGORY;
 }
 
 async function main() {

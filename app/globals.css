@@ -204,6 +204,47 @@
   .animate-marquee {
     animation: marquee 90s linear infinite;
   }
+
+  /* ── Mega Menu responsive ── */
+  @keyframes megaSlideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile: horizontal snap-scroll columns */
+  .mega-cols {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    padding-bottom: 8px;
+  }
+  .mega-cols > div {
+    flex: 0 0 88vw;
+    max-width: 340px;
+    scroll-snap-align: start;
+    padding: 16px 16px;
+    border-right: 1px solid #F0F0F0;
+  }
+  .mega-cols > div:last-child { border-right: none; }
+
+  /* Desktop: 4-column grid */
+  @media (min-width: 768px) {
+    .mega-cols {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr 0.9fr 1fr;
+      gap: 36px;
+      overflow-x: visible;
+      padding: 32px 28px;
+    }
+    .mega-cols > div {
+      flex: none;
+      max-width: none;
+      padding: 0;
+      border-right: none;
+    }
+  }
 }
 
 

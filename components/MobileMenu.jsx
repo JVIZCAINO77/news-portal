@@ -68,7 +68,7 @@ export default function MobileMenu({ isOpen, onClose, tickerItems = [] }) {
           <nav className="px-6 space-y-6">
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-600 mb-8 border-b-2 border-red-600 inline-block italic">Navegación</p>
             <ul className="space-y-4">
-              {CATEGORIES.filter(cat => cat.slug !== 'noticias').map((cat) => (
+              {CATEGORIES.filter(cat => cat.nav !== false).map((cat) => (
                 <li key={cat.slug}>
                   <Link 
                     href={`/categoria/${cat.slug}`} 

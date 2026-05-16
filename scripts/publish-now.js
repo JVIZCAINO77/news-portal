@@ -33,8 +33,8 @@ const parser = new Parser({
 
 // ─── CATEGORÍAS CON SUS FEEDS ─────────────────────────────────────────────────
 const CATEGORIES = {
-  noticias: {
-    slug: 'noticias', author: 'Redacción Nacional', style: 'periodístico objetivo y formal',
+  nacional: {
+    slug: 'nacional', author: 'Redacción Nacional', style: 'periodístico objetivo y formal',
     feeds: [
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
@@ -122,20 +122,21 @@ const CATEGORIES = {
       'https://www.bbc.com/mundo/index.xml',
     ],
   },
-  tendencias: {
-    slug: 'tendencias', author: 'Mesa de Tendencias', style: 'ágil y moderno',
-    feeds: [
-      'https://remolacha.net/feed/',
-      'https://cnnespanol.cnn.com/feed/',
-      'https://www.bbc.com/mundo/index.xml',
-    ],
-  },
   salud: {
     slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional e informativo',
     feeds: [
       'https://cnnespanol.cnn.com/feed/',
       'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
+    ],
+  },
+  'medio-ambiente': {
+    slug: 'medio-ambiente', author: 'Sección Medio Ambiente', style: 'informativo y consciente, con enfoque en impacto local e internacional',
+    feeds: [
+      'https://rss.dw.com/xml/rss-es-all',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://acento.com.do/feed/?s=medio+ambiente',
     ],
   },
 };
