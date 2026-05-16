@@ -359,30 +359,87 @@ const CATEGORIES = {
 // ALLOWLIST: al menos UNA de estas palabras DEBE aparecer para que el ítem sea válido.
 
 const TOPIC_BLOCKLIST = {
+  // ── DEPORTES: solo deporte, sin crimen ni economía ───────────────────────────
   deportes:       ['homicidio','asesinado','asesinato','detenido','arrestado',
-                   'inflacion','pib','banco central','ministro de'],
+                   'inflacion','pib','banco central','ministro de',
+                   'iran','ucrania','gaza','rusia','china','israel','trump','biden',
+                   'dolar cae','dolar sube','petroleo','bolsa'],
+
+  // ── ECONOMÍA: sin farándula, deportes ni crimen ──────────────────────────────
   economia:       ['beisbol','jonron','mlb','nba','partido de futbol',
-                   'actor','actriz','cantante','concierto','farandula','gol','pitcher'],
+                   'actor','actriz','cantante','concierto','farandula','gol','pitcher',
+                   'homicidio','asesinado','detenido','arrestado'],
+
+  // ── POLÍTICA: sin deportes, farándula ni crimen directo ──────────────────────
   politica:       ['beisbol','jonron','mlb','nba','actor','actriz','cantante',
                    'concierto','farandula','homicidio','gol','pitcher','deporte'],
+
+  // ── SALUD: sin política, deporte ni crimen ───────────────────────────────────
   salud:          ['beisbol','jonron','mlb','presidente abinader','asesinado','homicidio',
-                   'partido politico','gol','pitcher','deporte'],
-  entretenimiento:['presidente abinader','ministro de','pib','inflacion',
-                   'banco central','homicidio','asesinado','tribunal','gol','beisbol'],
+                   'partido politico','gol','pitcher','deporte',
+                   'iran','rusia','ucrania','ataque militar','guerra','bombardeo'],
+
+  // ── ENTRETENIMIENTO: ESTRICTO — solo farándula, espectáculos y cultura pop ───
+  // Bloquear: política, economía, crimen, geopolítica, deportes, sucesos
+  entretenimiento:['presidente abinader','ministro de','pib','inflacion','banco central',
+                   'homicidio','asesinado','tribunal','gol','beisbol','jonron',
+                   'dolar','petroleo','exportacion','importacion','presupuesto',
+                   'iran','rusia','ucrania','china','israel','trump','putin','guerra',
+                   'ataque','bombardeo','onu','otan','crisis global','canal de panama',
+                   'alianza','acuerdo','cumbre','asesinato','detenido','arrestado',
+                   'fiscal','sentencia','condena','crimen','banda criminal',
+                   'sargento','militar','policia nacional','ejercito','swat',
+                   'partido politico','senado','diputado','congreso','legislacion',
+                   'terremoto','tsunami','inundacion','desastre natural'],
+
+  // ── CULTURA: arte, patrimonio, letras dominicanas — sin geopolítica ni economía
   cultura:        ['beisbol','jonron','mlb','nba','pib','inflacion','banco central',
-                   'homicidio','asesinado','detenido'],
+                   'homicidio','asesinado','detenido','arrestado',
+                   'iran','rusia','ucrania','china','israel','trump','putin',
+                   'canal de panama','estrategico','geopolitico','alianza militar',
+                   'dolar','petroleo','exportacion','bolsa','reservas',
+                   'sargento','swat','policia','crimen','banda'],
+
+  // ── TECNOLOGÍA: sin política, crimen ni deportes ─────────────────────────────
   tecnologia:     ['homicidio','asesinado','asesinato','detenido por','arrestado por',
                    'presidente abinader','ministro de','senado dominicano','elecciones',
                    'votos','partido politico','diputado','senador','beisbol','futbol','gol'],
+
+  // ── SUCESOS: crímenes y accidentes LOCALES — sin economía ni geopolítica ──────
   sucesos:        ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba',
-                   'futbol','pib','inflacion'],
+                   'futbol','pib','inflacion','dolar','exportacion','importacion',
+                   'iran','rusia','ucrania','china','israel','trump','putin','guerra',
+                   'ataque militar','bombardeo','onu','otan','cumbre','alianza',
+                   'canal de panama','estrategia','geopolitica','petroleo','opep',
+                   'partido politico','senado dominicano','congreso','legislacion',
+                   'sargento campe','campeonato de tiro','tiro deportivo'],
+
+  // ── TENDENCIAS: sin política formal, crimen ni economía técnica ──────────────
   tendencias:     ['pib','inflacion','banco central','reforma constitucional',
                    'proyecto de ley','decreto presidencial','senado dominicano',
-                   'homicidio','asesinato','beisbol','partido politico'],
-  internacional:  ['presidente abinader','senado dominicano','camara de diputados',
-                   'ayuntamiento de','alcalde de rd','abinader'],
+                   'homicidio','asesinato','beisbol','partido politico',
+                   'exportacion','importacion','deficit presupuestario'],
 
-  policia:        ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','futbol','pib','inflacion','deporte'],
+  // ── INTERNACIONAL: SOLO eventos fuera de RD — bloquear noticias locales ──────
+  internacional:  ['presidente abinader','senado dominicano','camara de diputados',
+                   'ayuntamiento de','alcalde de rd','abinader',
+                   'ministerio de educacion rd','ministerio de salud rd',
+                   'coee','digesett','intrant','jce','pld','prm'],
+
+  // ── NOTICIAS (Nacional): sin geopolítica internacional pura ─────────────────
+  noticias:       ['iran','rusia','ucrania','china','israel','trump','putin','zelensky',
+                   'macron','netanyahu','corea del norte','arabia saudita',
+                   'ataque militar','bombardeo','invasion','guerra nuclear',
+                   'onu declara','otan activa','g7','g20','fmi acuerdo',
+                   'kiev','moscu','washington dc','paris','berlin','beijing'],
+
+  // ── POLICÍA: crimen local — sin farándula, deportes ni geopolítica ───────────
+  policia:        ['actor','actriz','cantante','concierto','beisbol','jonron','mlb',
+                   'nba','futbol','pib','inflacion','deporte',
+                   'iran','rusia','ucrania','china','israel','trump','guerra',
+                   'ataque militar','bombardeo','partido politico de espana',
+                   'pp denuncia','psoe','congreso espanol','gobierno espanol',
+                   'canal de panama','petroleo','exportacion','bolsa'],
 };
 
 const TOPIC_ALLOWLIST = {
@@ -430,31 +487,39 @@ const TOPIC_ALLOWLIST = {
 /**
  * Verifica si el ítem del RSS es temáticamente apto para la sección.
  * BLINDAJE ESTRICTO:
- *   (1) NINGUNA palabra del BLOCKLIST puede aparecer.
- *   (2) Al menos 1 hit en el TÍTULO, o 2+ hits en el texto completo.
+ *   (1) NINGUNA palabra del BLOCKLIST puede aparecer en título+snippet.
+ *   (2) Para secciones especializadas: el TÍTULO debe contener al menos 1 palabra del ALLOWLIST.
+ *       (no se acepta solo por el snippet — evita falsos positivos)
+ *   (3) Para "noticias" (general): 1 hit en título, ó 2+ hits en texto completo.
  */
 function isOnTopicForCategory(item, categorySlug) {
   const blocklist = TOPIC_BLOCKLIST[categorySlug] || [];
   const allowlist = TOPIC_ALLOWLIST[categorySlug] || [];
 
   const norm = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const text = norm(`${item.title || ''} ${item.contentSnippet || ''}`);
+  const text      = norm(`${item.title || ''} ${item.contentSnippet || ''}`);
   const titleOnly = norm(item.title || '');
 
-  // 1. BLOCKLIST: rechazar inmediatamente si aparece palabra prohibida
+  // 1. BLOCKLIST: rechazar inmediatamente si aparece palabra prohibida en cualquier parte
   const blocked = blocklist.some(w => text.includes(norm(w)));
   if (blocked) return false;
 
-  // 2. Sin ALLOWLIST = sin restricción temática
+  // 2. Sin ALLOWLIST = sin restricción temática (solo aplica a "noticias" por ahora)
   if (allowlist.length === 0) return true;
 
-  // 3. Hit en TÍTULO = señal fuerte → 1 basta
+  // 3. SECCIONES ESPECIALIZADAS: el TÍTULO debe tener al menos 1 hit del allowlist.
+  //    Así nos aseguramos de que el artículo sea SOBRE ese tema, no solo que lo mencione.
   const titleHit = allowlist.some(w => titleOnly.includes(norm(w)));
-  if (titleHit) return true;
 
-  // 4. Solo en snippet → necesita 2+ hits
-  const hits = allowlist.filter(w => text.includes(norm(w))).length;
-  return hits >= 2;
+  if (categorySlug === 'noticias') {
+    // Noticias es la sección general: acepta si hay hit en título O 2+ en texto
+    if (titleHit) return true;
+    const hits = allowlist.filter(w => text.includes(norm(w))).length;
+    return hits >= 2;
+  }
+
+  // Para TODAS las demás secciones: TÍTULO obligatorio con hit
+  return titleHit;
 }
 
 
