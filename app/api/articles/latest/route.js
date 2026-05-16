@@ -14,9 +14,10 @@ export async function GET(request) {
     const articles = await getLatestArticles(limit);
     return NextResponse.json(articles, {
       headers: {
-        // CDN cachea 60s; hasta 5min puede servir stale mientras revalida en background
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-        'Vercel-CDN-Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        // CDN cachea 5 min; hasta 10 min puede servir stale mientras revalida en background
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'Vercel-CDN-Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'CDN-Cache-Control': 'public, max-age=300',
       },
     });
   } catch (error) {

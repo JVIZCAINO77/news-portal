@@ -333,6 +333,32 @@ const CATEGORIES = {
       'https://www.bbc.com/mundo/index.xml',
     ],
   },
+
+  // ─── SECCIONES NACIONALES AMPLIADAS ──────────────────────────────────────────
+  nacional: {
+    slug: 'nacional', author: 'Redacción Nacional', style: 'periodístico objetivo y formal',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
+      'https://elnacional.com.do/feed/',
+      'https://acento.com.do/feed/',
+      'https://hoy.com.do/feed/',
+      'https://elnuevodiario.com.do/feed/',
+      'https://z101digital.com/feed/',
+    ],
+  },
+
+  'medio-ambiente': {
+    slug: 'medio-ambiente', author: 'Sección Medio Ambiente', style: 'informativo y consciente, con enfoque en impacto local e internacional',
+    feeds: [
+      'https://rss.dw.com/xml/rss-es-all',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://acento.com.do/feed/?s=medio+ambiente',
+      'https://www.france24.com/es/rss',
+    ],
+  },
 };
 
 
@@ -487,16 +513,32 @@ const TOPIC_BLOCKLIST = {
     'sargento','swat','policia','fiscal','tribunal',
   ],
 
-  // ── NOTICIAS (Actualidad Nacional) ───────────────────────────────────────────
-  // Comodín dominicano: política nacional, economía local, temas sociales
-  // Bloquear: geopolítica pura internacional
+  // ── NOTICIAS (legacy — redirige a nacional) ──────────────────────────────────
   noticias: [
     'trump','putin','zelensky','macron','netanyahu','xi jinping',
     'rusia','ucrania','iran','china','israel','palestina',
     'corea del norte','arabia saudita','union europea',
     'ataque militar','bombardeo','invasion','guerra nuclear',
-    'onu declara','otan activa','g7 cumbre','g20 cumbre',
-    'kiev','moscu','washington dc','paris','berlin','beijing',
+    'onu declara','otan activa',
+  ],
+
+  // ── NACIONAL ─────────────────────────────────────────────────────────────────
+  // Solo: República Dominicana — instituciones, gobierno local, vida ciudadana
+  nacional: [
+    'trump','putin','zelensky','rusia','ucrania','china','iran','israel',
+    'palestina','corea del norte','guerra','ataque militar','bombardeo',
+    'actor','actriz','cantante','concierto','farandula',
+    'beisbol','jonron','mlb','nba','gol','futbol',
+  ],
+
+  // ── MEDIO AMBIENTE ────────────────────────────────────────────────────────────
+  // Solo: clima, naturaleza, sostenibilidad, desastres naturales
+  'medio-ambiente': [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'homicidio','asesinado','arrestado','crimen','banda criminal',
+    'presidente abinader','senado','partido politico',
+    'pib','exportacion','importacion','banco central',
   ],
 };
 
@@ -605,16 +647,34 @@ const TOPIC_ALLOWLIST = {
     'escultura','poesia','novela','teatro dominicano','identidad cultural',
   ],
 
-  // ── NOTICIAS (Actualidad Nacional) ───────────────────────────────────────────
-  // Cubre lo dominicano que no encaja en una sección más específica
+  // ── NOTICIAS (legacy) ────────────────────────────────────────────────────────
   noticias: [
+    'dominicano','dominicana','republica dominicana','santo domingo','santiago',
+    'gobierno','ministerio','abinader','senado','congreso',
+    'municipio','alcalde','sociedad','comunidad','derechos',
+  ],
+
+  // ── NACIONAL ─────────────────────────────────────────────────────────────────
+  nacional: [
     'dominicano','dominicana','republica dominicana','santo domingo','santiago',
     'haiti','frontera','gobierno','ministerio','abinader','senado','congreso',
     'jce','elecciones','municipio','alcalde','pld','prm','fuerza del pueblo',
     'banco central','dolar','presupuesto nacional','zona franca',
-    'coee','digesett','intrant','proconsumidor',
+    'coee','digesett','intrant','proconsumidor','caasd','edenorte','edesur',
     'comunidad','sociedad','juventud','mujeres','derechos',
     'protesta','huelga','manifestacion','migracion','extradicion',
+    'inapa','senasa','mopc','adie','indotel',
+  ],
+
+  // ── MEDIO AMBIENTE ────────────────────────────────────────────────────────────
+  'medio-ambiente': [
+    'medio ambiente','medioambiente','cambio climatico','calentamiento global',
+    'deforestacion','reforestacion','contaminacion','reciclaje','sostenible',
+    'biodiversidad','parque nacional','cuenca','sequia',
+    'huracan','tormenta tropical','inundacion','inundaciones',
+    'ecosistema','flora','fauna','residuos','basura','plastico',
+    'energia renovable','solar','eolica','carbono','emisiones',
+    'desastre natural','terremoto','erupcion','tsunami',
   ],
 };
 
@@ -642,10 +702,15 @@ function isOnTopicForCategory(item, categorySlug) {
   // 3. El TÍTULO debe tener hit en el allowlist (garantiza que el artículo SEA sobre el tema)
   const titleHit = allowlist.some(w => titleOnly.includes(norm(w)));
 
-  if (categorySlug === 'noticias') {
-    // Noticias es el comodín nacional: acepta si hay hit en título O 2+ en texto completo
+  if (categorySlug === 'noticias' || categorySlug === 'nacional') {
+    // Nacional es el comodín dominicano: acepta si hay hit en título O 2+ en texto
     if (titleHit) return true;
     return allowlist.filter(w => text.includes(norm(w))).length >= 2;
+  }
+
+  if (categorySlug === 'medio-ambiente') {
+    // Medio ambiente: acepta si hay hit en título o snippet (temas emergentes)
+    return titleHit || allowlist.some(w => text.includes(norm(w)));
   }
 
   // Todas las demás secciones: el TÍTULO es obligatorio
@@ -668,7 +733,7 @@ export async function GET(request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const categoryKey = searchParams.get('category') || 'noticias';
+  const categoryKey = searchParams.get('category') || 'nacional';
 
   const cat = CATEGORIES[categoryKey];
   if (!cat) {

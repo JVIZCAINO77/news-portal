@@ -1,0 +1,61 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+
+  "crons": [
+    { "path": "/api/cron/bot?category=nacional",        "schedule": "0 7 * * *"  },
+    { "path": "/api/cron/bot?category=politica",        "schedule": "0 8 * * *"  },
+    { "path": "/api/cron/bot?category=sucesos",         "schedule": "0 9 * * *"  },
+    { "path": "/api/cron/bot?category=policia",         "schedule": "0 10 * * *" },
+    { "path": "/api/cron/bot?category=deportes",        "schedule": "0 11 * * *" },
+    { "path": "/api/cron/bot?category=economia",        "schedule": "0 12 * * *" },
+    { "path": "/api/cron/bot?category=entretenimiento", "schedule": "0 13 * * *" },
+    { "path": "/api/cron/bot?category=cultura",         "schedule": "0 14 * * *" },
+    { "path": "/api/cron/bot?category=salud",           "schedule": "0 15 * * *" },
+    { "path": "/api/cron/bot?category=medio-ambiente",  "schedule": "0 16 * * *" },
+    { "path": "/api/cron/bot?category=tecnologia",      "schedule": "0 17 * * *" },
+    { "path": "/api/cron/bot?category=internacional",   "schedule": "0 18 * * *" }
+  ],
+
+  "functions": {
+    "app/api/cron/bot/route.js": {
+      "maxDuration": 60,
+      "memory": 512
+    },
+    "app/api/og/route.js": {
+      "maxDuration": 15,
+      "memory": 1024
+    },
+    "app/api/articles/latest/route.js": {
+      "maxDuration": 10
+    },
+    "app/api/articles/paginated/route.js": {
+      "maxDuration": 10
+    },
+    "app/api/admin/**": {
+      "maxDuration": 30,
+      "memory": 256
+    }
+  },
+
+  "headers": [
+    {
+      "source": "/api/articles/:path*",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=300, stale-while-revalidate=600" }
+      ]
+    },
+    {
+      "source": "/api/og",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=86400, stale-while-revalidate=604800" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options",        "value": "SAMEORIGIN" }
+      ]
+    }
+  ]
+}
