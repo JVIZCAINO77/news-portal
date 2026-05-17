@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import CookieConsent from '@/components/CookieConsent';
 import BackToTop from '@/components/BackToTop';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
 import PushSubscribeButton from '@/components/PushSubscribeButton';
 import Script from 'next/script';
@@ -116,6 +117,7 @@ export default function RootLayout({ children }) {
         {/* Push Notifications — genera audiencia recurrente */}
         <PushSubscribeButton />
         <Analytics />
+        <SpeedInsights />
         {/* Service Worker para push + offline */}
         <Script
           id="register-sw"
