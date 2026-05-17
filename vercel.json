@@ -18,22 +18,22 @@
 
   "functions": {
     "app/api/cron/bot/route.js": {
-      "maxDuration": 60,
-      "memory": 512
+      "maxDuration": 45,
+      "memory": 256
     },
     "app/api/og/route.js": {
-      "maxDuration": 15,
-      "memory": 1024
+      "maxDuration": 10,
+      "memory": 512
     },
     "app/api/articles/latest/route.js": {
-      "maxDuration": 10
+      "maxDuration": 8
     },
     "app/api/articles/paginated/route.js": {
-      "maxDuration": 10
+      "maxDuration": 8
     },
     "app/api/admin/**": {
-      "maxDuration": 30,
-      "memory": 256
+      "maxDuration": 20,
+      "memory": 128
     }
   },
 
@@ -41,13 +41,19 @@
     {
       "source": "/api/articles/:path*",
       "headers": [
-        { "key": "Cache-Control", "value": "public, s-maxage=300, stale-while-revalidate=600" }
+        { "key": "Cache-Control", "value": "public, s-maxage=600, stale-while-revalidate=1200" }
       ]
     },
     {
       "source": "/api/og",
       "headers": [
         { "key": "Cache-Control", "value": "public, s-maxage=86400, stale-while-revalidate=604800" }
+      ]
+    },
+    {
+      "source": "/feed.xml",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, s-maxage=3600, stale-while-revalidate=7200" }
       ]
     },
     {

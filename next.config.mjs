@@ -7,32 +7,19 @@ const nextConfig = {
     // Cachear imágenes optimizadas por 30 días
     minimumCacheTTL: 2592000,
     // Tamaños de dispositivo para responsive images
-    deviceSizes: [390, 414, 768, 1024, 1280, 1920],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    deviceSizes: [390, 768, 1024, 1280],
+    imageSizes: [16, 48, 96, 256],
+    // ⚠️ SOLO dominios que controlamos directamente.
+    // Los dominios externos de noticias (.com.do) deben ser
+    // internalizados a Cloudinary por el bot antes de publicar.
     remotePatterns: [
-      { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'res.cloudinary.com' },
-      { protocol: 'https', hostname: 'image.pollinations.ai' },
-      { protocol: 'https', hostname: 'pollinations.ai' },
-      { protocol: 'https', hostname: 'remolacha.net' },
-      { protocol: 'https', hostname: 'almomento.net' },
-      { protocol: 'https', hostname: 'www.almomento.net' },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'i.ytimg.com' },
       { protocol: 'https', hostname: 'img.youtube.com' },
-      // Fuentes dominicanas nuevas
+      // Fallback temporal para fuentes dominicanas — eliminar una vez 100% Cloudinary
       { protocol: 'https', hostname: '**.diariolibre.com' },
-      { protocol: 'https', hostname: '**.acento.com.do' },
-      { protocol: 'https', hostname: '**.hoy.com.do' },
-      { protocol: 'https', hostname: '**.elcaribe.com.do' },
-      { protocol: 'https', hostname: '**.cdn.com.do' },
-      { protocol: 'https', hostname: '**.elnacional.com.do' },
-      { protocol: 'https', hostname: '**.noticiassin.com' },
-      { protocol: 'https', hostname: '**.elnuevodiario.com.do' },
-      { protocol: 'https', hostname: '**.z101digital.com' },
-      // Fuentes internacionales
-      { protocol: 'https', hostname: '**.cnn.com' },
-      { protocol: 'https', hostname: '**.bbc.com' },
-      { protocol: 'https', hostname: '**.france24.com' },
+      { protocol: 'https', hostname: '**.almomento.net' },
     ],
   },
   // ─── Compresión HTTP ──────────────────────────────────────────────────────
