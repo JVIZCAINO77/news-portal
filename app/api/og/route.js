@@ -14,6 +14,20 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 
+// Singleton Supabase — se reutiliza entre llamadas "tibias" al mismo worker
+// Evita reconectar en cada petición de imagen OG (era el mayor overhead de este endpoint)
+let _supabase = null;
+function getSupabase() {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      { auth: { persistSession: false, autoRefreshToken: false } }
+    );
+  }
+  return _supabase;
+}
+
 // ─── CACHÉ DE FUENTE EN MEMORIA ───────────────────────────────────────────────
 // La fuente Playfair se descarga UNA SOLA VEZ por instancia "tibia".
 // Elimina el fetch de 3.5s que antes ocurría en cada petición a /api/og.
@@ -51,10 +65,7 @@ export async function GET(request) {
     }
 
     // ── Datos del artículo ──────────────────────────────────────────────────
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
+    const supabase = getSupabase(); // Singleton — no reconecta en cada request
     const { data: article } = await supabase
       .from('articles')
       .select('title, excerpt, category, image, slug')

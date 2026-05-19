@@ -9,17 +9,11 @@ const nextConfig = {
     // Tamaños de dispositivo para responsive images
     deviceSizes: [390, 768, 1024, 1280],
     imageSizes: [16, 48, 96, 256],
-    // ⚠️ SOLO dominios que controlamos directamente.
-    // Los dominios externos de noticias (.com.do) deben ser
-    // internalizados a Cloudinary por el bot antes de publicar.
+    // SOLO dominios que controlamos. Todo lo demás pasa por <img> nativo en PremiumImage.
+    // Eliminar dominios externos reduce invocaciones del optimizador de imágenes de Vercel.
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
-      { protocol: 'https', hostname: 'i.ytimg.com' },
-      { protocol: 'https', hostname: 'img.youtube.com' },
-      // Fallback temporal para fuentes dominicanas — eliminar una vez 100% Cloudinary
-      { protocol: 'https', hostname: '**.diariolibre.com' },
-      { protocol: 'https', hostname: '**.almomento.net' },
     ],
   },
   // ─── Compresión HTTP ──────────────────────────────────────────────────────
