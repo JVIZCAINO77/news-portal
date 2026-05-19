@@ -18,8 +18,8 @@ const CRON_SECRET = process.env.CRON_SECRET;
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
 // OBJETIVO: 1 artículo por sección por día = 12 secciones = 12 art/día máximo.
 // 10 secciones nacionales vs 2 globales/internacional → más nacional que internacional.
-const DAILY_LIMIT_GLOBAL   = 12; // Techo del día: 12 secciones = 12 artículos exactos
-const DAILY_LIMIT_PER_CAT  = 1;  // Exactamente 1 artículo por sección al día
+const DAILY_LIMIT_GLOBAL   = 12; // Techo del día: 12 artículos exactos
+// Sin límite por categoría — el bot elige la mejor disponible cada ejecución
 
 // ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
 // Longitud mínima que debe tener el contenido generado por la IA.
@@ -177,9 +177,9 @@ function sharesCriticalEntities(titleA, titleB) {
   return [...entA].filter(e => entB.has(e)).length >= 2;
 }
 
-// Umbral Jaccard: 25% de overlap detecta el mismo evento con distintas palabras
-// (ej: "Guyana firma contrato" vs "RD incursiona en bloques de Guyana" = 30% overlap)
-const SEMANTIC_THRESHOLD = 0.25;
+// Umbral Jaccard: 20% de overlap detecta el mismo evento con distintas palabras
+// Bajado de 25% → 20% para capturar casos como "Ébola en Congo" vs "Ébola y tecnología"
+const SEMANTIC_THRESHOLD = 0.20;
 
 const CATEGORIES = {
   // ─── ESTRUCTURA OFICIAL IMPERIO PÚBLICO ──────────────────────────────────────
@@ -757,7 +757,30 @@ export async function GET(request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const categoryKey = searchParams.get('category') || 'nacional';
+  let categoryKey = searchParams.get('category');
+
+  // ─── AUTO-SELECCIÓN DE CATEGORÍA ────────────────────────────────────────────
+  // Si no se especifica categoría, el bot elige la mejor disponible:
+  // Prioriza categorías sin artículo hoy; entre ellas elige aleatoriamente.
+  if (!categoryKey) {
+    const supabaseTemp = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    const todayTmp = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+    const startTmp = new Date(`${todayTmp}T00:00:00-04:00`).toISOString();
+    const { data: publishedCats } = await supabaseTemp
+      .from('articles').select('category').gte('publishedAt', startTmp);
+    const coveredToday = new Set((publishedCats || []).map(a => a.category));
+    const allCats = Object.keys(CATEGORIES);
+    // Preferir categorías sin cobertura hoy
+    const uncovered = allCats.filter(c => !coveredToday.has(c));
+    const pool = uncovered.length > 0 ? uncovered : allCats;
+    categoryKey = pool[Math.floor(Math.random() * pool.length)];
+    console.log(`[Bot] 🎯 Categoría auto-seleccionada: ${categoryKey} (${uncovered.length} sin cubrir hoy)`);
+  }
 
   const cat = CATEGORIES[categoryKey];
   if (!cat) {
@@ -800,17 +823,7 @@ export async function GET(request) {
       return NextResponse.json({ message: `Límite GLOBAL diario alcanzado (${totalToday}/${DAILY_LIMIT_GLOBAL}).` }, { status: 200 });
     }
 
-    // Check por Categoría
-    const { count: countToday } = await supabase
-      .from('articles')
-      .select('*', { count: 'exact', head: true })
-      .eq('category', cat.slug)
-      .gte('publishedAt', startOfTodayDR)
-      .lte('publishedAt', endOfTodayDR);
-
-    if ((countToday ?? 0) >= DAILY_LIMIT_PER_CAT) {
-      return NextResponse.json({ message: `Límite de categoría ${cat.slug} alcanzado (${countToday}).` }, { status: 200 });
-    }
+    // Sin límite por categoría — solo el límite global de 12 aplica
 
     // Si pasamos el check, procedemos con el scraping pesado
     const parser = new Parser({
@@ -885,6 +898,29 @@ export async function GET(request) {
     const publishedKeywordSets = (publishedToday || [])
       .map(a => extractKeywords(a.title))
       .filter(s => s.size > 0);
+
+    // ─── POOL DE TEMAS YA CUBIERTOS HOY (cross-categoría) ────────────────────────
+    // Construir un Set con TODAS las keywords significativas de los artículos publicados hoy.
+    // Palabras genéricas excluidas para evitar falsos positivos (ej: "gobierno", "nuevo").
+    const GENERIC_TOPIC_WORDS = new Set([
+      'nuevo','nueva','nuevos','nuevas','gran','grande','primer','primera','tras',
+      'sigue','tiene','dice','hace','llega','viene','sera','esta','estos','estas',
+      'sobre','desde','hasta','entre','todos','todas','alguno','algunos','otros',
+      'mundo','pais','paises','gobierno','presidente','nacional','local','hoy',
+      'semana','meses','anos','dias','horas','tiempo','parte','lugar','caso',
+      'Santo','Domingo','Santiago','Republica','Dominicana',
+    ]);
+    const publishedTopicPool = new Set(
+      (publishedToday || []).flatMap(a => {
+        const norm = a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
+        return norm.split(/\s+/).filter(w =>
+          w.length > 5 &&                        // Palabras de 6+ caracteres (más específicas)
+          !GENERIC_TOPIC_WORDS.has(w) &&         // No es palabra genérica
+          !/^\d+$/.test(w)                       // No es número puro
+        );
+      })
+    );
+
 
     // === CAPA 4: Selección final — priorizar ÚLTIMA HORA y TENDENCIA POR CONSENSO ===
     // Calcular "Impacto" basado en repetición en medios y relevancia nacional
@@ -981,6 +1017,19 @@ export async function GET(request) {
         continue;
       }
 
+      // 4f. Deduplicación por TEMA CROSS-CATEGORÍA — bloquea el mismo tema en cualquier sección
+      // Extrae todas las keywords del candidato y verifica si alguna ya está en el pool de temas cubiertos hoy.
+      // Ejemplos bloqueados: "Ébola en Tecnología" si ya salió en Sucesos, "Trump" en Política y Economía, etc.
+      const candidateNorm = item.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
+      const candidateTopicWords = candidateNorm.split(/\s+/).filter(w =>
+        w.length > 5 && !GENERIC_TOPIC_WORDS.has(w) && !/^\d+$/.test(w)
+      );
+      const topicMatch = candidateTopicWords.find(w => publishedTopicPool.has(w));
+      if (topicMatch) {
+        console.log(`[Bot] 🔁 Duplicado CROSS-CATEGORÍA: "${item.title.slice(0, 60)}" → tema "${topicMatch}" ya cubierto hoy.`);
+        continue;
+      }
+
       news = item;
       isNewsBreaking = isBreakingNews(item.title);
       if (isNewsBreaking) {
@@ -1035,28 +1084,48 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 
     // ─── MULTI-PROVEEDOR IA — ROTACIÓN INTELIGENTE (STICKY KEY) ───────────────
     // Usar siempre la MISMA clave hasta que se agote por completo (todos los modelos = 429).
-    // Solo entonces pasar a la siguiente clave. Así conservamos los créditos Pro.
-    const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
+    // Mezclar aleatoriamente el pool de claves para distribuir los límites de cuota
+    // y evitar bloqueos por claves expiradas/filtradas consecutivas.
+    // Consolidamos claves de múltiples cuentas/variables de entorno para soporte multi-cuenta
+    const keys = [];
+    const envVars = ['GEMINI_API_KEY', 'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3'];
+    for (const v of envVars) {
+      if (process.env[v]) {
+        const parsed = process.env[v].split(',').map(k => k.trim()).filter(Boolean);
+        keys.push(...parsed);
+      }
+    }
+    for (let i = keys.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [keys[i], keys[j]] = [keys[j], keys[i]];
+    }
+
     const geminiModels = [
       'gemini-2.5-flash-lite',
       'gemini-2.0-flash',
       'gemini-1.5-flash',
-      'gemini-1.5-flash-8b',
       'gemini-1.5-pro',
     ];
 
     let rawText = '';
     let aiSuccess = false;
+    let keysChecked = 0;
 
     for (const key of keys) {
       if (aiSuccess) break;
+      // Limitar a máximo 5 intentos de claves distintas para evitar timeouts en Vercel (máx 45s)
+      if (keysChecked >= 5) {
+        console.log(`[Bot] ⚠️ Límite de 5 claves Gemini intentadas sin éxito. Pasando a pasarelas de fallback.`);
+        break;
+      }
+      keysChecked++;
       let keyExhausted = true;
 
       for (const model of geminiModels) {
         try {
           console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model}`);
           const gemCtrl = new AbortController();
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 25000); // 25s por modelo
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 6000); // 6s de timeout seguro para evitar Gateway Timeout
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1445,25 +1514,53 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       console.warn('[Scraper Warning] No se pudo extraer imagen real:', err.message);
     }
 
-    // Intentar internalizar la imagen real a Cloudinary
+    // ═══════════════════════════════════════════════════════════════════════
+    // GARANTÍA DE IMAGEN CLOUDINARY — 3 ETAPAS SIN EXCEPCIÓN
+    // REGLA: Si después de las 3 etapas no tenemos URL de Cloudinary,
+    //        el artículo NO se publica. Nunca guardamos URLs externas.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    // ETAPA 1: Internalizar la imagen real extraída del artículo (3 reintentos)
     if (finalImageUrl) {
-      console.log(`[Bot] Internalizando imagen: ${finalImageUrl.slice(0, 60)}...`);
-      finalImageUrl = await internalizeImage(finalImageUrl);
+      console.log(`[Bot] ETAPA-1 Internalizando imagen real: ${finalImageUrl.slice(0, 60)}...`);
+      finalImageUrl = await internalizeImage(finalImageUrl, 3);
     }
 
-    // Si no hay imagen (no se encontró, el dominio bloquea, o el upload falló) → imagen de IA
-    if (!finalImageUrl || (!finalImageUrl.includes('cloudinary.com') && !finalImageUrl.includes('unsplash.com'))) {
+    // ETAPA 2: Si no hay imagen Cloudinary → generar con IA y subir a Cloudinary (2 reintentos)
+    if (!finalImageUrl || !finalImageUrl.includes('cloudinary.com')) {
       if (finalImageUrl) {
-        console.warn(`[Bot] Imagen externa no internalizada (${finalImageUrl.slice(0, 40)}). Forzando imagen de IA por seguridad.`);
+        console.warn(`[Bot] ETAPA-2 Imagen real no internalizada. Generando imagen editorial por IA...`);
+      } else {
+        console.log(`[Bot] ETAPA-2 Sin imagen fuente. Generando imagen editorial por IA...`);
       }
-      console.log(`[Bot] Generando imagen por IA para: ${articleData.title}`);
-      const topicTags = Array.isArray(articleData.tags) ? articleData.tags.join(', ') : '';
-      const visualPrompt = `high-end editorial news photography for an article titled "${articleData.title}". Subject: ${topicTags}. Professional journalistic style, cinematic lighting, 8k resolution, realistic, wide shot, 16:9 aspect ratio. NO TEXT, NO LETTERS, NO WORDS, NO SIGNS, NO LOGOS.`;
-      const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(visualPrompt)}?width=1280&height=720&nologo=true&seed=${Date.now()}`;
-      
-      // Intentar internalizar la de IA también para máxima estabilidad
-      finalImageUrl = await internalizeImage(pollinationsUrl) || pollinationsUrl;
+      const topicTags   = Array.isArray(articleData.tags) ? articleData.tags.join(', ') : '';
+      const visualPrompt = `high-end editorial news photography for article: "${articleData.title.slice(0, 120)}". Topics: ${topicTags || articleData.category}. Category: ${cat.slug}. Professional journalistic style, cinematic dramatic lighting, photorealistic, 8k, wide angle shot, 16:9 aspect ratio. NO TEXT, NO LETTERS, NO LOGOS, NO SIGNS.`;
+      const seed1        = Date.now();
+      const polUrl1      = `https://image.pollinations.ai/prompt/${encodeURIComponent(visualPrompt)}?width=1280&height=720&nologo=true&enhance=true&seed=${seed1}`;
+
+      console.log(`[Bot] ETAPA-2 Pollinations URL: ${polUrl1.slice(0, 80)}...`);
+      finalImageUrl = await internalizeImage(polUrl1, 2);
     }
+
+    // ETAPA 3: Segundo intento de IA con seed diferente si aún falla
+    if (!finalImageUrl || !finalImageUrl.includes('cloudinary.com')) {
+      console.warn(`[Bot] ETAPA-3 Segundo intento de imagen IA con seed alternativo...`);
+      const seed2        = Date.now() + Math.floor(Math.random() * 999999);
+      const altPrompt    = `dramatic editorial photograph for news article about ${cat.slug}: "${articleData.title.slice(0, 80)}". Professional press photography, high contrast, real world scene, photorealistic. NO TEXT.`;
+      const polUrl2      = `https://image.pollinations.ai/prompt/${encodeURIComponent(altPrompt)}?width=1280&height=720&nologo=true&seed=${seed2}`;
+      finalImageUrl      = await internalizeImage(polUrl2, 2);
+    }
+
+    // GUARDIÁN FINAL: Si aún no tenemos Cloudinary → rechazar publicación
+    if (!finalImageUrl || !finalImageUrl.includes('cloudinary.com')) {
+      throw new Error(
+        `[Bot] 🚨 GUARDIÁN DE IMAGEN: No se pudo obtener imagen Cloudinary para "${articleData.title.slice(0, 60)}". ` +
+        `Artículo rechazado para mantener estándar visual. Se reintentará en el próximo ciclo del cron.`
+      );
+    }
+
+    console.log(`[Bot] ✅ Imagen Cloudinary garantizada: ${finalImageUrl.slice(0, 70)}...`);
+
 
     // ─── VALIDACIÓN DE CALIDAD FINAL (Content Length) ────────────────────────
     if (articleData.content.length < 1200) {
