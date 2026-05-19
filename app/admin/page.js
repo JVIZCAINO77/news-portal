@@ -9,6 +9,8 @@ import Link from 'next/link';
 import AutomationToggle from '@/components/AutomationToggle';
 import AgentsDashboard from '@/components/AgentsDashboard';
 import TrafficDashboard from '@/components/TrafficDashboard';
+
+export const revalidate = 60; // ISR: revalidar cada 60s
 import ImageRepairButton from '@/components/ImageRepairButton';
 
 export default async function AdminDashboardPage() {

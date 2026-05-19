@@ -20,8 +20,8 @@
 
   "functions": {
     "app/api/cron/bot/route.js": {
-      "maxDuration": 45,
-      "memory": 256
+      "maxDuration": 55,
+      "memory": 512
     },
     "app/api/og/route.js": {
       "maxDuration": 10,
@@ -33,12 +33,19 @@
     "app/api/articles/paginated/route.js": {
       "maxDuration": 8
     },
+    "app/api/articles/view/route.js": {
+      "maxDuration": 5
+    },
     "app/api/admin/**": {
       "maxDuration": 20,
       "memory": 128
     },
     "app/api/cron/fix-images/route.js": {
       "maxDuration": 60,
+      "memory": 256
+    },
+    "app/api/internalize-image/route.js": {
+      "maxDuration": 30,
       "memory": 256
     }
   },

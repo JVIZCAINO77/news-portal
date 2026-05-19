@@ -158,11 +158,18 @@ async function checkCategoryDistribution(supabase) {
 }
 
 async function checkGeminiKeys() {
-  const keys = [
+  // GEMINI_API_KEY es un pool separado por comas — separar y probar individualmente
+  const rawKeys = [
     process.env.GEMINI_API_KEY,
     process.env.GEMINI_API_KEY_2,
     process.env.GEMINI_API_KEY_3,
   ].filter(Boolean);
+
+  const allKeys = rawKeys.flatMap(k => k.split(',').map(s => s.trim())).filter(k => k.length > 10);
+  const totalKeys = allKeys.length;
+
+  // Probar solo las primeras 3 claves para evitar timeout (el bot rota todas automáticamente)
+  const keys = allKeys.slice(0, 3);
 
   if (keys.length === 0) {
     return result('gemini_keys', 'error', '❌ No hay claves Gemini configuradas en variables de entorno.');
@@ -198,17 +205,17 @@ async function checkGeminiKeys() {
   const errKeys   = results.filter(r => r.status !== 'ok' && r.status !== 'quota_exhausted').length;
 
   let status = 'ok';
-  let message = `✅ ${okKeys}/${keys.length} claves Gemini activas.`;
+  let message = `✅ ${okKeys}/${keys.length} claves Gemini activas (pool total: ${totalKeys}).`;
   if (okKeys === 0 && quotaKeys > 0) {
-    status = 'warn'; message = `⚠️ Todas las claves Gemini tienen cuota agotada. El bot usará Pollinations.`;
+    status = 'warn'; message = `⚠️ Cuota diaria agotada en ${quotaKeys} claves (pool: ${totalKeys}). Bot usando Pollinations como fallback.`;
   }
   if (okKeys === 0 && quotaKeys === 0) {
-    status = 'error'; message = `❌ Ninguna clave Gemini funciona correctamente.`;
+    status = 'error'; message = `❌ Ninguna clave Gemini funciona (pool: ${totalKeys}). Verificar claves en .env.local`;
   }
   if (quotaKeys > 0 && okKeys > 0) {
     message += ` ${quotaKeys} con cuota agotada.`;
   }
-  return result('gemini_keys', status, message, { results, okKeys, quotaKeys, errKeys });
+  return result('gemini_keys', status, message, { results, okKeys, quotaKeys, errKeys, totalKeys });
 }
 
 async function checkCloudinary() {

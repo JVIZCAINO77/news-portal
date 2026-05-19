@@ -269,33 +269,60 @@ Responde SOLO con JSON válido (sin bloques de código, sin texto extra):
 
 // ─── PROVEEDOR 1: GEMINI ──────────────────────────────────────────────────────
 async function generateWithGemini(cat, news, todayDR) {
-  const keys = (process.env.GEMINI_API_KEY || '').split(',').map(k => k.trim()).filter(Boolean);
-  // Incluimos todos los modelos Gemini gratuitos disponibles (cuotas independientes)
+  const keys = [];
+  const envVars = ['GEMINI_API_KEY', 'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3'];
+  for (const v of envVars) {
+    if (process.env[v]) {
+      const parsed = process.env[v].split(',').map(k => k.trim()).filter(Boolean);
+      keys.push(...parsed);
+    }
+  }
+  
+  // Mezclar aleatoriamente el pool de claves
+  for (let i = keys.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [keys[i], keys[j]] = [keys[j], keys[i]];
+  }
+
   const models = [
     'gemini-2.5-flash-lite',
     'gemini-2.0-flash',
     'gemini-1.5-flash',
-    'gemini-1.5-flash-8b',
     'gemini-1.5-pro',
   ];
 
   const prompt = buildPrompt(cat, news, todayDR);
+  let keysChecked = 0;
 
   for (const key of keys) {
+    if (keysChecked >= 5) {
+      console.log(`    ⚠️ Límite de 5 claves Gemini intentadas sin éxito. Pasando a fallback.`);
+      break;
+    }
+    keysChecked++;
+    let keyExhausted = true;
+
     for (const model of models) {
       try {
+        const gemCtrl = new AbortController();
+        const gemTimer = setTimeout(() => gemCtrl.abort(), 6000); // 6s timeout
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+          signal: gemCtrl.signal,
         });
+        clearTimeout(gemTimer);
         const data = await res.json();
         if (data.error) {
           const isQuota = data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED';
           const isInvalid = data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT';
           const isNotFound = data.error.code === 404;
           console.log(`    ⚠️ Gemini ${model} (...${key.slice(-6)}): ${isQuota ? 'cuota agotada' : isInvalid ? 'clave inválida' : isNotFound ? 'modelo no encontrado' : data.error.message}`);
-          if (isInvalid) break; // Clave inválida → pasar a siguiente clave
+          if (isInvalid) {
+            keyExhausted = true;
+            break; // Clave inválida → pasar a siguiente clave
+          }
           if (isNotFound) continue; // Modelo no disponible → probar siguiente modelo
           continue;
         }
@@ -308,6 +335,7 @@ async function generateWithGemini(cat, news, todayDR) {
         console.log(`    ❌ Gemini error (${model}): ${e.message.slice(0, 60)}`);
       }
     }
+    if (!keyExhausted) break;
   }
   return null;
 }

@@ -14,7 +14,7 @@ import PremiumImage from '@/components/PremiumImage';
 import ViewCounter from '@/components/ViewCounter';
 import { notFound } from 'next/navigation';
 
-export const revalidate = 60; // Revalidar cada minuto para noticias frescas
+export const revalidate = 3600; // ISR: 1 hora — los artículos publicados no cambian. Ahorra CPU máximo.
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;

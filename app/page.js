@@ -7,7 +7,7 @@ import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
 import BreakingTicker from '@/components/BreakingTicker';
 
-export const revalidate = 60; // Cachear por 1 minuto para carga instantánea, revalidando en background
+export const revalidate = 300; // ISR: revalidar cada 5 min — balance óptimo entre frescura y CPU
 
 
 
