@@ -39,17 +39,17 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
-      'https://elcaribe.com.do/feed/',           // reemplaza elnacional (404)
-      'https://listindiario.com/rss/',            // reemplaza acento (404)
-      'https://cdn.com.do/feed/',                 // reemplaza hoy (redirects)
+      'https://almomento.net/feed/',           // reemplaza elnacional (404)
+      'https://www.diariolibre.com/rss/portada.xml',            // reemplaza acento (404)
+      'https://noticiassin.com/feed/',                 // reemplaza hoy (redirects)
     ],
   },
   politica: {
     slug: 'politica', author: 'Mesa Política', style: 'neutral y objetivo',
     feeds: [
-      'https://listindiario.com/rss/',
-      'https://elcaribe.com.do/feed/',
-      'https://cdn.com.do/feed/',
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
       'https://noticiassin.com/feed/?s=politica',
     ],
   },
@@ -59,8 +59,8 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/?s=policia',
-      'https://elcaribe.com.do/feed/',
-      'https://listindiario.com/rss/',
+      'https://almomento.net/feed/',
+      'https://www.diariolibre.com/rss/portada.xml',
     ],
   },
   deportes: {
@@ -69,7 +69,7 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/deportes.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/deportes/portada',
       'https://www.marca.com/rss/portada.xml',
-      'https://elcaribe.com.do/feed/',
+      'https://almomento.net/feed/',
     ],
   },
   economia: {
@@ -78,16 +78,16 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/economia.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
       'https://elmundo.es/rss/economia.xml',
-      'https://listindiario.com/rss/',
+      'https://www.diariolibre.com/rss/portada.xml',
     ],
   },
   sucesos: {
     slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso',
     feeds: [
-      'https://listindiario.com/rss/',
+      'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/?s=policia',
-      'https://elcaribe.com.do/feed/',
+      'https://almomento.net/feed/',
     ],
   },
   internacional: {
@@ -104,7 +104,7 @@ const CATEGORIES = {
     feeds: [
       'https://www.diariolibre.com/rss/revista.xml',
       'https://remolacha.net/feed/',
-      'https://listindiario.com/rss/',
+      'https://www.diariolibre.com/rss/portada.xml',
     ],
   },
   cultura: {
@@ -113,7 +113,7 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/revista.xml',
       'https://www.bbc.com/mundo/index.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada',
-      'https://elcaribe.com.do/feed/',
+      'https://almomento.net/feed/',
     ],
   },
   tecnologia: {
@@ -138,7 +138,7 @@ const CATEGORIES = {
       'https://www.bbc.com/mundo/index.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/clima-y-medio-ambiente/portada',
       'https://www.infobae.com/feeds/rss/tendencias.xml',
-      'https://listindiario.com/rss/',
+      'https://www.diariolibre.com/rss/portada.xml',
     ],
   },
 };
