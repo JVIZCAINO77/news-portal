@@ -39,17 +39,17 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
-      'https://elnacional.com.do/feed/',
-      'https://acento.com.do/feed/',
-      'https://hoy.com.do/feed/',
+      'https://elcaribe.com.do/feed/',           // reemplaza elnacional (404)
+      'https://listindiario.com/rss/',            // reemplaza acento (404)
+      'https://cdn.com.do/feed/',                 // reemplaza hoy (redirects)
     ],
   },
   politica: {
     slug: 'politica', author: 'Mesa Política', style: 'neutral y objetivo',
     feeds: [
-      'https://acento.com.do/feed/?s=politica',
-      'https://elcaribe.com.do/feed/?s=politica',
-      'https://cdn.com.do/feed/?s=politica',
+      'https://listindiario.com/rss/',
+      'https://elcaribe.com.do/feed/',
+      'https://cdn.com.do/feed/',
       'https://noticiassin.com/feed/?s=politica',
     ],
   },
@@ -59,42 +59,44 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/?s=policia',
-      'https://elnacional.com.do/feed/',
-      'https://acento.com.do/feed/',
+      'https://elcaribe.com.do/feed/',
+      'https://listindiario.com/rss/',
     ],
   },
   deportes: {
     slug: 'deportes', author: 'Mesa Deportiva', style: 'analítico y pasional',
     feeds: [
       'https://www.diariolibre.com/rss/deportes.xml',
-      'https://rss.dw.com/xml/rss-es-all',
-      'https://cnnespanol.cnn.com/feed/',
-      'https://elnacional.com.do/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/deportes/portada',
+      'https://www.marca.com/rss/portada.xml',
+      'https://elcaribe.com.do/feed/',
     ],
   },
   economia: {
     slug: 'economia', author: 'Redacción Económica', style: 'serio y financiero',
     feeds: [
       'https://www.diariolibre.com/rss/economia.xml',
-      'https://rss.dw.com/xml/rss-es-all',
-      'https://cnnespanol.cnn.com/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
       'https://elmundo.es/rss/economia.xml',
+      'https://listindiario.com/rss/',
     ],
   },
   sucesos: {
     slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso',
     feeds: [
-      'https://acento.com.do/feed/?s=sucesos',
+      'https://listindiario.com/rss/',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/?s=policia',
+      'https://elcaribe.com.do/feed/',
     ],
   },
   internacional: {
     slug: 'internacional', author: 'Redacción Internacional', style: 'global y analítico',
     feeds: [
-      'https://cnnespanol.cnn.com/feed/',
-      'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada',
+      'https://elmundo.es/rss/portada.xml',
+      'https://www.infobae.com/feeds/rss/mundo.xml',
     ],
   },
   entretenimiento: {
@@ -102,41 +104,41 @@ const CATEGORIES = {
     feeds: [
       'https://www.diariolibre.com/rss/revista.xml',
       'https://remolacha.net/feed/',
-      'https://elnacional.com.do/feed/?s=espectaculos',
+      'https://listindiario.com/rss/',
     ],
   },
   cultura: {
     slug: 'cultura', author: 'Sección Cultural', style: 'elegante y descriptivo',
     feeds: [
       'https://www.diariolibre.com/rss/revista.xml',
-      'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
-      'https://elnacional.com.do/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada',
+      'https://elcaribe.com.do/feed/',
     ],
   },
   tecnologia: {
     slug: 'tecnologia', author: 'Redacción Tecnológica', style: 'informativo y vanguardista',
     feeds: [
-      'https://cnnespanol.cnn.com/feed/',
-      'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada',
+      'https://www.infobae.com/feeds/rss/tecno.xml',
     ],
   },
   salud: {
     slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional e informativo',
     feeds: [
-      'https://cnnespanol.cnn.com/feed/',
-      'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
+      'https://www.infobae.com/feeds/rss/salud.xml',
     ],
   },
   'medio-ambiente': {
     slug: 'medio-ambiente', author: 'Sección Medio Ambiente', style: 'informativo y consciente, con enfoque en impacto local e internacional',
     feeds: [
-      'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
-      'https://cnnespanol.cnn.com/feed/',
-      'https://acento.com.do/feed/?s=medio+ambiente',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/clima-y-medio-ambiente/portada',
+      'https://www.infobae.com/feeds/rss/tendencias.xml',
+      'https://listindiario.com/rss/',
     ],
   },
 };
@@ -284,28 +286,25 @@ async function generateWithGemini(cat, news, todayDR) {
     [keys[i], keys[j]] = [keys[j], keys[i]];
   }
 
+  // Solo modelos activos en 2026 — 1.5-flash y 1.5-pro dan 404 (deprecados)
   const models = [
-    'gemini-2.5-flash-lite',
-    'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro',
+    'gemini-2.5-flash-preview-05-20', // modelo más reciente y capaz
+    'gemini-2.5-flash-lite',           // rápido y estable
+    'gemini-2.0-flash',                // fallback confiable
+    'gemini-2.0-flash-lite',           // ultra-rápido de respaldo
   ];
 
   const prompt = buildPrompt(cat, news, todayDR);
-  let keysChecked = 0;
+  const deadKeys = new Set(); // claves mutas en esta sesión (cuota/leaked/banned)
 
   for (const key of keys) {
-    if (keysChecked >= 5) {
-      console.log(`    ⚠️ Límite de 5 claves Gemini intentadas sin éxito. Pasando a fallback.`);
-      break;
-    }
-    keysChecked++;
-    let keyExhausted = true;
+    if (deadKeys.size >= keys.length) break; // todas muertas
+    if (deadKeys.has(key)) continue;         // ya sabemos que no sirve
 
     for (const model of models) {
       try {
         const gemCtrl = new AbortController();
-        const gemTimer = setTimeout(() => gemCtrl.abort(), 6000); // 6s timeout
+        const gemTimer = setTimeout(() => gemCtrl.abort(), 25000);
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -315,15 +314,22 @@ async function generateWithGemini(cat, news, todayDR) {
         clearTimeout(gemTimer);
         const data = await res.json();
         if (data.error) {
-          const isQuota = data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED';
-          const isInvalid = data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT';
+          const isQuota    = data.error.code === 429 || data.error.status === 'RESOURCE_EXHAUSTED';
+          const isInvalid  = data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT';
           const isNotFound = data.error.code === 404;
-          console.log(`    ⚠️ Gemini ${model} (...${key.slice(-6)}): ${isQuota ? 'cuota agotada' : isInvalid ? 'clave inválida' : isNotFound ? 'modelo no encontrado' : data.error.message}`);
-          if (isInvalid) {
-            keyExhausted = true;
-            break; // Clave inválida → pasar a siguiente clave
+          const isLeaked   = (data.error.message || '').toLowerCase().includes('leaked');
+          const isBanned   = (data.error.message || '').toLowerCase().includes('banned');
+          const shortMsg   = isQuota ? 'cuota agotada' : isInvalid ? 'clave inválida'
+            : isNotFound ? 'modelo no encontrado' : isLeaked ? '⛔ clave filtrada (leaked)'
+            : isBanned ? '⛔ clave baneada' : data.error.message;
+          console.log(`    ⚠️ Gemini (...${key.slice(-6)}): ${shortMsg}`);
+
+          // Clave muerta → marcarla y saltar a la siguiente de inmediato
+          if (isQuota || isInvalid || isLeaked || isBanned) {
+            deadKeys.add(key);
+            break;
           }
-          if (isNotFound) continue; // Modelo no disponible → probar siguiente modelo
+          if (isNotFound) continue; // solo este modelo no existe → probar siguiente modelo
           continue;
         }
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
@@ -332,10 +338,15 @@ async function generateWithGemini(cat, news, todayDR) {
           return text;
         }
       } catch (e) {
-        console.log(`    ❌ Gemini error (${model}): ${e.message.slice(0, 60)}`);
+        console.log(`    ❌ Gemini timeout (...${key.slice(-6)}), siguiente clave...`);
+        deadKeys.add(key); // timeout = clave lenta/muerta
+        break;
       }
     }
-    if (!keyExhausted) break;
+  }
+
+  if (deadKeys.size > 0) {
+    console.log(`    ⚠️ ${deadKeys.size}/${keys.length} claves Gemini muertas. Pasando a fallback.`);
   }
   return null;
 }
@@ -437,23 +448,136 @@ async function generateWithOpenRouter(cat, news, todayDR) {
   return null;
 }
 
+// ─── PARSEAR Y VALIDAR ARTÍCULO GENERADO POR IA ──────────────────────────────
+function parseAndValidateArticle(rawText, cat, news) {
+  if (!rawText) return null;
+  const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+  if (/^irrelevante$/im.test(cleaned)) {
+    return { irrelevant: true };
+  }
+
+  let articleData;
+  try {
+    articleData = JSON.parse(cleaned);
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    if (match) {
+      try { articleData = JSON.parse(match[0]); } catch {}
+    }
+  }
+
+  // Rescate si el parseo JSON falló (Pollinations AI suele devolver texto en Markdown directo)
+  if (!articleData || typeof articleData !== 'object') {
+    // Si el texto parece ser JSON pero estaba roto, es mejor descartarlo para que intente con otra IA
+    // en lugar de publicar el JSON crudo como si fuera markdown.
+    const looksLikeJson = cleaned.startsWith('{') || cleaned.includes('"title":') || cleaned.includes('"content":');
+    if (looksLikeJson) {
+      console.log(`    ⚠️ Validation falló: JSON malformado detectado, no se usará como Markdown.`);
+      return null;
+    }
+
+    const lines = cleaned.split('\n');
+    let title = news.title;
+    if (lines[0] && /^#+\s*/.test(lines[0])) {
+      title = lines[0].replace(/^#+\s*/, '').trim();
+      lines.shift();
+    }
+    const content = lines.join('\n').trim();
+    if (content.length > 400) {
+      articleData = {
+        title,
+        excerpt: content.slice(0, 155).replace(/\n/g, ' '),
+        content,
+        tags: [cat.slug],
+        impact_level: 'medium'
+      };
+    }
+  }
+
+  if (!articleData || typeof articleData !== 'object') return null;
+
+  // Mapear traducciones de claves al español que a veces hace la IA
+  if (!articleData.title && articleData.titulo) articleData.title = articleData.titulo;
+  if (!articleData.content && articleData.contenido) articleData.content = articleData.contenido;
+  if (!articleData.excerpt && articleData.resumen) articleData.excerpt = articleData.resumen;
+
+  if (!articleData.title || !articleData.content) return null;
+
+  // ─── GUARDIA ANTI-PLACEHOLDER ───────────────────────────────────────────
+  const PLACEHOLDER_SIGNALS = [
+    'titular real aquí', 'gancho real aquí', 'artículo real en markdown',
+    'titular llamativo', 'magnético aquí', 'artículo completo',
+    'gancho periodístico', 'resumen en forma de', 'seo1', 'seo2', 'seo3',
+    '<titular', '<excerpt', '<contenido', '<tag', '[Nombre del',
+    '[Tu nombre', 'Inserte aquí', 'Escribe el artículo', 'Como editor de',
+    'Aquí tienes el artículo', 'Claro, aquí tienes',
+    'produce json', 'content markdown', 'write an article as editor',
+    'minimum 600 words', 'we need to produce',
+    'por supuesto', 'claro que sí', 'como inteligencia artificial',
+    'i am an ai', 'lo siento', 'no puedo generar', 'no puedo crear'
+  ];
+  
+  const normalizeForCheck = (str) => 
+    String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  const combinedAiText = normalizeForCheck(
+    `${articleData.title} ${articleData.excerpt} ${articleData.content} ${(articleData.tags || []).join(' ')}`
+  );
+
+  const isPlaceholder = PLACEHOLDER_SIGNALS.some(sig => 
+    combinedAiText.includes(normalizeForCheck(sig))
+  );
+
+  if (isPlaceholder) {
+    console.log(`    ⚠️ Validation falló: Contenido contiene placeholders o prompt filtrado.`);
+    return null;
+  }
+
+  // ── CANDADO DE LONGITUD MÍNIMA ─────────────────────────────
+  if (articleData.content.length < 1200) {
+    console.log(`    ⚠️ Validation falló: longitud del contenido (${articleData.content.length} chars) es menor a 1200.`);
+    return null;
+  }
+
+  // ── CANDADO DE ORIGINALIDAD ─────────────────────────────────
+  const sourceSnippetLen = (news.contentSnippet || '').length;
+  if (sourceSnippetLen > 100 && sourceSnippetLen <= 500 && articleData.content.length < sourceSnippetLen * 2) {
+    console.log(`    ⚠️ Validation falló: contenido muy similar en longitud al snippet original (no original).`);
+    return null;
+  }
+
+  return articleData;
+}
+
 // ─── ORQUESTADOR DE IA — prueba todos los proveedores en orden ───────────────
 async function generateArticle(cat, news, todayDR) {
   // 1. Gemini (cuota más generosa, prioridad más alta)
   let result = await generateWithGemini(cat, news, todayDR);
-  if (result) return result;
+  let parsed = parseAndValidateArticle(result, cat, news);
+  if (parsed) {
+    console.log("    ✅ Artículo generado y validado con Gemini");
+    return parsed;
+  }
 
   // 2. Pollinations AI (gratuito, sin límite de cuota)
   result = await generateWithPollinations(cat, news, todayDR);
-  if (result) return result;
+  parsed = parseAndValidateArticle(result, cat, news);
+  if (parsed) {
+    console.log("    ✅ Artículo generado y validado con Pollinations");
+    return parsed;
+  }
 
   // 3. OpenRouter modelos gratuitos (última línea de defensa)
   result = await generateWithOpenRouter(cat, news, todayDR);
-  if (result) return result;
+  parsed = parseAndValidateArticle(result, cat, news);
+  if (parsed) {
+    console.log("    ✅ Artículo generado y validado con OpenRouter");
+    return parsed;
+  }
 
   // Si todo falló → candado activado
-  console.log(`[Bot] 🔒 CANDADO ACTIVADO: todos los proveedores de IA fallaron. Artículo omitido (no publicar sin reescritura real).`);
-  throw new Error('Sin IA disponible: Gemini agotado, Pollinations y OpenRouter fallaron. Artículo omitido por política de AdSense estricta.');
+  console.log(`[Bot] 🔒 CANDADO ACTIVADO: todos los proveedores de IA fallaron las validaciones de calidad.`);
+  throw new Error('Sin IA disponible o todas las respuestas fallaron las validaciones de calidad (longitud, originalidad, formato).');
 }
 
 // ─── INTERNALIZAR IMAGEN A CLOUDINARY ────────────────────────────────────────
@@ -484,7 +608,7 @@ async function uploadToCloudinary(imageUrl, slug) {
     const b64    = Buffer.from(buf).toString('base64');
     const ts     = Math.round(Date.now() / 1000);
     const crypto = require('crypto');
-    const sig    = crypto.createHash('sha1').update(`folder=imperio-publico/bot&public_id=${slug}&timestamp=${ts}${apiSecret}`).digest('hex');
+    const sig    = crypto.createHash('sha1').update(`folder=imperio-publico/bot&overwrite=true&public_id=${slug}&timestamp=${ts}${apiSecret}`).digest('hex');
 
     const fd = new FormData();
     fd.append('file', `data:${ct};base64,${b64}`);
@@ -508,7 +632,7 @@ async function uploadToCloudinary(imageUrl, slug) {
 }
 
 // ─── PUBLICAR UN ARTÍCULO ─────────────────────────────────────────────────────
-async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywordSets, publishedTitles) {
+async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywordSets, publishedTitles, publishTimeISO) {
   // ── DEDUPLICACIÓN ESTRICTA (4 capas) ──────────────────────────────────────
   const dupCheck = isAlreadyCovered(news.title, news.link, publishedLinks, publishedKeywordSets, publishedTitles);
   if (dupCheck.covered) {
@@ -522,65 +646,15 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
   console.log(`  📰 Procesando: "${news.title.slice(0, 70)}"`);
 
   // Intentar con todos los proveedores de IA en orden (Gemini → Pollinations → OpenRouter)
-  const rawText = await generateArticle(cat, news, todayDR);
-
-  // Parsear respuesta
-  const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
-  if (/^irrelevante$/im.test(cleaned)) {
-    return { skipped: true, reason: 'IA: noticia irrelevante' };
-  }
-
   let articleData;
   try {
-    articleData = JSON.parse(cleaned);
-  } catch {
-    const match = cleaned.match(/\{[\s\S]*\}/);
-    if (match) {
-      try { articleData = JSON.parse(match[0]); } catch {}
-    }
+    articleData = await generateArticle(cat, news, todayDR);
+  } catch (err) {
+    throw err;
   }
 
-  // Rescate si el parseo JSON falló (Pollinations AI suele devolver texto en Markdown directo)
-  if (!articleData || typeof articleData !== 'object') {
-    const lines = cleaned.split('\n');
-    let title = news.title;
-    if (lines[0] && /^#+\s*/.test(lines[0])) {
-      title = lines[0].replace(/^#+\s*/, '').trim();
-      lines.shift();
-    }
-    const content = lines.join('\n').trim();
-    if (content.length > 400) {
-      articleData = {
-        title,
-        excerpt: content.slice(0, 155).replace(/\n/g, ' '),
-        content,
-        tags: [cat.slug],
-        impact_level: 'medium'
-      };
-    } else {
-      throw new Error('JSON inválido en respuesta de IA');
-    }
-  }
-
-  // Mapear traducciones de claves al español que a veces hace la IA
-  if (!articleData.title && articleData.titulo) articleData.title = articleData.titulo;
-  if (!articleData.content && articleData.contenido) articleData.content = articleData.contenido;
-  if (!articleData.excerpt && articleData.resumen) articleData.excerpt = articleData.resumen;
-
-  if (!articleData.title || !articleData.content) throw new Error('Campos faltantes en respuesta');
-
-  // ── CANDADO DE LONGITUD MÍNIMA ─────────────────────────────
-  if (articleData.content.length < 1200) {
-    throw new Error(`[CANDADO] Contenido muy corto: ${articleData.content.length} chars (mínimo 1200).`);
-  }
-
-  // ── CANDADO DE ORIGINALIDAD ─────────────────────────────────
-  // Solo aplica si el snippet de origen es corto (≤500 chars).
-  // Fuentes como BBC/CNN/DW tienen snippets de 600-900 chars — un artículo de 
-  // 600 palabras (≈3600 chars) es genuinamente original aunque no pase 2×snippet.
-  const sourceSnippetLen = (news.contentSnippet || '').length;
-  if (sourceSnippetLen > 100 && sourceSnippetLen <= 500 && articleData.content.length < sourceSnippetLen * 2) {
-    throw new Error(`[CANDADO] Contenido no reescrito: el artículo es muy similar en longitud al snippet original.`);
+  if (articleData.irrelevant) {
+    return { skipped: true, reason: 'IA: noticia irrelevante' };
   }
 
   // Verificar que el AI title tenga alguna relación semántica con el titular fuente
@@ -623,7 +697,7 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
     image: imageUrl,
     imageAlt: articleData.title,
     source_link: news.link,
-    publishedAt: new Date().toISOString(),
+    publishedAt: publishTimeISO || new Date().toISOString(),
     updated_at: new Date().toISOString(),
     featured: articleData.impact_level === 'high' || articleData.impact_level === 'medium',
     trending: articleData.impact_level === 'high',
@@ -637,16 +711,13 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
   publishedKeywordSets.push(extractKeywords(articleData.title));
   publishedTitles.add((articleData.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim());
 
-  // AUTO-POST en Redes Sociales: DESACTIVADO — publicación manual desde el panel admin.
-  // Para activar puntualmente: await postToSocialMedia(newArticle);
-
   return { success: true, id: inserted.id, title: inserted.title };
 }
 
 // ─── PROCESAR UNA CATEGORÍA ───────────────────────────────────────────────────
-async function processCategory(catKey, todayDR, startOfToday, endOfToday, publishedLinks, publishedKeywordSets, publishedTitles) {
+async function processCategory(catKey, todayDR, startOfToday, endOfToday, publishedLinks, publishedKeywordSets, publishedTitles, publishTimeISO) {
   const cat = CATEGORIES[catKey];
-  if (!cat) { console.log(`❌ Categoría desconocida: ${catKey}`); return; }
+  if (!cat) { console.log(`❌ Categoría desconocida: ${catKey}`); return false; }
 
   console.log(`\n═══════════════════════════════════════`);
   console.log(`📂 CATEGORÍA: ${catKey.toUpperCase()}`);
@@ -659,7 +730,7 @@ async function processCategory(catKey, todayDR, startOfToday, endOfToday, publis
 
   if ((totalToday ?? 0) >= 12) {
     console.log(`⛔ Limite global de 12 articulos diarios alcanzado (${totalToday}). Saliendo.`);
-    return;
+    return false;
   }
 
   const { count: catCount } = await supabase.from('articles')
@@ -669,7 +740,7 @@ async function processCategory(catKey, todayDR, startOfToday, endOfToday, publis
 
   if ((catCount ?? 0) >= 1) {
     console.log(`ℹ️ Ya hay ${catCount} articulo(s) de ${catKey} hoy. Saltando (1 por sección).`);
-    return;
+    return false;
   }
 
   // NOTA: publishedLinks/KeywordSets/Titles vienen como parametros — NO se recargan aqui.
@@ -700,7 +771,7 @@ async function processCategory(catKey, todayDR, startOfToday, endOfToday, publis
 
   if (todaysItems.length === 0) {
     console.log(`  ℹ️ Sin noticias de hoy en los feeds de ${catKey}.`);
-    return;
+    return false;
   }
 
   // Publicar 1 artículo por categoría
@@ -710,10 +781,11 @@ async function processCategory(catKey, todayDR, startOfToday, endOfToday, publis
     if (published >= 1) break; // 1 por categoría en este run
 
     try {
-      const result = await publishArticle(cat, item, todayDR, publishedLinks, publishedKeywordSets, publishedTitles);
+      const result = await publishArticle(cat, item, todayDR, publishedLinks, publishedKeywordSets, publishedTitles, publishTimeISO);
       if (result.success) {
-        console.log(`  ✅ PUBLICADO: "${result.title?.slice(0, 60)}"`);
+        console.log(`  ✅ PUBLICADO: "${result.title?.slice(0, 60)}" (a las ${new Date(publishTimeISO || Date.now()).toLocaleTimeString()})`);
         published++;
+        return true; // Exito
       } else {
         console.log(`  ↷ Omitido (${result.reason}): "${item.title?.slice(0, 50)}"`);
       }
@@ -725,6 +797,7 @@ async function processCategory(catKey, todayDR, startOfToday, endOfToday, publis
   if (published === 0) {
     console.log(`  ⚠️ No se pudo publicar ningún artículo en ${catKey}.`);
   }
+  return false;
 }
 
 // ─── MAIN ─────────────────────────────────────────────────────────────────────
@@ -763,11 +836,20 @@ async function main() {
     publishedKeywordSets.length + ' temas | ' +
     publishedTitles.size + ' titulos ya publicados hoy');
 
+  let offsetMinutes = 0;
+
   for (const catKey of categoriesToRun) {
-    await processCategory(
+    const publishTimeISO = new Date(Date.now() + offsetMinutes * 60000).toISOString();
+    
+    const success = await processCategory(
       catKey, todayDR, startOfToday, endOfToday,
-      publishedLinks, publishedKeywordSets, publishedTitles
+      publishedLinks, publishedKeywordSets, publishedTitles, publishTimeISO
     );
+    
+    if (success) {
+      offsetMinutes += 30; // Agregar 30 minutos al siguiente artículo
+    }
+
     if (categoriesToRun.length > 1) {
       console.log('\nEsperando 5 segundos antes de la siguiente categoria...');
       await new Promise(r => setTimeout(r, 5000));

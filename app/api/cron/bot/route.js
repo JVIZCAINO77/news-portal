@@ -189,12 +189,10 @@ const CATEGORIES = {
   politica: {
     slug: 'politica', author: 'Mesa Política', style: 'neutral, objetivo y analítico',
     feeds: [
-      'https://acento.com.do/feed/?s=politica',
-      'https://elcaribe.com.do/feed/?s=politica',
-      'https://hoy.com.do/feed/?s=politica',
-      'https://cdn.com.do/feed/?s=politica',
+      'https://listindiario.com/rss/',
+      'https://elcaribe.com.do/feed/',
+      'https://cdn.com.do/feed/',
       'https://noticiassin.com/feed/?s=politica',
-      'https://elnacional.com.do/feed/?s=politica',
       'https://www.diariolibre.com/rss/portada.xml',
       // Complementarias
       'https://elnuevodiario.com.do/feed/',
@@ -206,11 +204,10 @@ const CATEGORIES = {
     slug: 'economia', author: 'Redacción Económica', style: 'serio, financiero y accesible',
     feeds: [
       'https://www.diariolibre.com/rss/economia.xml',
-      'https://acento.com.do/feed/?s=economia',
-      'https://elcaribe.com.do/feed/?s=economia',
-      'https://hoy.com.do/feed/?s=economia',
-      'https://cdn.com.do/feed/?s=economia',
-      'https://elnacional.com.do/feed/?s=economia',
+      'https://listindiario.com/rss/',
+      'https://elcaribe.com.do/feed/',
+      'https://cdn.com.do/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
       // Complementarias
       'https://z101digital.com/feed/',
       'https://lainformacion.com.do/feed/',
@@ -220,12 +217,11 @@ const CATEGORIES = {
   sucesos: {
     slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso',
     feeds: [
-      'https://acento.com.do/feed/?s=sucesos',
+      'https://listindiario.com/rss/',
       'https://almomento.net/feed/',
-      'https://cdn.com.do/feed/?s=sucesos',
+      'https://cdn.com.do/feed/',
       'https://noticiassin.com/feed/?s=sucesos',
-      'https://elnacional.com.do/feed/?s=sucesos',
-      'https://hoy.com.do/feed/?s=accidente',
+      'https://elcaribe.com.do/feed/',
       // Complementarias
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
@@ -236,14 +232,12 @@ const CATEGORIES = {
     slug: 'policia', author: 'Sección Policial', style: 'periodístico, policial y formal',
     feeds: [
       'https://www.diariolibre.com/rss/portada.xml',
-      'https://acento.com.do/feed/?s=policia',
+      'https://listindiario.com/rss/',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/?s=policia',
-      'https://elnacional.com.do/feed/?s=policia',
-      'https://hoy.com.do/feed/?s=policia',
-      'https://cdn.com.do/feed/?s=crimen',
+      'https://elcaribe.com.do/feed/',
+      'https://cdn.com.do/feed/',
       // Complementarias — cobertura policial/judicial
-      'https://judicial.net.do/feed/',
       'https://z101digital.com/feed/',
       'https://elnuevodiario.com.do/feed/',
     ],
@@ -252,23 +246,22 @@ const CATEGORIES = {
     slug: 'deportes', author: 'Mesa Deportiva', style: 'analítico y pasional',
     feeds: [
       'https://www.diariolibre.com/rss/deportes.xml',
-      'https://acento.com.do/feed/?s=deportes',
-      'https://elnacional.com.do/feed/?s=deportes',
-      'https://hoy.com.do/feed/?s=deportes',
-      'https://cdn.com.do/feed/?s=deportes',
+      'https://listindiario.com/rss/',
+      'https://elcaribe.com.do/feed/',
+      'https://cdn.com.do/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/deportes/portada',
       // Complementarias
-      'https://z101digital.com/feed/?s=deportes',
+      'https://z101digital.com/feed/',
       'https://elnuevodiario.com.do/feed/',
     ],
   },
   salud: {
     slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable',
     feeds: [
-      'https://acento.com.do/feed/?s=salud',
-      'https://hoy.com.do/feed/?s=salud',
-      'https://elcaribe.com.do/feed/?s=salud',
-      'https://cnnespanol.cnn.com/feed/',
+      'https://listindiario.com/rss/',
+      'https://elcaribe.com.do/feed/',
       'https://www.bbc.com/mundo/index.xml',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
       // Complementarias
       'https://elnuevodiario.com.do/feed/',
       'https://lainformacion.com.do/feed/',
@@ -278,12 +271,10 @@ const CATEGORIES = {
     slug: 'cultura', author: 'Sección Cultural', style: 'elegante y descriptivo',
     feeds: [
       'https://www.diariolibre.com/rss/revista.xml',
-      'https://acento.com.do/feed/?s=cultura',
-      'https://hoy.com.do/feed/?s=cultura',
-      'https://elnacional.com.do/feed/?s=cultura',
-      'https://elcaribe.com.do/feed/?s=cultura',
+      'https://listindiario.com/rss/',
+      'https://elcaribe.com.do/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada',
       // Complementarias — cultura dominicana
-      'https://areítodigital.com/feed/',
       'https://elnuevodiario.com.do/feed/',
     ],
   },
@@ -291,10 +282,8 @@ const CATEGORIES = {
     slug: 'entretenimiento', author: 'Sección Espectáculos', style: 'dinámico y ameno',
     feeds: [
       'https://www.diariolibre.com/rss/revista.xml',
-      'https://acento.com.do/feed/?s=farandula',
       'https://remolacha.net/feed/',
-      'https://hoy.com.do/feed/?s=farandula',
-      'https://elnacional.com.do/feed/?s=espectaculos',
+      'https://listindiario.com/rss/',
       // Complementarias
       'https://z101digital.com/feed/',
       'https://elnuevodiario.com.do/feed/',
@@ -304,10 +293,9 @@ const CATEGORIES = {
     slug: 'tendencias', author: 'Mesa de Tendencias', style: 'ágil y moderno',
     feeds: [
       'https://remolacha.net/feed/',
-      'https://acento.com.do/feed/?s=viral',
-      'https://elnacional.com.do/feed/?s=tendencias',
-      'https://cnnespanol.cnn.com/feed/',
+      'https://listindiario.com/rss/',
       'https://www.bbc.com/mundo/index.xml',
+      'https://www.infobae.com/feeds/rss/tendencias.xml',
     ],
   },
 
@@ -315,10 +303,10 @@ const CATEGORIES = {
   tecnologia: {
     slug: 'tecnologia', author: 'Redacción Tecnológica', style: 'informativo y vanguardista',
     feeds: [
-      'https://acento.com.do/feed/?s=tecnologia',
-      'https://cnnespanol.cnn.com/feed/',
-      'https://rss.dw.com/xml/rss-es-all',
+      'https://listindiario.com/rss/',
       'https://www.bbc.com/mundo/index.xml',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada',
+      'https://www.infobae.com/feeds/rss/tecno.xml',
       'https://www.france24.com/es/rss',
     ],
   },
@@ -327,10 +315,11 @@ const CATEGORIES = {
   internacional: {
     slug: 'internacional', author: 'Redacción Internacional', style: 'global, analítico y contextualizado para audiencia dominicana',
     feeds: [
-      'https://cnnespanol.cnn.com/feed/',
-      'https://www.france24.com/es/rss',
-      'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
+      'https://www.france24.com/es/rss',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada',
+      'https://www.infobae.com/feeds/rss/mundo.xml',
+      'https://elmundo.es/rss/portada.xml',
     ],
   },
 
@@ -341,9 +330,9 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
-      'https://elnacional.com.do/feed/',
-      'https://acento.com.do/feed/',
-      'https://hoy.com.do/feed/',
+      'https://listindiario.com/rss/',
+      'https://elcaribe.com.do/feed/',
+      'https://cdn.com.do/feed/',
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
     ],
@@ -352,10 +341,10 @@ const CATEGORIES = {
   'medio-ambiente': {
     slug: 'medio-ambiente', author: 'Sección Medio Ambiente', style: 'informativo y consciente, con enfoque en impacto local e internacional',
     feeds: [
-      'https://rss.dw.com/xml/rss-es-all',
       'https://www.bbc.com/mundo/index.xml',
-      'https://cnnespanol.cnn.com/feed/',
-      'https://acento.com.do/feed/?s=medio+ambiente',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/clima-y-medio-ambiente/portada',
+      'https://www.infobae.com/feeds/rss/tendencias.xml',
+      'https://listindiario.com/rss/',
       'https://www.france24.com/es/rss',
     ],
   },
@@ -741,6 +730,149 @@ function isOnTopicForCategory(item, categorySlug) {
   return titleHit;
 }
 
+// ─── PARSEAR Y VALIDAR ARTÍCULO GENERADO POR IA ──────────────────────────────
+function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
+  if (!rawText) return null;
+  const cleaned = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+  if (/^irrelevante$/im.test(cleaned)) {
+    return { irrelevant: true };
+  }
+
+  let articleData;
+  try {
+    articleData = JSON.parse(cleaned);
+  } catch (parseError) {
+    const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try { articleData = JSON.parse(jsonMatch[0]); } catch {}
+    }
+  }
+
+  // Rescate si el parseo JSON falló (Pollinations AI suele devolver texto en Markdown directo)
+  if (!articleData || typeof articleData !== 'object') {
+    // Si el texto parece ser JSON pero estaba roto, es mejor descartarlo para que intente con otra IA
+    // en lugar de publicar el JSON crudo como si fuera markdown.
+    const looksLikeJson = cleaned.startsWith('{') || cleaned.includes('"title":') || cleaned.includes('"content":');
+    if (looksLikeJson) {
+      console.log(`[Bot] ⚠️ Validation falló: JSON malformado detectado, no se usará como Markdown.`);
+      return null;
+    }
+
+    const lines = cleaned.split('\n');
+    let title = newsTitle;
+    if (lines[0] && /^#+\s*/.test(lines[0])) {
+      title = lines[0].replace(/^#+\s*/, '').trim();
+      lines.shift();
+    }
+    const content = lines.join('\n').trim();
+    if (content.length > 400) {
+      articleData = {
+        title,
+        excerpt: content.slice(0, 155).replace(/\n/g, ' '),
+        content,
+        tags: [catSlug],
+        impact_level: 'medium'
+      };
+    }
+  }
+
+  if (!articleData || typeof articleData !== 'object') return null;
+
+  // Mapear traducciones de claves al español que a veces hace la IA
+  if (!articleData.title && articleData.titulo) articleData.title = articleData.titulo;
+  if (!articleData.content && articleData.contenido) articleData.content = articleData.contenido;
+  if (!articleData.excerpt && articleData.resumen) articleData.excerpt = articleData.resumen;
+
+  if (!articleData.title || !articleData.content) {
+    return null;
+  }
+
+  // ─── GUARDIA ANTI-PLACEHOLDER ───────────────────────────────────────────
+  const PLACEHOLDER_SIGNALS = [
+    'titular real aquí', 'gancho real aquí', 'artículo real en markdown',
+    'titular llamativo', 'magnético aquí', 'artículo completo',
+    'gancho periodístico', 'resumen en forma de', 'seo1', 'seo2', 'seo3',
+    '<titular', '<excerpt', '<contenido', '<tag', '[Nombre del',
+    '[Tu nombre', 'Inserte aquí', 'Escribe el artículo', 'Como editor de',
+    'Aquí tienes el artículo', 'Claro, aquí tienes',
+    'produce json', 'content markdown', 'write an article as editor',
+    'minimum 600 words', 'we need to produce',
+    'por supuesto', 'claro que sí', 'como inteligencia artificial',
+    'i am an ai', 'lo siento', 'no puedo generar', 'no puedo crear'
+  ];
+  
+  const normalizeForCheck = (str) => 
+    String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  const combinedAiText = normalizeForCheck(
+    `${articleData.title} ${articleData.excerpt} ${articleData.content} ${(articleData.tags || []).join(' ')}`
+  );
+
+  const isPlaceholder = PLACEHOLDER_SIGNALS.some(sig => 
+    combinedAiText.includes(normalizeForCheck(sig))
+  );
+  if (isPlaceholder) {
+    console.log(`[Bot] ⚠️ Validation falló: Contenido contiene placeholders.`);
+    return null;
+  }
+
+  // LIMPIEZA ESTRICTA: Reemplazar secuencias de saltos y comillas
+  const sanitizeAiText = (str) => {
+    if (typeof str !== 'string') return str;
+    return str.replace(/\\+n/g, '\n').replace(/\\"/g, '"').replace(/\n\n+/g, '\n\n').trim();
+  };
+
+  const sanitizeContent = (str) => {
+    if (typeof str !== 'string') return str;
+    return sanitizeAiText(str)
+      .replace(/\n?[\s\*]*etiquetas\s*(seo)?\s*:.*$/is, '')
+      .replace(/\n?[\s\*]*palabras\s*clave\s*:.*$/is, '')
+      .replace(/\n?[\s\*]*keywords?\s*:.*$/is, '')
+      .trim();
+  };
+
+  articleData.title = sanitizeAiText(articleData.title)
+    .replace(/[\r\n\t]+/g, ' ').replace(/\s+/g, ' ').replace(/[""]/g, '"').trim();
+
+  if (articleData.title.length < 15) {
+    console.log(`[Bot] ⚠️ Validation falló: Título muy corto.`);
+    return null;
+  }
+
+  // === ESCUDO DE SEGURIDAD: DETECCIÓN DE HALLUCINACIÓN (Cruce de keywords) ===
+  const sourceKws = extractKeywords(newsTitle);
+  const aiKws = extractKeywords(articleData.title);
+  const overlap = semanticOverlap(sourceKws, aiKws);
+  if (overlap === 0 && sourceKws.size > 0) {
+    console.log(`[Bot] ⚠️ Validation falló: Alucinación de título.`);
+    return null;
+  }
+
+  articleData.excerpt = sanitizeAiText(articleData.excerpt);
+  articleData.content = sanitizeContent(articleData.content);
+
+  // ── GUARDIA ANTI-TRUNCADO ──────────────────────────────────
+  if (!/[.!?"]\s*$/s.test(articleData.content)) {
+    console.log(`[Bot] ⚠️ Validation falló: Contenido parece truncado.`);
+    return null;
+  }
+
+  // ── CANDADO DE LONGITUD MÍNIMA ─────────────────────────────
+  if (articleData.content.length < MIN_CONTENT_LENGTH) {
+    console.log(`[Bot] ⚠️ Validation falló: Contenido muy corto (${articleData.content.length} chars).`);
+    return null;
+  }
+
+  // ── CANDADO DE ORIGINALIDAD ────────────────────────────────
+  const sourceSnippetLen = (newsSnippet || '').length;
+  if (sourceSnippetLen > 100 && sourceSnippetLen <= 500 && articleData.content.length < sourceSnippetLen * 2) {
+    console.log(`[Bot] ⚠️ Validation falló: Similar al snippet original.`);
+    return null;
+  }
+
+  return articleData;
+}
+
 export async function GET(request) {
   // X-Manual-Trigger solo exime del header Authorization cuando viene del trigger interno.
   // Aún así se valida CRON_SECRET para bloquear llamadas externas que inyecten el header.
@@ -1100,32 +1232,28 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       [keys[i], keys[j]] = [keys[j], keys[i]];
     }
 
+    // Solo modelos activos en 2026 — 1.5-flash y 1.5-pro dan 404 (deprecados)
     const geminiModels = [
-      'gemini-2.5-flash-lite',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
-      'gemini-1.5-pro',
+      'gemini-2.5-flash-preview-05-20', // modelo más reciente y capaz
+      'gemini-2.5-flash-lite',           // rápido y estable
+      'gemini-2.0-flash',                // fallback confiable
+      'gemini-2.0-flash-lite',           // ultra-rápido de respaldo
     ];
 
-    let rawText = '';
+    let articleData = null;
     let aiSuccess = false;
-    let keysChecked = 0;
+    const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
 
     for (const key of keys) {
       if (aiSuccess) break;
-      // Limitar a máximo 5 intentos de claves distintas para evitar timeouts en Vercel (máx 45s)
-      if (keysChecked >= 5) {
-        console.log(`[Bot] ⚠️ Límite de 5 claves Gemini intentadas sin éxito. Pasando a pasarelas de fallback.`);
-        break;
-      }
-      keysChecked++;
-      let keyExhausted = true;
+      if (deadKeys.size >= keys.length) break; // todas muertas
+      if (deadKeys.has(key)) continue;         // ya sabemos que no sirve
 
       for (const model of geminiModels) {
         try {
           console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model}`);
           const gemCtrl = new AbortController();
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 6000); // 6s de timeout seguro para evitar Gateway Timeout
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 25000); // 25s — suficiente para 2.5-flash
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1139,37 +1267,46 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             const isInvalid  = data.error.code === 400 || data.error.status === 'INVALID_ARGUMENT';
             const isNotFound = data.error.code === 404;
             const isDenied   = data.error.code === 403;
-            if (isInvalid || isDenied) {
-              console.log(`[Bot] ❌ Clave inválida/denegada ...${key.slice(-6)} — saltando`);
-              keyExhausted = true;
+            const isLeaked   = (data.error.message || '').toLowerCase().includes('leaked');
+            const isBanned   = (data.error.message || '').toLowerCase().includes('banned');
+
+            // Clave muerta → marcarla y saltar a la siguiente de inmediato
+            if (isQuota || isInvalid || isDenied || isLeaked || isBanned) {
+              const reason = isQuota ? 'cuota agotada' : isLeaked ? '⛔ leaked' : isBanned ? '⛔ banned' : 'inválida/denegada';
+              console.log(`[Bot] ⚠️ Gemini ...${key.slice(-6)}: ${reason} → siguiente clave`);
+              deadKeys.add(key);
               break;
             }
-            if (isQuota || isNotFound) {
-              console.log(`[Bot] ⚠️ ${isQuota ? 'Cuota agotada' : 'Modelo N/A'}: ...${key.slice(-6)} / ${model}`);
-              continue;
+            if (isNotFound) {
+              console.log(`[Bot] ⚠️ Modelo N/A: ${model} → siguiente modelo`);
+              continue; // solo este modelo no existe
             }
             console.log(`[Bot] ⚠️ Error Gemini: ${data.error.message?.slice(0, 60)}`);
             continue;
           }
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          if (text) {
-            console.log(`[Bot] ✅ Gemini éxito: ...${key.slice(-6)} / ${model}`);
-            rawText = text;
+          const parsed = parseAndValidateAI(text, cat.slug, news.contentSnippet, news.title);
+          if (parsed) {
+            console.log(`[Bot] ✅ Gemini éxito y validado: ...${key.slice(-6)} / ${model}`);
+            articleData = parsed;
             aiSuccess = true;
-            keyExhausted = false;
             break;
           }
         } catch (e) {
-          console.log(`[Bot] ❌ Gemini error de red (${model}): ${e.message?.slice(0, 60)}`);
+          console.log(`[Bot] ❌ Gemini timeout ...${key.slice(-6)} → siguiente clave`);
+          deadKeys.add(key); // timeout = clave lenta/muerta
+          break;
         }
       }
-      // Si la clave aún puede servir (no agotada) pero algo más falló, no saltar
-      if (!keyExhausted && !aiSuccess) break;
+    }
+
+    if (deadKeys.size > 0 && !aiSuccess) {
+      console.log(`[Bot] ⚠️ ${deadKeys.size}/${keys.length} claves Gemini muertas. Pasando a fallback.`);
     }
 
     // PRIORIDAD 2: Pollinations AI (gratuito, sin cuota)
     if (!aiSuccess) {
-      console.log('[Bot] ⚠️ Gemini sin cuota. Intentando Pollinations...');
+      console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando Pollinations...');
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s — generoso
@@ -1189,9 +1326,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         clearTimeout(timeoutId);
         if (polRes.ok) {
           const txt = await polRes.text();
-          if (txt && txt.length > 200) {
-            console.log('[Bot] ✅ Pollinations respondió correctamente.');
-            rawText = txt;
+          const parsed = parseAndValidateAI(txt, cat.slug, news.contentSnippet, news.title);
+          if (parsed) {
+            console.log('[Bot] ✅ Pollinations respondió y validado correctamente.');
+            articleData = parsed;
             aiSuccess = true;
           }
         }
@@ -1202,7 +1340,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 
     // PRIORIDAD 3: OpenRouter modelos gratuitos (última línea de defensa)
     if (!aiSuccess) {
-      console.log('[Bot] ⚠️ Pollinations sin respuesta. Intentando OpenRouter (gratuito)...');
+      console.log('[Bot] ⚠️ Pollinations sin respuesta o validación fallida. Intentando OpenRouter (gratuito)...');
       const FREE_MODELS_OR = [
         'openai/gpt-oss-120b:free',
         'openai/gpt-oss-20b:free',
@@ -1240,9 +1378,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           if (orRes.ok) {
             const orData = await orRes.json();
             const orText = orData.choices?.[0]?.message?.content || '';
-            if (orText && orText.length > 200) {
-              console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió.`);
-              rawText = orText;
+            const parsed = parseAndValidateAI(orText, cat.slug, news.contentSnippet, news.title);
+            if (parsed) {
+              console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió y validado.`);
+              articleData = parsed;
               aiSuccess = true;
             }
           }
@@ -1254,164 +1393,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 
     // Si TODOS los proveedores fallaron → candado estricto
     if (!aiSuccess) {
-      console.log(`[Bot] 🔒 CANDADO ACTIVADO: todos los proveedores de IA fallaron. Artículo omitido.`);
-      throw new Error('Sin IA disponible: Gemini agotado, Pollinations y OpenRouter fallaron. Artículo omitido por política AdSense.');
+      console.log(`[Bot] 🔒 CANDADO ACTIVADO: todos los proveedores de IA fallaron las validaciones.`);
+      throw new Error('Sin IA disponible o todas las respuestas fallaron las validaciones de calidad (longitud, originalidad, formato).');
     }
 
-    const cleanedText = rawText.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
-    console.log(`[Bot DEBUG] AI Raw Text:`, rawText.substring(0, 200));
-
-    // ── Guardia IRRELEVANTE ─────────────────────────────────────
-    if (/irrelevante/i.test(cleanedText)) {
-      throw new Error(`La IA dictaminó IRRELEVANTE para: "${news.title.slice(0, 80)}"`);
-    }
-
-    let articleData;
-    try {
-      articleData = JSON.parse(cleanedText);
-    } catch (parseError) {
-      const jsonMatch = cleanedText.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        try { articleData = JSON.parse(jsonMatch[0]); } catch {}
-      }
-    }
-
-    // Rescate si el parseo JSON falló (Pollinations AI suele devolver texto en Markdown directo)
-    if (!articleData || typeof articleData !== 'object') {
-      const lines = cleanedText.split('\n');
-      let title = news.title;
-      if (lines[0] && /^#+\s*/.test(lines[0])) {
-        title = lines[0].replace(/^#+\s*/, '').trim();
-        lines.shift();
-      }
-      const content = lines.join('\n').trim();
-      if (content.length > 400) {
-        articleData = {
-          title,
-          excerpt: content.slice(0, 155).replace(/\n/g, ' '),
-          content,
-          tags: [cat.slug],
-          impact_level: 'medium'
-        };
-      } else {
-        throw new Error(`Respuesta de IA no válida: no JSON format y texto muy corto`);
-      }
-    }
-
-    // Mapear traducciones de claves al español que a veces hace la IA
-    if (!articleData.title && articleData.titulo) articleData.title = articleData.titulo;
-    if (!articleData.content && articleData.contenido) articleData.content = articleData.contenido;
-    if (!articleData.excerpt && articleData.resumen) articleData.excerpt = articleData.resumen;
-
-    if (!articleData.title || !articleData.content) {
-      throw new Error('La IA no devolvió los campos requeridos.');
-    }
-
-
-
-    // ─── GUARDIA ANTI-PLACEHOLDER ───────────────────────────────────────────
-    // Detecta si la IA devolvió texto de plantilla en vez de contenido real
-    const PLACEHOLDER_SIGNALS = [
-      'titular real aquí',
-      'gancho real aquí',
-      'artículo real en markdown',
-      'titular llamativo',
-      'magnético aquí',
-      'artículo completo',
-      'gancho periodístico',
-      'resumen en forma de',
-      'seo1', 'seo2', 'seo3',
-      '<titular', '<excerpt', '<contenido', '<tag',
-      '[Nombre del', '[Tu nombre', 'Inserte aquí', 'Escribe el artículo',
-      'Como editor de', 'Aquí tienes el artículo', 'Claro, aquí tienes',
-    ];
-    
-    const normalizeForCheck = (str) => 
-      String(str || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-
-    const combinedAiText = normalizeForCheck(
-      `${articleData.title} ${articleData.excerpt} ${articleData.content} ${(articleData.tags || []).join(' ')}`
-    );
-
-    const isPlaceholder = PLACEHOLDER_SIGNALS.some(sig => 
-      combinedAiText.includes(normalizeForCheck(sig))
-    );
-
-    if (isPlaceholder) {
-      throw new Error(`La IA devolvió texto de plantilla en vez de contenido real. Noticia omitida: "${news.title.slice(0, 80)}".`);
-    }
-    // ────────────────────────────────────────────────────────────────────────
-    // ────────────────────────────────────────────────────────────────────────
-
-    // LIMPIEZA ESTRICTA: Reemplazar secuencias literales de \n por saltos de línea reales
-    const sanitizeAiText = (str) => {
-      if (typeof str !== 'string') return str;
-      return str
-        .replace(/\\+n/g, '\n') // Detecta \n, \\n, \\\n etc y los vuelve saltos reales
-        .replace(/\\"/g, '"')  
-        .replace(/\n\n+/g, '\n\n') // Colapsa múltiples saltos en máximo 2
-        .trim();
-    };
-
-    const sanitizeContent = (str) => {
-      if (typeof str !== 'string') return str;
-      return sanitizeAiText(str)
-        // Elimina bloque "Etiquetas SEO:" al final del contenido (variantes comunes)
-        // NOTA: usamos ancla de fin de string (no 'g') para no borrar ocurrencias internas
-        .replace(/\n?[\s\*]*etiquetas\s*(seo)?\s*:.*$/is, '')
-        .replace(/\n?[\s\*]*palabras\s*clave\s*:.*$/is, '')
-        .replace(/\n?[\s\*]*keywords?\s*:.*$/is, '')
-        .trim();
-    };
-
-    articleData.title = sanitizeAiText(articleData.title)
-      .replace(/[\r\n\t]+/g, ' ') // Elimina saltos de línea y tabs reales
-      .replace(/\s+/g, ' ')       // Colapsa espacios múltiples
-      .replace(/[""]/g, '"')     // Normaliza comillas
-      .trim();
-
-    // === ESCUDO DE SEGURIDAD: VALIDACIÓN DE TÍTULO ===
-    if (!articleData.title || articleData.title.length < 15) {
-      throw new Error(`Título generado inválido o demasiado corto: "${articleData.title}"`);
-    }
-
-    // === ESCUDO DE SEGURIDAD: DETECCIÓN DE HALLUCINACIÓN (Cruce de keywords) ===
-    const sourceKws = extractKeywords(news.title);
-    const aiKws = extractKeywords(articleData.title);
-    const overlap = semanticOverlap(sourceKws, aiKws);
-    // Si no hay SOLAPAMIENTO semántico entre el titular original y el generado (0% overlap)
-    // es muy probable que la IA esté alucinando o mezclando noticias.
-    if (overlap === 0 && sourceKws.size > 0) {
-      throw new Error(`Hallucinación detectada: El titular generado no tiene relación semántica con la fuente.`);
-    }
-
-    articleData.excerpt = sanitizeAiText(articleData.excerpt);
-    articleData.content = sanitizeContent(articleData.content);
-
-    // ── GUARDIA ANTI-TRUNCADO (Incomplete sentences) ──────────
-    // Si el contenido termina en algo que no es puntuación final, es probable que esté truncado
-    if (!/[.!?"]\s*$/s.test(articleData.content)) {
-      throw new Error(`El contenido parece estar truncado o incompleto (no termina en punto).`);
-    }
-
-    // ── CANDADO DE LONGITUD MÍNIMA ─────────────────────────────
-    // Si la IA devuelve contenido muy corto, es señal de un fallo o de que copió la fuente.
-    // NUNCA publicar artículos que no cumplan el estándar AdSense de contenido sustancial.
-    if (articleData.content.length < MIN_CONTENT_LENGTH) {
-      throw new Error(`[CANDADO] Contenido demasiado corto (${articleData.content.length} chars). Mínimo requerido: ${MIN_CONTENT_LENGTH}. Artículo descartado por política editorial.`);
-    }
-
-    // ── CANDADO DE ORIGINALIDAD: el contenido NO puede ser casi igual al snippet del RSS ─
-    // Solo aplica si el snippet es corto (≤500 chars). Fuentes BBC/CNN/DW tienen
-    // snippets de 600-900 chars — un artículo genuino de 600 palabras (≈3600 chars)
-    // es original aunque no supere 2× el snippet largo.
-    const sourceSnippetLen = (news.contentSnippet || '').length;
-    if (sourceSnippetLen > 100 && sourceSnippetLen <= 500 && articleData.content.length < sourceSnippetLen * 2) {
-      throw new Error(`[CANDADO] Contenido no reescrito: el artículo es muy similar en longitud al snippet original. Artículo descartado.`);
-    }
+    // El artículo ya está validado y sanitizado por parseAndValidateAI
 
     let finalImageUrl = null;
     try {
