@@ -27,15 +27,14 @@ export default async function AdminDashboardPage() {
     .from('articles')
     .select('*', { count: 'exact', head: true });
 
-  // Fix M5: SUM en DB en vez de en memoria — sin techo de 5000 artículos
+  // Obtener vistas y categoría por artículo para agregación en JS
   const { data: viewsAgg } = await supabaseAdmin
     .from('articles')
-    .select('views.sum(), category', { count: 'exact' })
-    .not('views', 'is', null);
+    .select('views, category');
 
-  // Fallback si la función agregada no está disponible
+  // Agregar vistas totales y por categoría
   let totalViews = 0;
-  let catStatsMap = {};
+  const catStatsMap = {};
   if (viewsAgg) {
     for (const row of viewsAgg) {
       const v = row.views || 0;
@@ -74,11 +73,7 @@ export default async function AdminDashboardPage() {
   ];
 
   // Distribución de vistas por categoría — Top 3
-  const catStats = {};
-  viewsData?.forEach(a => {
-    if (a.category) catStats[a.category] = (catStats[a.category] || 0) + (a.views || 0);
-  });
-  const topCategories = Object.entries(catStats)
+  const topCategories = Object.entries(catStatsMap)
     .map(([name, count]) => { const n = String(name || ''); return { name: n.charAt(0).toUpperCase() + n.slice(1), count }; })
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
