@@ -22,6 +22,9 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
   // Guardia DESPUÉS de todos los hooks (React Rules of Hooks)
   if (!SITE_CONFIG.showAds) return null;
 
+  // No renderizar si el slot es un placeholder — evita registrar slots inválidos en AdSense
+  if (!finalSlot || finalSlot.startsWith('placeholder')) return null;
+
   const dimensions = {
     leaderboard:  { minHeight: '90px',  label: '728 x 90' },
     rectangle:    { minHeight: '250px', label: '300 x 250' },

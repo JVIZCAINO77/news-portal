@@ -194,7 +194,6 @@ const CATEGORIES = {
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://noticiassin.com/feed/?s=politica',
-      'https://www.diariolibre.com/rss/portada.xml',
       // Complementarias
       'https://elnuevodiario.com.do/feed/',
       'https://clavedigital.com.do/feed/',
@@ -222,7 +221,6 @@ const CATEGORIES = {
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://noticiassin.com/feed/?s=sucesos',
-      'https://almomento.net/feed/',
       // Complementarias
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
@@ -233,10 +231,8 @@ const CATEGORIES = {
     slug: 'policia', author: 'Sección Policial', style: 'periodístico, policial y formal',
     feeds: [
       'https://www.diariolibre.com/rss/portada.xml',
-      'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/?s=policia',
-      'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       // Complementarias — cobertura policial/judicial
       'https://z101digital.com/feed/',
@@ -331,11 +327,9 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
-      'https://noticiassin.com/feed/',
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
+      'https://clavedigital.com.do/feed/',
     ],
   },
 
@@ -516,10 +510,10 @@ const TOPIC_BLOCKLIST = {
   // Solo: vida ciudadana RD — servicios, comunidad, sociedad, migración
   // Bloquear: todo lo que tiene sección propia más específica
   nacional: [
-    // Geopolítica / internacional
-    'trump','putin','zelensky','rusia','ucrania','china','iran','israel',
-    'palestina','corea del norte','guerra','ataque militar','bombardeo',
-    'eeuu','estados unidos','europa','onu','otan','g7','g20',
+    // Geopolítica pura (líderes y conflictos que SOLO son internacionales)
+    'trump','putin','zelensky','xi jinping','netanyahu',
+    'guerra nuclear','ataque militar','bombardeo','invasión',
+    'corea del norte','otan activa','g7 cumbre','g20 cumbre',
     // Política formal (va a 'politica')
     'presidente abinader','ministro de','senado dominicano','camara de diputados',
     'partido politico','proyecto de ley','decreto presidencial','legislacion',
