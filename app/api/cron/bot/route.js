@@ -869,6 +869,7 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
 }
 
 export async function GET(request) {
+    const startTime = Date.now();
   // X-Manual-Trigger solo exime del header Authorization cuando viene del trigger interno.
   // Aún así se valida CRON_SECRET para bloquear llamadas externas que inyecten el header.
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
@@ -1092,7 +1093,11 @@ export async function GET(request) {
 
     let news = null;
     let isNewsBreaking = false;
-    for (const item of prioritizedItems) {
+    for (const item of prioritizedItems) { 
+        if (Date.now() - startTime > 40000) {
+                console.warn("[Bot] Time safety limit reached, breaking prioritizedItems loop");
+                break;
+        }
       if (!item.link || !item.title) continue;
 
       // 4a. VALIDACIÓN TEMÁTICA — descartar si el ítem no es apto para esta sección
