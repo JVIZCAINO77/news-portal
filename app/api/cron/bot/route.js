@@ -9,8 +9,9 @@ import { SITE_CONFIG } from '@/lib/data';
 
 // ─── LÍMITE DE DURACIÓN ───────────────────────────────────────────────
 // Previene funciones "zombie" que consumen CPU sin límite.
+// Alineado con vercel.json → functions → maxDuration: 55.
 // Vercel Hobby: máx 60s. Vercel Pro: puede subirse hasta 300s.
-export const maxDuration = 60;
+export const maxDuration = 55;
 
 // Token secreto para evitar ataques externos, manejado por Vercel
 const CRON_SECRET = process.env.CRON_SECRET;
