@@ -1,4 +1,4 @@
-// app/politica-editorial/page.js — Política Editorial (Imperio Público)
+﻿// app/politica-editorial/page.js — Política Editorial (Imperio Público)
 export const dynamic = 'force-static';
 
 export const metadata = {
@@ -115,7 +115,7 @@ export default function PoliticaEditorialPage() {
               <li>En errores significativos, se publica una nota editorial separada.</li>
               <li>Nunca se eliminan artículos silenciosamente: todas las modificaciones quedan registradas.</li>
             </ol>
-            <p>Para reportar un error: <a href="mailto:vizcainosr29@gmail.com" className="text-red-600 font-bold hover:underline">vizcainosr29@gmail.com</a></p>
+            <p>Para reportar un error: <a href="mailto:imperiopublico@gmail.com" className="text-red-600 font-bold hover:underline">imperiopublico@gmail.com</a></p>
           </div>
         </section>
 
@@ -145,11 +145,11 @@ export default function PoliticaEditorialPage() {
           <div className="space-y-2">
             <p className="text-sm font-bold">
               <span className="text-red-600 uppercase tracking-widest text-[10px]">Director:</span>{' '}
-              <a href="mailto:jvizcaino242@gmail.com" className="hover:text-red-600 transition-colors">jvizcaino242@gmail.com</a>
+              <a href="mailto:imperiopublico@gmail.com" className="hover:text-red-600 transition-colors">imperiopublico@gmail.com</a>
             </p>
             <p className="text-sm font-bold">
               <span className="text-red-600 uppercase tracking-widest text-[10px]">Redacción:</span>{' '}
-              <a href="mailto:vizcainosr29@gmail.com" className="hover:text-red-600 transition-colors">vizcainosr29@gmail.com</a>
+              <a href="mailto:imperiopublico@gmail.com" className="hover:text-red-600 transition-colors">imperiopublico@gmail.com</a>
             </p>
           </div>
         </section>

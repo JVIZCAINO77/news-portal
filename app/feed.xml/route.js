@@ -1,4 +1,4 @@
-import { getLatestArticles } from '@/lib/serverData';
+﻿import { getLatestArticles } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
 
 // RSS se actualiza cada 5 min — no necesita ser completamente dinámico
@@ -58,7 +58,7 @@ export async function GET() {
     <description>${SITE_CONFIG.description}</description>
     <language>es-DO</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
-    <managingEditor>vizcainosr29@gmail.com (${SITE_CONFIG.name})</managingEditor>
+    <managingEditor>imperiopublico@gmail.com (${SITE_CONFIG.name})</managingEditor>
     <image>
       <url>${SITE_CONFIG.url}/og-image.png</url>
       <title>${SITE_CONFIG.name}</title>

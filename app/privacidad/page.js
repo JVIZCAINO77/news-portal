@@ -1,4 +1,4 @@
-export const metadata = {
+﻿export const metadata = {
   title: 'Política de Privacidad | Imperio Público',
   description: 'Política de privacidad de Imperio Público. Información sobre cookies, publicidad de Google AdSense y derechos del usuario.',
 };
@@ -21,7 +21,7 @@ export default function Privacidad() {
             El responsable del tratamiento de los datos personales recabados a través de este sitio web es <strong>Imperio Público</strong>, portal de noticias digital con domicilio en Santo Domingo, República Dominicana.
           </p>
           <p className="mt-3">
-            Contacto: <a href="mailto:vizcainosr29@gmail.com" className="text-red-600 font-bold hover:underline">vizcainosr29@gmail.com</a>
+            Contacto: <a href="mailto:imperiopublico@gmail.com" className="text-red-600 font-bold hover:underline">imperiopublico@gmail.com</a>
           </p>
         </section>
 
@@ -147,7 +147,7 @@ export default function Privacidad() {
             <li><strong>Residentes de California (CCPA):</strong> derecho a no venta de información personal y a conocer qué datos se recopilan.</li>
           </ul>
           <p className="mt-4">
-            Para ejercer cualquiera de estos derechos, contáctanos en: <a href="mailto:vizcainosr29@gmail.com" className="text-red-600 font-bold hover:underline">vizcainosr29@gmail.com</a>
+            Para ejercer cualquiera de estos derechos, contáctanos en: <a href="mailto:imperiopublico@gmail.com" className="text-red-600 font-bold hover:underline">imperiopublico@gmail.com</a>
           </p>
         </section>
 

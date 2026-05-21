@@ -1,4 +1,4 @@
-// app/contacto/page.js — Página de Contacto (Imperio Público)
+﻿// app/contacto/page.js — Página de Contacto (Imperio Público)
 'use client';
 import { useState } from 'react';
 
@@ -15,7 +15,7 @@ export default function ContactoPage() {
     // Abrimos el cliente de correo con los datos prellenados como fallback confiable
     const subject = encodeURIComponent(`[Imperio Público] ${form.asunto} — ${form.nombre}`);
     const body = encodeURIComponent(`Nombre: ${form.nombre}\nEmail: ${form.email}\nAsunto: ${form.asunto}\n\nMensaje:\n${form.mensaje}`);
-    window.location.href = `mailto:vizcainosr29@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:imperiopublico@gmail.com?subject=${subject}&body=${body}`;
     await new Promise(r => setTimeout(r, 600));
     setSent(true);
     setLoading(false);
@@ -132,15 +132,15 @@ export default function ContactoPage() {
             <div className="lg:col-span-5 space-y-10">
               <div className="border-l-4 border-red-600 pl-8">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Redacción y General</h3>
-                <a href="mailto:vizcainosr29@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
-                  vizcainosr29@gmail.com
+                <a href="mailto:imperiopublico@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
+                  imperiopublico@gmail.com
                 </a>
               </div>
 
               <div className="border-l-4 border-black pl-8">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-3">Publicidad y Denuncias</h3>
-                <a href="mailto:jvizcaino242@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
-                  jvizcaino242@gmail.com
+                <a href="mailto:imperiopublico@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
+                  imperiopublico@gmail.com
                 </a>
                 <p className="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2">Atención y Línea Confidencial</p>
               </div>

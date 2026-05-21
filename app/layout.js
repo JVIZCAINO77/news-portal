@@ -1,4 +1,4 @@
-// app/layout.js — Root Layout para Imperio Público 2.0
+﻿// app/layout.js — Root Layout para Imperio Público 2.0
 import './globals.css';
 import { SITE_CONFIG } from '@/lib/data';
 import Header from '@/components/Header';
@@ -104,6 +104,51 @@ export default function RootLayout({ children }) {
         <Suspense fallback={null}>
           <GoogleAnalytics gaId={SITE_CONFIG.gaId} />
         </Suspense>
+        {/* JSON-LD — Identidad legal del medio (visible para crawlers de Google, invisible para lectores) */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'NewsMediaOrganization',
+              name: 'Imperio Público',
+              legalName: 'Imperio Público',
+              alternateName: 'imperiopublico.com',
+              url: SITE_CONFIG.url,
+              logo: `${SITE_CONFIG.url}/logo.png`,
+              foundingDate: '2024',
+              description: SITE_CONFIG.description,
+              identifier: {
+                '@type': 'PropertyValue',
+                name: 'ONAPI — Certificado de Registro de Nombre Comercial',
+                propertyID: 'Núm. de Registro',
+                value: '931539',
+              },
+              founder: {
+                '@type': 'Person',
+                name: 'Jose Antonio Vizcaino Cuevas',
+              },
+              address: {
+                '@type': 'PostalAddress',
+                addressCountry: 'DO',
+                addressLocality: 'Santo Domingo',
+                addressRegion: 'Distrito Nacional',
+              },
+              contactPoint: {
+                '@type': 'ContactPoint',
+                email: 'imperiopublico@gmail.com',
+                contactType: 'editorial',
+                availableLanguage: 'Spanish',
+              },
+              sameAs: [
+                SITE_CONFIG.social?.facebook,
+                SITE_CONFIG.social?.twitter,
+                SITE_CONFIG.social?.instagram,
+                SITE_CONFIG.social?.youtube,
+              ].filter(Boolean),
+            }),
+          }}
+        />
       </head>
 
       <body className="min-h-screen flex flex-col font-sans antialiased">

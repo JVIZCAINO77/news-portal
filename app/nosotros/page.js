@@ -1,4 +1,4 @@
-// app/nosotros/page.js — Sobre Nosotros (Imperio Público) — Versión editorial completa
+﻿// app/nosotros/page.js — Sobre Nosotros (Imperio Público) — Versión editorial completa
 import Link from 'next/link';
 
 export const dynamic = 'force-static';
@@ -10,7 +10,7 @@ export const metadata = {
 };
 
 const TEAM = [
-  { name: 'José Vizcaíno', role: 'Director y Fundador', email: 'jvizcaino242@gmail.com', bio: 'Periodista digital y emprendedor de medios con más de 8 años de experiencia en comunicación, cobertura política y producción de contenido para audiencias dominicanas dentro y fuera del país. Fundó Imperio Público con la convicción de que la República Dominicana merece un medio digital ágil, veraz e independiente que priorice al ciudadano.' },
+  { name: 'José Vizcaíno', role: 'Director y Fundador', email: 'imperiopublico@gmail.com', bio: 'Periodista digital y emprendedor de medios con más de 8 años de experiencia en comunicación, cobertura política y producción de contenido para audiencias dominicanas dentro y fuera del país. Fundó Imperio Público con la convicción de que la República Dominicana merece un medio digital ágil, veraz e independiente que priorice al ciudadano.' },
   { name: 'Mesa Política', role: 'Editores de Política Nacional', email: 'redaccion@imperiopublico.com', bio: 'Equipo especializado en cobertura del poder ejecutivo, legislativo y judicial dominicano. Con fuentes en el Congreso Nacional y la Presidencia, ofrecen análisis profundo de cada decisión que impacta la vida de los ciudadanos.' },
   { name: 'Mesa Deportiva', role: 'Editores de Deportes', email: 'deportes@imperiopublico.com', bio: 'Periodistas con seguimiento cercano al béisbol dominicano en las Grandes Ligas, la Liga Dominicana de Béisbol y los seleccionados nacionales, con análisis que va más allá del marcador.' },
   { name: 'Redacción Económica', role: 'Economía y Finanzas', email: 'economia@imperiopublico.com', bio: 'Analistas que traducen los datos macroeconómicos a un lenguaje accesible. Cubren el dólar, la inflación, el sector empresarial y las políticas del Banco Central con rigor y contexto ciudadano.' },
@@ -65,6 +65,7 @@ export default function NosotrosPage() {
                   { year: '2025', event: 'Lanzamiento de cobertura en tiempo real y expansión a 12 secciones temáticas.' },
                   { year: '2025', event: 'Integración con Google Discover y publicación activa en 4 redes sociales.' },
                   { year: '2026', event: 'Superamos 1,000 artículos publicados y consolidamos presencia en Google News.' },
+                  { year: '2026', event: 'Registro oficial del Nombre Comercial ante la ONAPI (Núm. 931539), consolidando la identidad legal del medio.' },
                 ].map((m, i) => (
                   <div key={i} className="relative">
                     <div className="absolute -left-[1.85rem] top-1 w-3 h-3 bg-red-600 rounded-full" />
@@ -157,7 +158,7 @@ export default function NosotrosPage() {
               <li>No eliminamos el contenido original: lo mantenemos con la corrección visible para preservar la trazabilidad editorial.</li>
               <li>En errores graves, publicamos una nota editorial separada explicando el error y las medidas adoptadas.</li>
             </ol>
-            <p>Para reportar un error: <a href="mailto:vizcainosr29@gmail.com" className="text-red-600 font-bold hover:underline">vizcainosr29@gmail.com</a> con el asunto &quot;Corrección&quot;.</p>
+            <p>Para reportar un error: <a href="mailto:imperiopublico@gmail.com" className="text-red-600 font-bold hover:underline">imperiopublico@gmail.com</a> con el asunto &quot;Corrección&quot;.</p>
           </div>
         </div>
       </section>
@@ -169,7 +170,7 @@ export default function NosotrosPage() {
           <p className="text-slate-300 font-serif text-lg mb-10">Si tienes una denuncia, información de interés público o quieres colaborar, nos interesa escucharte.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/contacto" className="inline-block bg-red-600 text-white px-10 py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all">Contáctanos</Link>
-            <a href="mailto:vizcainosr29@gmail.com" className="inline-block border border-white text-white px-10 py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all">Escribir al Director</a>
+            <a href="mailto:imperiopublico@gmail.com" className="inline-block border border-white text-white px-10 py-5 text-[10px] font-black uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all">Escribir al Director</a>
           </div>
         </div>
       </section>
