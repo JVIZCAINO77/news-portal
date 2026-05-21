@@ -8,6 +8,9 @@ name: 🤖 Auto-Blogger Diario — Imperio Público
 # 10:00 AM → Tendencias      10:30 AM → Economía
 # 11:00 AM → Internacional   11:30 AM → Salud
 # 12:00 PM → Cultura
+#
+# NOTA: Los jobs schedulados corren 1 a la vez (cada uno tiene su propio cron).
+# Los workflow_dispatch corren en secuencia (needs:) para no saturar Vercel.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
@@ -26,14 +29,16 @@ on:
   workflow_dispatch:
     inputs:
       category:
-        description: 'Categoría a publicar (dejar vacío = todas)'
+        description: 'Categoría a publicar (dejar vacío = todas en secuencia)'
         required: false
         default: ''
 
 jobs:
   # ─── 07:00 AM RD — Política ──────────────────────────────────────────────
   politica:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 11 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 11 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'politica' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -52,7 +57,10 @@ jobs:
 
   # ─── 07:30 AM RD — Policía ───────────────────────────────────────────────
   policia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 11 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '30 11 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'policia' || github.event.inputs.category == ''))
+    needs: [politica]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -71,7 +79,10 @@ jobs:
 
   # ─── 08:00 AM RD — Deportes ──────────────────────────────────────────────
   deportes:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 12 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 12 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'deportes' || github.event.inputs.category == ''))
+    needs: [policia]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -90,7 +101,10 @@ jobs:
 
   # ─── 08:30 AM RD — Tecnología ────────────────────────────────────────────
   tecnologia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 12 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '30 12 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'tecnologia' || github.event.inputs.category == ''))
+    needs: [deportes]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -109,7 +123,10 @@ jobs:
 
   # ─── 09:00 AM RD — Sucesos ───────────────────────────────────────────────
   sucesos:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 13 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 13 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'sucesos' || github.event.inputs.category == ''))
+    needs: [tecnologia]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -128,7 +145,10 @@ jobs:
 
   # ─── 09:30 AM RD — Entretenimiento ───────────────────────────────────────
   entretenimiento:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 13 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '30 13 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'entretenimiento' || github.event.inputs.category == ''))
+    needs: [sucesos]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -147,7 +167,10 @@ jobs:
 
   # ─── 10:00 AM RD — Tendencias ────────────────────────────────────────────
   tendencias:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 14 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 14 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'tendencias' || github.event.inputs.category == ''))
+    needs: [entretenimiento]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -166,7 +189,10 @@ jobs:
 
   # ─── 10:30 AM RD — Economía ──────────────────────────────────────────────
   economia:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 14 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '30 14 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'economia' || github.event.inputs.category == ''))
+    needs: [tendencias]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -185,7 +211,10 @@ jobs:
 
   # ─── 11:00 AM RD — Internacional ─────────────────────────────────────────
   internacional:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 15 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 15 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'internacional' || github.event.inputs.category == ''))
+    needs: [economia]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -204,7 +233,10 @@ jobs:
 
   # ─── 11:30 AM RD — Salud ─────────────────────────────────────────────────
   salud:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '30 15 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '30 15 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'salud' || github.event.inputs.category == ''))
+    needs: [internacional]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -223,7 +255,10 @@ jobs:
 
   # ─── 12:00 PM RD — Cultura ───────────────────────────────────────────────
   cultura:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 16 * * *'
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 16 * * *') ||
+      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'cultura' || github.event.inputs.category == ''))
+    needs: [salud]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
