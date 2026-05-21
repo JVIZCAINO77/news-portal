@@ -891,23 +891,30 @@ export async function GET(request) {
   // Si no se especifica categoría, el bot elige la mejor disponible:
   // Prioriza categorías sin artículo hoy; entre ellas elige aleatoriamente.
   if (!categoryKey) {
-    const supabaseTemp = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-    const todayTmp = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
-    }).format(new Date());
-    const startTmp = new Date(`${todayTmp}T00:00:00-04:00`).toISOString();
-    const { data: publishedCats } = await supabaseTemp
-      .from('articles').select('category').gte('publishedAt', startTmp);
-    const coveredToday = new Set((publishedCats || []).map(a => a.category));
-    const allCats = Object.keys(CATEGORIES);
-    // Preferir categorías sin cobertura hoy
-    const uncovered = allCats.filter(c => !coveredToday.has(c));
-    const pool = uncovered.length > 0 ? uncovered : allCats;
-    categoryKey = pool[Math.floor(Math.random() * pool.length)];
-    console.log(`[Bot] 🎯 Categoría auto-seleccionada: ${categoryKey} (${uncovered.length} sin cubrir hoy)`);
+    try {
+      const supabaseTemp = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      );
+      const todayTmp = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).format(new Date());
+      const startTmp = new Date(`${todayTmp}T00:00:00-04:00`).toISOString();
+      const { data: publishedCats } = await supabaseTemp
+        .from('articles').select('category').gte('publishedAt', startTmp);
+      const coveredToday = new Set((publishedCats || []).map(a => a.category));
+      const allCats = Object.keys(CATEGORIES);
+      // Preferir categorías sin cobertura hoy
+      const uncovered = allCats.filter(c => !coveredToday.has(c));
+      const pool = uncovered.length > 0 ? uncovered : allCats;
+      categoryKey = pool[Math.floor(Math.random() * pool.length)];
+      console.log(`[Bot] 🎯 Auto-seleccionada: ${categoryKey} (${uncovered.length} sin cubrir hoy)`);
+    } catch (selErr) {
+      // Si Supabase falla, elegir categoría aleatoria del pool para no bloquear el cron
+      const allCats = Object.keys(CATEGORIES);
+      categoryKey = allCats[Math.floor(Math.random() * allCats.length)];
+      console.warn(`[Bot] ⚠️ Auto-select falló (${selErr.message}). Fallback aleatorio: ${categoryKey}`);
+    }
   }
 
   const cat = CATEGORIES[categoryKey];
@@ -1309,7 +1316,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando Pollinations...');
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s — generoso
+        const timeoutId = setTimeout(() => controller.abort(), 18000); // 18s — deja presupuesto para imagen
         const polRes = await fetch('https://text.pollinations.ai/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
@@ -1537,12 +1544,40 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       finalImageUrl      = await internalizeImage(polUrl2, 2);
     }
 
-    // GUARDIÁN FINAL: Si aún no tenemos Cloudinary → rechazar publicación
+    // GUARDIÁN FINAL: Si aún no tenemos Cloudinary → reciclar imagen reciente de la misma categoría
     if (!finalImageUrl || !finalImageUrl.includes('cloudinary.com')) {
-      throw new Error(
-        `[Bot] 🚨 GUARDIÁN DE IMAGEN: No se pudo obtener imagen Cloudinary para "${articleData.title.slice(0, 60)}". ` +
-        `Artículo rechazado para mantener estándar visual. Se reintentará en el próximo ciclo del cron.`
-      );
+      console.warn(`[Bot] ⚠️ GUARDIÁN: Cloudinary falló. Reciclando imagen de la BD para no perder el artículo...`);
+      try {
+        const { data: recycleImg } = await supabase
+          .from('articles')
+          .select('image')
+          .eq('category', cat.slug)
+          .like('image', '%cloudinary.com%')
+          .order('publishedAt', { ascending: false })
+          .limit(5);
+        const candidates = (recycleImg || []).map(r => r.image).filter(Boolean);
+        if (candidates.length > 0) {
+          finalImageUrl = candidates[Math.floor(Math.random() * candidates.length)];
+          console.log(`[Bot] ♻️ Imagen reciclada de BD [${cat.slug}]: ${finalImageUrl.slice(0, 60)}`);
+        } else {
+          // Último recurso: cualquier imagen Cloudinary de cualquier categoría
+          const { data: anyImg } = await supabase
+            .from('articles')
+            .select('image')
+            .like('image', '%cloudinary.com%')
+            .order('publishedAt', { ascending: false })
+            .limit(1)
+            .single();
+          finalImageUrl = anyImg?.image || null;
+          if (finalImageUrl) console.log(`[Bot] ♻️ Imagen reciclada global: ${finalImageUrl.slice(0, 60)}`);
+        }
+      } catch (recycleErr) {
+        console.warn(`[Bot] Reciclar imagen falló: ${recycleErr.message}`);
+      }
+      // Si sigue sin imagen, publicar sin imagen — el artículo vale más que ninguno
+      if (!finalImageUrl) {
+        console.warn(`[Bot] ⚠️ Publicando sin imagen. El contenido tiene prioridad.`);
+      }
     }
 
     console.log(`[Bot] ✅ Imagen Cloudinary garantizada: ${finalImageUrl.slice(0, 70)}...`);
