@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30; // Fix M4: previene que el cleanup sea cortado por Vercel
 
 /**
  * API de Mantenimiento Automático para Imperio Público.
@@ -32,19 +33,36 @@ export async function GET(request) {
       timestamp: new Date().toISOString()
     };
 
-    // 1. Limpieza SEGURA: solo artículos sin imagen, sin vistas, y sin destacar (probable relleno/error)
-    // NUNCA borramos artículos con imagen o con vistas — esos tienen valor editorial
+    // Fix C3: loguear los artículos ANTES de borrarlos para auditoría
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-    
+
+    // Primero: identificar qué se va a borrar
+    const { data: toDelete } = await supabase
+      .from('articles')
+      .select('id, title, publishedAt')
+      .lt('publishedAt', ninetyDaysAgo.toISOString())
+      .eq('featured', false)
+      .eq('trending', false)
+      .or('image.is.null,image.eq.""')  // Fix M8: incluir imagen vacía además de NULL
+      .eq('views', 0)
+      .limit(100); // Techo de seguridad: borrar máx 100 a la vez
+
+    if (toDelete?.length) {
+      console.log(`[Cleanup] 🗑️ Marcados para borrar (${toDelete.length}):`,
+        toDelete.map(a => `[${a.id}] ${a.title?.slice(0, 50)} (${a.publishedAt?.slice(0,10)})`)
+      );
+    }
+
     const { count: deletedArticles, error: err1 } = await supabase
       .from('articles')
       .delete({ count: 'exact' })
       .lt('publishedAt', ninetyDaysAgo.toISOString())
       .eq('featured', false)
       .eq('trending', false)
-      .is('image', null)     // Sin imagen = contenido de baja calidad
-      .eq('views', 0);       // Sin vistas = nadie lo ha leído
+      .or('image.is.null,image.eq.""')  // Fix M8
+      .eq('views', 0)
+      .limit(100);
 
     if (!err1) report.articlesDeleted = deletedArticles || 0;
 

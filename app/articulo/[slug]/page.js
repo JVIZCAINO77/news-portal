@@ -1,5 +1,6 @@
 // app/articulo/[slug]/page.js — Estructura Editorial SSR 2.0
 import { getArticleBySlug, getRelatedArticles } from '@/lib/serverData';
+import { sanitizeHtml, stripHtml } from '@/lib/sanitize'; // Fix C1 + I5
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 import SocialShare from '@/components/SocialShare';
 import AudioReader from '@/components/AudioReader';
@@ -61,7 +62,7 @@ export default async function ArticlePage({ params }) {
     return str
       .replace(/#+/g, '')
       .replace(/_{1,}/g, '')
-      .replace(/\\+n/g, ' ') // Limpieza agresiva: cualquier variante de \n a espacio en títulos/resúmenes
+      .replace(/\\+n/g, ' ')
       .trim();
   };
 
@@ -69,16 +70,15 @@ export default async function ArticlePage({ params }) {
   const displayExcerpt = cleanText(article.excerpt);
 
   // Procesamiento de párrafos más robusto
+  // Fix I2: regex mejorados para limpiar bloques SEO generados por el bot
   const paragraphs = (article.content || '')
-    .replace(/\\+n/g, '\n') // CORRECCIÓN AGRESIVA: Convierte cualquier variante de \n literal en salto real
-    // Limpia bloque de etiquetas SEO al FINAL del contenido (sin 'g' para evitar borrar ocurrencias internas)
-    .replace(/\n?[\s\*]*etiquetas\s*(seo)?\s*:.*$/is, '')
-    .replace(/\n?[\s\*]*palabras\s*clave\s*:.*$/is, '')
-    .replace(/\n?[\s\*]*keywords?\s*:.*$/is, '')
+    .replace(/\\+n/g, '\n')
+    // Fix I2: elimina bloques de etiquetas SEO al FINAL del contenido con variantes de espaciado
+    .replace(/\n[\s\*]*(?:etiquetas?\s*(?:seo)?|palabras?\s*claves?|keywords?)\s*:?[\s\S]*$/i, '')
     .split('\n')
     .map(p => p.trim())
-    .filter(p => p !== '' && p !== '---') // Elimina líneas vacías y separadores markdown
-    .map(p => p.replace(/^#+\s*/g, '')); // Elimina ## al inicio
+    .filter(p => p !== '' && p !== '---')
+    .map(p => p.replace(/^#+\s*/g, ''));
 
   // Normalize tags: handles array, Postgres {"a","b"}, JSON ["a","b"] or plain comma-string
   const tagsList = parseTags(article.tags);
@@ -180,20 +180,23 @@ export default async function ArticlePage({ params }) {
                 {displayExcerpt}
               </p>
 
-              <AudioReader title={displayTitle} text={article.content} />
+              <AudioReader title={displayTitle} text={stripHtml(article.content)} />
 
               <div className="prose-news pt-4">
                 {article.content?.trim().startsWith('<') ? (
+                  // Fix C1: sanitizar HTML antes de renderizar — elimina XSS stored
                   <div
                     className="article-html-content"
                     dangerouslySetInnerHTML={{
-                      __html: article.content
-                        .replace(/\\+n/g, '<br/>') // Convertir \n literal en break HTML
-                        .replace(/#+\s*/g, '')
-                        .replace(/<p[^>]*>(?:\s|&nbsp;)*<\/p>/gi, '')
-                        .replace(/<p([^>]*)>/, (match, attrs) => {
-                          return `<p class="paragraph-text"${attrs}>`;
-                        })
+                      __html: sanitizeHtml(
+                        article.content
+                          .replace(/\\+n/g, '<br/>')
+                          .replace(/#+\s*/g, '')
+                          .replace(/<p[^>]*>(?:\s|&nbsp;)*<\/p>/gi, '')
+                          .replace(/<p([^>]*)>/, (match, attrs) => {
+                            return `<p class="paragraph-text"${attrs}>`;
+                          })
+                      )
                     }}
                   />
                 ) : (
@@ -271,7 +274,6 @@ export default async function ArticlePage({ params }) {
                         <Link
                           key={idx}
                           href={`/buscar?q=${encodeURIComponent(tag)}`}
-                          rel="nofollow"
                           className="border border-slate-200 px-3 py-1 text-[10px] font-bold text-slate-500 uppercase hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
                         >
                           #{tag}
@@ -306,7 +308,7 @@ export default async function ArticlePage({ params }) {
                     </p>
 
                     <div className="flex items-center justify-center md:justify-start gap-4 pt-2">
-                      <a href={`mailto:${article.author_email || 'jvizcaino242@gmail.com'}`} className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-600 shadow-sm transition-all hover:scale-110" title="Email">
+                      <a href={`mailto:${article.author_email || process.env.NEXT_PUBLIC_EDITORIAL_EMAIL || 'redaccion@imperiopublico.com'}`} className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-600 shadow-sm transition-all hover:scale-110" title="Email">
                         <span className="font-bold text-lg">@</span>
                       </a>
                       <a href={SITE_CONFIG.social.twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-slate-200 text-slate-400 hover:text-black hover:border-black shadow-sm transition-all hover:scale-110" title="X (Twitter)">

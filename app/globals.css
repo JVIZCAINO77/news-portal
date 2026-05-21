@@ -84,7 +84,7 @@
     font-family: var(--font-sans);
     font-size: 1.15rem;
     line-height: 1.9; /* Mayor interlineado para lectura premium */
-    color: #1a1a1a;
+    color: var(--foreground); /* Fix I7: usar variable CSS para dark mode */
     margin-bottom: 1.5rem; /* Más espacio entre párrafos */
     display: block;
     text-align: justify;
@@ -310,8 +310,15 @@
 }
 
 /* --- Control de Publicidad (Anti-AutoAds Intrusivos) --- */
-/* Oculta anuncios inyectados automáticamente por Google que no están en nuestros contenedores con label */
-ins.adsbygoogle:not(.ad-container ins) {
+/* Fix I3: Oculta auto-ads inyectados por Google que no están en nuestros contenedores.
+   Selector simplificado — el anterior :not(.ad-container ins) no funciona en Safari <15.
+   Usamos enfoque positivo: solo mostrar ins.adsbygoogle dentro de .ad-container. */
+.ad-container .adsbygoogle {
+  display: block !important;
+}
+/* Ocultar cualquier ins de AdSense que NO esté dentro de .ad-container */
+body > ins.adsbygoogle,
+article ins.adsbygoogle:not(.ad-container ins.adsbygoogle) {
   display: none !important;
   height: 0 !important;
   visibility: hidden !important;

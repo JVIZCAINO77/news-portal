@@ -2,6 +2,7 @@
 export const dynamic = 'force-dynamic';
 
 import { createClient } from '@/lib/supabase/server';
+import { getAdminClient } from '@/lib/supabase/admin'; // Fix C2
 import Link from 'next/link';
 import BotControls from '@/components/BotControls';
 
@@ -23,11 +24,8 @@ export default async function AdminLayout({ children }) {
 
     user = authData.user;
 
-    const { createClient: createAdminClient } = await import('@supabase/supabase-js');
-    const supabaseAdmin = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
+    // Fix C2: cliente admin centralizado (no más import dinámico)
+    const supabaseAdmin = getAdminClient();
 
     const { data: profileData } = await supabaseAdmin
       .from('profiles')

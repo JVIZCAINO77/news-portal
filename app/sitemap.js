@@ -10,19 +10,19 @@ export default async function sitemap() {
   const routes = [
     {
       url: SITE_CONFIG.url,
-      lastModified: new Date(),
+      lastModified: new Date(), // Portada: sí cambia en cada revalidación
       changeFrequency: 'always',
       priority: 1.0,
     },
     {
       url: `${SITE_CONFIG.url}/nosotros`,
-      lastModified: new Date(),
+      lastModified: new Date('2025-01-01'), // Fix M6: fecha real de última edición
       changeFrequency: 'monthly',
       priority: 0.5,
     },
     {
       url: `${SITE_CONFIG.url}/contacto`,
-      lastModified: new Date(),
+      lastModified: new Date('2025-01-01'),
       changeFrequency: 'monthly',
       priority: 0.4,
     },

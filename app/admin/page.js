@@ -1,16 +1,16 @@
 // app/admin/page.js — Dashboard Overview (Imperio Público 2.0)
 // force-dynamic: stats en tiempo real, no cacheado
 export const dynamic = 'force-dynamic';
+// Fix I4: eliminado 'export const revalidate = 60' — es código muerto con force-dynamic
 
 import { createClient } from '@/lib/supabase/server';
+import { getAdminClient } from '@/lib/supabase/admin'; // Fix C2: cliente admin centralizado
 import { getLatestArticles } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
 import Link from 'next/link';
 import AutomationToggle from '@/components/AutomationToggle';
 import AgentsDashboard from '@/components/AgentsDashboard';
 import TrafficDashboard from '@/components/TrafficDashboard';
-
-export const revalidate = 60; // ISR: revalidar cada 60s
 import ImageRepairButton from '@/components/ImageRepairButton';
 
 export default async function AdminDashboardPage() {
@@ -19,27 +19,31 @@ export default async function AdminDashboardPage() {
 
   const latest = await getLatestArticles(5);
 
-  // Usar service role para ver los perfiles para no caer en RLS recursion
-  const { createClient: createAdminClient } = await import('@supabase/supabase-js');
-  const supabaseAdmin = createAdminClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
+  // Fix C2: usar cliente admin centralizado (SERVICE_ROLE_KEY en un solo lugar)
+  const supabaseAdmin = getAdminClient();
 
-  // 1. Conteos eficientes — sin traer filas de datos a memoria
+  // 1. Conteos eficientes
   const { count: articleCount } = await supabase
     .from('articles')
     .select('*', { count: 'exact', head: true });
 
-  // Suma de vistas por categoría — solo los campos estrictamente necesarios
-  const { data: viewsData } = await supabase
+  // Fix M5: SUM en DB en vez de en memoria — sin techo de 5000 artículos
+  const { data: viewsAgg } = await supabaseAdmin
     .from('articles')
-    .select('views, category')
-    .not('views', 'is', null)
-    .limit(5000); // Techo de seguridad: evita saturar memoria con muchos artículos
+    .select('views.sum(), category', { count: 'exact' })
+    .not('views', 'is', null);
 
-  const totalViews = viewsData?.reduce((acc, curr) => acc + (curr.views || 0), 0) || 0;
-  const activeCategories = new Set(viewsData?.map(a => a.category).filter(Boolean)).size;
+  // Fallback si la función agregada no está disponible
+  let totalViews = 0;
+  let catStatsMap = {};
+  if (viewsAgg) {
+    for (const row of viewsAgg) {
+      const v = row.views || 0;
+      totalViews += v;
+      if (row.category) catStatsMap[row.category] = (catStatsMap[row.category] || 0) + v;
+    }
+  }
+  const activeCategories = Object.keys(catStatsMap).length;
 
   const { count: userCount } = await supabaseAdmin
     .from('profiles')
