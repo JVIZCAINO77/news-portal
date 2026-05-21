@@ -26,7 +26,6 @@ export default function NewArticlePage() {
   const [isPreview, setIsPreview] = useState(false);
   
   const router = useRouter();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const supabase = createClient(); // Estable: usa vars de entorno, no re-crea conexión
 
   const handlePublish = async (e) => {

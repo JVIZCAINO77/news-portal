@@ -1,6 +1,5 @@
 'use client';
 // components/AdUnit.jsx — Espacio publicitario con reserva de espacio (CLS Prevention)
-'use client';
 import { useEffect } from 'react';
 import { SITE_CONFIG, ADS_SLOTS } from '@/lib/data';
 
