@@ -8,27 +8,23 @@
 import { useState, useEffect } from 'react';
 
 export default function PushSubscribeButton() {
-  const [state, setState] = useState('idle'); // idle | subscribed | denied | loading | unsupported
+  // Inicialización lazy — evalúa el soporte y permiso solo en el cliente
+  const [state, setState] = useState(() => {
+    if (typeof window === 'undefined') return 'idle';
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) return 'unsupported';
+    const perm = Notification.permission;
+    if (perm === 'granted') return 'subscribed';
+    if (perm === 'denied') return 'denied';
+    return 'idle';
+  });
   const [showBanner, setShowBanner] = useState(false);
 
+  // Mostrar banner después de 15s solo si el estado es 'idle'
   useEffect(() => {
-    // Solo mostrar si el browser lo soporta
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-      setState('unsupported');
-      return;
-    }
-
-    const perm = Notification.permission;
-    if (perm === 'granted') {
-      setState('subscribed');
-    } else if (perm === 'denied') {
-      setState('denied');
-    } else {
-      // Mostrar banner después de 15s (usuario ya vio el contenido)
-      const timer = setTimeout(() => setShowBanner(true), 15000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
+    if (state !== 'idle') return;
+    const timer = setTimeout(() => setShowBanner(true), 15000);
+    return () => clearTimeout(timer);
+  }, [state]);
 
   const subscribe = async () => {
     setState('loading');

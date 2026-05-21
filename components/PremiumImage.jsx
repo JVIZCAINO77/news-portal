@@ -94,9 +94,9 @@ export default function PremiumImage({
   const [status, setStatus] = useState(priority ? true : null);
   const [currentSrc, setCurrentSrc] = useState(resolved.url);
   const [mode, setMode]       = useState(resolved.mode);
-  const prevSrcRef            = useRef(src);
+  const prevSrcRef = useRef(src);
 
-  // Resetear solo cuando cambia la prop `src`
+  // Aplicar la nueva resolución cuando cambia src (sin setState síncrono en el cuerpo del efecto)
   useEffect(() => {
     if (src === prevSrcRef.current) return;
     prevSrcRef.current = src;
@@ -104,7 +104,8 @@ export default function PremiumImage({
     setCurrentSrc(r.url);
     setMode(r.mode);
     setStatus(priority ? true : null);
-  }, [src]); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
 
   // Safety timeout: elimina el skeleton después de 20s si ni onLoad ni onError llegaron
   // (edge case: imágenes cuyo evento de carga nunca dispara)

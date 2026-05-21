@@ -141,7 +141,7 @@ export default function Privacidad() {
           <ul className="list-disc pl-6 mt-4 space-y-2">
             <li><strong>Acceso:</strong> solicitar una copia de los datos que tenemos sobre ti.</li>
             <li><strong>Rectificación:</strong> corregir datos inexactos o incompletos.</li>
-            <li><strong>Supresión ("derecho al olvido"):</strong> solicitar la eliminación de tus datos.</li>
+            <li><strong>Supresión (&quot;derecho al olvido&quot;):</strong> solicitar la eliminación de tus datos.</li>
             <li><strong>Oposición:</strong> oponerte al tratamiento de tus datos para publicidad personalizada.</li>
             <li><strong>Portabilidad:</strong> recibir tus datos en un formato estructurado y legible por máquina.</li>
             <li><strong>Residentes de California (CCPA):</strong> derecho a no venta de información personal y a conocer qué datos se recopilan.</li>
@@ -171,7 +171,7 @@ export default function Privacidad() {
         <section>
           <h2 className="text-2xl font-black text-black mb-4 uppercase tracking-tight border-b-2 border-red-600 inline-block">10. Cambios en esta Política</h2>
           <p>
-            Nos reservamos el derecho de actualizar esta Política de Privacidad en cualquier momento. Los cambios serán publicados en esta página con una nueva fecha de "última actualización". Te recomendamos revisar esta página periódicamente.
+            Nos reservamos el derecho de actualizar esta Política de Privacidad en cualquier momento. Los cambios serán publicados en esta página con una nueva fecha de &quot;última actualización&quot;. Te recomendamos revisar esta página periódicamente.
           </p>
         </section>
 

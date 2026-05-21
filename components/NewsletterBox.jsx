@@ -1,6 +1,5 @@
-'use client';
+﻿'use client';
 // components/NewsletterBox.jsx — Bloque de suscripción Imperio Diario
-'use client';
 import { useState } from 'react';
 import { trackNewsletterSignup } from '@/lib/analytics';
 

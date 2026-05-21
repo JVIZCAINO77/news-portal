@@ -123,6 +123,7 @@ export async function GET(request) {
         >
           {/* ── CAPA 1: Foto full-bleed ── */}
           {imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={imageUrl}
               alt=""

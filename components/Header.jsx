@@ -19,7 +19,14 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isExtraOpen, setIsExtraOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentDate, setCurrentDate] = useState('');
+  // Inicialización lazy — formatea la fecha solo en el cliente para evitar setState en effect
+  const [currentDate, setCurrentDate] = useState(() => {
+    if (typeof window === 'undefined') return '';
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateStr = now.toLocaleDateString('es-DO', options);
+    return dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  });
   const dropdownRef = useRef(null);
   const [tickerItems, setTickerItems] = useState([]);
 
@@ -32,11 +39,6 @@ export default function Header() {
   }, [isMenuOpen]);
 
   useEffect(() => {
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateStr = now.toLocaleDateString('es-DO', options);
-    setCurrentDate(dateStr.charAt(0).toUpperCase() + dateStr.slice(1));
-
     const handleScroll = () => {
       const scrollY = window.scrollY;
       if (scrollY > 250) {
@@ -87,7 +89,7 @@ export default function Header() {
         <div className="max-w-6xl mx-auto px-4 md:px-8">
           {/* Mobile overlay buttons — hidden, nav bar hamburger handles this */}
 
-          <a href="/" className="flex items-center justify-center flex-row gap-6 md:gap-10 hover:opacity-90 transition-opacity">
+          <Link href="/" className="flex items-center justify-center flex-row gap-6 md:gap-10 hover:opacity-90 transition-opacity">
             <div className="relative h-12 md:h-20 lg:h-24 w-12 md:w-20 lg:w-24">
               <Image 
                 src="/icon.png" 
@@ -117,7 +119,7 @@ export default function Header() {
                 <div style={{ height: '1.5px', flex: 1, backgroundColor: '#bb1b21', opacity: 0.2 }}></div>
               </div>
             </div>
-          </a>
+          </Link>
         </div>
       </section>
 

@@ -40,3 +40,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# scripts de diagnóstico y mantenimiento local
+/scratch
+
+# scripts con credenciales embebidas — ejecutar localmente, nunca commitear
+scripts/sync-vercel-env.mjs

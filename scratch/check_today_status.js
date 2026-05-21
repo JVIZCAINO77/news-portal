@@ -6,7 +6,7 @@ const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santo_Doming
 const start = new Date(today + 'T00:00:00-04:00').toISOString();
 const end   = new Date(today + 'T23:59:59-04:00').toISOString();
 
-const allCats = ['noticias','politica','policia','deportes','tecnologia','sucesos','entretenimiento','tendencias','economia','internacional','salud','cultura'];
+const allCats = ['politica','economia','sucesos','policia','deportes','salud','cultura','entretenimiento','tendencias','tecnologia','internacional','nacional','medio-ambiente'];
 
 (async () => {
   const { data } = await s.from('articles').select('category').gte('publishedAt', start).lte('publishedAt', end);

@@ -1,7 +1,5 @@
-
 'use client';
 // components/ArticleCard.jsx — Tarjeta de artículo editorial premium
-import { useState } from 'react';
 import Link from 'next/link';
 import PremiumImage from './PremiumImage';
 import { getCategoryBySlug, formatDate } from '@/lib/data';
@@ -13,37 +11,38 @@ import { getCategoryBySlug, formatDate } from '@/lib/data';
  *  'small'   — Tarjeta horizontal compacta (estilo lista).
  *  'minimal' — Solo texto (para sidebars).
  */
+
+// Declarado FUERA del componente padre para evitar recréación en cada render
+function ImpactBadge({ trending, featured }) {
+  if (!trending && !featured) return null;
+  return (
+    <div className="absolute top-4 left-4 z-20 flex flex-col gap-1">
+      {trending && (
+        <span className="bg-black text-white text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 flex items-center gap-1 animate-pulse">
+          <span className="w-1 h-1 bg-red-600 rounded-full"></span> Tendencia
+        </span>
+      )}
+      {featured && !trending && (
+        <span className="bg-red-600 text-white text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5">Destacado</span>
+      )}
+    </div>
+  );
+}
+
 export default function ArticleCard({ article, variant = 'medium', className = '', extraBadge = null }) {
   if (!article) return null;
   const cat = getCategoryBySlug(article.category);
   const formattedDate = formatDate(article.publishedAt);
-  
+
   const clean = (str) => {
     if (typeof str !== 'string') return str;
     return str
-      .replace(/\\+n/g, ' ') 
-      .replace(/#+\s*/g, '') 
+      .replace(/\\+n/g, ' ')
+      .replace(/#+\s*/g, '')
       .trim();
   };
   const safeTitle = clean(article.title || 'Información en Desarrollo');
   const safeExcerpt = article.excerpt ? clean(article.excerpt) : null;
-
-  // Badge de Impacto
-  const ImpactBadge = () => {
-    if (!article.trending && !article.featured) return null;
-    return (
-      <div className="absolute top-4 left-4 z-20 flex flex-col gap-1">
-        {article.trending && (
-          <span className="bg-black text-white text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 flex items-center gap-1 animate-pulse">
-            <span className="w-1 h-1 bg-red-600 rounded-full"></span> Tendencia
-          </span>
-        )}
-        {article.featured && !article.trending && (
-          <span className="bg-red-600 text-white text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5">Destacado</span>
-        )}
-      </div>
-    );
-  };
 
 
   if (variant === 'hero') {
@@ -57,7 +56,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
           </header>
 
           <div className="relative overflow-hidden rounded-2xl shadow-2xl mb-6">
-            <ImpactBadge />
+            <ImpactBadge trending={article.trending} featured={article.featured} />
             <PremiumImage 
               src={article.image} 
               alt={article.imageAlt || article.title}
@@ -90,7 +89,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
       <Link href={`/articulo/${article.slug}`} className={`group block border-b border-gray-100 pb-8 h-full transition-all hover:border-red-100 ${className}`}>
         <article className="h-full flex flex-col">
           <div className="relative overflow-hidden rounded-xl shadow-lg mb-5">
-            <ImpactBadge />
+            <ImpactBadge trending={article.trending} featured={article.featured} />
             <PremiumImage 
               src={article.image} 
               alt={article.imageAlt || article.title}
@@ -157,7 +156,7 @@ export default function ArticleCard({ article, variant = 'medium', className = '
       <Link href={`/articulo/${article.slug}`} className={`group block overflow-hidden bg-white border border-slate-100 rounded-3xl shadow-sm hover:shadow-xl transition-all ${className}`}>
         <article className="grid grid-cols-1 md:grid-cols-2">
            <div className="relative overflow-hidden">
-             <ImpactBadge />
+             <ImpactBadge trending={article.trending} featured={article.featured} />
              <PremiumImage 
                src={article.image} 
                alt={article.imageAlt || article.title}

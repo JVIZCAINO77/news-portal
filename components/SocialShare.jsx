@@ -4,12 +4,11 @@ import { useState, useEffect } from 'react';
 import { trackShare } from '@/lib/analytics';
 
 export default function SocialShare({ url, title }) {
-  const [shareUrl, setShareUrl] = useState('');
+  // Inicialización lazy — window solo existe en el cliente; evita setState dentro de useEffect
+  const [shareUrl, setShareUrl] = useState(() =>
+    typeof window !== 'undefined' ? window.location.href : (url || '')
+  );
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    setShareUrl(window.location.href);
-  }, []);
 
   const encodedUrl = encodeURIComponent(shareUrl);
   const encodedTitle = encodeURIComponent(title);
