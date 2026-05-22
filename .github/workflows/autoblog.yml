@@ -9,8 +9,9 @@ name: 🤖 Auto-Blogger Diario — Imperio Público
 # 11:00 AM → Internacional   11:30 AM → Salud
 # 12:00 PM → Cultura
 #
-# NOTA: Los jobs schedulados corren 1 a la vez (cada uno tiene su propio cron).
-# Los workflow_dispatch corren en secuencia (needs:) para no saturar Vercel.
+# ✅ DISEÑO: Cada job es 100% independiente (sin `needs:`).
+#    Un fallo en un slot NO bloquea los demás.
+#    Reintentos automáticos con continue-on-error en el nivel de step.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
@@ -29,9 +30,13 @@ on:
   workflow_dispatch:
     inputs:
       category:
-        description: 'Categoría a publicar (dejar vacío = todas en secuencia)'
+        description: 'Categoría a publicar (dejar vacío = auto)'
         required: false
         default: ''
+
+# ─── FUNCIÓN REUTILIZABLE: publica 1 artículo con reintentos ─────────────────
+# Cada job es COMPLETAMENTE INDEPENDIENTE — no hay `needs:` entre ellos.
+# Si uno falla, los demás siguen corriendo en su horario sin verse afectados.
 
 jobs:
   # ─── 07:00 AM RD — Política ──────────────────────────────────────────────
@@ -40,14 +45,31 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '0 11 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'politica' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 🏛️ Publicar — POLÍTICA
+      - name: 🏛️ Publicar — POLÍTICA (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: POLÍTICA — $(date -u)"
+          echo "🚀 POLÍTICA — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=politica" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 🏛️ Publicar — POLÍTICA (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 POLÍTICA — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=politica" \
@@ -60,16 +82,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '30 11 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'policia' || github.event.inputs.category == ''))
-    needs: [politica]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 👮 Publicar — POLICÍA
+      - name: 👮 Publicar — POLICÍA (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: POLICÍA — $(date -u)"
+          echo "🚀 POLICÍA — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=policia" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 👮 Publicar — POLICÍA (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 POLICÍA — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=policia" \
@@ -82,16 +120,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '0 12 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'deportes' || github.event.inputs.category == ''))
-    needs: [policia]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: ⚽ Publicar — DEPORTES
+      - name: ⚽ Publicar — DEPORTES (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: DEPORTES — $(date -u)"
+          echo "🚀 DEPORTES — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=deportes" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: ⚽ Publicar — DEPORTES (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 DEPORTES — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=deportes" \
@@ -104,16 +158,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '30 12 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'tecnologia' || github.event.inputs.category == ''))
-    needs: [deportes]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 💻 Publicar — TECNOLOGÍA
+      - name: 💻 Publicar — TECNOLOGÍA (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: TECNOLOGÍA — $(date -u)"
+          echo "🚀 TECNOLOGÍA — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=tecnologia" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 💻 Publicar — TECNOLOGÍA (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 TECNOLOGÍA — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=tecnologia" \
@@ -126,16 +196,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '0 13 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'sucesos' || github.event.inputs.category == ''))
-    needs: [tecnologia]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 🚨 Publicar — SUCESOS
+      - name: 🚨 Publicar — SUCESOS (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: SUCESOS — $(date -u)"
+          echo "🚀 SUCESOS — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=sucesos" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 🚨 Publicar — SUCESOS (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 SUCESOS — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=sucesos" \
@@ -148,16 +234,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '30 13 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'entretenimiento' || github.event.inputs.category == ''))
-    needs: [sucesos]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 🎭 Publicar — ENTRETENIMIENTO
+      - name: 🎭 Publicar — ENTRETENIMIENTO (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: ENTRETENIMIENTO — $(date -u)"
+          echo "🚀 ENTRETENIMIENTO — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=entretenimiento" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 🎭 Publicar — ENTRETENIMIENTO (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 ENTRETENIMIENTO — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=entretenimiento" \
@@ -170,16 +272,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '0 14 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'tendencias' || github.event.inputs.category == ''))
-    needs: [entretenimiento]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 🔥 Publicar — TENDENCIAS
+      - name: 🔥 Publicar — TENDENCIAS (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: TENDENCIAS — $(date -u)"
+          echo "🚀 TENDENCIAS — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=tendencias" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 🔥 Publicar — TENDENCIAS (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 TENDENCIAS — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=tendencias" \
@@ -192,16 +310,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '30 14 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'economia' || github.event.inputs.category == ''))
-    needs: [tendencias]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 💰 Publicar — ECONOMÍA
+      - name: 💰 Publicar — ECONOMÍA (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: ECONOMÍA — $(date -u)"
+          echo "🚀 ECONOMÍA — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=economia" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 💰 Publicar — ECONOMÍA (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 ECONOMÍA — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=economia" \
@@ -214,16 +348,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '0 15 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'internacional' || github.event.inputs.category == ''))
-    needs: [economia]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 🌍 Publicar — INTERNACIONAL
+      - name: 🌍 Publicar — INTERNACIONAL (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: INTERNACIONAL — $(date -u)"
+          echo "🚀 INTERNACIONAL — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=internacional" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 🌍 Publicar — INTERNACIONAL (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 INTERNACIONAL — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=internacional" \
@@ -236,16 +386,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '30 15 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'salud' || github.event.inputs.category == ''))
-    needs: [internacional]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 🏥 Publicar — SALUD
+      - name: 🏥 Publicar — SALUD (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: SALUD — $(date -u)"
+          echo "🚀 SALUD — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=salud" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 🏥 Publicar — SALUD (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 SALUD — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=salud" \
@@ -258,16 +424,32 @@ jobs:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '0 16 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'cultura' || github.event.inputs.category == ''))
-    needs: [salud]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     steps:
-      - name: 🎨 Publicar — CULTURA
+      - name: 🎨 Publicar — CULTURA (intento 1)
+        id: intento1
+        continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 Sección: CULTURA — $(date -u)"
+          echo "🚀 CULTURA — intento 1 — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot?category=cultura" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 🎨 Publicar — CULTURA (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 CULTURA — reintento 2 — $(date -u)"
+          sleep 15
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=cultura" \
