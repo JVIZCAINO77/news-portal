@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 // Edge Runtime: más ligero y rápido que Node.js serverless para operaciones simples
-export const runtime = 'edge';
+export const runtime = 'nodejs';
 
 // Singleton del cliente Supabase — se reutiliza entre requests del mismo worker Edge.
 // Evita reconectar en cada petición de vista.

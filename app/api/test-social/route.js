@@ -20,7 +20,8 @@ export async function GET(request) {
   };
 
   try {
-    await postToSocialMedia(testArticle);
+    // DESACTIVADO: publicación solo manual desde admin panel.
+    // await postToSocialMedia(testArticle);
     return NextResponse.json({
       success: true,
       message: '✅ Prueba enviada. Revisa tus redes sociales.',
