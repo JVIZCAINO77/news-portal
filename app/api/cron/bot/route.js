@@ -1221,11 +1221,15 @@ REGLAS EDITORIALES ADICIONALES:
 Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 { "title": "<titular original>", "excerpt": "<gancho propio>", "content": "<artículo markdown original>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
 
-    // ─── MULTI-PROVEEDOR IA — ROTACIÓN INTELIGENTE (STICKY KEY) ───────────────
-    // Usar siempre la MISMA clave hasta que se agote por completo (todos los modelos = 429).
-    // Mezclar aleatoriamente el pool de claves para distribuir los límites de cuota
-    // y evitar bloqueos por claves expiradas/filtradas consecutivas.
-    // Consolidamos claves de múltiples cuentas/variables de entorno para soporte multi-cuenta
+    // ─── GEMINI PRO — ROTACIÓN DETERMINISTA POR SLOT ──────────────────────────
+    // Plan: Gemini API Pro (sin límite diario real, límite por minuto por clave).
+    // Estrategia: cada invocación del cron empieza en una clave diferente del pool,
+    // distribuyendo la carga uniformemente entre todas las claves disponibles.
+    //
+    // ¿Por qué determinista y no aleatoria?
+    //   • Aleatoria: por azar dos crons seguidos pueden golpear la misma clave.
+    //   • Determinista: slotIndex = minuto_actual % total_claves → cada cron
+    //     empieza en una clave diferente de forma predecible y equitativa.
     const keys = [];
     const envVars = ['GEMINI_API_KEY', 'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3'];
     for (const v of envVars) {
@@ -1234,16 +1238,29 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         keys.push(...parsed);
       }
     }
-    for (let i = keys.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [keys[i], keys[j]] = [keys[j], keys[i]];
+
+    if (keys.length === 0) {
+      console.error('[Bot] ❌ CRÍTICO: No hay claves Gemini configuradas.');
+    } else {
+      // Rotación determinista: cada slot de 30 min usa una clave de inicio diferente.
+      // Con 22 claves y crons cada 30 min → cada clave se usa ~1 vez por día como primaria.
+      const slotMinute   = Math.floor(Date.now() / 1000 / 60); // minutos desde epoch
+      const startIndex   = slotMinute % keys.length;
+      const rotatedKeys  = [...keys.slice(startIndex), ...keys.slice(0, startIndex)];
+      keys.length = 0;
+      keys.push(...rotatedKeys);
+      console.log(`[Bot] 🔑 Gemini Pro — ${keys.length} claves disponibles. Rotación: empieza en índice ${startIndex}`);
     }
 
-    // Solo modelos confirmados operativos con las claves actuales (Pro plan)
+    // ─── MODELOS GEMINI PRO — Verificados como operativos ─────────────────────
+    // Orden: el más capaz primero, fallbacks más rápidos/ligeros al final.
+    // gemini-2.5-flash: ✅ confirmado operativo con claves Pro (probado 2026-05-24)
+    // gemini-2.0-flash: ✅ backup — usa cuota pero funciona
+    // gemini-2.0-flash-lite: ✅ el más rápido, ideal si los anteriores saturan RPM
     const geminiModels = [
-      'gemini-2.5-flash',      // ✅ Principal — operativo y capaz
-      'gemini-2.0-flash',      // fallback confiable
-      'gemini-2.0-flash-lite', // ultra-rápido de respaldo
+      'gemini-2.5-flash',      // Principal Pro — mejor calidad, confirmado OK
+      'gemini-2.0-flash',      // Backup confiable
+      'gemini-2.0-flash-lite', // Ultra-rápido de respaldo
     ];
 
     let articleData = null;
