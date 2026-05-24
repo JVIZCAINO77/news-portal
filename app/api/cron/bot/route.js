@@ -1239,12 +1239,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       [keys[i], keys[j]] = [keys[j], keys[i]];
     }
 
-    // Solo modelos activos en 2026 — 1.5-flash y 1.5-pro dan 404 (deprecados)
+    // Solo modelos confirmados operativos con las claves actuales (Pro plan)
     const geminiModels = [
-      'gemini-2.5-flash-preview-05-20', // modelo más reciente y capaz
-      'gemini-2.5-flash-lite',           // rápido y estable
-      'gemini-2.0-flash',                // fallback confiable
-      'gemini-2.0-flash-lite',           // ultra-rápido de respaldo
+      'gemini-2.5-flash',      // ✅ Principal — operativo y capaz
+      'gemini-2.0-flash',      // fallback confiable
+      'gemini-2.0-flash-lite', // ultra-rápido de respaldo
     ];
 
     let articleData = null;
