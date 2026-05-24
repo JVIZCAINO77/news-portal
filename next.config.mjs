@@ -82,7 +82,7 @@ const nextConfig = {
               // Imágenes propias + Cloudinary + Unsplash + AdSense
               "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://pollinations.ai https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net",
               // Conexiones fetch/XHR/WebSocket
-              "connect-src 'self' https://*.supabase.co https://res.cloudinary.com https://api.cloudinary.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://graph.facebook.com https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+              "connect-src 'self' https://*.supabase.co https://res.cloudinary.com https://api.cloudinary.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://graph.facebook.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.frankfurter.app",
               // Frames: AdSense usa iframes
               "frame-src 'self' https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://bid.g.doubleclick.net",
               // Child frames (AdSense)
