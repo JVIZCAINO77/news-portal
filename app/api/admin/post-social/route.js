@@ -47,7 +47,11 @@ export async function POST(request) {
       .eq('id', articleId)
       .single();
 
-    if (artError || !article) {
+    if (artError) {
+      console.error('[Admin Social] Error al obtener artículo:', artError.message);
+      return Response.json({ error: `Error de base de datos: ${artError.message}` }, { status: 500 });
+    }
+    if (!article) {
       return Response.json({ error: 'Artículo no encontrado' }, { status: 404 });
     }
 
