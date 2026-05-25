@@ -1,0 +1,149 @@
+name: 🔔 Token Monitor — Facebook/Instagram
+# Verifica semanalmente el estado del token de Facebook e Instagram.
+# Si el token expira en menos de 15 días, crea un GitHub Issue de alerta.
+
+on:
+  schedule:
+    # Cada lunes a las 9 AM UTC (5 AM hora RD)
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Permite ejecutarlo manualmente
+
+jobs:
+  check-tokens:
+    name: Verificar tokens de redes sociales
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Verificar Facebook Page Token
+        id: check_fb
+        run: |
+          TOKEN="${{ secrets.FACEBOOK_PAGE_TOKEN }}"
+          APP_ID="1630041454741121"
+          APP_SECRET="${{ secrets.FB_APP_SECRET }}"
+          
+          if [ -z "$TOKEN" ]; then
+            echo "status=missing" >> $GITHUB_OUTPUT
+            echo "days_left=0" >> $GITHUB_OUTPUT
+            echo "❌ FACEBOOK_PAGE_TOKEN no está configurado en Secrets"
+            exit 0
+          fi
+
+          # Verificar validez y expiración via debug_token
+          APP_TOKEN="${APP_ID}|${APP_SECRET}"
+          RESPONSE=$(curl -sf "https://graph.facebook.com/v22.0/debug_token?input_token=${TOKEN}&access_token=${APP_TOKEN}" || echo '{"data":{"is_valid":false}}')
+          
+          IS_VALID=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin).get('data',{}); print(str(d.get('is_valid',False)).lower())" 2>/dev/null || echo "false")
+          EXPIRES_AT=$(echo "$RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin).get('data',{}); print(d.get('expires_at',0))" 2>/dev/null || echo "0")
+          
+          echo "is_valid=$IS_VALID" >> $GITHUB_OUTPUT
+          
+          if [ "$IS_VALID" = "false" ]; then
+            echo "status=invalid" >> $GITHUB_OUTPUT
+            echo "days_left=0" >> $GITHUB_OUTPUT
+            echo "❌ Token INVÁLIDO o EXPIRADO"
+          elif [ "$EXPIRES_AT" = "0" ]; then
+            echo "status=permanent" >> $GITHUB_OUTPUT
+            echo "days_left=999" >> $GITHUB_OUTPUT
+            echo "✅ Token PERMANENTE (no expira)"
+          else
+            DAYS_LEFT=$(( (EXPIRES_AT - $(date +%s)) / 86400 ))
+            echo "days_left=$DAYS_LEFT" >> $GITHUB_OUTPUT
+            if [ "$DAYS_LEFT" -lt 15 ]; then
+              echo "status=expiring_soon" >> $GITHUB_OUTPUT
+              echo "⚠️ Token expira en $DAYS_LEFT días — RENOVAR PRONTO"
+            else
+              echo "status=ok" >> $GITHUB_OUTPUT
+              echo "✅ Token válido — $DAYS_LEFT días restantes"
+            fi
+          fi
+
+      - name: Crear Issue de alerta si el token está por expirar
+        if: |
+          steps.check_fb.outputs.status == 'expiring_soon' ||
+          steps.check_fb.outputs.status == 'invalid' ||
+          steps.check_fb.outputs.status == 'missing'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = '${{ steps.check_fb.outputs.status }}';
+            const daysLeft = '${{ steps.check_fb.outputs.days_left }}';
+
+            const titles = {
+              expiring_soon: `⚠️ Facebook Token expira en ${daysLeft} días — Renovar ahora`,
+              invalid: '❌ Facebook Page Token INVÁLIDO — El portal no puede publicar en redes',
+              missing: '❌ FACEBOOK_PAGE_TOKEN no configurado en Vercel Secrets',
+            };
+
+            const bodies = {
+              expiring_soon: `
+            ## ⚠️ Acción Requerida: Renovar Token de Facebook
+
+            El **Facebook Page Token** de Imperio Público expira en **${daysLeft} días**.
+
+            Si no se renueva, el bot dejará de publicar automáticamente en Facebook e Instagram.
+
+            ### Cómo renovar el token (5 min):
+
+            1. Ve a [Facebook Graph API Explorer](https://developers.facebook.com/tools/explorer/)
+            2. Selecciona la App **ImperioPublico Bot** (ID: 1630041454741121)
+            3. Haz clic en **"Generate Access Token"** → acepta los permisos
+            4. En el panel de la derecha, expande **"Page Access Tokens"** y copia el token de **Imperio Publico**
+            5. Ve al panel admin → Configuración → Redes Sociales, o llama:
+               \`\`\`
+               POST /api/admin/refresh-fb-token
+               { "pageToken": "EAAx...TU_NUEVO_TOKEN..." }
+               \`\`\`
+
+            > ⏰ Renovar antes del **$(date -d "+${daysLeft} days" "+%d/%m/%Y" 2>/dev/null || echo "fecha próxima")**
+            `,
+              invalid: `
+            ## ❌ Facebook Page Token INVÁLIDO
+
+            El token actual fue invalidado por Facebook (posible cambio de contraseña o revocación de permisos).
+
+            **El portal NO puede publicar en Facebook ni Instagram hasta que se renueve.**
+
+            Sigue los pasos de renovación descritos arriba.
+            `,
+              missing: `
+            ## ❌ FACEBOOK_PAGE_TOKEN no encontrado
+
+            La variable de entorno \`FACEBOOK_PAGE_TOKEN\` no está configurada en los Secrets de GitHub ni en Vercel.
+
+            Configúrala en:
+            - **Vercel**: Settings → Environment Variables → \`FACEBOOK_PAGE_TOKEN\`
+            - **GitHub**: Settings → Secrets and variables → Actions → \`FACEBOOK_PAGE_TOKEN\`
+            `,
+            };
+
+            // Verificar si ya existe un issue abierto de este tipo
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'token-alert',
+            });
+
+            if (issues.data.length > 0) {
+              console.log('Ya existe un issue de alerta abierto:', issues.data[0].html_url);
+              return;
+            }
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: titles[status],
+              body: bodies[status],
+              labels: ['token-alert', 'urgent'],
+            });
+
+            console.log('Issue de alerta creado.');
+
+      - name: ✅ Reporte final
+        run: |
+          echo "─────────────────────────────────────────────"
+          echo "Estado FB Token : ${{ steps.check_fb.outputs.status }}"
+          echo "Días restantes  : ${{ steps.check_fb.outputs.days_left }}"
+          echo "─────────────────────────────────────────────"
