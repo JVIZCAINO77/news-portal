@@ -1275,8 +1275,13 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       for (const model of geminiModels) {
         try {
           console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model}`);
+          // Guarda global: si llevamos >40s, no tiene sentido iniciar otro intento de Gemini
+          if (Date.now() - startTime > 40000) {
+            console.warn('[Bot] ⏱️ Tiempo global >40s, abortando bucle Gemini.');
+            break;
+          }
           const gemCtrl = new AbortController();
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 25000); // 25s — suficiente para 2.5-flash
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 20000); // 20s — reducido para dejar margen al resto
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1330,9 +1335,13 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // PRIORIDAD 2: Pollinations AI (gratuito, sin cuota)
     if (!aiSuccess) {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando Pollinations...');
+      // Guarda: si llevamos >42s, saltar Pollinations directamente
+      if (Date.now() - startTime > 42000) {
+        console.warn('[Bot] ⏱️ Tiempo global >42s, saltando Pollinations.');
+      } else
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 18000); // 18s — deja presupuesto para imagen
+        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s — reducido para dejar margen
         const polRes = await fetch('https://text.pollinations.ai/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
@@ -1363,6 +1372,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 
     // PRIORIDAD 3: OpenRouter modelos gratuitos (última línea de defensa)
     if (!aiSuccess) {
+      // Guarda: si llevamos >44s, saltar OpenRouter — no hay tiempo suficiente
+      if (Date.now() - startTime > 44000) {
+        console.warn('[Bot] ⏱️ Tiempo global >44s, saltando OpenRouter para no causar timeout.');
+      } else {
       console.log('[Bot] ⚠️ Pollinations sin respuesta o validación fallida. Intentando OpenRouter (gratuito)...');
       const FREE_MODELS_OR = [
         'openai/gpt-oss-120b:free',
@@ -1374,11 +1387,16 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       ];
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
+        // Guarda por iteración: si llevamos >46s, no iniciar más intentos
+        if (Date.now() - startTime > 46000) {
+          console.warn('[Bot] ⏱️ Tiempo global >46s, abortando bucle OpenRouter.');
+          break;
+        }
         try {
           const orModelName = (orModel.split('/')[1] || orModel).split(':')[0];
           console.log(`[Bot] Probando OpenRouter (${orModelName})...`);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000);
+          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s — reducido de 30s
           const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -1412,6 +1430,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           console.log(`[Bot] ⚠️ OpenRouter (${orModel}) falló: ${orErr.message?.slice(0, 60)}`);
         }
       }
+      } // fin del bloque guarda OpenRouter
     }
 
     // Si TODOS los proveedores fallaron → candado estricto
