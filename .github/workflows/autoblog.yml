@@ -48,7 +48,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '0 11 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'politica' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 🏛️ Publicar — POLÍTICA (intento 1)
         id: intento1
@@ -59,7 +59,7 @@ jobs:
         run: |
           echo "🚀 POLÍTICA — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=politica" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -72,9 +72,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 POLÍTICA — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=politica" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -86,7 +86,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '30 11 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'policia' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 👮 Publicar — POLICÍA (intento 1)
         id: intento1
@@ -97,7 +97,7 @@ jobs:
         run: |
           echo "🚀 POLICÍA — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=policia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -110,9 +110,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 POLICÍA — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=policia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -124,7 +124,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '0 12 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'deportes' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: ⚽ Publicar — DEPORTES (intento 1)
         id: intento1
@@ -135,7 +135,7 @@ jobs:
         run: |
           echo "🚀 DEPORTES — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=deportes" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -148,9 +148,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 DEPORTES — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=deportes" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -162,7 +162,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '30 12 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'tecnologia' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 💻 Publicar — TECNOLOGÍA (intento 1)
         id: intento1
@@ -173,7 +173,7 @@ jobs:
         run: |
           echo "🚀 TECNOLOGÍA — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=tecnologia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -186,9 +186,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 TECNOLOGÍA — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=tecnologia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -200,7 +200,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '0 13 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'sucesos' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 🚨 Publicar — SUCESOS (intento 1)
         id: intento1
@@ -211,7 +211,7 @@ jobs:
         run: |
           echo "🚀 SUCESOS — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=sucesos" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -224,9 +224,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 SUCESOS — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=sucesos" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -238,7 +238,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '30 13 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'entretenimiento' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 🎭 Publicar — ENTRETENIMIENTO (intento 1)
         id: intento1
@@ -249,7 +249,7 @@ jobs:
         run: |
           echo "🚀 ENTRETENIMIENTO — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=entretenimiento" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -262,9 +262,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 ENTRETENIMIENTO — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=entretenimiento" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -276,7 +276,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '0 14 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'tendencias' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 🔥 Publicar — TENDENCIAS (intento 1)
         id: intento1
@@ -287,7 +287,7 @@ jobs:
         run: |
           echo "🚀 TENDENCIAS — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=tendencias" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -300,9 +300,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 TENDENCIAS — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=tendencias" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -314,7 +314,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '30 14 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'economia' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 💰 Publicar — ECONOMÍA (intento 1)
         id: intento1
@@ -325,7 +325,7 @@ jobs:
         run: |
           echo "🚀 ECONOMÍA — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=economia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -338,9 +338,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 ECONOMÍA — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=economia" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -352,7 +352,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '0 15 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'internacional' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 🌍 Publicar — INTERNACIONAL (intento 1)
         id: intento1
@@ -363,7 +363,7 @@ jobs:
         run: |
           echo "🚀 INTERNACIONAL — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=internacional" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -376,9 +376,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 INTERNACIONAL — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=internacional" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -390,7 +390,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '30 15 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'salud' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 🏥 Publicar — SALUD (intento 1)
         id: intento1
@@ -401,7 +401,7 @@ jobs:
         run: |
           echo "🚀 SALUD — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=salud" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -414,9 +414,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 SALUD — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=salud" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -428,7 +428,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '0 16 * * *') ||
       (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'cultura' || github.event.inputs.category == ''))
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 🎨 Publicar — CULTURA (intento 1)
         id: intento1
@@ -439,7 +439,7 @@ jobs:
         run: |
           echo "🚀 CULTURA — intento 1 — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=cultura" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -452,9 +452,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 CULTURA — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=cultura" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -469,7 +469,7 @@ jobs:
       (github.event_name == 'schedule' && github.event.schedule == '30 16 * * *') ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'slot-12')
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - name: 🔄 Publicar — SLOT 12 / Rotación (intento 1)
         id: intento1
@@ -480,7 +480,7 @@ jobs:
         run: |
           echo "🚀 SLOT 12 — Rotación automática — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
@@ -493,9 +493,9 @@ jobs:
           SITE_URL: "https://www.imperiopublico.com"
         run: |
           echo "🔄 SLOT 12 — reintento 2 — $(date -u)"
-          sleep 15
+          sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 58 \
+            --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
