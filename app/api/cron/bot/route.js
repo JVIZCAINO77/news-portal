@@ -320,7 +320,11 @@ const CATEGORIES = {
     ],
   },
 
-  // ─── SECCIONES NACIONALES AMPLIADAS ──────────────────────────────────────────
+  // ─── CATEGORÍAS EN RESERVA (sin slot de cron asignado) ──────────────────────
+  // Las siguientes secciones están listas para activarse pero actualmente NO tienen
+  // entrada en vercel.json ni en autoblog.yml.
+  // Para activarlas: añadir el cron en vercel.json + un job en autoblog.yml.
+  // Se pueden usar vía workflow_dispatch con: ?category=nacional o ?category=medio-ambiente
   nacional: {
     slug: 'nacional', author: 'Redacción Nacional', style: 'periodístico objetivo y formal',
     feeds: [
@@ -886,35 +890,52 @@ export async function GET(request) {
 
   const { searchParams } = new URL(request.url);
   let categoryKey = searchParams.get('category');
+  let categoryFallbackUsed = false;
 
-  // ─── AUTO-SELECCIÓN DE CATEGORÍA ────────────────────────────────────────────
-  // Si no se especifica categoría, el bot elige la mejor disponible:
-  // Prioriza categorías sin artículo hoy; entre ellas elige aleatoriamente.
-  if (!categoryKey) {
-    try {
-      const supabaseTemp = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        process.env.SUPABASE_SERVICE_ROLE_KEY
-      );
-      const todayTmp = new Intl.DateTimeFormat('en-CA', {
-        timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
-      }).format(new Date());
-      const startTmp = new Date(`${todayTmp}T00:00:00-04:00`).toISOString();
-      const { data: publishedCats } = await supabaseTemp
-        .from('articles').select('category').gte('publishedAt', startTmp);
-      const coveredToday = new Set((publishedCats || []).map(a => a.category));
-      const allCats = Object.keys(CATEGORIES);
-      // Preferir categorías sin cobertura hoy
-      const uncovered = allCats.filter(c => !coveredToday.has(c));
-      const pool = uncovered.length > 0 ? uncovered : allCats;
-      categoryKey = pool[Math.floor(Math.random() * pool.length)];
-      console.log(`[Bot] 🎯 Auto-seleccionada: ${categoryKey} (${uncovered.length} sin cubrir hoy)`);
-    } catch (selErr) {
-      // Si Supabase falla, elegir categoría aleatoria del pool para no bloquear el cron
-      const allCats = Object.keys(CATEGORIES);
-      categoryKey = allCats[Math.floor(Math.random() * allCats.length)];
-      console.warn(`[Bot] ⚠️ Auto-select falló (${selErr.message}). Fallback aleatorio: ${categoryKey}`);
+  // ─── ORDEN DE ROTACIÓN DETERMINISTA ────────────────────────────────────────
+  // Orden editorial oficial. El bot siempre sigue este orden de prioridad para
+  // garantizar que TODAS las secciones se cubran antes de repetir alguna.
+  // Solo incluye las 11 categorías con slot de cron activo (vercel.json + autoblog.yml).
+  const ROTATION_ORDER = [
+    'politica', 'policia', 'deportes', 'tecnologia', 'sucesos',
+    'entretenimiento', 'tendencias', 'economia', 'internacional', 'salud', 'cultura',
+  ];
+
+  // ─── LÓGICA DE SELECCIÓN / FALLBACK ────────────────────────────────────────
+  try {
+    const supabaseTemp = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    const todayTmp = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).format(new Date());
+    const startTmp = new Date(`${todayTmp}T00:00:00-04:00`).toISOString();
+    const { data: publishedCats } = await supabaseTemp
+      .from('articles').select('category').gte('publishedAt', startTmp);
+    const coveredToday = new Set((publishedCats || []).map(a => a.category));
+    // Primera categoría del orden oficial que aún no tiene artículo hoy
+    const nextUncovered = ROTATION_ORDER.find(c => !coveredToday.has(c)) || null;
+
+    if (!categoryKey) {
+      // Sin categoría especificada → elegir la primera sin cubrir en el orden oficial
+      categoryKey = nextUncovered || ROTATION_ORDER[0];
+      console.log(`[Bot] 🎯 Rotación determinista: ${categoryKey} (cubiertas hoy: ${[...coveredToday].join(', ') || 'ninguna'})`);
+    } else {
+      // Categoría explícita recibida (GitHub Actions / manual)
+      if (coveredToday.has(categoryKey) && nextUncovered) {
+        // Ya fue cubierta hoy → fallback a la siguiente sin cubrir en la rotación
+        console.log(`[Bot] 🔄 Categoría "${categoryKey}" ya cubierta hoy → fallback a "${nextUncovered}"`);
+        categoryKey = nextUncovered;
+        categoryFallbackUsed = true;
+      } else {
+        console.log(`[Bot] ✅ Publicando categoría solicitada: ${categoryKey}`);
+      }
     }
+  } catch (selErr) {
+    // Si Supabase falla, usar la categoría solicitada o el inicio de la rotación
+    if (!categoryKey) categoryKey = ROTATION_ORDER[0];
+    console.warn(`[Bot] ⚠️ Selección de rotación falló (${selErr.message}). Usando: ${categoryKey}`);
   }
 
   const cat = CATEGORIES[categoryKey];

@@ -1,17 +1,19 @@
 name: 🤖 Auto-Blogger Diario — Imperio Público
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ESTRUCTURA OFICIAL IMPERIO PÚBLICO — 11 secciones × 30 min
+# ESTRUCTURA OFICIAL IMPERIO PÚBLICO — 12 artículos/día
 # 07:00 AM → Política        07:30 AM → Policía
 # 08:00 AM → Deportes        08:30 AM → Tecnología
 # 09:00 AM → Sucesos         09:30 AM → Entretenimiento
 # 10:00 AM → Tendencias      10:30 AM → Economía
 # 11:00 AM → Internacional   11:30 AM → Salud
-# 12:00 PM → Cultura
+# 12:00 PM → Cultura         12:30 PM → Rotación (llena la sección que falte)
 #
 # ✅ DISEÑO: Cada job es 100% independiente (sin `needs:`).
 #    Un fallo en un slot NO bloquea los demás.
 #    Reintentos automáticos con continue-on-error en el nivel de step.
+#    Slot 12 (12:30 PM) usa rotación determinista: publica la categoría
+#    con menos cobertura hoy (la que haya quedado vacía primero).
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
@@ -27,6 +29,7 @@ on:
     - cron: '0 15 * * *'    # 11:00 AM RD → Internacional
     - cron: '30 15 * * *'   # 11:30 AM RD → Salud
     - cron: '0 16 * * *'    # 12:00 PM RD → Cultura
+    - cron: '30 16 * * *'   # 12:30 PM RD → Rotación (artículo #12)
   workflow_dispatch:
     inputs:
       category:
@@ -453,6 +456,47 @@ jobs:
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 58 \
             -X GET "$SITE_URL/api/cron/bot?category=cultura" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  # ─── 12:30 PM RD — ARTÍCULO #12 (Rotación automática) ────────────────────
+  # Sin categoría fija. La rotación determinista elige la sección que haya
+  # quedado vacía hoy (en orden: politica→policia→deportes→...→cultura).
+  # Si todas están cubiertas, publica en la primera del orden (política).
+  slot-12:
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '30 16 * * *') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'slot-12')
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: 🔄 Publicar — SLOT 12 / Rotación (intento 1)
+        id: intento1
+        continue-on-error: true
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🚀 SLOT 12 — Rotación automática — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 🔄 Publicar — SLOT 12 / Rotación (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 SLOT 12 — reintento 2 — $(date -u)"
+          sleep 15
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 58 \
+            -X GET "$SITE_URL/api/cron/bot" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1

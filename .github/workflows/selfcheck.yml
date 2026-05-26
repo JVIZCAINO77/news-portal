@@ -75,6 +75,7 @@ jobs:
   cleanup:
     name: 🧹 Limpieza de BD
     needs: code-doctor
+    if: always() # Corre aunque code-doctor falle (error de red, timeout, etc.)
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -97,6 +98,7 @@ jobs:
   fix-images:
     name: 🖼️ Reparar Imágenes
     needs: code-doctor
+    if: always() # Corre aunque code-doctor falle (error de red, timeout, etc.)
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
