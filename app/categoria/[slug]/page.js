@@ -1,7 +1,7 @@
 // app/categoria/[slug]/page.js — Página de Categoría (Imperio Público 2.0)
 import { notFound } from 'next/navigation';
 import { getArticlesByCategory } from '@/lib/serverData';
-import { getCategoryBySlug, CATEGORIES } from '@/lib/data';
+import { getCategoryBySlug, CATEGORIES, SITE_CONFIG } from '@/lib/data';
 import ArticleCard from '@/components/ArticleCard';
 import AdUnit from '@/components/AdUnit';
 
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }) {
     title,
     description,
     alternates: {
-      canonical: `/categoria/${slug}`,
+      canonical: `${SITE_CONFIG.url}/categoria/${slug}`,
     },
     openGraph: {
       title,

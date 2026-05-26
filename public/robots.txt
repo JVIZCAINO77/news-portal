@@ -20,5 +20,5 @@ Allow: /
 # Accesible en: https://www.imperiopublico.com/ads.txt
 
 # Sitemaps
-Sitemap: https://www.imperiopublico.com/sitemap.xml
-Sitemap: https://www.imperiopublico.com/news-sitemap.xml
+Sitemap: https://imperiopublico.com/sitemap.xml
+Sitemap: https://imperiopublico.com/news-sitemap.xml

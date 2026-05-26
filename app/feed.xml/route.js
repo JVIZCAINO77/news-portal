@@ -1,4 +1,4 @@
-﻿import { getLatestArticles } from '@/lib/serverData';
+import { getLatestArticles } from '@/lib/serverData';
 import { SITE_CONFIG } from '@/lib/data';
 
 // RSS se actualiza cada 5 min — no necesita ser completamente dinámico
@@ -31,6 +31,19 @@ export async function GET() {
         ? article.tags.map(t => `<category>${escapeXml(t)}</category>`).join('\n      ')
         : '';
 
+      // Primeros 500 chars del contenido limpio para <content:encoded>
+      const contentText = (article.content || '')
+        .replace(/\\n/g, ' ')
+        .replace(/#+\s*/g, '')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 500);
+      const contentEncoded = contentText
+        ? `${escapeXml(contentText)}... <a href="${url}">Leer artículo completo</a>`
+        : '';
+
       return `
     <item>
       <title><![CDATA[${article.title}]]></title>
@@ -38,10 +51,11 @@ export async function GET() {
       <guid isPermaLink="true">${url}</guid>
       <pubDate>${new Date(article.publishedAt).toUTCString()}</pubDate>
       <description><![CDATA[${article.excerpt || ''}]]></description>
+      ${contentEncoded ? `<content:encoded><![CDATA[${contentEncoded}]]></content:encoded>` : ''}
       <dc:creator><![CDATA[${author}]]></dc:creator>
       <category>${category}</category>
       ${tags}
-      ${imageUrl ? `<media:content url="${imageUrl}" medium="image" />\n      <media:thumbnail url="${imageUrl}" />` : ''}
+      ${imageUrl ? `<media:content url="${imageUrl}" medium="image" width="1200" height="630" />\n      <media:thumbnail url="${imageUrl}" />` : ''}
     </item>`;
     })
     .join('');
@@ -50,6 +64,7 @@ export async function GET() {
 <rss version="2.0"
   xmlns:media="http://search.yahoo.com/mrss/"
   xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/"
   xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>${SITE_CONFIG.name}</title>

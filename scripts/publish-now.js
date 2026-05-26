@@ -266,7 +266,9 @@ Usa Markdown con 3 subtítulos ## y negritas para datos clave. NO uses frases ge
 Si la noticia es trivial o irrelevante, responde exactamente: IRRELEVANTE
 
 Responde SOLO con JSON válido (sin bloques de código, sin texto extra):
-{"title":"titular SEO 50-70 chars","excerpt":"resumen 150 chars máximo","content":"artículo Markdown completo","tags":["Tag1","Tag2","Tag3"],"impact_level":"high"}`;
+{"title":"titular SEO 50-70 chars","excerpt":"resumen 150 chars máximo","content":"artículo Markdown completo","tags":["PersonaOEntidad","LugarOPaís","TemaClave","Organización","TemaSecundario"],"impact_level":"high"}
+
+REGLAS para tags: genera 5-7 tags específicos y relevantes. Usa nombres propios (personas, países, organizaciones), temas concretos y términos que la gente buscaría en Google. NO uses tags genéricos como "noticias", "actualidad" o "información". Cada tag debe ser 1-3 palabras.`;
 }
 
 // ─── PROVEEDOR 1: GEMINI ──────────────────────────────────────────────────────

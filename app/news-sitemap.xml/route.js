@@ -29,9 +29,24 @@ export async function GET() {
       const pubDate = new Date(article.publishedAt).toISOString();
       const url = `${SITE_CONFIG.url}/articulo/${escapeXml(article.slug)}`;
       const title = escapeXml(article.title);
-      const keywords = Array.isArray(article.tags) && article.tags.length > 0
-        ? escapeXml(article.tags.join(', '))
-        : '';
+      // Usar tags si existen; si no, extraer palabras clave del título como fallback
+      // (Google News usa keywords para clasificar temas en Discover)
+      let keywords = '';
+      if (Array.isArray(article.tags) && article.tags.length > 0) {
+        keywords = escapeXml(article.tags.join(', '));
+      } else {
+        // Fallback: extraer sustantivos relevantes del título (palabras >4 chars, sin stopwords)
+        const STOP_ES = new Set(['para','como','desde','sobre','entre','también','según','después','durante','través','mediante','contra','dentro','hacia','hasta','aunque','porque','cuando','donde','quien','cuál','todas','todos','estos','estas','unos','unas','esta','este','aquel','aquí']);
+        const titleWords = (article.title || '')
+          .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-zA-Z\s]/g, ' ')
+          .toLowerCase()
+          .split(/\s+/)
+          .filter(w => w.length >= 5 && !STOP_ES.has(w));
+        // Añadir la categoría y hasta 5 palabras clave del título
+        const fallbackTags = [...new Set([article.category || '', ...titleWords.slice(0, 5)])].filter(Boolean);
+        keywords = escapeXml(fallbackTags.join(', '));
+      }
 
       return `
   <url>

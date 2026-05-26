@@ -23,27 +23,46 @@ export async function generateMetadata({ params }) {
 
   if (!article) return { title: 'Noticia no encontrada | Imperio Público' };
 
+  const tags = Array.isArray(article.tags) ? article.tags : [];
+
   return {
-    title: article.title,
+    title: `${article.title} | ${SITE_CONFIG.name}`,
     description: article.excerpt || article.content?.substring(0, 160),
+    keywords: tags.join(', '),
     openGraph: {
       title: article.title,
       description: article.excerpt,
       url: `${SITE_CONFIG.url}/articulo/${slug}`,
       siteName: SITE_CONFIG.name,
-      images: [{ url: article.image, width: 1200, height: 630 }],
+      // OG image dinámica con diseño de marca — aumenta CTR en redes sociales
+      images: [{
+        url: `${SITE_CONFIG.url}/api/og?slug=${slug}`,
+        width: 1080,
+        height: 1350,
+        alt: article.title,
+      }],
       type: 'article',
       publishedTime: article.publishedAt,
+      modifiedTime: article.updated_at || article.publishedAt,
       authors: [article.author || SITE_CONFIG.name],
+      section: article.category,
+      tags,
     },
     twitter: {
       card: 'summary_large_image',
       title: article.title,
       description: article.excerpt,
       images: [article.image],
+      site: SITE_CONFIG.twitterHandle,
     },
     alternates: {
       canonical: `${SITE_CONFIG.url}/articulo/${slug}`,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   };
 }
@@ -83,16 +102,27 @@ export default async function ArticlePage({ params }) {
   // Normalize tags: handles array, Postgres {"a","b"}, JSON ["a","b"] or plain comma-string
   const tagsList = parseTags(article.tags);
 
+  const articleUrl = `${SITE_CONFIG.url}/articulo/${article.slug}`;
+  const wordCount = article.content ? article.content.split(/\s+/).length : 0;
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `${SITE_CONFIG.url}/articulo/${article.slug}`
+      "@id": articleUrl
     },
+    "url": articleUrl,
     "headline": displayTitle,
     "description": displayExcerpt,
-    "image": [article.image],
+    "image": [
+      {
+        "@type": "ImageObject",
+        "url": article.image,
+        "width": 1200,
+        "height": 630
+      }
+    ],
     "datePublished": article.publishedAt,
     "dateModified": article.updated_at || article.publishedAt,
     "author": [{
@@ -100,14 +130,26 @@ export default async function ArticlePage({ params }) {
       "name": article.author || "Redacción Imperio Público",
       "url": SITE_CONFIG.url
     }],
-    "keywords": tagsList.join(', '),
     "publisher": {
       "@type": "Organization",
       "name": SITE_CONFIG.name,
+      "url": SITE_CONFIG.url,
       "logo": {
         "@type": "ImageObject",
-        "url": `${SITE_CONFIG.url}${SITE_CONFIG.logo}`
+        "url": `${SITE_CONFIG.url}${SITE_CONFIG.logo}`,
+        "width": 200,
+        "height": 60
       }
+    },
+    "keywords": tagsList.join(', '),
+    "articleSection": article.category,
+    "inLanguage": "es-DO",
+    "wordCount": wordCount,
+    "isAccessibleForFree": true,
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": SITE_CONFIG.name,
+      "url": SITE_CONFIG.url
     }
   };
 
@@ -357,7 +399,7 @@ export default async function ArticlePage({ params }) {
               <div className="flex flex-wrap items-center gap-3 justify-center">
                 {/* WhatsApp */}
                 <a
-                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(displayTitle + ' — ' + 'https://imperiopublico.com/articulo/' + article.slug)}`}
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent(displayTitle + ' — ' + SITE_CONFIG.url + '/articulo/' + article.slug)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-black text-sm px-5 py-3 rounded-xl transition-all hover:scale-105 shadow-lg shadow-emerald-500/30"
@@ -368,7 +410,7 @@ export default async function ArticlePage({ params }) {
                 </a>
                 {/* Facebook */}
                 <a
-                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://imperiopublico.com/articulo/' + article.slug)}`}
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SITE_CONFIG.url + '/articulo/' + article.slug)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm px-5 py-3 rounded-xl transition-all hover:scale-105 shadow-lg shadow-blue-600/30"
@@ -379,7 +421,7 @@ export default async function ArticlePage({ params }) {
                 </a>
                 {/* X / Twitter */}
                 <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(displayTitle)}&url=${encodeURIComponent('https://imperiopublico.com/articulo/' + article.slug)}&via=imperiopublico`}
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(displayTitle)}&url=${encodeURIComponent(SITE_CONFIG.url + '/articulo/' + article.slug)}&via=imperiopublico`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 bg-black hover:bg-gray-900 text-white font-black text-sm px-5 py-3 rounded-xl transition-all hover:scale-105 shadow-lg shadow-black/20"
