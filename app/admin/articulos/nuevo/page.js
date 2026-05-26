@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CATEGORIES } from '@/lib/data';
-import { createClient } from '@/lib/supabase/client';
 import MarkdownPreview from '@/components/MarkdownPreview';
 import ImageUpload from '@/components/ImageUpload';
 import { uploadToCloudinary } from '@/lib/upload';
@@ -26,70 +25,53 @@ export default function NewArticlePage() {
   const [isPreview, setIsPreview] = useState(false);
   
   const router = useRouter();
-  const supabase = createClient(); // Estable: usa vars de entorno, no re-crea conexión
 
   const handlePublish = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { alert('Sesión expirada. Recarga la página.'); setLoading(false); return; }
-    
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('id', user.id)
-      .single();
+    const parsedTags = tags.trim()
+      ? tags.split(',').map(t => t.trim().replace(/^#/, '').replace(/\s+/g, '')).filter(Boolean)
+      : null;
 
-    const slug = title
-      .toLowerCase()
-      .normalize('NFD')                    // descompone tildes: á → a + combining accent
-      .replace(/[\u0300-\u036f]/g, '')     // elimina los diacríticos (tildes, cedillas)
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
-    
-    // 🔍 Validación de Duplicados: Revisamos si el enlace ya existe en la base de datos
-    const { data: existingArticle } = await supabase
-      .from('articles')
-      .select('id')
-      .eq('slug', slug)
-      .single();
+    try {
+      const res = await fetch('/api/admin/articles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          excerpt,
+          content,
+          category,
+          image,
+          author,
+          tags: parsedTags,
+          sourceLink,
+          featured,
+          trending,
+        }),
+      });
 
-    if (existingArticle) {
-      alert("⚠️ ALERTA EDITORIAL: Ya existe una noticia publicada con este mismo título. Por favor, cámbialo ligeramente para evitar duplicados.");
-      setLoading(false);
-      return;
-    }
+      const data = await res.json();
 
-    const newArticle = {
-      title,
-      slug,
-      excerpt,
-      content,
-      category,
-      image: image || 'https://images.unsplash.com/photo-1504711331083-9c897949ff59?auto=format&fit=crop&w=1200&h=630&q=80',
-      author: author || profile?.full_name || user.email.split('@')[0],
-      author_id: user.id,
-      tags: tags.trim()
-        ? tags.split(',').map(t => t.trim().replace(/^#/, '').replace(/\s+/g, '')).filter(Boolean)
-        : null,
-      source_link: sourceLink.trim() || null,
-      publishedAt: new Date().toISOString(),
-      featured,
-      trending
-    };
+      if (!res.ok) {
+        if (data.error === 'duplicate_slug') {
+          alert('⚠️ ALERTA EDITORIAL: Ya existe una noticia publicada con este mismo título. Por favor, cámbialo ligeramente para evitar duplicados.');
+        } else {
+          alert(`Error: ${data.error || 'Error desconocido'}`);
+        }
+        setLoading(false);
+        return;
+      }
 
-    const { error } = await supabase.from('articles').insert(newArticle);
-
-    if (error) {
-      alert(`Error: ${error.message}`);
-      setLoading(false);
-    } else {
       setSuccess(true);
       setTimeout(() => {
         router.push('/admin/articulos');
         router.refresh();
       }, 1500);
+    } catch (err) {
+      alert(`Error de red: ${err.message}`);
+      setLoading(false);
     }
   };
 

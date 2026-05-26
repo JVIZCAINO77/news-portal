@@ -68,56 +68,49 @@ export default function EditArticlePage() {
     e.preventDefault();
     setSaving(true);
 
-    const slug = title
-      .toLowerCase()
-      .normalize('NFD')                    // descompone tildes: á → a + combining accent
-      .replace(/[\u0300-\u036f]/g, '')     // elimina los diacríticos
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)+/g, '');
+    const parsedTags = tags.trim()
+      ? tags.split(',').map(t => t.trim().replace(/^#/, '').replace(/\s+/g, '')).filter(Boolean)
+      : null;
 
-    // 🔍 Validación de Duplicados (excluyendo el artículo actual)
-    const { data: existingArticle } = await supabase
-      .from('articles')
-      .select('id')
-      .eq('slug', slug)
-      .neq('id', id)
-      .single();
+    try {
+      const res = await fetch('/api/admin/articles', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          title,
+          excerpt,
+          content,
+          category,
+          image,
+          author,
+          tags: parsedTags,
+          sourceLink,
+          featured,
+          trending,
+        }),
+      });
 
-    if (existingArticle) {
-      alert("⚠️ ALERTA: Ya existe OTRA noticia con este título. Por favor usa un título diferente.");
-      setSaving(false);
-      return;
-    }
+      const data = await res.json();
 
-    const { error } = await supabase
-      .from('articles')
-      .update({
-        title,
-        slug,
-        excerpt,
-        content,
-        category,
-        image,
-        author,
-        tags: tags.trim()
-          ? tags.split(',').map(t => t.trim().replace(/^#/, '').replace(/\s+/g, '')).filter(Boolean)
-          : null,
-        source_link: sourceLink.trim() || null,
-        featured,
-        trending,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', id);
+      if (!res.ok) {
+        if (data.error === 'duplicate_slug') {
+          alert('⚠️ ALERTA: Ya existe OTRA noticia con este título. Por favor usa un título diferente.');
+        } else {
+          alert(`Error: ${data.error || 'Error desconocido'}`);
+        }
+        setSaving(false);
+        return;
+      }
 
-    if (error) {
-      alert(`Error: ${error.message}`);
-      setSaving(false);
-    } else {
       setSuccess(true);
       setTimeout(() => {
         router.push('/admin/articulos');
         router.refresh();
       }, 1000);
+    } catch (err) {
+      alert(`Error de red: ${err.message}`);
+      setSaving(false);
     }
   };
 
