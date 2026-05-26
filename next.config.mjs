@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // ─── Ocultar tecnología usada (info disclosure prevention) ──────────────────
+  poweredByHeader: false,
+
   // ─── Optimización de imágenes ─────────────────────────────────────────────
   images: {
     // Formatos modernos: AVIF primero (40% más pequeño), WebP como fallback
@@ -60,38 +63,31 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
+          // ─── HSTS: fuerza HTTPS, previene ataques MITM ──────────────────────
+          // max-age=1 año. includeSubDomains protege subdominios. preload para HSTS preload list.
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
           { key: 'X-Content-Type-Options',   value: 'nosniff' },
           { key: 'X-Frame-Options',           value: 'SAMEORIGIN' },
           { key: 'X-XSS-Protection',          value: '1; mode=block' },
           { key: 'Referrer-Policy',            value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy',         value: 'camera=(), microphone=(), geolocation=()' },
-          // ─── Content-Security-Policy ─────────────────────────────────────────────
-          // Requerido para aprobación de AdSense y protección XSS.
-          // unsafe-inline: Next.js lo requiere para los inline scripts del layout.
-          // unsafe-eval:   Tiptap (editor de admin) lo necesita en dev.
-          // Para endurecer en el futuro usar nonces de Next.js (Next 15+).
+          { key: 'Permissions-Policy',         value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()' },
+          // ─── Content-Security-Policy ─────────────────────────────────────────
           {
             key: 'Content-Security-Policy',
             value: [
-              // Scripts propios + GA4 + AdSense + Vercel
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com blob:",
-              // Estilos propios + Google Fonts
+              "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              // Fuentes
               "font-src 'self' https://fonts.gstatic.com data:",
-              // Imágenes propias + Cloudinary + Unsplash + AdSense
               "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://pollinations.ai https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net",
-              // Conexiones fetch/XHR/WebSocket
               "connect-src 'self' https://*.supabase.co https://res.cloudinary.com https://api.cloudinary.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://graph.facebook.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.frankfurter.app",
-              // Frames: AdSense usa iframes
               "frame-src 'self' https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://bid.g.doubleclick.net",
-              // Child frames (AdSense)
               "child-src 'self' blob: https://pagead2.googlesyndication.com",
-              // Formularios solo al propio dominio
               "form-action 'self'",
-              // Service Worker para push notifications
               "worker-src 'self' blob:",
-              // Bloquear todo lo no especificado
+              // base-uri previene inyección de <base> tag (clickjacking via base tag)
+              "base-uri 'self'",
+              // upgrade-insecure-requests: fuerza HTTPS en recursos embebidos
+              "upgrade-insecure-requests",
               "default-src 'self'",
             ].join('; '),
           },
