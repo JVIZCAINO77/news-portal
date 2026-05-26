@@ -2,7 +2,8 @@
 import { getArticleBySlug, getRelatedArticles } from '@/lib/serverData';
 import { sanitizeHtml, stripHtml } from '@/lib/sanitize'; // Fix C1 + I5
 import ReadingProgressBar from '@/components/ReadingProgressBar';
-import SocialShare from '@/components/SocialShare';
+// SocialShare eliminado por decisión editorial (panel flotante lateral)
+// import SocialShare from '@/components/SocialShare';
 import AudioReader from '@/components/AudioReader';
 import AdUnit from '@/components/AdUnit';
 import NewsletterBox from '@/components/NewsletterBox';
@@ -161,7 +162,7 @@ export default async function ArticlePage({ params }) {
       />
       <article className="bg-background min-h-screen transition-colors duration-500">
         <ReadingProgressBar title={displayTitle} />
-        <SocialShare title={article.title} />
+        {/* SocialShare eliminado — panel flotante lateral */}
         {/* Contador de vistas — invisible, fire & forget */}
         <ViewCounter slug={article.slug} />
 
