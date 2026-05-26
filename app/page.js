@@ -1,43 +1,69 @@
-// app/page.js — Portada Imperio Público — Diseño Periódico Clásico
+// app/page.js — Portada Imperio Público — Diseño Premium Editorial NYT/Bloomberg
 import Link from 'next/link';
 import { getDailyTopArticles, getLatestArticles } from '@/lib/serverData';
-import { SITE_CONFIG, CATEGORIES, formatDate } from '@/lib/data';
+import { SITE_CONFIG, formatDate, calculateReadingTime } from '@/lib/data';
 import PremiumImage from '@/components/PremiumImage';
-import NewsletterBox from '@/components/NewsletterBox';
 import AdUnit from '@/components/AdUnit';
-import BreakingTicker from '@/components/BreakingTicker';
+import ArticleCarousel from '@/components/ArticleCarousel';
 
-export const revalidate = 300; // ISR: revalidar cada 5 min — balance óptimo entre frescura y CPU
+export const revalidate = 300;
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function timeAgo(dateStr) {
+  if (!dateStr) return '';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1)  return 'Ahora mismo';
+  if (mins < 60) return `Hace ${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)  return `Hace ${hrs} hora${hrs !== 1 ? 's' : ''}`;
+  const days = Math.floor(hrs / 24);
+  return `Hace ${days} día${days !== 1 ? 's' : ''}`;
+}
 
+function toTime(dateStr) {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' });
+}
+
+function CategoryBadge({ category, className = '' }) {
+  return (
+    <span className={`inline-block text-[0.55rem] font-bold uppercase tracking-[0.25em] text-[#C8102E] ${className}`}>
+      {category === 'noticias' ? 'Nacional' : category}
+    </span>
+  );
+}
+
+function AdSlot({ label = 'PUBLICIDAD', className = '' }) {
+  return (
+    <div className={`w-full bg-[#F5F5F5] border-y border-[#E5E5E5] py-3 text-center ${className}`}>
+      <p className="text-[0.45rem] text-gray-400 uppercase tracking-[0.3em] mb-2 font-semibold">{label}</p>
+      <div className="h-[90px] flex items-center justify-center">
+        <span className="text-[0.6rem] text-gray-300 tracking-widest">970 × 90</span>
+      </div>
+    </div>
+  );
+}
 
 export default async function HomePage() {
-  // Cargamos en paralelo: top del día (por impacto) + últimas noticias (para el ticker)
   const [dailyTop, latest] = await Promise.all([
-    getDailyTopArticles(12, 6),
+    getDailyTopArticles(20, 6),
     getLatestArticles(30),
   ]);
 
   const clean = (str) => typeof str === 'string' ? str.replace(/#+\s*/g, '').trim() : str;
-  const sanitize = (art) => ({
-    ...art,
-    title: clean(art.title),
-    excerpt: clean(art.excerpt)
-  });
+  const sanitize = (art) => ({ ...art, title: clean(art.title), excerpt: clean(art.excerpt) });
 
   const cleanedTop    = dailyTop.map(sanitize);
   const cleanedLatest = latest.map(sanitize);
 
-  // Pool principal: artículos de mayor impacto del día, completado con los más recientes si hace falta
-  const pool = cleanedTop.length >= 12
+  const pool = cleanedTop.length >= 15
     ? cleanedTop
-    : [...cleanedTop, ...cleanedLatest].filter(
-        (a, i, arr) => arr.findIndex(x => x.id === a.id) === i
-      );
+    : [...cleanedTop, ...cleanedLatest].filter((a, i, arr) => arr.findIndex(x => x.id === a.id) === i);
 
-  // El ticker muestra las noticias recientes que NO están ya en el pool principal
-  const usedIds = new Set(pool.slice(0, 12).map(a => a.id));
-  const ticker  = cleanedLatest.filter(a => !usedIds.has(a.id)).slice(0, 6);
+  const enDesarrollo = [...cleanedLatest]
+    .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt))
+    .slice(0, 6);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -45,218 +71,266 @@ export default async function HomePage() {
     "name": SITE_CONFIG.name,
     "url": SITE_CONFIG.url,
     "logo": `${SITE_CONFIG.url}${SITE_CONFIG.logo}`,
-    "sameAs": [
-      SITE_CONFIG.social.facebook,
-      SITE_CONFIG.social.instagram,
-      SITE_CONFIG.social.twitter,
-      SITE_CONFIG.social.youtube
-    ],
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+1-829-637-1008",
-      "contactType": "customer service",
-      "areaServed": "DO",
-      "availableLanguage": "Spanish"
-    }
+    "sameAs": [SITE_CONFIG.social.facebook, SITE_CONFIG.social.instagram, SITE_CONFIG.social.twitter, SITE_CONFIG.social.youtube],
   };
 
   return (
-    <div className="bg-white text-gray-900">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <div className="bg-white text-[#111111]" style={{ fontFamily: 'var(--font-sans, Inter, sans-serif)' }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* ══════════════════════════════════════════════
-          PORTADA — Diseño Periódico Clásico
-      ══════════════════════════════════════════════ */}
-      <main aria-label="Portada">
-        {/* Espacio en blanco (Ticker eliminado a petición) */}
-        <div className="h-4 md:h-6" />
+      {/* ── AD BANNER TOP ──────────────────────────────────────────────────── */}
+      <div className="border-b border-[#E5E5E5] py-1 text-center bg-[#F9F9F9]">
+        <AdUnit format="leaderboard" slot="home_top" className="mx-auto" />
+      </div>
 
-        {/* ── SECCIÓN 1: Jerarquía de Impacto (Especial + Sidebar) ── */}
+      <main aria-label="Portada" className="max-w-[1280px] mx-auto px-5 md:px-8 lg:px-10">
 
-        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-4 border-b border-black mb-6 mt-[7px]">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* Artículo Especial (Importancia 1) - 2/3 de ancho */}
-            <div className="lg:col-span-8 border-b lg:border-b-0 lg:border-r border-gray-100 pb-12 lg:pb-0 lg:pr-12">
-              {pool[0] && (
-                <Link href={`/articulo/${pool[0].slug}`} className="group block">
-                  {/* PARTE 1: TÍTULO EN LA SECCIÓN ROJA */}
-                  <h1 className="editorial-title group-hover:text-red-700 transition-colors mb-4 text-4xl md:text-5xl lg:text-7xl">
-                    {(pool[0].title && pool[0].title.trim() !== '') ? pool[0].title : 'Información en Desarrollo'}
-                  </h1>
+        {/* ══════════════════════════════════════════════════════════════════
+            BLOQUE 1 — HERO + LO MÁS LEÍDO
+        ══════════════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12 py-10 border-b border-[#E5E5E5]">
 
-                  {/* PARTE 2: IMAGEN */}
-                  {pool[0].image && (
-                    <PremiumImage 
-                      src={pool[0].image} 
+          {/* ── LEFT: ARTÍCULO PRINCIPAL ── */}
+          <div className="lg:border-r border-[#E5E5E5] lg:pr-12">
+            {pool[0] && (
+              <Link href={`/articulo/${pool[0].slug}`} className="group block">
+                {pool[0].image && (
+                  <div className="relative overflow-hidden mb-6 shadow-[0_4px_24px_rgba(0,0,0,0.10)]">
+                    <PremiumImage
+                      src={pool[0].image}
                       alt={pool[0].title}
                       category={pool[0].category}
-                      containerClassName="w-full min-h-[350px] md:min-h-[500px] max-h-[650px] mb-[16px] shadow-xl border border-gray-100 rounded-sm group/img"
-                      className="w-auto h-auto max-w-full max-h-[650px] object-contain transition-transform duration-700 group-hover/img:scale-[1.01] shadow-2xl"
+                      containerClassName="w-full aspect-[16/9] md:aspect-[21/9]"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.015]"
                       priority={true}
-                      width={1280}
+                      width={1200}
                     />
-                  )}
-                  
-                  {/* PARTE 3: SUBTÍTULO EN LA SECCIÓN VERDE (El amarillo fue eliminado) */}
-                  {(pool[0].excerpt && pool[0].excerpt.trim() !== '') && (
-                    <p className="text-xl md:text-2xl leading-relaxed font-serif line-clamp-3 text-gray-800 mb-[4px]">
-                      {pool[0].excerpt}
-                    </p>
-                  )}
+                    <div className="absolute top-4 left-4">
+                      <span className="bg-[#C8102E] text-white text-[0.5rem] font-bold uppercase tracking-[0.3em] px-3 py-1.5">
+                        {pool[0].category === 'noticias' ? 'Nacional' : pool[0].category}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
-                  <p className="text-[0.7rem] font-black text-gray-600 uppercase tracking-[0.2em] pt-6 border-t border-gray-50">
-                   EDICIÓN ESPECIAL · POR {(pool[0].author || 'Redacción').toUpperCase()} · {formatDate(pool[0].publishedAt)}
+                <h1
+                  className="editorial-title text-[2.6rem] md:text-[3.2rem] lg:text-[3.6rem] leading-[1.08] tracking-[-0.02em] text-[#111111] mb-5 group-hover:text-[#C8102E] transition-colors duration-300"
+                >
+                  {pool[0].title || 'Información en Desarrollo'}
+                </h1>
+
+                {pool[0].excerpt && (
+                  <p className="text-[1.05rem] leading-[1.75] text-[#444444] mb-6 font-serif max-w-[680px]">
+                    {pool[0].excerpt}
                   </p>
-                </Link>
-              )}
+                )}
+
+                <div className="flex items-center gap-3 pt-5 border-t border-[#E5E5E5] text-[0.6rem] text-[#888888] font-semibold uppercase tracking-[0.2em]">
+                  <span>Por {pool[0].author || 'Redacción'}</span>
+                  <span className="text-[#E5E5E5]">|</span>
+                  <span>{formatDate(pool[0].publishedAt)}</span>
+                  <span className="text-[#E5E5E5]">|</span>
+                  <span>{calculateReadingTime(pool[0].content)} min de lectura</span>
+                </div>
+              </Link>
+            )}
+          </div>
+
+          {/* ── RIGHT: LO MÁS LEÍDO 01–05 ── */}
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between pb-3 mb-5 border-b-[2px] border-[#111111]">
+              <span className="text-[0.6rem] font-black uppercase tracking-[0.35em] text-[#111111]">Lo más leído</span>
+              <Link href="/buscar?q=popular" className="text-[0.5rem] font-bold uppercase tracking-[0.2em] text-[#C8102E] hover:underline transition-all">
+                Ver todo →
+              </Link>
             </div>
 
+            <div className="flex flex-col divide-y divide-[#E5E5E5]">
+              {pool.slice(1, 6).map((art) => (
+                <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex items-start gap-4 py-4 first:pt-0 last:pb-0 hover:bg-[#FAFAFA] transition-colors -mx-2 px-2 rounded-sm">
 
-            {/* Sidebar de Noticias (Importancia 2 y 3) - 1/3 de ancho */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
-              {pool.slice(1, 3).map((art, idx) => (
-                <div key={art.id} className={idx === 0 ? 'pb-10 border-b border-gray-100' : ''}>
-                  <Link href={`/articulo/${art.slug}`} className="group block">
-                    {art.image && (
-                      <PremiumImage 
-                        src={art.image} 
+                  {/* Texto */}
+                  <div className="flex-1 min-w-0">
+                    <CategoryBadge category={art.category} className="mb-1 block" />
+                    <h2 className="text-[0.8rem] font-bold leading-snug tracking-tight text-[#111111] group-hover:text-[#C8102E] transition-colors line-clamp-3">
+                      {art.title}
+                    </h2>
+                    <span className="text-[0.5rem] text-[#AAAAAA] font-semibold uppercase tracking-widest mt-1.5 block">
+                      {formatDate(art.publishedAt)}
+                    </span>
+                  </div>
+
+                  {/* Thumbnail */}
+                  {art.image && (
+                    <div className="w-[64px] h-[48px] flex-shrink-0 overflow-hidden rounded-sm shadow-sm">
+                      <PremiumImage
+                        src={art.image}
                         alt={art.title}
                         category={art.category}
-                        containerClassName="aspect-[16/9] mb-5 shadow-md rounded-sm group/img"
-                        className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
-                        width={600}
-                        priority={true}
+                        containerClassName="w-full h-full"
+                        className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-500"
+                        width={120}
                       />
-                    )}
-                    <h2 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-3">
-                      {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
-                    </h2>
-                    {(art.excerpt && art.excerpt.trim() !== '') && (
-                      <p className="text-sm line-clamp-2 mb-4 text-serif text-gray-700">
-                        {art.excerpt}
-                      </p>
-                    )}
-                    <span className="text-[0.6rem] font-bold text-gray-600 uppercase tracking-widest">
-                       {formatDate(art.publishedAt)}
-                    </span>
-                  </Link>
-                </div>
+                    </div>
+                  )}
+                </Link>
               ))}
             </div>
-
           </div>
         </div>
 
-        {/* ── SECCIÓN 2: Historias 4 y 5 + Columna a la Derecha (Sidebar) ── */}
-        <div className="max-w-6xl mx-auto px-4 md:px-8 pb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            {/* Izquierda: 2 noticias principales secundarias */}
-            <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6 border-r border-gray-100 pr-0 lg:pr-8">
-              {pool.slice(3, 5).map((art) => (
-                <div key={art.id}>
-                  <Link href={`/articulo/${art.slug}`} className="group block">
-                    {art.image && (
-                      <PremiumImage 
-                        src={art.image} 
-                        alt={art.title}
-                        category={art.category}
-                        containerClassName="aspect-[16/9] mb-5 shadow-md rounded-sm group/img"
-                        className="w-auto h-auto max-w-full max-h-full object-contain transition-transform duration-500 group-hover/img:scale-105"
-                      />
-                    )}
-                    <span className="text-[0.6rem] font-black text-[#bb1b21] uppercase tracking-[0.2em] mb-3 block">
-                        {art.category === 'noticias' ? 'Nacional' : art.category}
-                      </span>
-                    <h2 className="card-title text-xl md:text-2xl group-hover:text-red-700 leading-tight mb-4">
-                      {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
-                    </h2>
-                    {(art.excerpt && art.excerpt.trim() !== '') && (
-                      <p className="text-sm line-clamp-3 text-gray-700">
-                        {art.excerpt}
-                      </p>
-                    )}
-                  </Link>
-                </div>
-              ))}
+        {/* ── AD BANNER MID ─────────────────────────────────────────────── */}
+        <div className="border-y border-[#E5E5E5] py-2 my-0 -mx-5 md:-mx-8 lg:-mx-10 px-5 text-center bg-[#F9F9F9]">
+          <AdUnit format="leaderboard" slot="home_mid" className="mx-auto" />
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            BLOQUE 2 — NOTICIAS DESTACADAS (izq) + EN DESARROLLO (der)
+        ══════════════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-12 py-10 border-b border-[#E5E5E5]">
+
+          {/* ── NOTICIAS DESTACADAS — Carousel ── */}
+          <div className="lg:border-r border-[#E5E5E5] lg:pr-12">
+            <div className="flex items-center gap-3 pb-3 mb-7 border-b-[2px] border-[#111111]">
+              <span className="text-[0.6rem] font-black uppercase tracking-[0.35em]">🔥 Noticias Destacadas</span>
+            </div>
+            <ArticleCarousel articles={pool.slice(6, 13)} visibleCount={3} />
+          </div>
+
+          {/* ── EN DESARROLLO — Timeline ── */}
+          <div>
+            <div className="flex items-center gap-2 pb-3 mb-5 border-b-[2px] border-[#111111]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-2 h-2 bg-[#C8102E] rounded-full animate-pulse" />
+                <span className="text-[0.6rem] font-black uppercase tracking-[0.35em]">En Desarrollo</span>
+              </span>
             </div>
 
-            {/* Derecha: Sidebar Editorial (Breves + Publicidad) */}
-            <div className="lg:col-span-4">
-              <div className="border-b-2 border-black mb-6 pb-2">
-                <span className="text-[0.7rem] font-black uppercase tracking-[0.3em] flex items-center gap-2">
-                  <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                  Breves del Imperio
-                </span>
-              </div>
+            <div className="relative">
+              {/* Línea vertical */}
+              <div className="absolute left-[42px] top-0 bottom-0 w-px bg-[#E5E5E5]" />
 
-              <AdUnit format="rectangle" slot="home_sidebar" className="my-0 mb-10" />
-              <div className="space-y-8">
-                {pool.slice(8, 12).map((art, idx) => (
-                  <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-5 items-start border-b border-gray-100 pb-6 last:border-0">
-                    <div className="text-3xl font-black text-gray-200 font-serif leading-none shrink-0">{idx + 1}</div>
-                    <div className="flex-1">
-                      <h3 className="text-[0.95rem] font-bold group-hover:text-red-700 leading-snug">
-                        {(art.title && art.title.trim() !== '') ? art.title : 'Información en Desarrollo'}
+              <div className="space-y-0">
+                {enDesarrollo.map((art, idx) => (
+                  <Link key={art.id} href={`/articulo/${art.slug}`} className="group flex gap-4 items-start py-4 border-b border-[#F0F0F0] last:border-0 hover:bg-[#FAFAFA] -mx-2 px-2 rounded-sm transition-colors">
+                    {/* Hora */}
+                    <div className="w-10 shrink-0 text-right">
+                      <span className="text-[0.5rem] font-black text-[#C8102E] tabular-nums block mt-0.5">
+                        {toTime(art.publishedAt)}
+                      </span>
+                    </div>
+                    {/* Dot */}
+                    <div className="shrink-0 w-2 h-2 rounded-full bg-[#C8102E] mt-1.5 relative z-10 ring-2 ring-white" />
+                    {/* Título */}
+                    <div className="flex-1 min-w-0">
+                      <CategoryBadge category={art.category} className="mb-0.5 block" />
+                      <h3 className="text-[0.78rem] font-bold leading-snug group-hover:text-[#C8102E] transition-colors line-clamp-2 text-[#111111]">
+                        {art.title}
                       </h3>
-                      <span className="text-[0.55rem] text-[#bb1b21] font-bold uppercase tracking-widest mt-2 block">
-                          {art.category === 'noticias' ? 'Nacional' : art.category}
-                        </span>
                     </div>
                   </Link>
                 ))}
+              </div>
+            </div>
+
+            <Link href="/categoria/internacional" className="mt-5 flex items-center gap-1 text-[0.5rem] font-bold uppercase tracking-[0.2em] text-[#C8102E] hover:underline transition-all">
+              Ver más actualizaciones →
+            </Link>
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            BLOQUE 3 — LO MÁS LEÍDO HOY (5 cards horizontales)
+        ══════════════════════════════════════════════════════════════════ */}
+        <div className="py-10 border-b border-[#E5E5E5]">
+          <div className="flex items-center gap-3 pb-3 mb-8 border-b-[2px] border-[#111111]">
+            <span className="w-2.5 h-2.5 bg-[#C8102E] rounded-full" />
+            <span className="text-[0.6rem] font-black uppercase tracking-[0.35em]">Lo más leído hoy</span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {pool.slice(0, 5).map((art, idx) => (
+              <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
+                <div className="relative mb-3 overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] rounded-sm">
+                  <PremiumImage
+                    src={art.image}
+                    alt={art.title}
+                    category={art.category}
+                    containerClassName="aspect-[16/10] w-full"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500"
+                    width={380}
+                  />
+                </div>
+                <CategoryBadge category={art.category} className="mb-1.5 block" />
+                <h3 className="text-[0.8rem] font-bold leading-snug tracking-tight text-[#111111] group-hover:text-[#C8102E] transition-colors line-clamp-3 mb-1.5">
+                  {art.title}
+                </h3>
+                <div className="flex items-center gap-1.5 text-[0.47rem] text-[#AAAAAA] font-semibold uppercase tracking-widest">
+                  <span>{formatDate(art.publishedAt)}</span>
+                  <span>·</span>
+                  <span>{calculateReadingTime(art.content)} min</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* ══════════════════════════════════════════════════════════════════
+            BLOQUE 4 — MÁS NOTICIAS (3 cols) + AD 300×600
+        ══════════════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-12 py-10">
+
+          {/* Grid artículos */}
+          <div>
+            <div className="flex items-center gap-2 pb-3 mb-8 border-b-[2px] border-[#111111]">
+              <span className="w-2 h-2 bg-[#C8102E] rounded-full" />
+              <span className="text-[0.6rem] font-black uppercase tracking-[0.35em]">Más Noticias</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {pool.slice(13, 19).map((art) => (
+                <Link key={art.id} href={`/articulo/${art.slug}`} className="group block border-b border-[#E5E5E5] pb-7">
+                  {art.image && (
+                    <div className="overflow-hidden mb-4 shadow-[0_2px_12px_rgba(0,0,0,0.07)]">
+                      <PremiumImage
+                        src={art.image}
+                        alt={art.title}
+                        category={art.category}
+                        containerClassName="aspect-[16/9] w-full"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        width={480}
+                      />
+                    </div>
+                  )}
+                  <CategoryBadge category={art.category} className="mb-2 block" />
+                  <h3 className="card-title text-[0.95rem] leading-snug text-[#111111] group-hover:text-[#C8102E] transition-colors line-clamp-3 mb-2.5">
+                    {art.title}
+                  </h3>
+                  {art.excerpt && (
+                    <p className="text-[0.75rem] text-[#666666] line-clamp-2 leading-relaxed mb-3 font-serif">{art.excerpt}</p>
+                  )}
+                  <div className="flex items-center gap-2 text-[0.47rem] text-[#AAAAAA] font-semibold uppercase tracking-widest">
+                    <span>{formatDate(art.publishedAt)}</span>
+                    <span>·</span>
+                    <span>{calculateReadingTime(art.content)} min de lectura</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* AD 300×600 sticky */}
+          <div className="hidden lg:block">
+            <div className="sticky top-24">
+              <p className="text-[0.42rem] text-gray-400 uppercase tracking-[0.35em] mb-2 font-semibold text-center">Publicidad</p>
+              <div className="bg-[#F5F5F5] border border-[#E5E5E5] flex items-center justify-center" style={{ width: '300px', minHeight: '600px' }}>
+                <AdUnit format="rectangle" slot="home_sidebar_bottom" />
               </div>
             </div>
           </div>
         </div>
 
       </main>
-
-      {/* ── LO MÁS LEÍDO ─────────────────────────────────────────── */}
-      <section className="max-w-6xl mx-auto px-4 md:px-8 py-12 border-t-4 border-black">
-        <div className="flex items-center gap-4 mb-8">
-          <span className="w-3 h-3 bg-red-600 rounded-full animate-pulse" />
-          <h2 className="text-[0.7rem] font-black uppercase tracking-[0.4em]">Lo más leído hoy</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {(pool.length > 5 ? pool.slice(5, 10) : pool.slice(0, 5)).map((art, idx) => (
-            <Link
-              key={art.id}
-              href={`/articulo/${art.slug}`}
-              className="group flex flex-col gap-3 hover:opacity-80 transition-opacity"
-            >
-              <div className="relative">
-                <span className="absolute -top-3 -left-2 text-7xl font-black text-slate-100 leading-none select-none z-0 font-serif">
-                  {idx + 1}
-                </span>
-                <PremiumImage
-                  src={art.image}
-                  alt={art.title}
-                  category={art.category}
-                  containerClassName="aspect-[4/3] rounded-xl overflow-hidden relative z-10 shadow-md"
-                  className="w-full h-full object-contain"
-                  width={400}
-                />
-              </div>
-              <div>
-                  <span className="text-[0.55rem] font-black uppercase tracking-[0.2em] text-red-600 block mb-1">
-                    {art.category === 'noticias' ? 'Nacional' : art.category}
-                  </span>
-                <h3 className="text-sm font-black leading-tight group-hover:text-red-700 transition-colors line-clamp-3">
-                  {art.title}
-                </h3>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Newsletter - Full Width */}
-      <NewsletterBox />
     </div>
   );
 }

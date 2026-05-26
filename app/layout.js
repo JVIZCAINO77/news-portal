@@ -1,4 +1,4 @@
-﻿// app/layout.js — Root Layout para Imperio Público 2.0
+// app/layout.js — Root Layout para Imperio Público 2.0
 import './globals.css';
 import { SITE_CONFIG } from '@/lib/data';
 import Header from '@/components/Header';
@@ -151,7 +151,7 @@ export default function RootLayout({ children }) {
         />
       </head>
 
-      <body className="min-h-screen flex flex-col font-sans antialiased">
+      <body className={`min-h-screen flex flex-col antialiased ${playfair.variable} ${inter.variable}`}>
         <Header />
         <div className="min-h-screen pb-24 md:pb-0" style={{ paddingTop: '2px' }}>
           {children}

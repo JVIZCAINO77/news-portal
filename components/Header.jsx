@@ -131,10 +131,16 @@ export default function Header() {
             {/* ─── Botón Hamburguesa Amarillo — IZQUIERDA ─── */}
             <button
               id="nav-extra-toggle"
-              onClick={() => setIsExtraOpen(v => !v)}
-              aria-expanded={isExtraOpen}
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                  setIsMenuOpen(v => !v);
+                } else {
+                  setIsExtraOpen(v => !v);
+                }
+              }}
+              aria-expanded={isExtraOpen || isMenuOpen}
               aria-haspopup="true"
-              aria-label="Todas las secciones"
+              aria-label="Menú de navegación"
               className="flex-shrink-0 flex items-center justify-center w-12 h-10 mr-2 transition-all active:scale-90 hover:scale-105"
               style={{ backgroundColor: '#111', borderRadius: '4px', border: '2px solid rgba(255,255,255,0.7)', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}
             >
@@ -172,8 +178,8 @@ export default function Header() {
             <div className="text-[10px] font-semibold text-gray-800 uppercase italic tracking-widest shrink-0">{currentDate}</div>
             
             {/* Ticker dinámico */}
-            <div className="flex-1 overflow-hidden hidden lg:flex items-center gap-3 border-l border-r border-gray-100 px-6">
-              <span className="bg-red-700 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 shrink-0">
+            <div className="flex-1 hidden lg:flex items-center gap-3 border-l border-r border-gray-100 px-6 min-w-0">
+              <span className="bg-red-700 text-white text-[8px] font-black uppercase tracking-[0.15em] px-2.5 py-1 shrink-0 rounded-[2px]">
                 HOY
               </span>
               <div className="overflow-hidden flex-1 relative h-4">

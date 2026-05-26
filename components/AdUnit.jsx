@@ -1,51 +1,57 @@
 'use client';
-// components/AdUnit.jsx — Espacio publicitario con reserva de espacio (CLS Prevention)
+// components/AdUnit.jsx — Espacios publicitarios optimizados (sin CLS, sin espacios vacíos en dev)
 import { useEffect } from 'react';
 import { SITE_CONFIG, ADS_SLOTS } from '@/lib/data';
 
 export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
-  // Mapeo dinámico: si el slot pasado es una llave de ADS_SLOTS, usar su valor.
   const finalSlot = ADS_SLOTS[slot] || slot;
+  const isDev = process.env.NODE_ENV === 'development';
 
   useEffect(() => {
-    // Si los anuncios están apagados, no iniciamos AdSense
-    if (!SITE_CONFIG.showAds) return;
+    if (!SITE_CONFIG.showAds || isDev) return;
     try {
       if (window.adsbygoogle) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       }
-    } catch (e) {
-      console.error('AdSense Error:', e);
-    }
+    } catch (e) {}
   }, [slot]);
 
-  // Guardia DESPUÉS de todos los hooks (React Rules of Hooks)
   if (!SITE_CONFIG.showAds) return null;
-
-  // No renderizar si el slot es un placeholder — evita registrar slots inválidos en AdSense
   if (!finalSlot || finalSlot.startsWith('placeholder')) return null;
 
+  // ── EN DESARROLLO: placeholder mínimo, no ocupa espacio visual ──────────
+  if (isDev) {
+    return (
+      <div className={`inline-flex items-center justify-center border border-dashed border-gray-200 rounded-sm bg-gray-50 text-gray-300 ${className}`}
+           style={{ minHeight: '28px', padding: '4px 12px' }}>
+        <span className="text-[0.45rem] font-bold uppercase tracking-[0.3em]">
+          Ad · {format}
+        </span>
+      </div>
+    );
+  }
+
+  // ── EN PRODUCCIÓN: AdSense real con reserva de espacio mínima ───────────
   const dimensions = {
-    leaderboard:  { minHeight: '90px',  label: '728 x 90' },
-    rectangle:    { minHeight: '250px', label: '300 x 250' },
-    'in-article': { minHeight: '120px', label: 'Native / In-Article' },
+    leaderboard:  { height: '90px' },
+    rectangle:    { height: '250px' },
+    'in-article': { height: '120px' },
   };
-  const style = dimensions[format] || dimensions.rectangle;
+  const h = (dimensions[format] || dimensions.rectangle).height;
 
   return (
-    <div className={`ad-container my-8 ${className}`} style={{ minHeight: style.minHeight }}>
-      <div className="flex flex-col items-center justify-center relative overflow-hidden" style={{ minHeight: style.minHeight }}>
-        <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-300 mb-2">
-          Publicidad
-        </span>
-        
-        <ins className="adsbygoogle"
-             style={{ display: 'block', minWidth: '250px', minHeight: style.minHeight }}
-             data-ad-client={SITE_CONFIG.adsenseId}
-             data-ad-slot={finalSlot}
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-      </div>
+    <div className={`ad-container ${className}`} style={{ minHeight: h }}>
+      <span className="block text-center text-[0.42rem] font-semibold uppercase tracking-[0.3em] text-gray-300 mb-1">
+        Publicidad
+      </span>
+      <ins
+        className="adsbygoogle"
+        style={{ display: 'block', minHeight: h }}
+        data-ad-client={SITE_CONFIG.adsenseId}
+        data-ad-slot={finalSlot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
     </div>
   );
 }

@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #bb1b21;
+  --color-primary: #C8102E;
   /* Map Tailwind colors to our switching CSS variables */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-border-base: var(--border);
   --color-muted-base: var(--muted);
   
-  --font-title: "Playfair Display", serif;
-  --font-serif: "Playfair Display", serif;
-  --font-poppins: "Inter", sans-serif;
-  --font-sans: "Inter", sans-serif;
+  --font-title: var(--font-playfair, "Playfair Display", serif);
+  --font-serif: var(--font-playfair, "Playfair Display", serif);
+  --font-sans: var(--font-inter, "Inter", sans-serif);
+  --font-poppins: var(--font-inter, "Inter", sans-serif);
   --font-mono: ui-monospace, monospace;
 }
 
 :root {
   --background: #ffffff;
-  --foreground: #111827;
-  --primary: #bb1b21;
+  --foreground: #111111;
+  --primary: #C8102E;
   --secondary: #1f2937;
   --muted: #6b7280;
-  --border: #e5e7eb;
+  --border: #E5E5E5;
 }
 
 .dark {
@@ -326,9 +326,9 @@ article ins.adsbygoogle:not(.ad-container ins.adsbygoogle) {
 
 /* Asegurar que nuestras unidades manuales tengan un espaciado limpio */
 .ad-container {
-  margin: 3rem 0;
-  padding: 1.5rem 0;
-  border-top: 1px solid rgba(0,0,0,0.05);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  margin: 1rem 0;
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(0,0,0,0.04);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
 }
 
