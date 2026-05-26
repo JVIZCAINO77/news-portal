@@ -79,9 +79,7 @@ export default async function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* ── AD BANNER TOP ──────────────────────────────────────────────────── */}
-      <div className="border-b border-[#E5E5E5] py-1 text-center bg-[#F9F9F9]">
-        <AdUnit format="leaderboard" slot="home_top" className="mx-auto" />
-      </div>
+      <AdUnit format="leaderboard" slot="home_top" className="mx-auto block text-center" />
 
       <main aria-label="Portada" className="max-w-[1280px] mx-auto px-5 md:px-8 lg:px-10">
 
@@ -180,9 +178,7 @@ export default async function HomePage() {
         </div>
 
         {/* ── AD BANNER MID ─────────────────────────────────────────────── */}
-        <div className="border-y border-[#E5E5E5] py-2 my-0 -mx-5 md:-mx-8 lg:-mx-10 px-5 text-center bg-[#F9F9F9]">
-          <AdUnit format="leaderboard" slot="home_mid" className="mx-auto" />
-        </div>
+        <AdUnit format="leaderboard" slot="home_mid" className="mx-auto block text-center" />
 
         {/* ══════════════════════════════════════════════════════════════════
             BLOQUE 2 — NOTICIAS DESTACADAS (izq) + EN DESARROLLO (der)
@@ -322,10 +318,7 @@ export default async function HomePage() {
           {/* AD 300×600 sticky */}
           <div className="hidden lg:block">
             <div className="sticky top-24">
-              <p className="text-[0.42rem] text-gray-400 uppercase tracking-[0.35em] mb-2 font-semibold text-center">Publicidad</p>
-              <div className="bg-[#F5F5F5] border border-[#E5E5E5] flex items-center justify-center" style={{ width: '300px', minHeight: '600px' }}>
-                <AdUnit format="rectangle" slot="home_sidebar_bottom" />
-              </div>
+              <AdUnit format="rectangle" slot="home_sidebar_bottom" />
             </div>
           </div>
         </div>
