@@ -127,8 +127,6 @@ export default async function HomePage() {
                   <span>Por {pool[0].author || 'Redacción'}</span>
                   <span className="text-[#E5E5E5]">|</span>
                   <span>{formatDate(pool[0].publishedAt)}</span>
-                  <span className="text-[#E5E5E5]">|</span>
-                  <span>{calculateReadingTime(pool[0].content)} min de lectura</span>
                 </div>
               </Link>
             )}
@@ -261,11 +259,7 @@ export default async function HomePage() {
                 <h3 className="text-[0.8rem] font-bold leading-snug tracking-tight text-[#111111] group-hover:text-[#C8102E] transition-colors line-clamp-3 mb-1.5">
                   {art.title}
                 </h3>
-                <div className="flex items-center gap-1.5 text-[0.47rem] text-[#AAAAAA] font-semibold uppercase tracking-widest">
-                  <span>{formatDate(art.publishedAt)}</span>
-                  <span>·</span>
-                  <span>{calculateReadingTime(art.content)} min</span>
-                </div>
+                <span className="text-[0.47rem] text-[#AAAAAA] font-semibold uppercase tracking-widest">{formatDate(art.publishedAt)}</span>
               </Link>
             ))}
           </div>
@@ -305,11 +299,7 @@ export default async function HomePage() {
                   {art.excerpt && (
                     <p className="text-[0.75rem] text-[#666666] line-clamp-2 leading-relaxed mb-3 font-serif">{art.excerpt}</p>
                   )}
-                  <div className="flex items-center gap-2 text-[0.47rem] text-[#AAAAAA] font-semibold uppercase tracking-widest">
-                    <span>{formatDate(art.publishedAt)}</span>
-                    <span>·</span>
-                    <span>{calculateReadingTime(art.content)} min de lectura</span>
-                  </div>
+                  <span className="text-[0.47rem] text-[#AAAAAA] font-semibold uppercase tracking-widest">{formatDate(art.publishedAt)}</span>
                 </Link>
               ))}
             </div>

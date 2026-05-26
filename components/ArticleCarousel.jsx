@@ -49,11 +49,7 @@ export default function ArticleCarousel({ articles = [], visibleCount = 3 }) {
             <h3 className="text-[0.82rem] font-black leading-snug group-hover:text-red-700 transition-colors line-clamp-3 tracking-tight mb-2">
               {art.title}
             </h3>
-            <div className="flex items-center gap-2 text-[0.5rem] text-gray-400 font-bold uppercase tracking-widest">
-              <span>{formatArticleDate(art.publishedAt)}</span>
-              <span>·</span>
-              <span>{readingTime(art.content)} min de lectura</span>
-            </div>
+            <span className="text-[0.5rem] text-gray-400 font-bold uppercase tracking-widest">{formatArticleDate(art.publishedAt)}</span>
           </Link>
         ))}
       </div>
