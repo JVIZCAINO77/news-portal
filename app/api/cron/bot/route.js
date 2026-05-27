@@ -1277,26 +1277,19 @@ function isOnTopicForCategory(item, categorySlug) {
   // 1. BLOCKLIST: rechazar si aparece cualquier palabra prohibida en título o snippet
   if (blocklist.some(w => text.includes(norm(w)))) return false;
 
-  // 2. Sin ALLOWLIST definido → sin restricción (no debería ocurrir)
+  // 2. Sin ALLOWLIST definido → sin restricción
   if (allowlist.length === 0) return true;
 
-  // 3. El TÍTULO debe tener hit en el allowlist (garantiza que el artículo SEA sobre el tema)
-  const titleHit = allowlist.some(w => titleOnly.includes(norm(w)));
+  // 3. Aceptar si hay hit en TÍTULO o en SNIPPET
+  //    El blocklist garantiza que el contenido no sea de otra sección.
+  //    No es necesario exigir el hit solo en el título — muchas noticias
+  //    válidas describen el tema en el cuerpo/snippet, no en el titular.
+  const titleHit   = allowlist.some(w => titleOnly.includes(norm(w)));
+  const snippetHit = allowlist.some(w => text.includes(norm(w)));
 
-  if (categorySlug === 'noticias' || categorySlug === 'nacional') {
-    // Nacional es el comodín dominicano: acepta si hay hit en título O 2+ en texto
-    if (titleHit) return true;
-    return allowlist.filter(w => text.includes(norm(w))).length >= 2;
-  }
-
-  if (categorySlug === 'medio-ambiente') {
-    // Medio ambiente: acepta si hay hit en título o snippet (temas emergentes)
-    return titleHit || allowlist.some(w => text.includes(norm(w)));
-  }
-
-  // Todas las demás secciones: el TÍTULO es obligatorio
-  return titleHit;
+  return titleHit || snippetHit;
 }
+
 
 // ─── PARSEAR Y VALIDAR ARTÍCULO GENERADO POR IA ──────────────────────────────
 function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
