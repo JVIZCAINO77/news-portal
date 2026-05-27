@@ -635,6 +635,13 @@ const TOPIC_ALLOWLIST = {
     'record','impactante','sorprendente','curioso','increible','fenomeno',
     'generacion','joven','redes sociales','influencer','challenge',
     'estilo de vida','nuevo reto','se hace viral','lo que todos hablan',
+    // Ampliacion: sociedad, controversias, fenomenos del momento
+    'sociedad','polemica','debate','controversial','escandalo',
+    'misterio','historia curiosa','revelacion','sorpresa',
+    'estudio revela','expertos','segun','nuevo','alerta',
+    'consejo','recomiendan','descubren','mujer','hombre','familia',
+    'comunidad','jovenes','ninos','personas','todo el mundo',
+    'sentencia','fallo','decisio','caso','demanda','tribunal',
   ],
 
   // ── ECONOMÍA ─────────────────────────────────────────────────────────────────
@@ -658,6 +665,12 @@ const TOPIC_ALLOWLIST = {
     'reserva federal','tasas de interes',
     'terremoto','tsunami','erupcion volcanica',
     'pandemia','emergencia sanitaria','politica exterior',
+    // Ampliacion: cualquier pais fuera de RD tiene cobertura internacional
+    'mexico','colombia','venezuela','cuba','haiti','argentina','brasil',
+    'espana','europa','africa','asia','america latina','caribe',
+    'presidente de','gobierno de','crisis en','elecciones en',
+    'migracion','refugiados','diplomacia','embajada','cancilleria',
+    'economia mundial','mercado global','bolsa','wall street',
   ],
 
   // ── SALUD ────────────────────────────────────────────────────────────────────
@@ -667,6 +680,12 @@ const TOPIC_ALLOWLIST = {
     'bienestar','prevencion','nutricion','farmaco','epidemia','sanitario',
     'alimentacion','dieta','cirugia','trasplante','emergencia medica',
     'seguro medico','salud publica','ministerio de salud',
+    // Ampliacion: salud mental, bienestar y consejos medicos
+    'mental','psicologia','ansiedad','depresion','estres','terapia',
+    'ejercicio','dormir','sueno','longevidad','envejecimiento',
+    'vitamina','suplemento','investigacion medica','estudio cientifico',
+    'alimento','beneficios de','riesgo de','sintoma','medicos recomiendan',
+    'segun estudio','nueva terapia','descubren','expertos dicen',
   ],
 
   // ── CULTURA ──────────────────────────────────────────────────────────────────
@@ -676,6 +695,12 @@ const TOPIC_ALLOWLIST = {
     'gastronomia','arquitectura','identidad','artesania','historia',
     'educacion cultural','teatro cultural','evento cultural','pintura',
     'escultura','poesia','novela','teatro dominicano','identidad cultural',
+    // Ampliacion: educacion, patrimonio y vida cultural dominicana
+    'educacion','escuela','universidad','estudiante','maestro','docente',
+    'dominicano','dominicana','merengue','bachata','carnaval',
+    'patrimonio dominicano','zona colonial','herencia',
+    'lectura','escritura','humanidades','ceremonia','homenaje',
+    'premiacion','concurso','beca','galeria','exhibicion',
   ],
 
   // ── NOTICIAS (legacy) ────────────────────────────────────────────────────────
