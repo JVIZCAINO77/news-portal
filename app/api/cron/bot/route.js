@@ -208,7 +208,10 @@ const CATEGORIES = {
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
-      // Complementarias
+      // Nuevas fuentes económicas
+      'https://www.france24.com/es/economia/rss',
+      'https://www.infobae.com/feeds/rss/economia.xml',
+      'https://cnnespanol.cnn.com/feed/',
       'https://z101digital.com/feed/',
       'https://lainformacion.com.do/feed/',
       'https://elnuevodiario.com.do/feed/',
@@ -259,7 +262,10 @@ const CATEGORIES = {
       'https://almomento.net/feed/',
       'https://www.bbc.com/mundo/index.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
-      // Complementarias
+      // Nuevas fuentes de salud
+      'https://www.france24.com/es/rss',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://www.infobae.com/feeds/rss/salud.xml',
       'https://elnuevodiario.com.do/feed/',
       'https://lainformacion.com.do/feed/',
     ],
@@ -271,7 +277,10 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada',
-      // Complementarias — cultura dominicana
+      // Nuevas fuentes culturales
+      'https://remolacha.net/feed/',
+      'https://www.infobae.com/feeds/rss/cultura.xml',
+      'https://cnnespanol.cnn.com/feed/',
       'https://elnuevodiario.com.do/feed/',
     ],
   },
@@ -293,6 +302,12 @@ const CATEGORIES = {
       'https://www.diariolibre.com/rss/portada.xml',
       'https://www.bbc.com/mundo/index.xml',
       'https://www.infobae.com/feeds/rss/tendencias.xml',
+      // Nuevas fuentes de tendencias
+      'https://www.france24.com/es/rss',
+      'https://cnnespanol.cnn.com/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
+      'https://z101digital.com/feed/',
+      'https://almomento.net/feed/',
     ],
   },
 
@@ -317,6 +332,10 @@ const CATEGORIES = {
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada',
       'https://www.infobae.com/feeds/rss/mundo.xml',
       'https://elmundo.es/rss/portada.xml',
+      // Nuevas fuentes internacionales
+      'https://cnnespanol.cnn.com/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/america/portada',
+      'https://www.dw.com/es/rss/noticias/rss-6617',
     ],
   },
 
@@ -983,7 +1002,7 @@ export async function GET(request) {
 
     // Si pasamos el check, procedemos con el scraping pesado
     const parser = new Parser({
-      timeout: 5000,
+      timeout: 7000, // subido de 5s a 7s — feeds internacionales pueden ser lentos
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
       }
@@ -1017,10 +1036,11 @@ export async function GET(request) {
     }
 
 
-    // === CAPA 1: Pre-filtro estricto por fecha (solo HOY en RD) ===
-    const todaysItems = pooledItems.filter(item => {
+    // === CAPA 1: Pre-filtro por fecha — HOY primero, fallback a 36h si no hay candidatos ===
+    // Prioridad 1: Noticias estrictamente de HOY en RD (frescura máxima)
+    let todaysItems = pooledItems.filter(item => {
       const dateStr = item.isoDate || item.pubDate;
-      if (!dateStr) return false; // Sin fecha = rechazado
+      if (!dateStr) return false;
       const itemDR = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'America/Santo_Domingo',
         year: 'numeric', month: '2-digit', day: '2-digit'
@@ -1030,8 +1050,21 @@ export async function GET(request) {
 
     console.log(`[Bot] ${todaysItems.length} noticias de HOY (${todayDR}) de ${pooledItems.length} totales`);
 
+    // Fallback: si no hay noticias de hoy exacto → ampliar ventana a 36h
+    // Esto cubre casos donde el feed actualizó tarde la noche anterior o los feeds
+    // internacionales van con desfase horario.
     if (todaysItems.length === 0) {
-      return NextResponse.json({ message: `No hay noticias de HOY (${todayDR}) en las fuentes consultadas para: ${categoryKey}` }, { status: 200 });
+      const cutoff36h = new Date(Date.now() - 36 * 60 * 60 * 1000);
+      todaysItems = pooledItems.filter(item => {
+        const dateStr = item.isoDate || item.pubDate;
+        if (!dateStr) return false;
+        return new Date(dateStr) >= cutoff36h;
+      });
+      if (todaysItems.length > 0) {
+        console.log(`[Bot] ⚠️ Sin noticias de HOY — usando fallback 36h: ${todaysItems.length} candidatos`);
+      } else {
+        return NextResponse.json({ message: `No hay noticias recientes (36h) en las fuentes para: ${categoryKey}` }, { status: 200 });
+      }
     }
 
     // El check de límites ya se hizo en la Capa 0 al inicio.
@@ -1080,7 +1113,9 @@ export async function GET(request) {
 
     // === CAPA 4: Selección final — priorizar ÚLTIMA HORA y TENDENCIA POR CONSENSO ===
     // Calcular "Impacto" basado en repetición en medios y relevancia nacional
-    const itemsWithScore = todaysItems.map(item => {
+    // Limitar el pool a 60 items para evitar O(n²) lento con feeds grandes
+    const scoringPool = todaysItems.slice(0, 60);
+    const itemsWithScore = scoringPool.map(item => {
       const keywords = extractKeywords(item.title);
       let consensusScore = 0;
       
@@ -1095,7 +1130,7 @@ export async function GET(request) {
       }
 
       // Consenso: ¿Cuántos otros medios están hablando de esto hoy?
-      for (const other of todaysItems) {
+      for (const other of scoringPool) {
         if (other === item) continue;
         const otherKeywords = extractKeywords(other.title);
         if (semanticOverlap(keywords, otherKeywords) >= 0.25) {
@@ -1302,7 +1337,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             break;
           }
           const gemCtrl = new AbortController();
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 20000); // 20s — reducido para dejar margen al resto
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 15000); // 15s — reducido para dejar margen al resto
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
