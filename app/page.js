@@ -34,16 +34,6 @@ function CategoryBadge({ category, className = '' }) {
   );
 }
 
-function AdSlot({ label = 'PUBLICIDAD', className = '' }) {
-  return (
-    <div className={`w-full bg-[#F5F5F5] border-y border-[#E5E5E5] py-3 text-center ${className}`}>
-      <p className="text-[0.45rem] text-gray-400 uppercase tracking-[0.3em] mb-2 font-semibold">{label}</p>
-      <div className="h-[90px] flex items-center justify-center">
-        <span className="text-[0.6rem] text-gray-300 tracking-widest">970 × 90</span>
-      </div>
-    </div>
-  );
-}
 
 export default async function HomePage() {
   const [dailyTop, latest] = await Promise.all([

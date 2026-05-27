@@ -1636,7 +1636,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       }
     }
 
-    console.log(`[Bot] ✅ Imagen Cloudinary garantizada: ${finalImageUrl.slice(0, 70)}...`);
+    if (finalImageUrl) {
+      console.log(`[Bot] ✅ Imagen Cloudinary garantizada: ${finalImageUrl.slice(0, 70)}...`);
+    } else {
+      console.warn(`[Bot] ⚠️ Publicando sin imagen (todas las fuentes fallaron).`);
+    }
 
 
     // ─── VALIDACIÓN DE CALIDAD FINAL (Content Length) ────────────────────────
@@ -1707,6 +1711,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       image: finalImageUrl,
       imageAlt: articleData.title,
       source_link: news.link,
+      source_name: sourceName,  // ← nombre legible del medio fuente (fix BUG-7)
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       // Las noticias de ÚLTIMA HORA siempre son destacadas
