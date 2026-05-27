@@ -1495,10 +1495,13 @@ export async function GET(request) {
       .from('articles').select('category').gte('publishedAt', startTmp);
     const coveredToday = new Set((publishedCats || []).map(a => a.category));
 
-    // Consulta 2: ¿Qué categorías tienen AL MENOS 1 artículo en toda la historia?
-    const { data: allCats } = await supabaseTemp
-      .from('articles').select('category');
-    const everPublished = new Set((allCats || []).map(a => a.category));
+    // Consulta 2 (OPTIMIZADA): categorías con artículos en los últimos 90 días
+    // Usar ventana de 90 días en lugar de toda la historia — mucho más rápido
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentCats } = await supabaseTemp
+      .from('articles').select('category').gte('publishedAt', ninetyDaysAgo).limit(500);
+    const everPublished = new Set((recentCats || []).map(a => a.category));
+
 
     // Nivel 1 — Categorías VACÍAS en toda la historia (nunca publicadas)
     const neverPublished = ROTATION_ORDER.filter(c => !everPublished.has(c));
