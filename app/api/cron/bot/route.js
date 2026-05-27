@@ -1178,15 +1178,15 @@ export async function GET(request) {
       }
 
       // 4f. Deduplicación por TEMA CROSS-CATEGORÍA — bloquea el mismo tema en cualquier sección
-      // Extrae todas las keywords del candidato y verifica si alguna ya está en el pool de temas cubiertos hoy.
-      // Ejemplos bloqueados: "Ébola en Tecnología" si ya salió en Sucesos, "Trump" en Política y Economía, etc.
+      // Solo bloquea si hay 3+ palabras temáticas en común (evita falsos positivos al final del día
+      // cuando el pool de palabras ya es muy grande y bloquea artículos de temas distintos).
       const candidateNorm = item.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
       const candidateTopicWords = candidateNorm.split(/\s+/).filter(w =>
         w.length > 5 && !GENERIC_TOPIC_WORDS.has(w) && !/^\d+$/.test(w)
       );
-      const topicMatch = candidateTopicWords.find(w => publishedTopicPool.has(w));
-      if (topicMatch) {
-        console.log(`[Bot] 🔁 Duplicado CROSS-CATEGORÍA: "${item.title.slice(0, 60)}" → tema "${topicMatch}" ya cubierto hoy.`);
+      const topicMatches = candidateTopicWords.filter(w => publishedTopicPool.has(w));
+      if (topicMatches.length >= 3) {
+        console.log(`[Bot] 🔁 Duplicado CROSS-CATEGORÍA (${topicMatches.length} palabras): "${item.title.slice(0, 60)}" → temas [${topicMatches.slice(0,3).join(', ')}] ya cubiertos hoy.`);
         continue;
       }
 
