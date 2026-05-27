@@ -1483,7 +1483,10 @@ export async function GET(request) {
     'eeuu', 'haiti', 'espana', 'europa', 'opinion',
   ];
 
-  // ─── LÓGICA DE SELECCIÓN / FALLBACK ────────────────────────────────────────
+  // ─── LÓGICA DE SELECCIÓN / FALLBACK — 3 NIVELES ───────────────────────────
+  // Nivel 1: Secciones con 0 artículos totales (nunca publicadas) — prioridad MÁXIMA
+  // Nivel 2: Secciones sin cobertura hoy (rotación diaria normal)
+  // Nivel 3: Primera sección del orden si todas ya tienen artículos hoy
   try {
     const supabaseTemp = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -1493,22 +1496,45 @@ export async function GET(request) {
       timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
     }).format(new Date());
     const startTmp = new Date(`${todayTmp}T00:00:00-04:00`).toISOString();
+
+    // Consulta 1: ¿Qué categorías ya tienen artículo HOY?
     const { data: publishedCats } = await supabaseTemp
       .from('articles').select('category').gte('publishedAt', startTmp);
     const coveredToday = new Set((publishedCats || []).map(a => a.category));
-    // Primera categoría del orden oficial que aún no tiene artículo hoy
-    const nextUncovered = ROTATION_ORDER.find(c => !coveredToday.has(c)) || null;
+
+    // Consulta 2: ¿Qué categorías tienen AL MENOS 1 artículo en toda la historia?
+    const { data: allCats } = await supabaseTemp
+      .from('articles').select('category');
+    const everPublished = new Set((allCats || []).map(a => a.category));
+
+    // Nivel 1 — Categorías VACÍAS en toda la historia (nunca publicadas)
+    const neverPublished = ROTATION_ORDER.filter(c => !everPublished.has(c));
+
+    // Nivel 2 — Categorías con artículos históricos pero sin cobertura hoy
+    const notCoveredToday = ROTATION_ORDER.filter(c => everPublished.has(c) && !coveredToday.has(c));
+
+    // Elegir según prioridad
+    let autoCategory = null;
+    if (neverPublished.length > 0) {
+      autoCategory = neverPublished[0];
+      console.log(`[Bot] 🆕 NIVEL 1 — Sección sin artículos nunca: "${autoCategory}" (${neverPublished.length} secciones vacías)`);
+    } else if (notCoveredToday.length > 0) {
+      autoCategory = notCoveredToday[0];
+      console.log(`[Bot] 🎯 NIVEL 2 — Rotación diaria: "${autoCategory}" (cubiertas hoy: ${[...coveredToday].join(', ') || 'ninguna'})`);
+    } else {
+      autoCategory = ROTATION_ORDER[0];
+      console.log(`[Bot] 🔁 NIVEL 3 — Todas cubiertas, repite desde el inicio: "${autoCategory}"`);
+    }
 
     if (!categoryKey) {
-      // Sin categoría especificada → elegir la primera sin cubrir en el orden oficial
-      categoryKey = nextUncovered || ROTATION_ORDER[0];
-      console.log(`[Bot] 🎯 Rotación determinista: ${categoryKey} (cubiertas hoy: ${[...coveredToday].join(', ') || 'ninguna'})`);
+      categoryKey = autoCategory;
     } else {
       // Categoría explícita recibida (GitHub Actions / manual)
-      if (coveredToday.has(categoryKey) && nextUncovered) {
-        // Ya fue cubierta hoy → fallback a la siguiente sin cubrir en la rotación
-        console.log(`[Bot] 🔄 Categoría "${categoryKey}" ya cubierta hoy → fallback a "${nextUncovered}"`);
-        categoryKey = nextUncovered;
+      // Si ya está cubierta hoy, aplicar misma lógica de 3 niveles como fallback
+      if (coveredToday.has(categoryKey)) {
+        const fallback = neverPublished[0] || notCoveredToday[0] || ROTATION_ORDER[0];
+        console.log(`[Bot] 🔄 Categoría "${categoryKey}" ya cubierta hoy → fallback a "${fallback}"`);
+        categoryKey = fallback;
         categoryFallbackUsed = true;
       } else {
         console.log(`[Bot] ✅ Publicando categoría solicitada: ${categoryKey}`);
