@@ -1,19 +1,18 @@
 name: 🤖 Auto-Blogger Diario — Imperio Público
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ESTRUCTURA OFICIAL IMPERIO PÚBLICO — 12 artículos/día
+# ESTRUCTURA OFICIAL IMPERIO PÚBLICO — 12 artículos/día · 32 secciones en rotación
+# El bot rota por las 32 secciones del portal. Ciclo completo: ~3 días.
 # 07:00 AM → Política        07:30 AM → Policía
 # 08:00 AM → Deportes        08:30 AM → Tecnología
 # 09:00 AM → Sucesos         09:30 AM → Entretenimiento
-# 10:00 AM → Tendencias      10:30 AM → Economía
-# 11:00 AM → Internacional   11:30 AM → Salud
-# 12:00 PM → Cultura         12:30 PM → Rotación (llena la sección que falte)
+# 10:00 AM → Economía        10:30 AM → Internacional
+# 11:00 AM → Salud           11:30 AM → Cultura
+# 12:00 PM → Rotación #11    12:30 PM → Rotación #12
 #
-# ✅ DISEÑO: Cada job es 100% independiente (sin `needs:`).
-#    Un fallo en un slot NO bloquea los demás.
-#    Reintentos automáticos con continue-on-error en el nivel de step.
-#    Slot 12 (12:30 PM) usa rotación determinista: publica la categoría
-#    con menos cobertura hoy (la que haya quedado vacía primero).
+# ✅ Los slots fijos cubren las 10 secciones principales siempre.
+# ✅ Los slots de rotación cubren las 22 secciones adicionales en orden.
+# ✅ Cada job es 100% independiente — un fallo no bloquea los demás.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:

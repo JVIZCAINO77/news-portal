@@ -339,11 +339,8 @@ const CATEGORIES = {
     ],
   },
 
-  // ─── CATEGORÍAS EN RESERVA (sin slot de cron asignado) ──────────────────────
-  // Las siguientes secciones están listas para activarse pero actualmente NO tienen
-  // entrada en vercel.json ni en autoblog.yml.
-  // Para activarlas: añadir el cron en vercel.json + un job en autoblog.yml.
-  // Se pueden usar vía workflow_dispatch con: ?category=nacional o ?category=medio-ambiente
+  // ─── SECCIONES ACTIVAS EN ROTACIÓN — Todas las categorías del portal ──────────
+
   nacional: {
     slug: 'nacional', author: 'Redacción Nacional', style: 'periodístico objetivo y formal',
     feeds: [
@@ -364,6 +361,217 @@ const CATEGORIES = {
       'https://www.infobae.com/feeds/rss/tendencias.xml',
       'https://www.diariolibre.com/rss/portada.xml',
       'https://www.france24.com/es/rss',
+    ],
+  },
+
+  opinion: {
+    slug: 'opinion', author: 'Mesa Editorial', style: 'opinión, análisis profundo y periodismo de criterio',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/opinion/portada',
+      'https://www.france24.com/es/rss',
+      'https://elnuevodiario.com.do/feed/',
+    ],
+  },
+
+  gobierno: {
+    slug: 'gobierno', author: 'Redacción Gubernamental', style: 'formal, institucional y objetivo',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
+      'https://z101digital.com/feed/',
+    ],
+  },
+
+  justicia: {
+    slug: 'justicia', author: 'Sección Judicial', style: 'riguroso, legal y objetivo',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
+      'https://z101digital.com/feed/',
+    ],
+  },
+
+  congreso: {
+    slug: 'congreso', author: 'Redacción Legislativa', style: 'formal, legislativo e informativo',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
+      'https://z101digital.com/feed/',
+    ],
+  },
+
+  educacion: {
+    slug: 'educacion', author: 'Sección Educación', style: 'informativo, formativo y esperanzador',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
+      'https://elnuevodiario.com.do/feed/',
+      'https://www.bbc.com/mundo/index.xml',
+    ],
+  },
+
+  provincias: {
+    slug: 'provincias', author: 'Corresponsalía Nacional', style: 'cercano, comunitario e informativo',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
+      'https://z101digital.com/feed/',
+      'https://lainformacion.com.do/feed/',
+    ],
+  },
+
+  farandula: {
+    slug: 'farandula', author: 'Sección Farándula', style: 'dinámico, ameno y entretenido',
+    feeds: [
+      'https://remolacha.net/feed/',
+      'https://www.diariolibre.com/rss/revista.xml',
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://z101digital.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
+    ],
+  },
+
+  musica: {
+    slug: 'musica', author: 'Mesa Musical', style: 'apasionado, cultural y conectado con el público dominicano',
+    feeds: [
+      'https://remolacha.net/feed/',
+      'https://www.diariolibre.com/rss/revista.xml',
+      'https://www.infobae.com/feeds/rss/cultura.xml',
+      'https://elnuevodiario.com.do/feed/',
+      'https://z101digital.com/feed/',
+    ],
+  },
+
+  cine: {
+    slug: 'cine', author: 'Sección Cine y Streaming', style: 'crítico, descriptivo y accesible',
+    feeds: [
+      'https://remolacha.net/feed/',
+      'https://www.diariolibre.com/rss/revista.xml',
+      'https://www.infobae.com/feeds/rss/cultura.xml',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada',
+      'https://elnuevodiario.com.do/feed/',
+    ],
+  },
+
+  virales: {
+    slug: 'virales', author: 'Mesa de Virales', style: 'fresco, rápido y directo al punto',
+    feeds: [
+      'https://remolacha.net/feed/',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://www.infobae.com/feeds/rss/tendencias.xml',
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://cnnespanol.cnn.com/feed/',
+    ],
+  },
+
+  moda: {
+    slug: 'moda', author: 'Sección Moda y Estilo', style: 'elegante, moderno y aspiracional',
+    feeds: [
+      'https://remolacha.net/feed/',
+      'https://www.diariolibre.com/rss/revista.xml',
+      'https://www.infobae.com/feeds/rss/tendencias.xml',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
+      'https://elnuevodiario.com.do/feed/',
+    ],
+  },
+
+  gastronomia: {
+    slug: 'gastronomia', author: 'Sección Gastronomía', style: 'sabroso, descriptivo y cultural',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://remolacha.net/feed/',
+    ],
+  },
+
+  turismo: {
+    slug: 'turismo', author: 'Sección Turismo', style: 'descriptivo, atractivo y orientado a viajeros',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
+      'https://elnuevodiario.com.do/feed/',
+      'https://www.france24.com/es/rss',
+    ],
+  },
+
+  finanzas: {
+    slug: 'finanzas', author: 'Redacción Financiera', style: 'técnico pero accesible, orientado al ciudadano',
+    feeds: [
+      'https://www.diariolibre.com/rss/economia.xml',
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
+      'https://www.infobae.com/feeds/rss/economia.xml',
+    ],
+  },
+
+  emprendimiento: {
+    slug: 'emprendimiento', author: 'Sección Emprendimiento', style: 'inspirador, práctico y motivacional',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
+      'https://www.infobae.com/feeds/rss/economia.xml',
+      'https://cnnespanol.cnn.com/feed/',
+    ],
+  },
+
+  eeuu: {
+    slug: 'eeuu', author: 'Corresponsal en EE.UU.', style: 'analítico, con contexto para audiencia dominicana y diáspora',
+    feeds: [
+      'https://cnnespanol.cnn.com/feed/',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://www.france24.com/es/rss',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada',
+      'https://www.infobae.com/feeds/rss/mundo.xml',
+    ],
+  },
+
+  haiti: {
+    slug: 'haiti', author: 'Redacción Fronteriza', style: 'objetivo, contextualizado y sensible a la realidad binacional',
+    feeds: [
+      'https://www.diariolibre.com/rss/portada.xml',
+      'https://almomento.net/feed/',
+      'https://noticiassin.com/feed/',
+      'https://www.france24.com/es/rss',
+      'https://www.bbc.com/mundo/index.xml',
+    ],
+  },
+
+  espana: {
+    slug: 'espana', author: 'Corresponsal en España', style: 'contextualizado para dominicanos en España y lectores nacionales',
+    feeds: [
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/espana/portada',
+      'https://elmundo.es/rss/portada.xml',
+      'https://www.france24.com/es/rss',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://cnnespanol.cnn.com/feed/',
+    ],
+  },
+
+  europa: {
+    slug: 'europa', author: 'Redacción Europa', style: 'global y analítico',
+    feeds: [
+      'https://www.france24.com/es/rss',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada',
+      'https://www.bbc.com/mundo/index.xml',
+      'https://www.dw.com/es/rss/noticias/rss-6617',
+      'https://elmundo.es/rss/portada.xml',
     ],
   },
 };
@@ -563,7 +771,6 @@ const TOPIC_BLOCKLIST = {
   ],
 
   // ── MEDIO AMBIENTE ────────────────────────────────────────────────────────────
-  // Solo: clima, naturaleza, sostenibilidad, desastres naturales
   'medio-ambiente': [
     'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
     'actor','actriz','cantante','concierto','farandula','influencer',
@@ -571,7 +778,159 @@ const TOPIC_BLOCKLIST = {
     'presidente abinader','senado','partido politico',
     'pib','exportacion','importacion','banco central',
   ],
+
+  // ── NACIONAL ─────────────────────────────────────────────────────────────────
+  // Mismas reglas que ya existe (sin cambios)
+
+  // ── OPINION ──────────────────────────────────────────────────────────────────
+  opinion: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+  ],
+
+  // ── GOBIERNO ─────────────────────────────────────────────────────────────────
+  gobierno: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'trump','putin','rusia','ucrania','china','israel','iran','guerra','otan',
+  ],
+
+  // ── JUSTICIA ─────────────────────────────────────────────────────────────────
+  justicia: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'trump','putin','rusia','ucrania','china','israel','iran','guerra','otan',
+  ],
+
+  // ── CONGRESO ─────────────────────────────────────────────────────────────────
+  congreso: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'trump','putin','rusia','ucrania','china','israel','iran','guerra',
+    'homicidio','asesinado','arrestado','crimen',
+  ],
+
+  // ── EDUCACIÓN ─────────────────────────────────────────────────────────────────
+  educacion: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'homicidio','asesinado','arrestado','allanamiento','crimen',
+    'trump','putin','rusia','ucrania','guerra',
+  ],
+
+  // ── PROVINCIAS ───────────────────────────────────────────────────────────────
+  provincias: [
+    'trump','putin','rusia','ucrania','china','israel','iran','guerra','otan',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'beisbol','jonron','mlb','nba',
+  ],
+
+  // ── FARÁNDULA ────────────────────────────────────────────────────────────────
+  farandula: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'pib','inflacion','banco central','exportacion','importacion','presupuesto',
+    'homicidio','asesinado','allanamiento','crimen','banda criminal',
+    'trump','putin','rusia','ucrania','china','israel','iran','guerra','otan',
+    'terremoto','tsunami','crisis global',
+  ],
+
+  // ── MÚSICA ───────────────────────────────────────────────────────────────────
+  musica: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'pib','inflacion','banco central','exportacion','presupuesto',
+    'homicidio','asesinado','allanamiento','crimen',
+    'trump','putin','rusia','ucrania','guerra',
+  ],
+
+  // ── CINE ─────────────────────────────────────────────────────────────────────
+  cine: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'pib','inflacion','banco central','exportacion','presupuesto',
+    'homicidio','asesinado','allanamiento','crimen',
+    'trump','putin','rusia','ucrania','guerra',
+  ],
+
+  // ── VIRALES ──────────────────────────────────────────────────────────────────
+  virales: [
+    'pib','inflacion','banco central','exportacion','importacion','deficit',
+    'reforma constitucional','proyecto de ley','decreto presidencial',
+    'senado dominicano','partido politico',
+    'homicidio','asesinato','allanamiento','crimen',
+    'trump','putin','rusia','ucrania','guerra',
+  ],
+
+  // ── MODA ─────────────────────────────────────────────────────────────────────
+  moda: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'pib','inflacion','banco central','exportacion',
+    'homicidio','asesinado','arrestado','crimen',
+    'trump','putin','rusia','ucrania','guerra',
+  ],
+
+  // ── GASTRONOMÍA ──────────────────────────────────────────────────────────────
+  gastronomia: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'pib','inflacion','banco central','exportacion','presupuesto',
+    'homicidio','asesinado','arrestado','crimen','allanamiento',
+    'trump','putin','rusia','ucrania','guerra',
+  ],
+
+  // ── TURISMO ──────────────────────────────────────────────────────────────────
+  turismo: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'pib','inflacion','banco central','presupuesto',
+    'homicidio','asesinado','arrestado','crimen','allanamiento',
+    'trump','putin','rusia','ucrania','guerra',
+  ],
+
+  // ── FINANZAS ─────────────────────────────────────────────────────────────────
+  finanzas: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'homicidio','asesinado','arrestado','crimen','allanamiento',
+  ],
+
+  // ── EMPRENDIMIENTO ───────────────────────────────────────────────────────────
+  emprendimiento: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'homicidio','asesinado','arrestado','crimen',
+    'trump','putin','rusia','ucrania','guerra',
+  ],
+
+  // ── EE.UU. ───────────────────────────────────────────────────────────────────
+  eeuu: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'presidente abinader','senado dominicano','camara de diputados',
+    'pld','prm','fuerza del pueblo','jce',
+  ],
+
+  // ── HAITÍ ────────────────────────────────────────────────────────────────────
+  haiti: [
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'trump','putin','rusia','ucrania','china','israel','iran',
+    'pib','inflacion','banco central','exportacion',
+  ],
+
+  // ── ESPAÑA ───────────────────────────────────────────────────────────────────
+  espana: [
+    'beisbol','jonron','mlb','nba','gol','futbol dominicano','baloncesto dominicano',
+    'actor dominicano','actriz dominicana','farandula dominicana',
+    'presidente abinader','senado dominicano','camara de diputados',
+    'pld','prm','fuerza del pueblo',
+  ],
+
+  // ── EUROPA ───────────────────────────────────────────────────────────────────
+  europa: [
+    'beisbol','jonron','mlb','nba',
+    'actor','actriz','cantante','concierto','farandula','influencer',
+    'presidente abinader','senado dominicano','camara de diputados',
+    'pld','prm','fuerza del pueblo',
+  ],
 };
+
 
 const TOPIC_ALLOWLIST = {
 
@@ -732,7 +1091,173 @@ const TOPIC_ALLOWLIST = {
     'energia renovable','solar','eolica','carbono','emisiones',
     'desastre natural','terremoto','erupcion','tsunami',
   ],
+
+  // ── OPINION ──────────────────────────────────────────────────────────────────
+  opinion: [
+    'opinion','analisis','editorial','columna','perspectiva','criterio',
+    'debate','reflexion','punto de vista','comentario','posicion',
+    'segun','considera','afirma','sostiene','propone','critica','defiende',
+    'experto','analista','especialista','periodista','columnista',
+  ],
+
+  // ── GOBIERNO ─────────────────────────────────────────────────────────────────
+  gobierno: [
+    'gobierno','gubernamental','ejecutivo','presidencia','presidente','ministro',
+    'ministerio','secretaria','gabinete','decreto','reglamento','politica publica',
+    'abinader','funcionario','designacion','nombramiento','despacho presidencial',
+    'poder ejecutivo','estado dominicano','palacio nacional',
+  ],
+
+  // ── JUSTICIA ─────────────────────────────────────────────────────────────────
+  justicia: [
+    'justicia','judicial','tribunal','juez','jueza','fiscal','fiscalia',
+    'sentencia','condena','absolusion','proceso judicial','imputado',
+    'ministerio publico','poder judicial','corte','camara penal',
+    'abogado','defensor','caso judicial','demanda','querella',
+    'dicrim','dncd','investigacion judicial','flagrancia',
+  ],
+
+  // ── CONGRESO ─────────────────────────────────────────────────────────────────
+  congreso: [
+    'congreso','senado','senador','camara de diputados','diputado',
+    'legislativo','proyecto de ley','ley aprobada','sesion','plenaria',
+    'votacion','reforma','legislacion','debate legislativo','comision',
+    'poder legislativo','banca','bancada','acuerdo legislativo',
+  ],
+
+  // ── EDUCACIÓN ────────────────────────────────────────────────────────────────
+  educacion: [
+    'educacion','educativo','escuela','colegio','universidad','academico',
+    'estudiante','maestro','docente','profesor','aula','pedagogia',
+    'minerd','ministerio de educacion','tanda extendida','becas',
+    'examen','prueba nacional','titulacion','formacion','bachillerato',
+    'enseñanza','aprendizaje','calidad educativa','reforma educativa',
+  ],
+
+  // ── PROVINCIAS ───────────────────────────────────────────────────────────────
+  provincias: [
+    'provincia','provincial','municipio','ayuntamiento','alcalde','alcaldesa',
+    'santiago','la vega','san pedro','higüey','bonao','mao','monte plata',
+    'barahona','san juan','azua','higuey','la romana','la altagracia',
+    'punta cana','samana','puerto plata','espaillat','duarte','san francisco',
+    'comunidad','barrio','residentes','vecinos','sector',
+  ],
+
+  // ── FARÁNDULA ────────────────────────────────────────────────────────────────
+  farandula: [
+    'farandula','espectaculo','celebridad','famoso','famosa','estrella',
+    'actor','actriz','cantante','modelo','influencer','youtuber','tiktoker',
+    'reality','television','show','entrevista exclusiva','romance',
+    'ruptura','separacion','noviazgo','escandalo','polemic',
+    'alfombra roja','premiacion','gala','paparazzi',
+  ],
+
+  // ── MÚSICA ───────────────────────────────────────────────────────────────────
+  musica: [
+    'musica','musical','cancion','album','disco','sencillo','lanzamiento',
+    'cantante','artista','banda','grupo musical','concierto','gira',
+    'reggaeton','bachata','salsa','merengue','dembow','urbano',
+    'streaming','spotify','youtube','apple music','billboard',
+    'nominacion','grammy','latin grammy','premio','exito',
+  ],
+
+  // ── CINE ─────────────────────────────────────────────────────────────────────
+  cine: [
+    'cine','pelicula','film','estreno','taquilla','director','actriz',
+    'netflix','hbo','disney plus','amazon prime','streaming','serie',
+    'trailer','avance','oscar','golden globe','critica de cine',
+    'produccion','guion','animacion','documental','cortometraje',
+    'temporada','episodio','reparto','personaje',
+  ],
+
+  // ── VIRALES ──────────────────────────────────────────────────────────────────
+  virales: [
+    'viral','se hizo viral','miles de vistas','millones de reproducciones',
+    'video viral','trending','tendencia','lo mas visto','compartido',
+    'tiktok','instagram','twitter','redes sociales','meme',
+    'impactante','sorprendente','curioso','increible','insólito',
+    'record','fenomeno','historia curiosa','lo que debes saber',
+  ],
+
+  // ── MODA ─────────────────────────────────────────────────────────────────────
+  moda: [
+    'moda','fashion','tendencia de moda','estilo','look','outfit',
+    'diseñador','diseñadora','coleccion','temporada','pasarela',
+    'belleza','cosmeticos','maquillaje','skincare','cuidado personal',
+    'lujo','marca','brand','influencer de moda','lifestyle',
+    'semana de la moda','fashion week','ropa','vestuario',
+  ],
+
+  // ── GASTRONOMÍA ──────────────────────────────────────────────────────────────
+  gastronomia: [
+    'gastronomia','gastronomico','restaurante','chef','cocina','receta',
+    'comida','alimento','plato','sabor','ingrediente','menu',
+    'cuisine','gourmet','street food','food','bebida',
+    'dominicano','tipico','tradicional','mangú','sancocho','tostones',
+    'bar','cafeteria','heladeria','pasteleria','panaderia',
+  ],
+
+  // ── TURISMO ──────────────────────────────────────────────────────────────────
+  turismo: [
+    'turismo','turistico','turista','visitante','destino','viaje',
+    'hotel','resort','playa','atracion','punta cana','santo domingo',
+    'temporada','temporada alta','agencia de viajes','tour','excursion',
+    'ministerio de turismo','mitur','aeropuerto','vuelo','crucero',
+    'republica dominicana','dominicano','caribe','vacaciones',
+  ],
+
+  // ── FINANZAS ─────────────────────────────────────────────────────────────────
+  finanzas: [
+    'finanzas','financiero','banco','bancario','credito','prestamo',
+    'tasa de interes','ahorro','inversion','bolsa','acciones','bono',
+    'dolar','tipo de cambio','divisas','deuda','deficit','superavit',
+    'banco central','reforma monetaria','regulacion financiera',
+    'wallet','transferencia','pago','remesa','hipoteca',
+  ],
+
+  // ── EMPRENDIMIENTO ───────────────────────────────────────────────────────────
+  emprendimiento: [
+    'emprendimiento','emprendedor','emprendedora','startup','negocio propio',
+    'pyme','micro empresa','empresa','empresario','empresaria',
+    'innovacion','idea de negocio','pitch','incubadora','aceleradora',
+    'capital semilla','inversion','fondo','venture','escalabilidad',
+    'marca personal','networking','exito empresarial','lanzamiento',
+  ],
+
+  // ── EE.UU. ───────────────────────────────────────────────────────────────────
+  eeuu: [
+    'eeuu','estados unidos','washington','nueva york','miami','nueva jersey',
+    'trump','biden','harris','administracion','congreso americano','senado americano',
+    'casa blanca','departamento de estado','immigration','migracion',
+    'dominicanos en eeuu','diaspora','deportacion','visa','green card',
+    'florida','nueva york','boston','chicago','california',
+  ],
+
+  // ── HAITÍ ────────────────────────────────────────────────────────────────────
+  haiti: [
+    'haiti','haitiano','haitiana','port au prince','frontera','inmigrante',
+    'migracion haitiana','crisis haitiana','gangas','violencia haiti',
+    'deportacion','repatriacion','binacional','frontera dominicana',
+    'dajabon','jimani','compostela','haitianizacion','ayiti',
+  ],
+
+  // ── ESPAÑA ───────────────────────────────────────────────────────────────────
+  espana: [
+    'espana','españa','madrid','barcelona','gobierno espanol','gobierno español',
+    'sanchez','rajoy','psoe','pp','vox','podemos','ciudadanos',
+    'dominicanos en espana','diaspora dominicana','emigrantes dominicanos',
+    'comunidad autonoma','cortes generales','iberia','europa',
+  ],
+
+  // ── EUROPA ───────────────────────────────────────────────────────────────────
+  europa: [
+    'europa','europeo','europea','union europea','parlamento europeo',
+    'alemania','francia','italia','reino unido','portugal','bélgica',
+    'macron','scholz','ursula','comision europea','consejo europeo',
+    'euro','eurozona','schengen','bruselas','berlín','paris','roma',
+  ],
 };
+
 
 /**
  * Verifica si el ítem del RSS es temáticamente apto para la sección.
@@ -940,9 +1465,22 @@ export async function GET(request) {
   // Orden editorial oficial. El bot siempre sigue este orden de prioridad para
   // garantizar que TODAS las secciones se cubran antes de repetir alguna.
   // Solo incluye las 11 categorías con slot de cron activo (vercel.json + autoblog.yml).
+  // ─── ORDEN DE ROTACIÓN DETERMINISTA — 32 SECCIONES ────────────────────────────
+  // Todas las categorías del portal registradas. El bot publica 12/día, completando
+  // el ciclo completo en ~3 días (garantía de cobertura editorial total).
+  // Prioridad: secciones de alto impacto primero, subsecciones al final.
   const ROTATION_ORDER = [
+    // Tier 1 — Secciones principales de alto tráfico (diarias)
     'politica', 'policia', 'deportes', 'tecnologia', 'sucesos',
-    'entretenimiento', 'tendencias', 'economia', 'internacional', 'salud', 'cultura',
+    'entretenimiento', 'economia', 'internacional', 'salud', 'cultura',
+    // Tier 2 — Secciones nacionales importantes
+    'nacional', 'gobierno', 'justicia', 'congreso', 'educacion',
+    // Tier 3 — Secciones de estilo de vida y tendencias
+    'tendencias', 'farandula', 'musica', 'cine', 'virales',
+    'moda', 'gastronomia', 'turismo',
+    // Tier 4 — Secciones especializadas y territoriales
+    'finanzas', 'emprendimiento', 'medio-ambiente', 'provincias',
+    'eeuu', 'haiti', 'espana', 'europa', 'opinion',
   ];
 
   // ─── LÓGICA DE SELECCIÓN / FALLBACK ────────────────────────────────────────
