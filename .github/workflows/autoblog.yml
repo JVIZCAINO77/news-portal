@@ -460,9 +460,45 @@ jobs:
           [ "$HTTP" = "200" ] || exit 1
 
   # ─── 12:30 PM RD — ARTÍCULO #12 (Rotación automática) ────────────────────
-  # Sin categoría fija. La rotación determinista elige la sección que haya
-  # quedado vacía hoy (en orden: politica→policia→deportes→...→cultura).
-  # Si todas están cubiertas, publica en la primera del orden (política).
+  # ─── 12:00 PM RD — ARTÍCULO #11 (Rotación automática) ────────────────────
+  # Sin categoría fija. La rotación 3 niveles elige la sección más prioritaria:
+  # 1) secciones sin artículos nunca, 2) sin cobertura hoy, 3) reinicio ciclo.
+  slot-11:
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 16 * * *') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'slot-11')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🔄 Publicar — SLOT 11 / Rotación (intento 1)
+        id: intento1
+        continue-on-error: true
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🚀 SLOT 11 — Rotación automática — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+      - name: 🔄 Publicar — SLOT 11 / Rotación (reintento 2)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          sleep 30
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  # ─── 12:30 PM RD — ARTÍCULO #12 (Rotación automática) ───────────────────
   slot-12:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '30 16 * * *') ||
@@ -484,18 +520,358 @@ jobs:
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
-
-      - name: 🔄 Publicar — SLOT 12 / Rotación (reintento 2 si falló)
+      - name: 🔄 Publicar — SLOT 12 / Rotación (reintento 2)
         if: steps.intento1.outcome == 'failure'
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🔄 SLOT 12 — reintento 2 — $(date -u)"
           sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # SECCIONES DE ROTACIÓN — Solo se activan via workflow_dispatch o rotación
+  # automática del bot. NO tienen cron propio. Aparecen en el sidebar para
+  # poder dispararlas manualmente cuando se necesite.
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  nacional:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'nacional'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🇩🇴 Publicar — NACIONAL
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=nacional" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  gobierno:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'gobierno'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🏛️ Publicar — GOBIERNO
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=gobierno" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  justicia:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'justicia'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: ⚖️ Publicar — JUSTICIA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=justicia" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  congreso:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'congreso'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🏛️ Publicar — CONGRESO
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=congreso" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  educacion:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'educacion'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 📚 Publicar — EDUCACIÓN
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=educacion" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  provincias:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'provincias'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 📍 Publicar — PROVINCIAS
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=provincias" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  farandula:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'farandula'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: ⭐ Publicar — FARÁNDULA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=farandula" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  musica:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'musica'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🎵 Publicar — MÚSICA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=musica" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  cine:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'cine'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🎬 Publicar — CINE
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=cine" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  virales:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'virales'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🔥 Publicar — VIRALES
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=virales" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  moda:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'moda'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 👗 Publicar — MODA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=moda" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  gastronomia:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'gastronomia'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🍽️ Publicar — GASTRONOMÍA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=gastronomia" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  turismo:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'turismo'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: ✈️ Publicar — TURISMO
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=turismo" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  finanzas:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'finanzas'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 💳 Publicar — FINANZAS
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=finanzas" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  emprendimiento:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'emprendimiento'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🚀 Publicar — EMPRENDIMIENTO
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=emprendimiento" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  medio-ambiente:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'medio-ambiente'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🌿 Publicar — MEDIO AMBIENTE
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=medio-ambiente" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  eeuu:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'eeuu'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🇺🇸 Publicar — EE.UU.
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=eeuu" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  haiti:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'haiti'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🇭🇹 Publicar — HAITÍ
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=haiti" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  espana:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'espana'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🇪🇸 Publicar — ESPAÑA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=espana" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  europa:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'europa'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 🇪🇺 Publicar — EUROPA
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=europa" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  opinion:
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'opinion'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 📝 Publicar — OPINIÓN
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot?category=opinion" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1

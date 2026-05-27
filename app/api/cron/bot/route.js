@@ -1591,7 +1591,7 @@ export async function GET(request) {
 
     // Si pasamos el check, procedemos con el scraping pesado
     const parser = new Parser({
-      timeout: 7000, // subido de 5s a 7s — feeds internacionales pueden ser lentos
+      timeout: 4000, // 4s — feeds lentos se descartan, Gemini necesita el margen
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
       }
@@ -1605,10 +1605,11 @@ export async function GET(request) {
       return NextResponse.json({ message: `No hay feeds configurados para: ${categoryKey}` }, { status: 200 });
     }
 
-    // Fetch en paralelo de todos los feeds de la categoría
+    // Fetch en paralelo — cada feed tiene un hard limit de 4.5s para no bloquear el resto
     const feedPromises = categoryFeeds.map(async (feedUrl) => {
       try {
-        const feed = await parser.parseURL(feedUrl);
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('feed-timeout')), 4500));
+        const feed = await Promise.race([parser.parseURL(feedUrl), timeout]);
         return feed.items || [];
       } catch (e) {
         console.warn(`[Bot] Feed falló (${feedUrl.slice(0, 50)}): ${e.message}`);
