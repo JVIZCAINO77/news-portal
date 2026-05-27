@@ -204,16 +204,9 @@ const CATEGORIES = {
     slug: 'economia', author: 'Redacción Económica', style: 'serio, financiero y accesible',
     feeds: [
       'https://www.diariolibre.com/rss/economia.xml',
-      'https://www.diariolibre.com/rss/portada.xml',
       'https://almomento.net/feed/',
-      'https://noticiassin.com/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
-      // Nuevas fuentes económicas
-      'https://www.france24.com/es/economia/rss',
       'https://www.infobae.com/feeds/rss/economia.xml',
-      'https://cnnespanol.cnn.com/feed/',
-      'https://z101digital.com/feed/',
-      'https://lainformacion.com.do/feed/',
       'https://elnuevodiario.com.do/feed/',
     ],
   },
@@ -329,13 +322,8 @@ const CATEGORIES = {
     feeds: [
       'https://www.bbc.com/mundo/index.xml',
       'https://www.france24.com/es/rss',
-      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada',
       'https://www.infobae.com/feeds/rss/mundo.xml',
-      'https://elmundo.es/rss/portada.xml',
-      // Nuevas fuentes internacionales
-      'https://cnnespanol.cnn.com/feed/',
-      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/america/portada',
-      'https://www.dw.com/es/rss/noticias/rss-6617',
+      'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/internacional/portada',
     ],
   },
 
@@ -348,8 +336,6 @@ const CATEGORIES = {
       'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://elnuevodiario.com.do/feed/',
-      'https://z101digital.com/feed/',
-      'https://clavedigital.com.do/feed/',
     ],
   },
 
@@ -1622,6 +1608,12 @@ export async function GET(request) {
     }
 
 
+    // ⚡ CAP DE ITEMS: máximo 30 por ejecución — evita scoring lento en feeds grandes
+    if (pooledItems.length > 30) {
+      pooledItems = pooledItems.slice(0, 30);
+      console.log(`[Bot] ✂️ Pool recortado a 30 items para optimizar tiempo`);
+    }
+
     // === CAPA 1: Pre-filtro por fecha — HOY primero, fallback a 36h si no hay candidatos ===
     // Prioridad 1: Noticias estrictamente de HOY en RD (frescura máxima)
     let todaysItems = pooledItems.filter(item => {
@@ -1635,6 +1627,7 @@ export async function GET(request) {
     });
 
     console.log(`[Bot] ${todaysItems.length} noticias de HOY (${todayDR}) de ${pooledItems.length} totales`);
+
 
     // Fallback: si no hay noticias de hoy exacto → ampliar ventana a 36h
     // Esto cubre casos donde el feed actualizó tarde la noche anterior o los feeds
