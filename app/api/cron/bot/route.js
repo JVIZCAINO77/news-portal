@@ -1909,21 +1909,26 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     let aiSuccess = false;
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
 
+    // ⚡ LÍMITE DE CLAVES: máximo 3 intentos por ejecución para no acumular tiempo
+    const maxKeysToTry = Math.min(keys.length, 3);
+    let keysAttempted = 0;
+
     for (const key of keys) {
       if (aiSuccess) break;
-      if (deadKeys.size >= keys.length) break; // todas muertas
-      if (deadKeys.has(key)) continue;         // ya sabemos que no sirve
+      if (keysAttempted >= maxKeysToTry) break;  // máximo 3 claves por ejecución
+      if (deadKeys.has(key)) continue;
+      keysAttempted++;
 
       for (const model of geminiModels) {
         try {
-          console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model}`);
-          // Guarda global: si llevamos >40s, no tiene sentido iniciar otro intento de Gemini
-          if (Date.now() - startTime > 40000) {
-            console.warn('[Bot] ⏱️ Tiempo global >40s, abortando bucle Gemini.');
+          console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model} (clave ${keysAttempted}/${maxKeysToTry})`);
+          // Guard estricto: >35s = salir YA para no chocar con el límite de 55s de Vercel
+          if (Date.now() - startTime > 35000) {
+            console.warn('[Bot] ⏱️ Tiempo global >35s, abortando bucle Gemini para evitar timeout.');
             break;
           }
           const gemCtrl = new AbortController();
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 15000); // 15s — reducido para dejar margen al resto
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 10000); // 10s por llamada (era 15s)
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1977,9 +1982,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // PRIORIDAD 2: Pollinations AI (gratuito, sin cuota)
     if (!aiSuccess) {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando Pollinations...');
-      // Guarda: si llevamos >42s, saltar Pollinations directamente
-      if (Date.now() - startTime > 42000) {
-        console.warn('[Bot] ⏱️ Tiempo global >42s, saltando Pollinations.');
+      // Guarda: si llevamos >38s, saltar Pollinations directamente
+      if (Date.now() - startTime > 38000) {
+        console.warn('[Bot] ⏱️ Tiempo global >38s, saltando Pollinations.');
       } else
       try {
         const controller = new AbortController();
