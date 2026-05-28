@@ -1399,7 +1399,11 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
   articleData.content = sanitizeContent(articleData.content);
 
   // ── GUARDIA ANTI-TRUNCADO ──────────────────────────────────
-  if (!/[.!?"]\s*$/s.test(articleData.content)) {
+  // Acepta: punto, !, ?, comilla, cierre HTML (> o </tag>), paréntesis
+  // También acepta si el contenido tiene >900 chars (modelo libre con límite de tokens)
+  const endsClean = /[.!?"'>)\]\u00bb]\s*$|<\/[a-z]+>\s*$/si.test(articleData.content);
+  const isLongEnough = articleData.content.length > 900;
+  if (!endsClean && !isLongEnough) {
     console.log(`[Bot] ⚠️ Validation falló: Contenido parece truncado.`);
     return null;
   }
