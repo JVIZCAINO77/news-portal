@@ -2366,7 +2366,6 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       image: finalImageUrl,
       imageAlt: articleData.title,
       source_link: news.link,
-      source_name: sourceName,  // ← nombre legible del medio fuente (fix BUG-7)
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       // Las noticias de ÚLTIMA HORA siempre son destacadas
