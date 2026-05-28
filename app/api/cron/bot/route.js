@@ -1417,6 +1417,29 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
     return null;
   }
 
+  // ── CANDADO DE COHERENCIA TEMÁTICA (post-generación) ──────
+  // Verifica que el artículo generado pertenezca a la sección asignada.
+  // Analiza título + excerpt + tags con el ALLOWLIST de la sección.
+  // Si la sección propia tiene 0 hits y otra sección tiene más → rechazar.
+  const normCat = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const aiText  = normCat([articleData.title, articleData.excerpt, (articleData.tags || []).join(' ')].join(' '));
+  const ownAllowlist = TOPIC_ALLOWLIST[catSlug] || [];
+  const ownHits  = ownAllowlist.filter(w => aiText.includes(normCat(w))).length;
+
+  if (ownHits === 0 && ownAllowlist.length > 0) {
+    // Ver si otra sección tiene más afinidad
+    let bestAlt = null, bestAltHits = 0;
+    for (const [sec, kws] of Object.entries(TOPIC_ALLOWLIST)) {
+      if (sec === catSlug) continue;
+      const hits = kws.filter(w => aiText.includes(normCat(w))).length;
+      if (hits > bestAltHits) { bestAltHits = hits; bestAlt = sec; }
+    }
+    if (bestAltHits >= 2) {
+      console.log(`[Bot] ↷ Coherencia temática fallida: el artículo generado no tiene keywords de [${catSlug}] (0 hits). Parece ser [${bestAlt}] (${bestAltHits} hits). Rechazando para buscar mejor ítem.`);
+      return null;
+    }
+  }
+
   return articleData;
 }
 

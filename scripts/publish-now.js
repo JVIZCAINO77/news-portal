@@ -143,6 +143,51 @@ const CATEGORIES = {
   },
 };
 
+// ─── VALIDACIÓN DE CATEGORÍA — keywords esperadas por sección ───────────────
+const CATEGORY_KEYWORDS = {
+  politica:        ['política','gobierno','congreso','senado','diputado','presidente','partido','ley','decreto','ministerio','elección','elecciones','legislativo','ejecutivo','constitución','alcalde','senador','cámara','reforma','oposición','candidato','votación'],
+  economia:        ['dólar','economía','económico','pib','inflación','financiero','banco','precio','mercado','inversión','exportación','importación','presupuesto','deuda','moneda','tasa','fiscal','tributario','comercio','empleo','desempleo','salario','empresa','bolsa'],
+  policia:         ['policía','crimen','delito','arrestado','detenido','fiscal','tribunal','juicio','acusado','condena','investigación','narcotráfico','robo','homicidio','violencia','seguridad','banda','droga','asesinato','operativo','captura','pnp','dncd'],
+  deportes:        ['fútbol','béisbol','baloncesto','deporte','pelota','gol','partido','equipo','jugador','atleta','campeón','liga','torneo','copa','entrenador','estadio','nfl','mlb','nba','olimpiadas','medalla'],
+  sucesos:         ['accidente','incendio','explosión','víctima','muerto','herido','catástrofe','desastre','choque','huracán','sismo','inundación','tormenta','emergencia','rescate','tragedia','fallecido','colisión','derrumbe'],
+  internacional:   ['internacional','mundial','global','eeuu','europa','china','rusia','colombia','venezuela','cuba','haití','onu','otan','trump','biden','guerra','diplomacia','exterior','embajada','extranjero','latinoamérica','geopolítica','white house','washington'],
+  entretenimiento: ['música','cine','película','artista','cantante','actor','actriz','concierto','espectáculo','famoso','celebridad','televisión','serie','netflix','show','fiesta','festival','reality','entrevista','estreno'],
+  cultura:         ['cultura','arte','exposición','museo','literatura','libro','teatro','danza','patrimonio','tradición','pintura','escultura','arquitectura','festival cultural','escritor','poeta','galería','moda','diseño'],
+  tecnologia:      ['tecnología','inteligencia artificial','ia','app','software','hardware','internet','digital','ciberseguridad','robot','innovación','startup','tesla','google','meta','apple','microsoft','samsung','algoritmo','nube','datos','chatgpt','anthropic','openai'],
+  salud:           ['salud','médico','hospital','enfermedad','vacuna','pandemia','virus','tratamiento','medicina','paciente','clínica','cirugía','diagnóstico','cáncer','diabetes','hipertensión','bienestar','nutrición','oms','terapia','síntoma'],
+  'medio-ambiente':['medio ambiente','clima','cambio climático','contaminación','reciclaje','biodiversidad','ecosistema','deforestación','océano','mar','bosque','residuos','emisiones','energía renovable','solar','eólica','flora','fauna','sostenible','verde','calentamiento'],
+  nacional:        ['república dominicana','dominicano','dominicana','santo domingo','santiago','puerto plata','san pedro','barahona','la vega','higuey'],
+};
+
+// Normaliza texto para comparación (quita tildes, minúsculas)
+function normText(str) {
+  return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+/**
+ * Valida que el artículo generado pertenece a la sección asignada.
+ * Retorna { ok, ownHits, bestMatch, bestHits }
+ * - ok: true si hay al menos 1 keyword de la sección propia en el texto
+ * - bestMatch: sección alternativa con más hits si ownHits < bestHits
+ */
+function validateCategoryMatch(articleData, assignedCategory) {
+  const text = normText([articleData.title, articleData.excerpt, (articleData.tags || []).join(' ')].join(' '));
+
+  const ownKws  = CATEGORY_KEYWORDS[assignedCategory] || [];
+  const ownHits = ownKws.filter(kw => text.includes(normText(kw))).length;
+
+  let bestMatch = null, bestHits = 0;
+  for (const [sec, kws] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (sec === assignedCategory) continue;
+    const hits = kws.filter(kw => text.includes(normText(kw))).length;
+    if (hits > bestHits) { bestHits = hits; bestMatch = sec; }
+  }
+
+  // Si la sección alternativa tiene MÁS hits que la propia Y la propia tiene 0 hits → mala ubicación
+  const ok = ownHits > 0 || bestHits === 0;
+  return { ok, ownHits, bestMatch, bestHits };
+}
+
 const STOP_WORDS = new Set([
   'el','la','los','las','un','una','de','del','al','a','en','y','e','o','que','por',
   'para','con','sin','sobre','entre','se','le','lo','su','sus','es','son','ha','han',
@@ -664,6 +709,20 @@ async function publishArticle(cat, news, todayDR, publishedLinks, publishedKeywo
   const aiKws = extractKeywords(articleData.title);
   if (aiKws.size > 0 && sourceKws.size > 0 && semanticOverlap(sourceKws, aiKws) === 0) {
     throw new Error('Alucinación: el título generado no tiene relación con la fuente');
+  }
+
+  // ── VALIDACIÓN DE COHERENCIA TEMÁTICA ────────────────────────────────────
+  // Detecta si el artículo generado pertenece a otra sección y lo rechaza
+  // para que processCategory pruebe con el siguiente ítem del feed.
+  const catCheck = validateCategoryMatch(articleData, cat.slug);
+  if (!catCheck.ok) {
+    const msg = `tema no corresponde a [${cat.slug.toUpperCase()}]` +
+      (catCheck.bestMatch ? ` — parece ser [${catCheck.bestMatch.toUpperCase()}] (${catCheck.bestHits} hits vs ${catCheck.ownHits})` : '');
+    console.log(`  ↷ Rechazado por categoría incorrecta: ${msg}`);
+    return { skipped: true, reason: msg };
+  }
+  if (catCheck.ownHits === 1 && catCheck.bestHits > catCheck.ownHits) {
+    console.log(`  ⚠️  Advertencia de categoría: [${cat.slug}] tiene solo ${catCheck.ownHits} keyword. Continúa (umbral mínimo cumplido).`);
   }
 
   // Construir slug
