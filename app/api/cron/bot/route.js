@@ -1899,26 +1899,46 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     //   • Aleatoria: por azar dos crons seguidos pueden golpear la misma clave.
     //   • Determinista: slotIndex = minuto_actual % total_claves → cada cron
     //     empieza en una clave diferente de forma predecible y equitativa.
-    const keys = [];
+    const allKeys = [];
     const envVars = ['GEMINI_API_KEY', 'GEMINI_API_KEY_2', 'GEMINI_API_KEY_3'];
     for (const v of envVars) {
       if (process.env[v]) {
         const parsed = process.env[v].split(',').map(k => k.trim()).filter(Boolean);
-        keys.push(...parsed);
+        allKeys.push(...parsed);
       }
+    }
+
+    // ─── ROTACIÓN A/B DIARIA ────────────────────────────────────────────────────
+    // Con 14 cuentas divididas en 2 grupos de 7:
+    //   Días PARES (UTC)  → Grupo A (claves 1-7)  trabajan, Grupo B descansa
+    //   Días IMPARES (UTC)→ Grupo B (claves 8-14) trabajan, Grupo A descansa
+    // Cada grupo descansa 24h → la cuota de 25 RPD/proyecto se resetea completamente.
+    // Resultado: 7 claves activas × 25 RPD = 175 solicitudes/día garantizadas.
+    const keys = [];
+    if (allKeys.length >= 10) {
+      const utcDay    = new Date().getUTCDate();
+      const useGroupA = utcDay % 2 === 0;
+      const half      = Math.ceil(allKeys.length / 2);   // 7 si hay 14, 7 si hay 13
+      const groupA    = allKeys.slice(0, half);
+      const groupB    = allKeys.slice(half);
+      const active    = useGroupA ? groupA : groupB;
+      keys.push(...active);
+      console.log(`[Bot] 🔑 Rotación A/B — Grupo ${useGroupA ? 'A' : 'B'} activo (día UTC ${utcDay}): ${keys.length} claves de ${allKeys.length} en pool`);
+    } else {
+      // Pool pequeño → usar todas sin rotación
+      keys.push(...allKeys);
+      console.log(`[Bot] 🔑 Gemini — ${keys.length} claves disponibles (pool completo, sin rotación A/B)`);
     }
 
     if (keys.length === 0) {
       console.error('[Bot] ❌ CRÍTICO: No hay claves Gemini configuradas.');
     } else {
-      // Rotación determinista: cada slot de 30 min usa una clave de inicio diferente.
-      // Con 22 claves y crons cada 30 min → cada clave se usa ~1 vez por día como primaria.
-      const slotMinute   = Math.floor(Date.now() / 1000 / 60); // minutos desde epoch
+      // Rotación determinista intra-grupo: cada slot de 30 min empieza en clave diferente
+      const slotMinute   = Math.floor(Date.now() / 1000 / 60);
       const startIndex   = slotMinute % keys.length;
       const rotatedKeys  = [...keys.slice(startIndex), ...keys.slice(0, startIndex)];
       keys.length = 0;
       keys.push(...rotatedKeys);
-      console.log(`[Bot] 🔑 Gemini Pro — ${keys.length} claves disponibles. Rotación: empieza en índice ${startIndex}`);
     }
 
     // ─── MODELOS GEMINI PRO — Verificados como operativos ─────────────────────
