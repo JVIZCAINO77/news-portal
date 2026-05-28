@@ -1445,6 +1445,12 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
 
 export async function GET(request) {
     const startTime = Date.now();
+  // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
+  const IS_VERCEL = !!process.env.VERCEL;
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 35000  : 120000; // 35s prod / 120s local
+  const TIME_LIMIT_OR_START = IS_VERCEL ? 38000  : 125000; // antes de OpenRouter
+  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 44000  : 200000; // por iteración OpenRouter
+  const TIME_LIMIT_POL      = IS_VERCEL ? 46000  : 210000; // antes de Pollinations
   // X-Manual-Trigger solo exime del header Authorization cuando viene del trigger interno.
   // Aún así se valida CRON_SECRET para bloquear llamadas externas que inyecten el header.
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
@@ -1758,8 +1764,9 @@ export async function GET(request) {
 
     let news = null;
     let isNewsBreaking = false;
+    const TIME_LIMIT_LOOP = IS_VERCEL ? 40000 : 180000;
     for (const item of prioritizedItems) { 
-        if (Date.now() - startTime > 40000) {
+        if (Date.now() - startTime > TIME_LIMIT_LOOP) {
                 console.warn("[Bot] Time safety limit reached, breaking prioritizedItems loop");
                 break;
         }
@@ -1939,7 +1946,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         try {
           console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model} (clave ${keysAttempted}/${maxKeysToTry})`);
           // Guard estricto: >35s = salir YA para no chocar con el límite de 55s de Vercel
-          if (Date.now() - startTime > 35000) {
+          if (Date.now() - startTime > TIME_LIMIT_GEMINI) {
             console.warn('[Bot] ⏱️ Tiempo global >35s, abortando bucle Gemini para evitar timeout.');
             break;
           }
@@ -2000,7 +2007,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // Pollinations se usa como último recurso por su latencia y disponibilidad variable.
     if (!aiSuccess) {
       // Guarda: si llevamos >38s, saltar OpenRouter — no hay tiempo suficiente
-      if (Date.now() - startTime > 38000) {
+      if (Date.now() - startTime > TIME_LIMIT_OR_START) {
         console.warn('[Bot] ⏱️ Tiempo global >38s, saltando OpenRouter para no causar timeout.');
       } else {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando OpenRouter...');
@@ -2015,7 +2022,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
         // Guarda por iteración: si llevamos >44s, no iniciar más intentos
-        if (Date.now() - startTime > 44000) {
+        if (Date.now() - startTime > TIME_LIMIT_OR_ITER) {
           console.warn('[Bot] ⏱️ Tiempo global >44s, abortando bucle OpenRouter.');
           break;
         }
@@ -2064,7 +2071,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     if (!aiSuccess) {
       console.log('[Bot] ⚠️ OpenRouter sin respuesta. Intentando Pollinations como último recurso...');
       // Guarda: si llevamos >46s, saltar Pollinations — no hay tiempo
-      if (Date.now() - startTime > 46000) {
+      if (Date.now() - startTime > TIME_LIMIT_POL) {
         console.warn('[Bot] ⏱️ Tiempo global >46s, saltando Pollinations.');
       } else
       try {
