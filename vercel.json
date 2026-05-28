@@ -2,11 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
 
   "crons": [
-    { "path": "/api/cron/bot", "schedule": "0,30 11-23 * * *" },
-    { "path": "/api/cron/bot", "schedule": "0 0 * * *" },
+    { "path": "/api/cron/bot",              "schedule": "0,30 11-23 * * *" },
+    { "path": "/api/cron/bot",              "schedule": "0 0 * * *" },
     { "path": "/api/cron/cleanup",          "schedule": "0 23 * * *" },
     { "path": "/api/cron/fix-images",       "schedule": "0 2  * * *" },
-    { "path": "/api/cron/refresh-fb-token", "schedule": "0 10 * * *" }
+    { "path": "/api/cron/refresh-fb-token", "schedule": "0 10 * * *" },
+    { "path": "/api/cron/self-heal",        "schedule": "0 1  * * *" }
   ],
 
   "functions": {
@@ -41,6 +42,12 @@
     },
     "app/api/cron/refresh-fb-token/route.js": {
       "maxDuration": 30
+    },
+    "app/api/cron/self-heal/route.js": {
+      "maxDuration": 55
+    },
+    "app/api/health/route.js": {
+      "maxDuration": 15
     }
   },
 

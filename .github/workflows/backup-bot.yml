@@ -1,0 +1,86 @@
+name: 🤖 Backup Bot — Imperio Público
+
+# ─── PROPÓSITO ──────────────────────────────────────────────────────────────
+# Respaldo automático del bot editorial.
+# Vercel crons no son 100% confiables (fallan ~2-3% del tiempo).
+# Este workflow dispara el bot via HTTP cada 30 min como red de seguridad.
+# Se activa STAGGERED respecto a Vercel (offset 15 min) para no duplicar.
+#
+# Horario (hora RD = UTC-4):
+#   Vercel:  00, 30 de cada hora (7AM-11PM RD)
+#   GitHub:  15, 45 de cada hora (7AM-11PM RD) ← este workflow
+
+on:
+  schedule:
+    # 15 y 45 de cada hora entre 11AM-3AM UTC (7AM-11PM RD)
+    - cron: '15,45 11-23 * * *'
+    - cron: '15,45 0-3  * * *'
+  workflow_dispatch:
+    inputs:
+      category:
+        description: 'Categoría específica (opcional)'
+        required: false
+        default: ''
+
+jobs:
+  trigger-bot:
+    name: 🚀 Disparar Bot
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: 🔍 Verificar salud del sistema
+        id: health
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://www.imperiopublico.com/api/health")
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          if [ "$STATUS" != "200" ] && [ "$STATUS" != "503" ]; then
+            echo "⚠️ Health check no alcanzable (HTTP $STATUS) — disparando bot de todas formas"
+          fi
+
+      - name: 🤖 Disparar bot editorial
+        run: |
+          CATEGORY="${{ github.event.inputs.category }}"
+          if [ -n "$CATEGORY" ]; then
+            URL="https://www.imperiopublico.com/api/cron/bot?category=$CATEGORY"
+          else
+            URL="https://www.imperiopublico.com/api/cron/bot"
+          fi
+
+          echo "📡 Disparando: $URL"
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "x-vercel-cron: 1" \
+            --max-time 90 \
+            "$URL" 2>&1)
+
+          HTTP_CODE=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | sed 's/HTTP_STATUS://')
+          BODY=$(echo "$RESPONSE" | grep -v "HTTP_STATUS:")
+
+          echo "📊 HTTP Status: $HTTP_CODE"
+          echo "📄 Response: ${BODY:0:300}"
+
+          if [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Bot disparado exitosamente"
+          else
+            echo "❌ Error HTTP $HTTP_CODE"
+            # No fallar el workflow — el cron de Vercel puede haberse adelantado
+            exit 0
+          fi
+
+      - name: 📊 Verificar cobertura diaria (solo a las 11 PM RD)
+        # Solo verificar cobertura en el último cron del día
+        if: github.event_name == 'schedule'
+        run: |
+          HOUR_UTC=$(date -u +%H)
+          MINUTE_UTC=$(date -u +%M)
+          # 3 AM UTC = 11 PM RD
+          if [ "$HOUR_UTC" = "03" ] && [ "$MINUTE_UTC" = "15" ]; then
+            echo "🔍 Revisando cobertura final del día..."
+            curl -s \
+              -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+              -H "x-vercel-cron: 1" \
+              "https://www.imperiopublico.com/api/cron/self-heal" | \
+              python3 -c "import sys,json; d=json.load(sys.stdin); print('Cubiertas:', d.get('covered',[])); print('Faltantes:', d.get('missing',[]))"
+          fi
