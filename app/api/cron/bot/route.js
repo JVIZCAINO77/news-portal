@@ -1926,7 +1926,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
 
     // ⚡ LÍMITE DE CLAVES: máximo 3 intentos por ejecución para no acumular tiempo
-    const maxKeysToTry = Math.min(keys.length, 3);
+    const maxKeysToTry = Math.min(keys.length, 5);
     let keysAttempted = 0;
 
     for (const key of keys) {
@@ -1995,16 +1995,81 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       console.log(`[Bot] ⚠️ ${deadKeys.size}/${keys.length} claves Gemini muertas. Pasando a fallback.`);
     }
 
-    // PRIORIDAD 2: Pollinations AI (gratuito, sin cuota)
+    // PRIORIDAD 2: OpenRouter (fallback primario — confirmado operativo)
+    // NOTA: Movido antes de Pollinations porque OpenRouter (~2s) es más rápido y confiable.
+    // Pollinations se usa como último recurso por su latencia y disponibilidad variable.
     if (!aiSuccess) {
-      console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando Pollinations...');
-      // Guarda: si llevamos >38s, saltar Pollinations directamente
+      // Guarda: si llevamos >38s, saltar OpenRouter — no hay tiempo suficiente
       if (Date.now() - startTime > 38000) {
-        console.warn('[Bot] ⏱️ Tiempo global >38s, saltando Pollinations.');
+        console.warn('[Bot] ⏱️ Tiempo global >38s, saltando OpenRouter para no causar timeout.');
+      } else {
+      console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando OpenRouter...');
+      const FREE_MODELS_OR = [
+        'openai/gpt-oss-20b:free',
+        'openai/gpt-oss-120b:free',
+        'nvidia/nemotron-3-super-120b-a12b:free',
+        'z-ai/glm-4.5-air:free',
+        'minimax/minimax-m2.5:free',
+        'nvidia/nemotron-3-nano-30b-a3b:free',
+      ];
+      for (const orModel of FREE_MODELS_OR) {
+        if (aiSuccess) break;
+        // Guarda por iteración: si llevamos >44s, no iniciar más intentos
+        if (Date.now() - startTime > 44000) {
+          console.warn('[Bot] ⏱️ Tiempo global >44s, abortando bucle OpenRouter.');
+          break;
+        }
+        try {
+          const orModelName = (orModel.split('/')[1] || orModel).split(':')[0];
+          console.log(`[Bot] Probando OpenRouter (${orModelName})...`);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s por modelo
+          const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`,
+              'HTTP-Referer': 'https://imperiopublico.com',
+              'X-Title': 'Imperio Público Bot',
+            },
+            body: JSON.stringify({
+              model: orModel,
+              messages: [
+                { role: 'system', content: 'Eres periodista profesional. Responde ÚNICAMENTE con JSON válido.' },
+                { role: 'user', content: prompt }
+              ],
+              max_tokens: 2500,
+            }),
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+          if (orRes.ok) {
+            const orData = await orRes.json();
+            const orText = orData.choices?.[0]?.message?.content || '';
+            const parsed = parseAndValidateAI(orText, cat.slug, news.contentSnippet, news.title);
+            if (parsed) {
+              console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió y validado.`);
+              articleData = parsed;
+              aiSuccess = true;
+            }
+          }
+        } catch (orErr) {
+          console.log(`[Bot] ⚠️ OpenRouter (${orModel}) falló: ${orErr.message?.slice(0, 60)}`);
+        }
+      }
+      } // fin del bloque guarda OpenRouter
+    }
+
+    // PRIORIDAD 3: Pollinations AI (último recurso — latencia alta y disponibilidad variable)
+    if (!aiSuccess) {
+      console.log('[Bot] ⚠️ OpenRouter sin respuesta. Intentando Pollinations como último recurso...');
+      // Guarda: si llevamos >46s, saltar Pollinations — no hay tiempo
+      if (Date.now() - startTime > 46000) {
+        console.warn('[Bot] ⏱️ Tiempo global >46s, saltando Pollinations.');
       } else
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000); // 12s — reducido para dejar margen
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s máximo
         const polRes = await fetch('https://text.pollinations.ai/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0' },
@@ -2031,69 +2096,6 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       } catch (pollinationsError) {
         console.log(`[Bot] ⚠️ Pollinations falló: ${pollinationsError.message?.slice(0, 60)}`);
       }
-    }
-
-    // PRIORIDAD 3: OpenRouter modelos gratuitos (última línea de defensa)
-    if (!aiSuccess) {
-      // Guarda: si llevamos >44s, saltar OpenRouter — no hay tiempo suficiente
-      if (Date.now() - startTime > 44000) {
-        console.warn('[Bot] ⏱️ Tiempo global >44s, saltando OpenRouter para no causar timeout.');
-      } else {
-      console.log('[Bot] ⚠️ Pollinations sin respuesta o validación fallida. Intentando OpenRouter (gratuito)...');
-      const FREE_MODELS_OR = [
-        'openai/gpt-oss-120b:free',
-        'openai/gpt-oss-20b:free',
-        'nvidia/nemotron-3-super-120b-a12b:free',
-        'z-ai/glm-4.5-air:free',
-        'minimax/minimax-m2.5:free',
-        'nvidia/nemotron-3-nano-30b-a3b:free',
-      ];
-      for (const orModel of FREE_MODELS_OR) {
-        if (aiSuccess) break;
-        // Guarda por iteración: si llevamos >46s, no iniciar más intentos
-        if (Date.now() - startTime > 46000) {
-          console.warn('[Bot] ⏱️ Tiempo global >46s, abortando bucle OpenRouter.');
-          break;
-        }
-        try {
-          const orModelName = (orModel.split('/')[1] || orModel).split(':')[0];
-          console.log(`[Bot] Probando OpenRouter (${orModelName})...`);
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s — reducido de 30s
-          const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY || ''}`,
-              'HTTP-Referer': 'https://imperiopublico.com',
-              'X-Title': 'Imperio Público Bot',
-            },
-            body: JSON.stringify({
-              model: orModel,
-              messages: [
-                { role: 'system', content: 'Eres periodista profesional. Responde ÚNICAMENTE con JSON válido.' },
-                { role: 'user', content: prompt }
-              ],
-              max_tokens: 2000,
-            }),
-            signal: controller.signal,
-          });
-          clearTimeout(timeoutId);
-          if (orRes.ok) {
-            const orData = await orRes.json();
-            const orText = orData.choices?.[0]?.message?.content || '';
-            const parsed = parseAndValidateAI(orText, cat.slug, news.contentSnippet, news.title);
-            if (parsed) {
-              console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió y validado.`);
-              articleData = parsed;
-              aiSuccess = true;
-            }
-          }
-        } catch (orErr) {
-          console.log(`[Bot] ⚠️ OpenRouter (${orModel}) falló: ${orErr.message?.slice(0, 60)}`);
-        }
-      }
-      } // fin del bloque guarda OpenRouter
     }
 
     // Si TODOS los proveedores fallaron → candado estricto
