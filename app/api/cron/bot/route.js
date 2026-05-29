@@ -612,24 +612,42 @@ const TOPIC_BLOCKLIST = {
 
   // ── DEPORTES ─────────────────────────────────────────────────────────────────
   // Solo: béisbol, fútbol, baloncesto, boxeo, atletas, ligas
-  // Bloquear: política, economía, crimen, geopolítica, farándula
+  // Bloquear: política, economía, crimen, geopolítica, farándula, eventos no deportivos
   deportes: [
-    'homicidio','asesinado','asesinato','detenido','arrestado','allanamiento',
-    'pib','inflacion','banco central','exportacion','importacion','presupuesto',
-    'ministro de','senado','diputado','legislacion','reforma',
+    'homicidio','asesinado','asesinato','feminicidio','matan','detenido','arrestado','allanamiento',
+    'tiroteo','disparo','bala','arma','herido','accidente','incendio','secuestro',
+    'narco','banda criminal','crimen organizado','dicrim','dncd','fiscal','tribunal',
+    'pib','inflacion','banco central','exportacion','importacion','presupuesto','deficit',
+    'ministro de','senado','diputado','legislacion','reforma','proyecto de ley',
     'trump','putin','iran','rusia','ucrania','china','israel','guerra','otan',
-    'actor','actriz','cantante','concierto','farandula','influencer',
+    'actor','actriz','cantante','concierto','farandula','influencer','espectaculo',
+    'huracan','tormenta tropical','inundacion','terremoto','sismo','desastre',
+    'tecnologia','inteligencia artificial','chatgpt','openai','ciberseguridad',
+    'prensa','libertad de prensa','periodismo','dia mundial',
   ],
 
   // ── TECNOLOGÍA ───────────────────────────────────────────────────────────────
   // Solo: IA, celulares, apps, redes sociales, innovación, ciencia, ciberseguridad
-  // Bloquear: política local, crimen, deportes, farándula
+  // Bloquear: política local, crimen, deportes, farándula, SUCESOS, POLICÍA
   tecnologia: [
-    'homicidio','asesinado','asesinato','detenido','arrestado','allanamiento',
-    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta',
-    'actor','actriz','cantante','concierto','farandula','espectaculo',
+    // Crimen / sucesos / policía (las secciones que más se colaban)
+    'homicidio','asesinado','asesinato','feminicidio','matan','muerto','muertos',
+    'detenido','arrestado','capturado','allanamiento','operativo','fugitivo',
+    'tiroteo','disparo','bala','arma','herido','heridos','accidente','incendio',
+    'secuestro','rehén','victima','explosión','explosion','derrumbe','choque',
+    'narco','narcotráfico','banda criminal','crimen organizado','dicrim','dncd',
+    'policia nacional','pn ','fiscal','tribunal','juez','sentencia','condena',
+    // Deportes
+    'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','atleta','pelotero',
+    'pitcher','campeonato','torneo','estadio','liga deportiva','boxeo',
+    // Farándula / entretenimiento
+    'actor','actriz','cantante','concierto','farandula','espectaculo','influencer',
+    'reggaeton','bachata','merengue','netflix','hbo','oscar','grammy',
+    // Política local dominicana
     'presidente abinader','senado dominicano','diputado','legislacion','elecciones',
-    'partido politico','pld','prm','fuerza del pueblo',
+    'partido politico','pld','prm','fuerza del pueblo','leonel fernandez','danilo medina',
+    // Clima / medio ambiente (no es tecnología)
+    'huracan','tormenta tropical','inundacion','sequia','terremoto','sismo','tsunami',
   ],
 
   // ── SUCESOS ──────────────────────────────────────────────────────────────────
@@ -1451,8 +1469,8 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 35000  : 120000; // 35s prod / 120s local
-  const TIME_LIMIT_OR_START = IS_VERCEL ? 38000  : 125000; // antes de OpenRouter
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 20000  : 120000; // 20s prod / 120s local — reducido para dar más tiempo a fallbacks
+  const TIME_LIMIT_OR_START = IS_VERCEL ? 25000  : 125000; // 25s prod — OpenRouter arranca antes para tener margen
   const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 44000  : 200000; // por iteración OpenRouter
   const TIME_LIMIT_POL      = IS_VERCEL ? 46000  : 210000; // antes de Pollinations
   // X-Manual-Trigger solo exime del header Authorization cuando viene del trigger interno.
@@ -1956,8 +1974,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     let aiSuccess = false;
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
 
-    // ⚡ LÍMITE DE CLAVES: máximo 3 intentos por ejecución para no acumular tiempo
-    const maxKeysToTry = Math.min(keys.length, 5);
+    // ⚡ LÍMITE DE CLAVES: máximo 2 intentos por ejecución para no acumular tiempo
+    // Con cuota agotada en todas las claves, cada intento = ~400ms → 2 claves = ~800ms máximo
+    // Esto deja suficiente tiempo para que OpenRouter (~2s) publique el artículo.
+    const maxKeysToTry = Math.min(keys.length, 2);
     let keysAttempted = 0;
 
     for (const key of keys) {
@@ -2322,7 +2342,71 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     if (articleData.content.length < 1200) {
       throw new Error(`Contenido demasiado corto (${articleData.content.length} caracteres). Se requiere un análisis más profundo para mantener el estándar premium.`);
     }
-    // ────────────────────────────────────────────────────────────────────────
+
+    // ─── BLINDAJE FINAL DE CATEGORÍA (pre-inserción) ─────────────────────────
+    // Misma lógica que auditoria_categorias.js — última defensa antes de publicar.
+    // Si el artículo generado por IA no encaja en su sección, se descarta.
+    const CAT_GUARD_KEYWORDS = {
+      deportes:        ['deporte','beisbol','futbol','baloncesto','nba','mlb','pelotero','atleta','jugador','equipo','partido','torneo','campeonato','liga','gol','jonron','pitcher','cancha','estadio','boxeo','tenis','ciclismo','medalla','atletismo','natacion','voleibol','softbol'],
+      economia:        ['economia','economico','financiero','pib','inflacion','banco','dolar','mercado','inversion','empresa','comercio','impuesto','presupuesto','exportacion','precio','deficit','reservas','bolsa','deuda','aranceles','empleo','desempleo','crecimiento','remesas','hacienda','finanzas'],
+      politica:        ['politica','politico','presidente','ministro','diputado','senador','partido','elecciones','congreso','legislacion','decreto','reforma','alcalde','gabinete','ejecutivo','legislativo','campana','voto','candidato','abinader','danilo','leonel','jce','consulta popular','referendum','constitucion','senado','camara','pld','prm','fuerza del pueblo'],
+      salud:           ['salud','medico','hospital','enfermedad','vacuna','tratamiento','paciente','clinica','medicina','virus','pandemia','cancer','diabetes','bienestar','prevencion','nutricion','epidemia','sanitario','cirugia','farmacia','oms','ops','msp','dengue','malaria','zika','covid','hipertension','trasplante'],
+      entretenimiento: ['espectaculo','farandula','actor','actriz','cantante','pelicula','serie','concierto','artista','musica','teatro','show','celebridad','estreno','nominacion','premio','reggaeton','bachata','merengue','influencer','tiktoker','streaming','netflix','hbo','disney','grammy','billboard','oscar'],
+      cultura:         ['cultura','arte','museo','exposicion','patrimonio','literatura','libro','autor','escritor','festival','danza','folclore','tradicion','gastronomia','arquitectura','artesania','carnaval','unesco','historia','arqueologia','pintura','escultura','poesia','novela','teatro dominicano'],
+      tecnologia:      ['tecnologia','inteligencia artificial','ia','robot','app','software','hardware','digital','internet','ciberseguridad','startup','innovacion','samsung','apple','google','meta','openai','computadora','smartphone','chatgpt','drone','bitcoin','crypto','blockchain','5g','programacion','hackeo','hacker','algoritmo'],
+      sucesos:         ['detenido','arrestado','capturado','homicidio','asesinado','robo','accidente','incendio','crimen','herido','muerto','matan','secuestro','victima','sospechoso','fugitivo','delito','colision','choque','fallece','tiroteo','disparo','lesionado','atropellado','explosion','derrumbe','desaparecido','feminicidio','reyerta'],
+      internacional:   ['internacional','mundial','eeuu','estados unidos','europa','china','rusia','latinoamerica','onu','biden','trump','guerra','conflicto','diplomacia','cumbre','tratado','global','extranjero','migrantes','israel','ucrania','haiti','palestina','iran','corea del norte','nato','otan','g7','g20','france','alemania','reino unido','canada','mexico','venezuela','cuba','colombia','brasil','argentina'],
+      policia:         ['policia nacional','pn ','dncd','dicrim','fiscalia','tribunal','juez','fiscal','carcel','preso','condena','arresto','operativo','banda','narco','crimen organizado','denuncia','abogado','ministerio publico','juicio','sentencia','imputado','acusado','apelacion','antinarcoticos','decomiso','allanamiento','flagrancia','detencion','interpol'],
+      nacional:        ['republica dominicana','dominicano','dominicana','santo domingo','santiago','san pedro','la romana','barahona','higüey','higuey','moca','bonao','region','provincia','municipio','ayuntamiento','intrant','mesc','mopc','caasd','edenorte','edesur','inapa','indotel','digesett','senasa','dr ','rd ','comunidad','barrio','vecinos'],
+      'medio-ambiente':['medio ambiente','medioambiente','cambio climatico','calentamiento','deforestacion','reforestacion','contaminacion','reciclaje','sostenible','biodiversidad','parque nacional','cuenca','sequia','huracan','tormenta tropical','inundacion','ecosistema','flora','fauna','residuos','energia renovable','solar','eolico','temperatura','clima','lluvia','tornado','terremoto','sismo'],
+    };
+    const CAT_GUARD_BLOCKLIST = {
+      deportes:        ['homicidio','asesinado','inflacion','banco central','pib','ministro de gobierno'],
+      economia:        ['beisbol','jonron','mlb','nba','actor','actriz','cantante','homicidio','tiroteo'],
+      politica:        ['beisbol','jonron','mlb','nba','actor','actriz','cantante','homicidio','tiroteo'],
+      salud:           ['beisbol','jonron','mlb','pib','inflacion','banco central','tiroteo'],
+      entretenimiento: ['presidente abinader','ministro de','pib','inflacion','banco central','homicidio','tiroteo'],
+      cultura:         ['beisbol','jonron','mlb','nba','pib','inflacion','banco central','tiroteo'],
+      tecnologia:      ['homicidio','asesinado','tiroteo','secuestro','beisbol','jonron','mlb','nba','huracan','tormenta tropical','inundacion','terremoto','actor','actriz','cantante'],
+      sucesos:         ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','pib'],
+      internacional:   ['presidente abinader','senado dominicano','camara de diputados','ayuntamiento de'],
+      policia:         ['actor','actriz','cantante','concierto','beisbol','jonron','mlb','nba','pib'],
+      nacional:        ['trump','putin','zelensky','rusia','ucrania','china','iran','israel','palestina','corea del norte','guerra','eeuu','estados unidos','europa','onu','otan','beisbol','jonron','mlb','nba','futbol','gol','actor','actriz','cantante','concierto','pib','inflacion','banco central','homicidio','asesinado','asesinato','feminicidio','matan','tiroteo','secuestro','narco','banda criminal','inteligencia artificial','chatgpt','openai','samsung','apple','bitcoin'],
+      'medio-ambiente':['beisbol','jonron','mlb','nba','actor','actriz','cantante','tiroteo'],
+    };
+    const MIN_CAT_SCORE = 1; // Al menos 1 keyword de la sección debe estar presente
+    const normFinal = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const aiTextFinal = normFinal(`${articleData.title} ${articleData.excerpt || ''} ${(articleData.tags || []).join(' ')}`);
+    const guardSlug = cat.slug;
+    const guardKws = CAT_GUARD_KEYWORDS[guardSlug] || [];
+    const guardBlock = CAT_GUARD_BLOCKLIST[guardSlug] || [];
+
+    // 1. ¿Hay alguna keyword bloqueante? → descartar inmediatamente
+    const blockedBy = guardBlock.find(w => aiTextFinal.includes(normFinal(w)));
+    if (blockedBy) {
+      // No lanzar error (no penalizar la iteración de noticias), solo saltar al siguiente ítem
+      console.log(`[Bot] 🚫 BLINDAJE CATEGORÍA: artículo de [${guardSlug}] contiene keyword bloqueante "${blockedBy}" — descartado antes de publicar.`);
+      continue;
+    }
+
+    // 2. ¿El artículo tiene al menos 1 keyword de su propia sección?
+    if (guardKws.length > 0) {
+      const ownHitsFinal = guardKws.filter(w => aiTextFinal.includes(normFinal(w))).length;
+      if (ownHitsFinal < MIN_CAT_SCORE) {
+        // Buscar si otra sección tiene 2+ hits
+        let altBest = null, altBestHits = 0;
+        for (const [sec, kws] of Object.entries(CAT_GUARD_KEYWORDS)) {
+          if (sec === guardSlug) continue;
+          const hits = kws.filter(w => aiTextFinal.includes(normFinal(w))).length;
+          if (hits > altBestHits) { altBestHits = hits; altBest = sec; }
+        }
+        if (altBestHits >= 2) {
+          console.log(`[Bot] 🚫 BLINDAJE CATEGORÍA: artículo de [${guardSlug}] (${ownHitsFinal} hits propios) parece ser [${altBest}] (${altBestHits} hits) — descartado.`);
+          continue;
+        }
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     let sourceName = 'Fuente Externa';
     try {
