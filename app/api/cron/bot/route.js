@@ -2050,9 +2050,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // NOTA: Movido antes de Pollinations porque OpenRouter (~2s) es más rápido y confiable.
     // Pollinations se usa como último recurso por su latencia y disponibilidad variable.
     if (!aiSuccess) {
-      // Guarda: si llevamos >38s, saltar OpenRouter — no hay tiempo suficiente
+      // Guarda: si llevamos >25s, saltar OpenRouter — no hay tiempo suficiente
       if (Date.now() - startTime > TIME_LIMIT_OR_START) {
-        console.warn('[Bot] ⏱️ Tiempo global >38s, saltando OpenRouter para no causar timeout.');
+        console.warn('[Bot] ⏱️ Tiempo global >25s, saltando OpenRouter para no causar timeout.');
       } else {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando OpenRouter...');
       const FREE_MODELS_OR = [
@@ -2074,7 +2074,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           const orModelName = (orModel.split('/')[1] || orModel).split(':')[0];
           console.log(`[Bot] Probando OpenRouter (${orModelName})...`);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s por modelo
+          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s por modelo
           const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
