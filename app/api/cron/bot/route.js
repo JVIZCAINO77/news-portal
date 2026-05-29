@@ -1973,6 +1973,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     let articleData = null;
     let aiSuccess = false;
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
+    let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
     // ⚡ LÍMITE DE CLAVES: máximo 2 intentos por ejecución para no acumular tiempo
     // Con cuota agotada en todas las claves, cada intento = ~400ms → 2 claves = ~800ms máximo
@@ -1982,16 +1983,17 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 
     for (const key of keys) {
       if (aiSuccess) break;
-      if (keysAttempted >= maxKeysToTry) break;  // máximo 3 claves por ejecución
+      if (geminiQuotaExhausted) break; // ⚡ cuota agotada detectada → saltar todo Gemini
+      if (keysAttempted >= maxKeysToTry) break;
       if (deadKeys.has(key)) continue;
       keysAttempted++;
 
       for (const model of geminiModels) {
         try {
           console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model} (clave ${keysAttempted}/${maxKeysToTry})`);
-          // Guard estricto: >35s = salir YA para no chocar con el límite de 55s de Vercel
+          // Guard estricto: >20s = salir YA para no chocar con el límite de 55s de Vercel
           if (Date.now() - startTime > TIME_LIMIT_GEMINI) {
-            console.warn('[Bot] ⏱️ Tiempo global >35s, abortando bucle Gemini para evitar timeout.');
+            console.warn('[Bot] ⏱️ Tiempo global >20s, abortando bucle Gemini para evitar timeout.');
             break;
           }
           const gemCtrl = new AbortController();
@@ -2017,6 +2019,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
               const reason = isQuota ? 'cuota agotada' : isLeaked ? '⛔ leaked' : isBanned ? '⛔ banned' : 'inválida/denegada';
               console.log(`[Bot] ⚠️ Gemini ...${key.slice(-6)}: ${reason} → siguiente clave`);
               deadKeys.add(key);
+              // ⚡ Si es cuota agotada y ya probamos 1 clave, asumir todas agotadas → saltar a OpenRouter
+              if (isQuota && keysAttempted >= 1) {
+                geminiQuotaExhausted = true;
+                console.log('[Bot] ⚡ Cuota Gemini confirmada agotada → saltando directo a OpenRouter.');
+              }
               break;
             }
             if (isNotFound) {
