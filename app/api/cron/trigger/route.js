@@ -2,10 +2,19 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+// Todas las categorías del bot (33 en total — sincronizado con ROTATION_ORDER en route.js)
 const VALID_CATEGORIES = [
-  'noticias', 'politica', 'policia', 'deportes', 'tecnologia', 'sucesos',
-  'entretenimiento', 'tendencias', 'economia', 'internacional',
-  'salud', 'cultura'
+  // Tier 1
+  'politica', 'policia', 'deportes', 'tecnologia', 'sucesos', 'entretenimiento',
+  'economia', 'internacional', 'salud', 'cultura',
+  // Tier 2
+  'nacional', 'gobierno', 'justicia', 'congreso', 'educacion',
+  // Tier 3
+  'tendencias', 'farandula', 'musica', 'cine', 'virales', 'moda', 'gastronomia', 'turismo',
+  // Tier 4
+  'finanzas', 'emprendimiento', 'medio-ambiente', 'provincias', 'eeuu', 'haiti', 'espana', 'europa', 'opinion',
+  // Legacy
+  'noticias',
 ];
 
 export async function POST(request) {

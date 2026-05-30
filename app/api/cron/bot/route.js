@@ -1305,22 +1305,63 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
   }
 
   let articleData;
+
+  // ── Intento 1: JSON.parse estándar ─────────────────────────────────────────
   try {
     articleData = JSON.parse(cleaned);
-  } catch (parseError) {
+  } catch (_e1) {}
+
+  // ── Intento 2: Extraer bloque {} con regex ──────────────────────────────────
+  if (!articleData) {
     const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      try { articleData = JSON.parse(jsonMatch[0]); } catch {}
+      try { articleData = JSON.parse(jsonMatch[0]); } catch (_e2) {}
     }
   }
 
-  // Rescate si el parseo JSON falló (Pollinations AI suele devolver texto en Markdown directo)
+  // ── Intento 3: Extracción campo a campo (robusto para gemini-2.5-flash) ─────
+  // gemini-2.5-flash a veces devuelve JSON con comillas sin escapar dentro del
+  // campo "content", lo que rompe JSON.parse. Extraemos cada campo individualmente.
+  if (!articleData && (cleaned.includes('"title"') || cleaned.includes('"content"'))) {
+    try {
+      const extractStr = (key) => {
+        // Busca "key": "valor..." y extrae hasta la siguiente clave o cierre de objeto
+        const rx = new RegExp(`"${key}"\\s*:\\s*"([\\s\\S]*?)"\\s*(?:,\\s*"|\\s*\\})`, 'i');
+        const m = cleaned.match(rx);
+        return m ? m[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : null;
+      };
+      const extractArr = (key) => {
+        const rx = new RegExp(`"${key}"\\s*:\\s*\\[([^\\]]+)\\]`);
+        const m = cleaned.match(rx);
+        if (!m) return [];
+        return m[1].split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+      };
+      // Para "content" necesitamos estrategia distinta por ser largo
+      const contentRx = /"content"\s*:\s*"([\s\S]+?)"\s*,\s*"tags"/i;
+      const contentMatch = cleaned.match(contentRx);
+
+      const recovered = {
+        title:        extractStr('title'),
+        excerpt:      extractStr('excerpt'),
+        content:      contentMatch ? contentMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"') : null,
+        tags:         extractArr('tags'),
+        impact_level: extractStr('impact_level') || 'medium',
+      };
+
+      if (recovered.title && recovered.content && recovered.content.length > 400) {
+        articleData = recovered;
+        console.log('[Bot] ✅ Recuperado JSON malformado via extracción campo-a-campo');
+      }
+    } catch (_e3) {
+      console.log('[Bot] ⚠️ Extracción campo-a-campo también falló');
+    }
+  }
+
+  // ── Rescate Markdown (Pollinations AI suele devolver texto plano) ───────────
   if (!articleData || typeof articleData !== 'object') {
-    // Si el texto parece ser JSON pero estaba roto, es mejor descartarlo para que intente con otra IA
-    // en lugar de publicar el JSON crudo como si fuera markdown.
     const looksLikeJson = cleaned.startsWith('{') || cleaned.includes('"title":') || cleaned.includes('"content":');
     if (looksLikeJson) {
-      console.log(`[Bot] ⚠️ Validation falló: JSON malformado detectado, no se usará como Markdown.`);
+      console.log(`[Bot] ⚠️ JSON malformado no recuperable — descartando para siguiente IA.`);
       return null;
     }
 
