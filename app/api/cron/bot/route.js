@@ -1961,13 +1961,13 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     }
 
     // ─── MODELOS GEMINI PRO — Verificados como operativos ─────────────────────
-    // Orden: el más capaz primero, fallbacks más rápidos/ligeros al final.
-    // gemini-2.5-flash: ✅ confirmado operativo con claves Pro (probado 2026-05-24)
-    // gemini-2.0-flash: ✅ backup — usa cuota pero funciona
-    // gemini-2.0-flash-lite: ✅ el más rápido, ideal si los anteriores saturan RPM
+    // Orden: más rápidos primero para encajar en el timeout de 18s de Vercel.
+    // gemini-2.0-flash: ✅ rápido (~3-5s), cuota diaria alta — PRINCIPAL
+    // gemini-2.5-flash: ✅ calidad alta pero tarda ~15-20s — segundo intento
+    // gemini-2.0-flash-lite: ✅ ultra-rápido, cuota alta — fallback rápido
     const geminiModels = [
-      'gemini-2.5-flash',      // Principal Pro — mejor calidad, confirmado OK
-      'gemini-2.0-flash',      // Backup confiable
+      'gemini-2.0-flash',      // Principal — rápido, confiable, cuota alta
+      'gemini-2.5-flash',      // Segundo — mayor calidad, tarda más
       'gemini-2.0-flash-lite', // Ultra-rápido de respaldo
     ];
 
@@ -1976,10 +1976,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
-    // ⚡ LÍMITE DE CLAVES: máximo 2 intentos por ejecución para no acumular tiempo
-    // Con cuota agotada en todas las claves, cada intento = ~400ms → 2 claves = ~800ms máximo
-    // Esto deja suficiente tiempo para que OpenRouter (~2s) publique el artículo.
-    const maxKeysToTry = Math.min(keys.length, 2);
+    // ⚡ LÍMITE DE CLAVES: máximo 4 intentos por ejecución
+    // gemini-2.0-flash responde en ~3-5s → 4 claves = ~20s máximo antes del fallback
+    // Esto da más oportunidades de éxito sin agotar el tiempo de Vercel.
+    const maxKeysToTry = Math.min(keys.length, 4);
     let keysAttempted = 0;
 
     for (const key of keys) {
@@ -1998,7 +1998,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             break;
           }
           const gemCtrl = new AbortController();
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 10000); // 10s por llamada (era 15s)
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 18000); // 18s — necesario para gemini-2.5-flash
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
