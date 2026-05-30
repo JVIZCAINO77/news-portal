@@ -17,11 +17,12 @@ export const maxDuration = 55;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// OBJETIVO: 6 artículos/día — 1 cada 2.5 horas — para no agotar la cuota gratuita
-// de Gemini. Reset de cuotas: 3:00 AM hora RD (medianoche UTC).
-// Crons configurados: 3:10 AM · 5:40 AM · 8:10 AM · 10:40 AM · 1:10 PM · 3:40 PM RD
-const DAILY_LIMIT_GLOBAL   = 6;  // Techo del día: 6 artículos exactos
-// Sin límite por categoría — el bot elige la mejor disponible cada ejecución
+// PLAN HOBBY DE VERCEL: máximo 2 crons únicos permitidos.
+// Cron activo: 7:00 AM RD (11:00 UTC) — 1 artículo automático por día.
+// Los 5 restantes se disparan desde el panel admin con "Disparar Ahora".
+// Reset de cuotas Gemini: 3:00 AM hora RD (medianoche UTC).
+const DAILY_LIMIT_GLOBAL   = 6;  // Techo del día: máximo 6 artículos en total
+// Sin límite por categoría — el bot elige la categoría con menor cobertura cada vez
 
 // ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
 // Longitud mínima que debe tener el contenido generado por la IA.
