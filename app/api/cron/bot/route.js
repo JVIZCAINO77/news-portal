@@ -1470,10 +1470,10 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 20000  : 120000; // 20s prod / 120s local — reducido para dar más tiempo a fallbacks
-  const TIME_LIMIT_OR_START = IS_VERCEL ? 25000  : 125000; // 25s prod — OpenRouter arranca antes para tener margen
-  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 44000  : 200000; // por iteración OpenRouter
-  const TIME_LIMIT_POL      = IS_VERCEL ? 46000  : 210000; // antes de Pollinations
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 42000  : 120000; // 42s prod — 2 claves × 25s c/u antes de cortar
+  const TIME_LIMIT_OR_START = IS_VERCEL ? 44000  : 125000; // 44s prod — OpenRouter solo si queda tiempo
+  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 50000  : 200000; // por iteración OpenRouter
+  const TIME_LIMIT_POL      = IS_VERCEL ? 52000  : 210000; // antes de Pollinations
   // X-Manual-Trigger solo exime del header Authorization cuando viene del trigger interno.
   // Aún así se valida CRON_SECRET para bloquear llamadas externas que inyecten el header.
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
@@ -1960,15 +1960,14 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       keys.push(...rotatedKeys);
     }
 
-    // ─── MODELOS GEMINI PRO — Verificados como operativos ─────────────────────
-    // Orden: más rápidos primero para encajar en el timeout de 18s de Vercel.
-    // gemini-2.0-flash: ✅ rápido (~3-5s), cuota diaria alta — PRINCIPAL
-    // gemini-2.5-flash: ✅ calidad alta pero tarda ~15-20s — segundo intento
-    // gemini-2.0-flash-lite: ✅ ultra-rápido, cuota alta — fallback rápido
+    // ─── MODELOS GEMINI PRO — Estado verificado 2026-05-30 ──────────────────
+    // SOLO gemini-2.5-flash tiene cuota disponible en el plan gratuito.
+    // gemini-2.0-flash y gemini-2.0-flash-lite están en 429 RESOURCE_EXHAUSTED.
+    // Timeout 25s: gemini-2.5-flash es un modelo de razonamiento, tarda 10-20s.
     const geminiModels = [
-      'gemini-2.0-flash',      // Principal — rápido, confiable, cuota alta
-      'gemini-2.5-flash',      // Segundo — mayor calidad, tarda más
-      'gemini-2.0-flash-lite', // Ultra-rápido de respaldo
+      'gemini-2.5-flash',      // ✅ ÚNICO con cuota disponible — PRINCIPAL
+      'gemini-2.0-flash',      // Intento secundario (puede tener cuota en alguna clave)
+      'gemini-2.0-flash-lite', // Fallback rápido
     ];
 
     let articleData = null;
@@ -1976,10 +1975,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
-    // ⚡ LÍMITE DE CLAVES: máximo 4 intentos por ejecución
-    // gemini-2.0-flash responde en ~3-5s → 4 claves = ~20s máximo antes del fallback
-    // Esto da más oportunidades de éxito sin agotar el tiempo de Vercel.
-    const maxKeysToTry = Math.min(keys.length, 4);
+    // ⚡ LÍMITE DE CLAVES: 2 intentos con gemini-2.5-flash
+    // Cada clave tarda 10-25s con 2.5-flash → 2 claves = hasta 50s máximo.
+    // El TIME_LIMIT_GEMINI de 42s garantiza que se corta antes del límite de Vercel.
+    const maxKeysToTry = Math.min(keys.length, 2);
     let keysAttempted = 0;
 
     for (const key of keys) {
@@ -1998,7 +1997,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             break;
           }
           const gemCtrl = new AbortController();
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 18000); // 18s — necesario para gemini-2.5-flash
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 25000); // 25s — gemini-2.5-flash es modelo de razonamiento, tarda 10-20s
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
