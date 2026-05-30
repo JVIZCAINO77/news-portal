@@ -17,9 +17,10 @@ export const maxDuration = 55;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// OBJETIVO: 1 artículo por sección por día = 12 secciones = 12 art/día máximo.
-// 10 secciones nacionales vs 2 globales/internacional → más nacional que internacional.
-const DAILY_LIMIT_GLOBAL   = 12; // Techo del día: 12 artículos exactos
+// OBJETIVO: 6 artículos/día — 1 cada 2.5 horas — para no agotar la cuota gratuita
+// de Gemini. Reset de cuotas: 3:00 AM hora RD (medianoche UTC).
+// Crons configurados: 3:10 AM · 5:40 AM · 8:10 AM · 10:40 AM · 1:10 PM · 3:40 PM RD
+const DAILY_LIMIT_GLOBAL   = 6;  // Techo del día: 6 artículos exactos
 // Sin límite por categoría — el bot elige la mejor disponible cada ejecución
 
 // ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
