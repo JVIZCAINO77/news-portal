@@ -27,7 +27,7 @@ const DAILY_LIMIT_GLOBAL   = 6;  // Techo del día: máximo 6 artículos en tota
 // ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
 // Longitud mínima que debe tener el contenido generado por la IA.
 // Si la IA devuelve algo muy corto, es señal de un fallo — NUNCA publicar.
-const MIN_CONTENT_LENGTH = 1200; // caracteres mínimos en el campo 'content'
+const MIN_CONTENT_LENGTH = 2500; // caracteres mínimos (~400 palabras) — requerido por AdSense
 // PROHIBIDO publicar contenido sin pasar por reescritura de IA.
 // Este flag actúa como candado: si es false, el artículo es rechazado.
 const REQUIRE_AI_REWRITE = true;
@@ -1936,20 +1936,27 @@ Luego escribes tu PROPIO artículo con:
   • Tu PROPIO análisis e interpretación del impacto
 Si alguien compara tu artículo con la fuente original, deben leer como dos piezas completamente distintas.
 
-REGLAS EDITORIALES ADICIONALES:
+REGLAS EDITORIALES (CUMPLIMIENTO OBLIGATORIO):
 1. SECCIÓN: Enfoca el ángulo en "${cat.slug.toUpperCase()}". Estilo: ${cat.style}.
 2. IDIOMA: Español dominicano profesional, natural y fluido.
-3. Primer párrafo: impactante, que enganche al lector en las primeras dos líneas.
-4. Estructura: al menos 3 subtítulos (##) que guíen la lectura.
-5. Usa **negritas** en datos clave, cifras y nombres importantes.
-6. TÍTULO: Original, atractivo, SEO-optimizado. Entre 50-70 caracteres. NO copies el título de la fuente.
-7. CONTENIDO: MÍNIMO 600 palabras. Incluye contexto histórico, impacto local o regional, y perspectiva.
-8. EXCERPT: Meta-descripción propia de 155 caracteres máximo.
-9. PROHIBIDO: frases genéricas de IA ("En conclusión...", "Es importante destacar...", "Cabe mencionar...").
-10. Si la noticia es trivial o sin relevancia pública → responde exactamente: IRRELEVANTE
+3. Primer párrafo: impactante y denso en información — presenta QUIÉN, QUÉ, CUÁNDO, DÓNDE y POR QUÉ.
+4. ESTRUCTURA OBLIGATORIA — al menos 5 secciones con subtítulos (##):
+   - Contexto e antecedentes (¿qué llevó a este hecho?)
+   - Detalles del hecho (cifras, declaraciones, hechos verificados)
+   - Implicaciones y análisis (¿qué cambia a partir de esto?)
+   - Perspectiva ciudadana o regional (¿cómo afecta al dominicano de a pie?)
+   - Lo que viene (¿qué esperar en los próximos días o semanas?)
+5. Usa **negritas** en datos clave, cifras, nombres importantes y declaraciones.
+6. Incluye al menos 2 citas o declaraciones (reales o reconstruidas con base en los hechos).
+7. TÍTULO: Original, atractivo, SEO-optimizado. Entre 55-75 caracteres. NO copies el título de la fuente.
+8. CONTENIDO: MÍNIMO 900 PALABRAS. El artículo debe ser exhaustivo, con contexto histórico, datos de respaldo, análisis de impacto local, comparaciones regionales si aplica, y perspectiva editorial.
+9. EXCERPT: Meta-descripción propia, atractiva y con keywords naturales. Máximo 160 caracteres.
+10. TAGS: Entre 4 y 6 etiquetas relevantes y específicas (no genéricas).
+11. PROHIBIDO: frases genéricas de IA ("En conclusión...", "Es importante destacar...", "Cabe mencionar...", "Sin lugar a dudas...").
+12. Si la noticia es trivial o sin relevancia pública → responde exactamente: IRRELEVANTE
 
 Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
-{ "title": "<titular original>", "excerpt": "<gancho propio>", "content": "<artículo markdown original>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
+{ "title": "<titular original>", "excerpt": "<gancho propio>", "content": "<artículo markdown original, mínimo 900 palabras>", "tags": ["Tag1", "Tag2", "Tag3", "Tag4"], "impact_level": "high|medium|low" }`;
 
     // ─── GEMINI PRO — ROTACIÓN DETERMINISTA POR SLOT ──────────────────────────
     // Plan: Gemini API Pro (sin límite diario real, límite por minuto por clave).
