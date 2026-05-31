@@ -165,20 +165,35 @@ export default function PremiumImage({
           onError={handleError}
         />
       ) : (
-        /* Cloudinary, proxy, Pollinations → <img> nativo para máxima compatibilidad */
-        <img
-          src={currentSrc || fallback}
-          alt={alt || 'Noticia'}
-          width={width}
-          height={Math.round(width * 0.5625)}
-          className={imgClass}
-          onLoad={handleLoad}
-          onError={handleError}
-          loading={priority ? 'eager' : 'lazy'}
-          fetchPriority={priority ? 'high' : 'auto'}
-          decoding={priority ? 'sync' : 'async'}
-          crossOrigin="anonymous"
-        />
+        /* Cloudinary, proxy, Pollinations → <img> nativo con srcset responsivo */
+        (() => {
+          // Generar srcset solo para Cloudinary — otros CDN no soportan transforms on-the-fly
+          const isCloudinary = currentSrc?.includes('cloudinary.com');
+          const srcset = isCloudinary
+            ? [
+                optimizeImageUrl(src, 480)  + ' 480w',
+                optimizeImageUrl(src, 768)  + ' 768w',
+                optimizeImageUrl(src, 1024) + ' 1024w',
+                optimizeImageUrl(src, 1200) + ' 1200w',
+              ].join(', ')
+            : undefined;
+          return (
+            <img
+              src={currentSrc || fallback}
+              alt={alt || 'Noticia'}
+              width={width}
+              height={Math.round(width * 0.5625)}
+              className={imgClass}
+              onLoad={handleLoad}
+              onError={handleError}
+              loading={priority ? 'eager' : 'lazy'}
+              fetchPriority={priority ? 'high' : 'auto'}
+              decoding={priority ? 'sync' : 'async'}
+              crossOrigin="anonymous"
+              {...(srcset ? { srcSet: srcset, sizes: imgSizes } : {})}
+            />
+          );
+        })()
       )}
     </div>
   );
