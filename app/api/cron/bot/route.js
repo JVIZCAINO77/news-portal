@@ -1616,47 +1616,15 @@ export async function GET(request) {
         console.log(`[Bot] ✅ Publicando categoría solicitada: ${categoryKey}`);
       }
     }
-
-    // ─── LISTA DE CANDIDATAS PARA FALLBACK AUTOMÁTICO ──────────────────────────
-    // Si la categoría primaria no tiene noticias válidas, el bot rota automáticamente
-    // a la siguiente sin cobertura hoy. Máximo 3 categorías por ejecución (tiempo).
-    const fallbackCandidates = [
-      ...neverPublished.filter(c => c !== categoryKey),
-      ...notCoveredToday.filter(c => c !== categoryKey),
-    ].slice(0, 4); // hasta 4 alternativas
-    categoryFallbackUsed = false;
-    // Exponerla al scope externo para el loop de categorías
-    Object.assign(request, { _botCandidates: [categoryKey, ...fallbackCandidates] });
-
   } catch (selErr) {
     // Si Supabase falla, usar la categoría solicitada o el inicio de la rotación
     if (!categoryKey) categoryKey = ROTATION_ORDER[0];
     console.warn(`[Bot] ⚠️ Selección de rotación falló (${selErr.message}). Usando: ${categoryKey}`);
-    Object.assign(request, { _botCandidates: [categoryKey] });
   }
 
-  // ─── LOOP DE CATEGORÍAS CON FALLBACK AUTOMÁTICO ─────────────────────────────
-  // El bot intenta publicar en la categoría primaria. Si no hay noticias válidas
-  // (feeds vacíos, todos fuera de tema, todos duplicados), rota a la siguiente.
-  // Límite: 3 categorías por ejecución para no exceder el timeout de Vercel.
-  const categoryQueue = (request._botCandidates || [categoryKey]).slice(0, 3);
-  let publishedResult = null;
-
-  for (const currentCategoryKey of categoryQueue) {
-    // Guardia de tiempo: si llevamos >30s, no iniciar otra categoría
-    if (Date.now() - startTime > 30000 && currentCategoryKey !== categoryQueue[0]) {
-      console.warn(`[Bot] ⏱️ Tiempo >30s, abortando rotación de categorías. Intentadas: ${categoryQueue.indexOf(currentCategoryKey)}/${categoryQueue.length}`);
-      break;
-    }
-
-  const cat = CATEGORIES[currentCategoryKey];
+  const cat = CATEGORIES[categoryKey];
   if (!cat) {
-    console.warn(`[Bot] ⚠️ Categoría inválida en queue: ${currentCategoryKey} — saltando`);
-    continue;
-  }
-
-  if (currentCategoryKey !== categoryKey) {
-    console.log(`[Bot] 🔄 FALLBACK AUTOMÁTICO: "${categoryKey}" sin noticias → probando "${currentCategoryKey}"`);
+    return NextResponse.json({ error: `Categoría inválida: ${categoryKey}` }, { status: 400 });
   }
 
   const supabase = createClient(
@@ -2602,18 +2570,8 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       }
     } // fin del bucle for
 
-    // Si el loop interno de noticias terminó sin publicar → continuar con siguiente categoría
-    console.log(`[Bot] ⚠️ Categoría "${currentCategoryKey}" agotada sin publicar. ${categoryQueue.indexOf(currentCategoryKey) + 1 < categoryQueue.length ? 'Probando siguiente...' : 'Sin más alternativas.'}`);
-    continue; // ← sale del loop interno de noticias y prueba la siguiente categoría
-
-  } // ─── FIN LOOP DE CATEGORÍAS ───────────────────────────────────────────────
-
-  // Si todas las categorías se agotaron sin publicar
-  const triedCats = categoryQueue.slice(0, categoryQueue.length).join(', ');
-  return NextResponse.json({
-    message: `Sin noticias válidas en ninguna de las ${categoryQueue.length} categorías probadas: [${triedCats}].`,
-    categories_tried: categoryQueue,
-  }, { status: 200 });
+    // Si termina el bucle y no se publicó nada
+    return NextResponse.json({ message: `No se pudo generar contenido válido para ninguna de las noticias candidatas.` }, { status: 200 });
 
   } catch (error) {
     console.error(`[Bot Error]`, error.message);
