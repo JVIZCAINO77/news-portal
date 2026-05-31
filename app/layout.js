@@ -94,9 +94,6 @@ export default function RootLayout({ children }) {
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
-        {/* Preload del logo — elemento LCP en mobile */}
-        <link rel="preload" as="image" href="/icon.png" fetchPriority="high" />
-
         {/* RSS Feed autodiscovery */}
         <link rel="alternate" type="application/rss+xml" title={`${SITE_CONFIG.name} — Últimas Noticias`} href="/feed.xml" />
 

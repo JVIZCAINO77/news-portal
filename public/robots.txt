@@ -1,23 +1,33 @@
 User-agent: *
 Allow: /
+Allow: /articulo/
+Allow: /categoria/
+Allow: /nosotros
+Allow: /contacto
+Allow: /aviso-legal
+Allow: /politica-privacidad
 Allow: /ads.txt
-Allow: /api/proxy-image
 Disallow: /admin/
 Disallow: /api/
 Disallow: /auth/
 Disallow: /buscar?
 
-# Reglas específicas para el bot de AdSense
+# Reglas específicas para el bot de AdSense (necesita ver el contenido)
 User-agent: AdsBot-Google
-Allow: /ads.txt
 Allow: /
+Allow: /articulo/
+Allow: /ads.txt
 
 User-agent: AdsBot-Google-Mobile
-Allow: /ads.txt
 Allow: /
+Allow: /articulo/
+Allow: /ads.txt
 
-# Fichero ads.txt — obligatorio para Google AdSense
-# Accesible en: https://www.imperiopublico.com/ads.txt
+# Googlebot debe rastrear todo el contenido editorial
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /auth/
 
 # Sitemaps
 Sitemap: https://imperiopublico.com/sitemap.xml
