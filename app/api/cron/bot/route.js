@@ -100,15 +100,21 @@ const STOP_WORDS = new Set([
 function stemWord(word) {
   if (word.length <= 5) return word;
   // Sufijos de mayor a menor (orden importa)
+  // Incluye -iano/-iana para normalizar gentilicios/adjetivos derivados
+  // (sahariano → sahar, caribeno → caribe, venezolano → venezol)
   const suffixes = [
     'aciones','ización','amiento','imientos','amiento',
     'adores','adora','adores','antes','antes',
     'iendo','ando','ación','arios','arias',
-    'mente','istas','ista','osos','osas',
-    'eros','eras','eros','ismo','ista',
+    'mente','istas','ista',
+    // Adjetivos derivados: -iano/-iana/-iano (sahariano→sahar, venezolano→venezol)
+    'ianos','ianas','iano','iana',
+    // Adjetivos -oso/-osa (caluroso→calur, peligroso→peligr)
+    'osos','osas','oso','osa',
+    'eros','eras','ero','era','ismo','ista',
     'ado','ada','ados','adas','ido','ida','idos','idas',
-    'ando','iendo','aron','aron',
-    'era','ero','ura','ura',
+    'ando','iendo','aron',
+    'ura',
     'es','os','as',
   ];
   for (const s of suffixes) {
@@ -180,9 +186,10 @@ function sharesCriticalEntities(titleA, titleB) {
   return [...entA].filter(e => entB.has(e)).length >= 2;
 }
 
-// Umbral Jaccard: 20% de overlap detecta el mismo evento con distintas palabras
-// Bajado de 25% → 20% para capturar casos como "Ébola en Congo" vs "Ébola y tecnología"
-const SEMANTIC_THRESHOLD = 0.20;
+// Umbral Jaccard: 15% de overlap detecta el mismo evento con distintas palabras
+// Bajado de 20% → 15% para capturar sinónimos conceptuales (polvo/velo, calor/temperatura)
+// Ejemplo: "polvo sahara temperaturas" vs "velo sahariano calor" → stems comunes sahar+temp
+const SEMANTIC_THRESHOLD = 0.15;
 
 const CATEGORIES = {
   // ─── ESTRUCTURA OFICIAL IMPERIO PÚBLICO ──────────────────────────────────────
@@ -1297,6 +1304,7 @@ function isOnTopicForCategory(item, categorySlug) {
 }
 
 
+
 // ─── PARSEAR Y VALIDAR ARTÍCULO GENERADO POR IA ──────────────────────────────
 function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
   if (!rawText) return null;
@@ -1516,16 +1524,19 @@ export async function GET(request) {
   const TIME_LIMIT_OR_START = IS_VERCEL ? 44000  : 125000; // 44s prod — OpenRouter solo si queda tiempo
   const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 50000  : 200000; // por iteración OpenRouter
   const TIME_LIMIT_POL      = IS_VERCEL ? 52000  : 210000; // antes de Pollinations
-  // X-Manual-Trigger solo exime del header Authorization cuando viene del trigger interno.
-  // Aún así se valida CRON_SECRET para bloquear llamadas externas que inyecten el header.
+  // Leer el secreto en runtime (no a nivel de módulo) para garantizar el valor correcto
+  const runtimeSecret = process.env.CRON_SECRET;
+  // Vercel inyecta este header en todos los cron jobs programados (mecanismo oficial)
+  const isVercelCron = request.headers.get('x-vercel-cron') === '1';
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
   const adminId = request.headers.get('X-Admin-Id');
 
-  if (CRON_SECRET) {
+  if (runtimeSecret) {
     const authHeader = request.headers.get('authorization');
-    // Permitir disparo manual si viene del trigger interno con un adminId válido (UUID)
+    // Permitir: (1) cron de Vercel, (2) admin interno con UUID, (3) Bearer token correcto
     const isInternalAdmin = isManualTrigger && adminId && /^[0-9a-f-]{36}$/i.test(adminId);
-    if (!isInternalAdmin && authHeader !== `Bearer ${CRON_SECRET}`) {
+    const hasValidToken   = authHeader === `Bearer ${runtimeSecret}`;
+    if (!isVercelCron && !isInternalAdmin && !hasValidToken) {
       return NextResponse.json({ error: 'No autorizado. Se requiere token CRON.' }, { status: 401 });
     }
   }
@@ -1750,20 +1761,29 @@ export async function GET(request) {
       .gte('publishedAt', startOfTodayDR)
       .lte('publishedAt', endOfTodayDR);
 
+    // Para la deduplicación SEMÁNTICA ampliamos a 7 días — evita cubrir el mismo tema
+    // aunque el artículo original haya sido publicado en un día anterior.
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: publishedWeek } = await supabase
+      .from('articles')
+      .select('title')
+      .gte('publishedAt', sevenDaysAgo)
+      .lte('publishedAt', endOfTodayDR);
+
     const publishedLinks  = new Set((publishedToday || []).map(a => a.source_link).filter(Boolean));
     const publishedTitles = new Set(
       (publishedToday || []).map(a =>
         a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
       )
     );
-    // Pre-computar keywords de todos los artículos publicados hoy (para check semántico)
-    const publishedKeywordSets = (publishedToday || [])
+    // Pre-computar keywords de artículos de los ÚLTIMOS 7 DÍAS (ventana semántica ampliada)
+    // Detecta el mismo tema aunque el artículo original fuera publicado en días anteriores.
+    const publishedKeywordSets = (publishedWeek || [])
       .map(a => extractKeywords(a.title))
       .filter(s => s.size > 0);
 
-    // ─── POOL DE TEMAS YA CUBIERTOS HOY (cross-categoría) ────────────────────────
-    // Construir un Set con TODAS las keywords significativas de los artículos publicados hoy.
-    // Palabras genéricas excluidas para evitar falsos positivos (ej: "gobierno", "nuevo").
+    // ─── POOL DE TEMAS YA CUBIERTOS (Últimos 7 días, cross-categoría) ───────────────────────
+    // Palabras genéricas excluidas para evitar falsos positivos.
     const GENERIC_TOPIC_WORDS = new Set([
       'nuevo','nueva','nuevos','nuevas','gran','grande','primer','primera','tras',
       'sigue','tiene','dice','hace','llega','viene','sera','esta','estos','estas',
@@ -1773,12 +1793,12 @@ export async function GET(request) {
       'Santo','Domingo','Santiago','Republica','Dominicana',
     ]);
     const publishedTopicPool = new Set(
-      (publishedToday || []).flatMap(a => {
+      (publishedWeek || []).flatMap(a => {
         const norm = a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
         return norm.split(/\s+/).filter(w =>
-          w.length > 5 &&                        // Palabras de 6+ caracteres (más específicas)
-          !GENERIC_TOPIC_WORDS.has(w) &&         // No es palabra genérica
-          !/^\d+$/.test(w)                       // No es número puro
+          w.length > 5 &&
+          !GENERIC_TOPIC_WORDS.has(w) &&
+          !/^\d+$/.test(w)
         );
       })
     );
@@ -1836,6 +1856,17 @@ export async function GET(request) {
                 break;
         }
       if (!item.link || !item.title) continue;
+
+      // 4a-0. BLOQUEO DE AUTOPLAGIO — nunca republicar desde el propio portal
+      // Si la URL de la fuente pertenece a imperiopublico.com, descartar de inmediato.
+      const SELF_DOMAINS = ['imperiopublico.com', 'www.imperiopublico.com'];
+      try {
+        const itemHost = new URL(item.link).hostname.replace(/^www\./, '');
+        if (SELF_DOMAINS.some(d => itemHost === d || itemHost.endsWith('.' + d))) {
+          console.log(`[Bot] 🚫 AUTOPLAGIO bloqueado: "${item.title.slice(0, 60)}" (fuente: ${itemHost})`);
+          continue;
+        }
+      } catch (_) { /* URL inválida — dejar pasar, el filtro de link exacto lo capturará */ }
 
       // 4a. VALIDACIÓN TEMÁTICA — descartar si el ítem no es apto para esta sección
       if (!isOnTopicForCategory(item, cat.slug)) {
@@ -2024,11 +2055,12 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
-    // ⚡ LÍMITE DE CLAVES: 2 intentos con gemini-2.5-flash
-    // Cada clave tarda 10-25s con 2.5-flash → 2 claves = hasta 50s máximo.
-    // El TIME_LIMIT_GEMINI de 42s garantiza que se corta antes del límite de Vercel.
-    const maxKeysToTry = Math.min(keys.length, 2);
+    // ⚡ LÍMITE DE CLAVES: intentar todas las claves activas del grupo
+    // El guarda de tiempo TIME_LIMIT_GEMINI (42s) garantiza que se corta
+    // automáticamente antes del límite de 55s de Vercel.
+    const maxKeysToTry = keys.length; // usar todo el grupo A o B
     let keysAttempted = 0;
+    let quotaFailures = 0; // claves que fallaron específicamente por cuota agotada
 
     for (const key of keys) {
       if (aiSuccess) break;
@@ -2042,7 +2074,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model} (clave ${keysAttempted}/${maxKeysToTry})`);
           // Guard estricto: >20s = salir YA para no chocar con el límite de 55s de Vercel
           if (Date.now() - startTime > TIME_LIMIT_GEMINI) {
-            console.warn('[Bot] ⏱️ Tiempo global >20s, abortando bucle Gemini para evitar timeout.');
+            console.warn('[Bot] ⏱️ Tiempo global >42s, abortando bucle Gemini para evitar timeout.');
             break;
           }
           const gemCtrl = new AbortController();
@@ -2068,10 +2100,14 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
               const reason = isQuota ? 'cuota agotada' : isLeaked ? '⛔ leaked' : isBanned ? '⛔ banned' : 'inválida/denegada';
               console.log(`[Bot] ⚠️ Gemini ...${key.slice(-6)}: ${reason} → siguiente clave`);
               deadKeys.add(key);
-              // ⚡ Si es cuota agotada y ya probamos 1 clave, asumir todas agotadas → saltar a OpenRouter
-              if (isQuota && keysAttempted >= 1) {
-                geminiQuotaExhausted = true;
-                console.log('[Bot] ⚡ Cuota Gemini confirmada agotada → saltando directo a OpenRouter.');
+              // ⚡ Solo asumir cuota global agotada si 2+ claves distintas fallan por quota
+              // Una sola falla puede ser transitoria o de esa clave en particular.
+              if (isQuota) {
+                quotaFailures++;
+                if (quotaFailures >= 2) {
+                  geminiQuotaExhausted = true;
+                  console.log(`[Bot] ⚡ ${quotaFailures} claves con cuota agotada → saltando directo a OpenRouter.`);
+                }
               }
               break;
             }
