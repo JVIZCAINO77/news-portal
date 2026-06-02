@@ -1,4 +1,4 @@
-﻿// app/contacto/page.js — Página de Contacto (Imperio Público)
+// app/contacto/page.js � P�gina de Contacto (Imperio P�blico)
 'use client';
 import { useState } from 'react';
 
@@ -13,9 +13,9 @@ export default function ContactoPage() {
     e.preventDefault();
     setLoading(true);
     // Abrimos el cliente de correo con los datos prellenados como fallback confiable
-    const subject = encodeURIComponent(`[Imperio Público] ${form.asunto} — ${form.nombre}`);
+    const subject = encodeURIComponent(`[Imperio P�blico] ${form.asunto} � ${form.nombre}`);
     const body = encodeURIComponent(`Nombre: ${form.nombre}\nEmail: ${form.email}\nAsunto: ${form.asunto}\n\nMensaje:\n${form.mensaje}`);
-    window.location.href = `mailto:imperiopublico@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:jvizcaino242@gmail.com?subject=${subject}&body=${body}`;
     await new Promise(r => setTimeout(r, 600));
     setSent(true);
     setLoading(false);
@@ -23,13 +23,13 @@ export default function ContactoPage() {
 
   return (
     <main className="bg-white">
-      {/* Encabezado de Página */}
+      {/* Encabezado de P�gina */}
       <header className="bg-gray-50 border-b border-gray-100 py-20 mb-20">
         <div className="max-w-6xl mx-auto px-6">
           <span className="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 mb-4 block">Canales Directos</span>
-          <h1 className="text-6xl md:text-7xl font-black uppercase tracking-tighter leading-none italic mb-6">Contáctanos</h1>
+          <h1 className="text-6xl md:text-7xl font-black uppercase tracking-tighter leading-none italic mb-6">Cont�ctanos</h1>
           <p className="text-xl font-serif text-slate-600 max-w-3xl leading-relaxed">
-            Estamos aquí para escucharte. Utiliza nuestros canales oficiales para denuncias, colaboraciones o publicidad.
+            Estamos aqu� para escucharte. Utiliza nuestros canales oficiales para denuncias, colaboraciones o publicidad.
           </p>
         </div>
       </header>
@@ -46,9 +46,9 @@ export default function ContactoPage() {
                   <div className="w-16 h-16 bg-green-600 flex items-center justify-center mx-auto mb-6">
                     <svg width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                   </div>
-                  <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">¡Mensaje Enviado!</h3>
+                  <h3 className="text-3xl font-black uppercase tracking-tighter mb-4">�Mensaje Enviado!</h3>
                   <p className="text-slate-800 font-serif text-lg">
-                    Nos pondremos en contacto contigo en las próximas 24 horas.
+                    Nos pondremos en contacto contigo en las pr�ximas 24 horas.
                   </p>
                   <button
                     onClick={() => { setSent(false); setForm({ nombre: '', email: '', asunto: '', mensaje: '' }); }}
@@ -73,7 +73,7 @@ export default function ContactoPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-700 mb-3">Correo Electrónico *</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-slate-700 mb-3">Correo Electr�nico *</label>
                       <input
                         name="email"
                         type="email"
@@ -96,10 +96,10 @@ export default function ContactoPage() {
                       className="w-full border-0 border-b-2 border-gray-200 focus:border-red-600 outline-none py-3 text-base font-bold bg-transparent transition-colors"
                     >
                       <option value="">Selecciona un tema</option>
-                      <option value="denuncia">Denuncia o Investigación</option>
+                      <option value="denuncia">Denuncia o Investigaci�n</option>
                       <option value="colaboracion">Quiero Colaborar</option>
                       <option value="publicidad">Publicidad</option>
-                      <option value="correccion">Corrección de Artículo</option>
+                      <option value="correccion">Correcci�n de Art�culo</option>
                       <option value="otro">Otro</option>
                     </select>
                   </div>
@@ -112,7 +112,7 @@ export default function ContactoPage() {
                       onChange={handleChange}
                       required
                       rows={6}
-                      placeholder="Escribe aquí tu mensaje..."
+                      placeholder="Escribe aqu� tu mensaje..."
                       className="w-full border border-gray-100 focus:border-red-600 outline-none p-6 text-base font-serif leading-relaxed placeholder:text-slate-400 resize-none transition-colors"
                     />
                   </div>
@@ -131,63 +131,63 @@ export default function ContactoPage() {
             {/* Info de contacto */}
             <div className="lg:col-span-5 space-y-10">
               <div className="border-l-4 border-red-600 pl-8">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Redacción y General</h3>
-                <a href="mailto:imperiopublico@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
-                  imperiopublico@gmail.com
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-3">Redacci�n y General</h3>
+                <a href="mailto:jvizcaino242@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
+                  jvizcaino242@gmail.com
                 </a>
               </div>
 
               <div className="border-l-4 border-black pl-8">
                 <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-3">Publicidad y Denuncias</h3>
-                <a href="mailto:imperiopublico@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
-                  imperiopublico@gmail.com
+                <a href="mailto:jvizcaino242@gmail.com" className="text-xl font-black text-black hover:text-red-600 transition-colors break-all">
+                  jvizcaino242@gmail.com
                 </a>
-                <p className="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2">Atención y Línea Confidencial</p>
+                <p className="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2">Atenci�n y L�nea Confidencial</p>
               </div>
 
               {/* Horario */}
               <div className="bg-slate-50 p-8">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-4">Horario de Atención</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-black mb-4">Horario de Atenci�n</h3>
                 <div className="space-y-2 text-sm font-serif text-slate-600">
                   <div className="flex justify-between">
-                    <span className="font-bold uppercase text-[10px] tracking-widest">Lunes — Viernes</span>
-                    <span>8:00 AM — 6:00 PM</span>
+                    <span className="font-bold uppercase text-[10px] tracking-widest">Lunes � Viernes</span>
+                    <span>8:00 AM � 6:00 PM</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="font-bold uppercase text-[10px] tracking-widest">Sábado</span>
-                    <span>9:00 AM — 1:00 PM</span>
+                    <span className="font-bold uppercase text-[10px] tracking-widest">S�bado</span>
+                    <span>9:00 AM � 1:00 PM</span>
                   </div>
                   <div className="flex justify-between text-slate-400">
                     <span className="font-bold uppercase text-[10px] tracking-widest">Domingo</span>
                     <span>Cerrado</span>
                   </div>
                 </div>
-                <p className="text-[9px] font-bold uppercase tracking-widest text-red-600 mt-4">⚠️ Urgencias periodísticas: 24/7</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-red-600 mt-4">?? Urgencias period�sticas: 24/7</p>
               </div>
 
               {/* Redes Sociales */}
               <div className="border-l-4 border-red-600 pl-8 pt-4">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-6">Síguenos en Redes</h3>
+                <h3 className="text-[10px] font-black uppercase tracking-widest text-red-600 mb-6">S�guenos en Redes</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <a href="https://www.facebook.com/profile.php?id=61573298082093" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="Síguenos en Facebook">
+                  <a href="https://www.facebook.com/profile.php?id=61573298082093" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="S�guenos en Facebook">
                     <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
                       <span className="text-[10px] font-black">FB</span>
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-widest">Facebook</span>
                   </a>
-                  <a href="https://www.instagram.com/imperiopublico/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="Síguenos en Instagram">
+                  <a href="https://www.instagram.com/imperiopublico/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="S�guenos en Instagram">
                     <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
                       <span className="text-[10px] font-black">IG</span>
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-widest">Instagram</span>
                   </a>
-                  <a href="https://x.com/imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="Síguenos en X (Twitter)">
+                  <a href="https://x.com/imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="S�guenos en X (Twitter)">
                     <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
                       <span className="text-[10px] font-black">X</span>
                     </div>
                     <span className="text-[11px] font-black uppercase tracking-widest">Twitter / X</span>
                   </a>
-                  <a href="https://www.youtube.com/@Imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="Síguenos en YouTube">
+                  <a href="https://www.youtube.com/@Imperiopublico" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 group" aria-label="S�guenos en YouTube">
                     <div className="w-10 h-10 border border-gray-100 flex items-center justify-center group-hover:bg-black group-hover:text-white transition-all">
                       <span className="text-[10px] font-black">YT</span>
                     </div>

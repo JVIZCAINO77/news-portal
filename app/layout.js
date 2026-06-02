@@ -133,7 +133,7 @@ export default function RootLayout({ children }) {
               },
               contactPoint: {
                 '@type': 'ContactPoint',
-                email: 'imperiopublico@gmail.com',
+                email: 'jvizcaino242@gmail.com',
                 contactType: 'editorial',
                 availableLanguage: 'Spanish',
               },
