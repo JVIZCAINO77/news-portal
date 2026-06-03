@@ -1769,7 +1769,8 @@ export async function GET(request) {
       .from('articles')
       .select('title, excerpt')
       .gte('publishedAt', thirtyDaysAgo)
-      .lte('publishedAt', endOfTodayDR);
+      .lte('publishedAt', endOfTodayDR)
+      .limit(400); // Cap RAM: evita cargar cientos de excerpts en memoria
 
     const publishedLinks  = new Set((publishedToday || []).map(a => a.source_link).filter(Boolean));
     const publishedTitles = new Set(
@@ -2195,13 +2196,23 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           });
           clearTimeout(timeoutId);
           if (orRes.ok) {
-            const orData = await orRes.json();
-            const orText = orData.choices?.[0]?.message?.content || '';
-            const parsed = parseAndValidateAI(orText, cat.slug, news.contentSnippet, news.title);
-            if (parsed) {
-              console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió y validado.`);
-              articleData = parsed;
-              aiSuccess = true;
+            // FIX: OpenRouter a veces devuelve texto plano en lugar de JSON (ej. "An error occurred").
+            // Envolvemos .json() en try-catch para no romper el bucle de fallback.
+            let orText = '';
+            try {
+              const orData = await orRes.json();
+              orText = orData.choices?.[0]?.message?.content || '';
+            } catch (_jsonErr) {
+              const rawText = await orRes.text().catch(() => '');
+              console.log(`[Bot] ⚠️ OpenRouter (${orModel}) devolvió texto plano: ${rawText.slice(0, 80)}`);
+            }
+            if (orText) {
+              const parsed = parseAndValidateAI(orText, cat.slug, news.contentSnippet, news.title);
+              if (parsed) {
+                console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió y validado.`);
+                articleData = parsed;
+                aiSuccess = true;
+              }
             }
           }
         } catch (orErr) {

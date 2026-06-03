@@ -14,12 +14,14 @@ export async function GET() {
   const checks  = {};
   let   healthy = true;
 
+  // Cliente único reutilizado en todos los checks — evita abrir 2 conexiones por request
+  const sb = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
   // 1. Supabase
   try {
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
     const { count } = await sb.from('articles').select('*', { count: 'exact', head: true });
     checks.supabase = { ok: true, articles: count };
   } catch (e) {
@@ -47,10 +49,6 @@ export async function GET() {
 
   // 5. Artículos de hoy
   try {
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
     const todayDR    = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Santo_Domingo',
       year: 'numeric', month: '2-digit', day: '2-digit',
@@ -72,10 +70,6 @@ export async function GET() {
 
   // 6. Facebook token
   try {
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
     const { data } = await sb.from('social_tokens').select('expires_at').eq('id', 'facebook_page').single();
     const daysLeft = data?.expires_at
       ? Math.max(0, Math.floor((new Date(data.expires_at) - Date.now()) / 86400000))

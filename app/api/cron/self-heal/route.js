@@ -89,28 +89,40 @@ export async function GET(req) {
     return NextResponse.json({ status: 'complete', ...report });
   }
 
-  // Disparar bot para cada sección faltante (hasta 3 a la vez — límite de tiempo)
-  const toHeal = missing.slice(0, 3); // máx 3 en una ejecución de 55s
-  for (const section of toHeal) {
-    try {
+  // Disparar bot para cada sección faltante EN PARALELO (Promise.allSettled)
+  // FIX CRÍTICO: antes era secuencial (45s × 3 = 135s > límite de 55s de Vercel).
+  // Ahora: todas las secciones se disparan a la vez, 20s timeout cada una.
+  // 3 llamadas en paralelo de 20s = caben perfectamente en la ventana de 55s.
+  const toHeal = missing.slice(0, 3);
+  const healResults = await Promise.allSettled(
+    toHeal.map(async (section) => {
       const botUrl = `${SITE_URL}/api/cron/bot?category=${section}`;
       const ctrl   = new AbortController();
-      const timer  = setTimeout(() => ctrl.abort(), 45000); // 45s por sección
-      const res    = await fetch(botUrl, {
-        headers: {
-          'Authorization':  `Bearer ${CRON_SECRET}`,
-          'x-vercel-cron': '1',
-        },
-        signal: ctrl.signal,
-      });
-      clearTimeout(timer);
-      if (res.ok) {
-        report.healed.push(section);
-      } else {
-        report.failed.push(`${section} (HTTP ${res.status})`);
+      const timer  = setTimeout(() => ctrl.abort(), 20000); // 20s por sección
+      try {
+        const res = await fetch(botUrl, {
+          headers: {
+            'Authorization': `Bearer ${CRON_SECRET}`,
+            'x-vercel-cron': '1',
+          },
+          signal: ctrl.signal,
+        });
+        clearTimeout(timer);
+        if (res.ok) return { section, ok: true };
+        return { section, ok: false, reason: `HTTP ${res.status}` };
+      } catch (e) {
+        clearTimeout(timer);
+        return { section, ok: false, reason: e.message.slice(0, 40) };
       }
-    } catch (e) {
-      report.failed.push(`${section} (${e.message.slice(0, 40)})`);
+    })
+  );
+
+  for (const result of healResults) {
+    const val = result.value || { section: '?', ok: false, reason: result.reason?.message || 'rejected' };
+    if (val.ok) {
+      report.healed.push(val.section);
+    } else {
+      report.failed.push(`${val.section} (${val.reason})`);
     }
   }
 
