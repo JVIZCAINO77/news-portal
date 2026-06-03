@@ -1790,7 +1790,8 @@ export async function GET(request) {
       'sobre','desde','hasta','entre','todos','todas','alguno','algunos','otros',
       'mundo','pais','paises','gobierno','presidente','nacional','local','hoy',
       'semana','meses','anos','dias','horas','tiempo','parte','lugar','caso',
-      'Santo','Domingo','Santiago','Republica','Dominicana',
+      // ⚠️ FIX: deben ser minúsculas — el texto ya está normalizado con toLowerCase()
+      'santo','domingo','santiago','republica','dominicana',
     ]);
     const publishedTopicPool = new Set(
       (publishedWeek || []).flatMap(a => {
@@ -1849,7 +1850,8 @@ export async function GET(request) {
 
     let news = null;
     let isNewsBreaking = false;
-    const TIME_LIMIT_LOOP = IS_VERCEL ? 40000 : 180000;
+    // ⚠️ FIX: 38s (antes 40s) — da margen claro antes del corte Gemini en 42s
+    const TIME_LIMIT_LOOP = IS_VERCEL ? 38000 : 180000;
     for (const item of prioritizedItems) { 
         if (Date.now() - startTime > TIME_LIMIT_LOOP) {
                 console.warn("[Bot] Time safety limit reached, breaking prioritizedItems loop");
@@ -2147,13 +2149,15 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         console.warn('[Bot] ⏱️ Tiempo global >25s, saltando OpenRouter para no causar timeout.');
       } else {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando OpenRouter...');
+      // ⚠️ FIX: IDs actualizados — los anteriores (gpt-oss-20b, gpt-oss-120b) no existen en OpenRouter
+      // Verificados en openrouter.ai/models (junio 2026) — modelos gratuitos disponibles
       const FREE_MODELS_OR = [
-        'openai/gpt-oss-20b:free',
-        'openai/gpt-oss-120b:free',
-        'nvidia/nemotron-3-super-120b-a12b:free',
-        'z-ai/glm-4.5-air:free',
-        'minimax/minimax-m2.5:free',
-        'nvidia/nemotron-3-nano-30b-a3b:free',
+        'meta-llama/llama-3.3-70b-instruct:free',
+        'mistralai/mistral-7b-instruct:free',
+        'google/gemma-3-27b-it:free',
+        'deepseek/deepseek-r1-0528:free',
+        'qwen/qwen3-235b-a22b:free',
+        'microsoft/phi-4-reasoning-plus:free',
       ];
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
