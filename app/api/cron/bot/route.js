@@ -2395,40 +2395,12 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       finalImageUrl      = await internalizeImage(polUrl2, 2);
     }
 
-    // GUARDIÁN FINAL: Si aún no tenemos Cloudinary → reciclar imagen reciente de la misma categoría
+    // GUARDIÁN FINAL: Si Cloudinary falló en las 3 etapas → publicar SIN imagen
+    // ⚠️ ELIMINADO el reciclaje de imágenes de la BD — causaba duplicados de imagen entre artículos.
+    // Un artículo sin imagen es preferible a uno con la misma foto que otro artículo ya publicado.
     if (!finalImageUrl || !finalImageUrl.includes('cloudinary.com')) {
-      console.warn(`[Bot] ⚠️ GUARDIÁN: Cloudinary falló. Reciclando imagen de la BD para no perder el artículo...`);
-      try {
-        const { data: recycleImg } = await supabase
-          .from('articles')
-          .select('image')
-          .eq('category', cat.slug)
-          .like('image', '%cloudinary.com%')
-          .order('publishedAt', { ascending: false })
-          .limit(5);
-        const candidates = (recycleImg || []).map(r => r.image).filter(Boolean);
-        if (candidates.length > 0) {
-          finalImageUrl = candidates[Math.floor(Math.random() * candidates.length)];
-          console.log(`[Bot] ♻️ Imagen reciclada de BD [${cat.slug}]: ${finalImageUrl.slice(0, 60)}`);
-        } else {
-          // Último recurso: cualquier imagen Cloudinary de cualquier categoría
-          const { data: anyImg } = await supabase
-            .from('articles')
-            .select('image')
-            .like('image', '%cloudinary.com%')
-            .order('publishedAt', { ascending: false })
-            .limit(1)
-            .single();
-          finalImageUrl = anyImg?.image || null;
-          if (finalImageUrl) console.log(`[Bot] ♻️ Imagen reciclada global: ${finalImageUrl.slice(0, 60)}`);
-        }
-      } catch (recycleErr) {
-        console.warn(`[Bot] Reciclar imagen falló: ${recycleErr.message}`);
-      }
-      // Si sigue sin imagen, publicar sin imagen — el artículo vale más que ninguno
-      if (!finalImageUrl) {
-        console.warn(`[Bot] ⚠️ Publicando sin imagen. El contenido tiene prioridad.`);
-      }
+      finalImageUrl = null;
+      console.warn(`[Bot] ⚠️ Cloudinary falló en las 3 etapas. Publicando sin imagen (evita duplicado de foto).`);
     }
 
     if (finalImageUrl) {
