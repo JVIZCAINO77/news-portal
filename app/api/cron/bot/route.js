@@ -186,10 +186,10 @@ function sharesCriticalEntities(titleA, titleB) {
   return [...entA].filter(e => entB.has(e)).length >= 2;
 }
 
-// Umbral Jaccard: 15% de overlap detecta el mismo evento con distintas palabras
-// Bajado de 20% → 15% para capturar sinónimos conceptuales (polvo/velo, calor/temperatura)
-// Ejemplo: "polvo sahara temperaturas" vs "velo sahariano calor" → stems comunes sahar+temp
-const SEMANTIC_THRESHOLD = 0.15;
+// Umbral Jaccard: 25% — detecta el mismo evento con distintas palabras sin falsos positivos
+// Subido de 15% → 25% para reducir duplicados sobre el mismo tema (Irán, petróleo, frontera, etc.)
+// Ejemplo: "Trump extiende alto el fuego" vs "Irán responde cese de fuego" → stems iran+fuego comunes
+const SEMANTIC_THRESHOLD = 0.25;
 
 const CATEGORIES = {
   // ─── ESTRUCTURA OFICIAL IMPERIO PÚBLICO ──────────────────────────────────────
@@ -1761,13 +1761,14 @@ export async function GET(request) {
       .gte('publishedAt', startOfTodayDR)
       .lte('publishedAt', endOfTodayDR);
 
-    // Para la deduplicación SEMÁNTICA ampliamos a 7 días — evita cubrir el mismo tema
-    // aunque el artículo original haya sido publicado en un día anterior.
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: publishedWeek } = await supabase
+    // Para la deduplicación SEMÁNTICA ampliamos a 30 días — evita cubrir el mismo tema
+    // aunque el artículo original haya sido publicado hasta un mes antes.
+    // Subido de 7 → 30 días para bloquear temas recurrentes (Irán, petróleo, frontera, etc.)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: publishedMonth } = await supabase
       .from('articles')
-      .select('title')
-      .gte('publishedAt', sevenDaysAgo)
+      .select('title, excerpt')
+      .gte('publishedAt', thirtyDaysAgo)
       .lte('publishedAt', endOfTodayDR);
 
     const publishedLinks  = new Set((publishedToday || []).map(a => a.source_link).filter(Boolean));
@@ -1776,13 +1777,13 @@ export async function GET(request) {
         a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
       )
     );
-    // Pre-computar keywords de artículos de los ÚLTIMOS 7 DÍAS (ventana semántica ampliada)
-    // Detecta el mismo tema aunque el artículo original fuera publicado en días anteriores.
-    const publishedKeywordSets = (publishedWeek || [])
-      .map(a => extractKeywords(a.title))
+    // Pre-computar keywords de artículos de los ÚLTIMOS 30 DÍAS (ventana semántica ampliada)
+    // Combina título + excerpt para mayor cobertura — detecta el mismo evento con distinto titular.
+    const publishedKeywordSets = (publishedMonth || [])
+      .map(a => extractKeywords(`${a.title} ${a.excerpt || ''}`))
       .filter(s => s.size > 0);
 
-    // ─── POOL DE TEMAS YA CUBIERTOS (Últimos 7 días, cross-categoría) ───────────────────────
+    // ─── POOL DE TEMAS YA CUBIERTOS (Últimos 30 días, cross-categoría) ────────────────────────
     // Palabras genéricas excluidas para evitar falsos positivos.
     const GENERIC_TOPIC_WORDS = new Set([
       'nuevo','nueva','nuevos','nuevas','gran','grande','primer','primera','tras',
@@ -1794,8 +1795,10 @@ export async function GET(request) {
       'santo','domingo','santiago','republica','dominicana',
     ]);
     const publishedTopicPool = new Set(
-      (publishedWeek || []).flatMap(a => {
-        const norm = a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
+      (publishedMonth || []).flatMap(a => {
+        // Incluir excerpt en el pool de temas para mayor cobertura
+        const combined = `${a.title} ${a.excerpt || ''}`;
+        const norm = combined.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
         return norm.split(/\s+/).filter(w =>
           w.length > 5 &&
           !GENERIC_TOPIC_WORDS.has(w) &&
@@ -1899,13 +1902,14 @@ export async function GET(request) {
       }
 
       // 4d. Deduplicación SEMÁNTICA — detectar el mismo evento aunque venga de diferente fuente/título
-      const candidateKeywords = extractKeywords(item.title);
+      // Combina título + snippet del RSS para mayor cobertura semántica (30 días atrás)
+      const candidateKeywords = extractKeywords(`${item.title} ${item.contentSnippet || ''}`);
       const semanticDuplicate = publishedKeywordSets.find(
         existingKws => semanticOverlap(candidateKeywords, existingKws) >= SEMANTIC_THRESHOLD
       );
       if (semanticDuplicate) {
         const overlap = Math.round(semanticOverlap(candidateKeywords, semanticDuplicate) * 100);
-        console.log(`[Bot] 🔁 Duplicado SEMÁNTICO (${overlap}% Jaccard): "${item.title.slice(0, 60)}" ya cubierto hoy.`);
+        console.log(`[Bot] 🔁 Duplicado SEMÁNTICO (${overlap}% Jaccard, 30d): "${item.title.slice(0, 60)}" ya cubierto.`);
         continue;
       }
 
