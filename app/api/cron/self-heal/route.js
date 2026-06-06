@@ -146,6 +146,17 @@ export async function GET(req) {
     [healedTxt, failedTxt, remainTxt].filter(Boolean).join('\n')
   );
 
+  // ─── CLEANUP INTEGRADO (HAL-10) ───────────────────────────────────────────
+  // El cron de cleanup fue eliminado del plan Hobby (límite = 2 crons).
+  // Se lanza aquí como fire-and-forget: no bloquea la respuesta del self-heal.
+  // Se ejecuta cada noche junto con la auto-sanación (1 AM UTC / 9 PM RD).
+  fetch(`${SITE_URL}/api/cron/cleanup`, {
+    headers: {
+      'Authorization': `Bearer ${CRON_SECRET}`,
+      'x-vercel-cron': '1',
+    },
+  }).catch(e => console.warn('[Self-heal] Cleanup fire-and-forget falló:', e.message));
+
   return NextResponse.json({
     status: report.failed.length === 0 ? 'healed' : 'partial',
     ...report,

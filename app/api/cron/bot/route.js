@@ -17,20 +17,12 @@ export const maxDuration = 55;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// PLAN HOBBY DE VERCEL: máximo 2 crons únicos permitidos.
-// Cron activo: 7:00 AM RD (11:00 UTC) — 1 artículo automático por día.
-// Los 5 restantes se disparan desde el panel admin con "Disparar Ahora".
-// Reset de cuotas Gemini: 3:00 AM hora RD (medianoche UTC).
-const DAILY_LIMIT_GLOBAL   = 6;  // Techo del día: máximo 6 artículos en total
-// Sin límite por categoría — el bot elige la categoría con menor cobertura cada vez
+// Cron: 7:00 AM RD (11:00 UTC). Los restantes se disparan desde el panel admin.
+// Reset de cuotas Gemini: medianoche UTC (3:00 AM hora RD).
+const DAILY_LIMIT_GLOBAL = 6; // Techo diario: máximo 6 artículos en total
 
-// ─── CANDADO DE ORIGINALIDAD ─────────────────────────────────────────────────
-// Longitud mínima que debe tener el contenido generado por la IA.
-// Si la IA devuelve algo muy corto, es señal de un fallo — NUNCA publicar.
-const MIN_CONTENT_LENGTH = 2500; // caracteres mínimos (~400 palabras) — requerido por AdSense
-// PROHIBIDO publicar contenido sin pasar por reescritura de IA.
-// Este flag actúa como candado: si es false, el artículo es rechazado.
-const REQUIRE_AI_REWRITE = true;
+// Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
+const MIN_CONTENT_LENGTH = 2500; // ~400 palabras — requerido por AdSense
 
 // ─── DETECTOR DE ÚLTIMA HORA ───────────────────────────────────────────────
 // Palabras clave que indican un suceso urgente/crítico que NUNCA debe bloquearse
@@ -1545,13 +1537,9 @@ export async function GET(request) {
   let categoryKey = searchParams.get('category');
   let categoryFallbackUsed = false;
 
-  // ─── ORDEN DE ROTACIÓN DETERMINISTA ────────────────────────────────────────
-  // Orden editorial oficial. El bot siempre sigue este orden de prioridad para
-  // garantizar que TODAS las secciones se cubran antes de repetir alguna.
-  // Solo incluye las 11 categorías con slot de cron activo (vercel.json + autoblog.yml).
-  // ─── ORDEN DE ROTACIÓN DETERMINISTA — 32 SECCIONES ────────────────────────────
-  // Todas las categorías del portal registradas. El bot publica 12/día, completando
-  // el ciclo completo en ~3 días (garantía de cobertura editorial total).
+  // ─── ORDEN DE ROTACIÓN DETERMINISTA — 33 SECCIONES ─────────────────────────
+  // Todas las categorías del portal. El bot publica máx 6/día,
+  // completando el ciclo completo en ~6 días (cobertura editorial total).
   // Prioridad: secciones de alto impacto primero, subsecciones al final.
   const ROTATION_ORDER = [
     // Tier 1 — Secciones principales de alto tráfico (diarias)
@@ -1571,11 +1559,15 @@ export async function GET(request) {
   // Nivel 1: Secciones con 0 artículos totales (nunca publicadas) — prioridad MÁXIMA
   // Nivel 2: Secciones sin cobertura hoy (rotación diaria normal)
   // Nivel 3: Primera sección del orden si todas ya tienen artículos hoy
+
+  // HAL-02: cliente único — reutilizado en selección de categoría y en el flujo principal
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  );
+
   try {
-    const supabaseTemp = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
+    const supabaseTemp = supabase; // alias semántico para la fase de selección
     const todayTmp = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Santo_Domingo', year: 'numeric', month: '2-digit', day: '2-digit'
     }).format(new Date());
@@ -1638,10 +1630,6 @@ export async function GET(request) {
     return NextResponse.json({ error: `Categoría inválida: ${categoryKey}` }, { status: 400 });
   }
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  );
 
   const { data: botSetting } = await supabase
     .from('settings')
@@ -2047,14 +2035,12 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       keys.push(...rotatedKeys);
     }
 
-    // ─── MODELOS GEMINI PRO — Estado verificado 2026-05-30 ──────────────────
-    // SOLO gemini-2.5-flash tiene cuota disponible en el plan gratuito.
-    // gemini-2.0-flash y gemini-2.0-flash-lite están en 429 RESOURCE_EXHAUSTED.
-    // Timeout 25s: gemini-2.5-flash es un modelo de razonamiento, tarda 10-20s.
+    // ─── MODELOS GEMINI — Estado verificado 2026-06 ──────────────────────────
+    // Solo gemini-2.5-flash tiene cuota disponible en el plan gratuito.
+    // gemini-2.0-flash y gemini-2.0-flash-lite están en 429 RESOURCE_EXHAUSTED
+    // de forma permanente → se eliminaron para no desperdiciar tiempo de iteración.
     const geminiModels = [
-      'gemini-2.5-flash',      // ✅ ÚNICO con cuota disponible — PRINCIPAL
-      'gemini-2.0-flash',      // Intento secundario (puede tener cuota en alguna clave)
-      'gemini-2.0-flash-lite', // Fallback rápido
+      'gemini-2.5-flash', // ✅ ÚNICO con cuota disponible
     ];
 
     let articleData = null;

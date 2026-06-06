@@ -2,9 +2,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-export const maxDuration = 30; // Fix M4: previene que el cleanup sea cortado por Vercel
+export const runtime    = 'nodejs';
+export const dynamic    = 'force-dynamic';
+export const maxDuration = 30; // HAL-09: declarado aquí Y en vercel.json para garantía doble
 
 /**
  * API de Mantenimiento Automático para Imperio Público.
@@ -13,11 +13,16 @@ export const maxDuration = 30; // Fix M4: previene que el cleanup sea cortado po
  * También puede llamarse manualmente desde maintenance.yml.
  */
 export async function GET(request) {
-  const authHeader = request.headers.get('authorization');
-  const CRON_SECRET = process.env.CRON_SECRET;
+  // ── Guardia dual — igual que /api/cron/bot y /api/cron/self-heal ────────────
+  // HAL-08 fix: la condición anterior (CRON_SECRET && ...) dejaba el endpoint
+  // completamente abierto si CRON_SECRET no estaba definido en el entorno.
+  // Ahora se requiere AL MENOS una de las dos vías de autorización.
+  const CRON_SECRET   = process.env.CRON_SECRET;
+  const isVercelCron  = request.headers.get('x-vercel-cron') === '1';
+  const authHeader    = request.headers.get('authorization');
+  const hasValidToken = !!CRON_SECRET && authHeader === `Bearer ${CRON_SECRET}`;
 
-  // Protección de seguridad
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!isVercelCron && !hasValidToken) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
   }
 

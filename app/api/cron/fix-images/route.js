@@ -21,9 +21,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { internalizeImage } from '@/lib/botUtils';
 
-export const maxDuration = 60;
-
-const CRON_SECRET = process.env.CRON_SECRET;
+export const maxDuration = 55; // Hobby: límite real es 60s, 55s da margen de seguridad
 
 // Dominios problemáticos — cualquier imagen de estas fuentes debe reemplazarse
 const BLOCKED_DOMAINS = [
@@ -67,12 +65,15 @@ function buildPollinationsUrl(title, category) {
 }
 
 export async function GET(request) {
-  // ── Autenticación ────────────────────────────────────────────────────────────
-  const { searchParams } = new URL(request.url);
-  const secret = request.headers.get('authorization')?.replace('Bearer ', '')
-    || searchParams.get('secret');
+  // ── Guardia dual — igual que todos los crons del sistema ────────────────────
+  const CRON_SECRET   = process.env.CRON_SECRET;
+  const isVercelCron  = request.headers.get('x-vercel-cron') === '1';
+  const authHeader    = request.headers.get('authorization');
+  const querySecret   = new URL(request.url).searchParams.get('secret');
+  const hasValidToken = !!CRON_SECRET &&
+    (authHeader === `Bearer ${CRON_SECRET}` || querySecret === CRON_SECRET);
 
-  if (CRON_SECRET && secret !== CRON_SECRET) {
+  if (!isVercelCron && !hasValidToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
