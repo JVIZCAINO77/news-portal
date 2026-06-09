@@ -1514,8 +1514,8 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 42000  : 120000; // 42s prod — 2 claves × 25s c/u antes de cortar
-  const TIME_LIMIT_OR_START = IS_VERCEL ? 44000  : 125000; // 44s prod — OpenRouter solo si queda tiempo
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 38000  : 120000; // 38s prod — permite 3 intentos × 12s c/u antes de cortar
+  const TIME_LIMIT_OR_START = IS_VERCEL ? 42000  : 125000; // 42s prod — OpenRouter solo si queda tiempo
   const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 50000  : 200000; // por iteración OpenRouter
   const TIME_LIMIT_POL      = IS_VERCEL ? 52000  : 210000; // antes de Pollinations
   // Leer el secreto en runtime (no a nivel de módulo) para garantizar el valor correcto
@@ -2073,7 +2073,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             break;
           }
           const gemCtrl = new AbortController();
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 25000); // 25s — gemini-2.5-flash es modelo de razonamiento, tarda 10-20s
+          // ⚡ 12s por clave — gemini-2.5-flash responde en 2-8s cuando hay cuota disponible.
+          // Si tarda más de 12s es señal de alta demanda → cortar y pasar a la siguiente clave.
+          // Esto permite intentar 3+ claves dentro del presupuesto total de 38s.
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 12000); // 12s (antes 25s)
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
