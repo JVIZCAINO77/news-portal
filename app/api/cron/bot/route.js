@@ -2145,15 +2145,14 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         console.warn('[Bot] ⏱️ Tiempo global >25s, saltando OpenRouter para no causar timeout.');
       } else {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando OpenRouter...');
-      // ⚠️ FIX: IDs actualizados — los anteriores (gpt-oss-20b, gpt-oss-120b) no existen en OpenRouter
-      // Verificados en openrouter.ai/models (junio 2026) — modelos gratuitos disponibles
+      // ⚠️ Modelos verificados en openrouter.ai/models (junio 2026) — gratuitos disponibles
       const FREE_MODELS_OR = [
-        'meta-llama/llama-3.3-70b-instruct:free',
-        'mistralai/mistral-7b-instruct:free',
-        'google/gemma-3-27b-it:free',
-        'deepseek/deepseek-r1-0528:free',
-        'qwen/qwen3-235b-a22b:free',
-        'microsoft/phi-4-reasoning-plus:free',
+        'moonshotai/kimi-k2.6:free',             // ✅ 262k ctx — razonamiento fuerte
+        'google/gemma-4-31b-it:free',             // ✅ 262k ctx — Google, buena calidad
+        'google/gemma-4-26b-a4b-it:free',         // ✅ 262k ctx — alternativa Gemma 4
+        'nvidia/nemotron-3-super-120b-a12b:free', // ✅ 1M ctx — NVIDIA grande
+        'nvidia/nemotron-3-ultra-550b-a55b:free', // ✅ 1M ctx — NVIDIA ultra
+        'meta-llama/llama-3.3-70b-instruct:free', // ✅ fallback — puede tener rate limit
       ];
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
