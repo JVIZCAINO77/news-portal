@@ -17,9 +17,11 @@ export const maxDuration = 55;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// Cron: 7:00 AM RD (11:00 UTC). Los restantes se disparan desde el panel admin.
+// Cron principal: 7:00 AM RD (11:00 UTC) — publica ~6 artículos de alto impacto.
+// Self-heal:      9:00 PM RD (01:00 UTC) — cubre las 11 secciones requeridas restantes.
+// Total objetivo: 12 artículos/día (coherente con getDailyTopArticles y REQUIRED_SECTIONS).
 // Reset de cuotas Gemini: medianoche UTC (3:00 AM hora RD).
-const DAILY_LIMIT_GLOBAL = 6; // Techo diario: máximo 6 artículos en total
+const DAILY_LIMIT_GLOBAL = 12; // Techo diario: máximo 12 artículos en total
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
 const MIN_CONTENT_LENGTH = 2500; // ~400 palabras — requerido por AdSense
@@ -2542,7 +2544,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       publishedAt: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       // Las noticias de ÚLTIMA HORA siempre son destacadas
-      featured: articleData.impact_level === 'high' || articleData.impact_level === 'medium' || isNewsBreaking || Math.random() > 0.9,
+      // Fix M-2: 'medium' era el valor por defecto de la IA → marcaba TODO como featured.
+      // Solo 'high' o breaking news merecen destacarse en portada.
+      featured: articleData.impact_level === 'high' || isNewsBreaking,
       trending: articleData.impact_level === 'high' || (isNewsBreaking && Math.random() > 0.5),
     };
 

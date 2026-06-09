@@ -91,9 +91,10 @@ export async function GET(req) {
 
   // Disparar bot para cada sección faltante EN PARALELO (Promise.allSettled)
   // FIX CRÍTICO: antes era secuencial (45s × 3 = 135s > límite de 55s de Vercel).
-  // Ahora: todas las secciones se disparan a la vez, 20s timeout cada una.
-  // 3 llamadas en paralelo de 20s = caben perfectamente en la ventana de 55s.
-  const toHeal = missing.slice(0, 3);
+  // Ahora: hasta 5 secciones se disparan a la vez, 20s timeout cada una.
+  // 5 llamadas en paralelo de 20s = caben perfectamente en la ventana de 55s.
+  // Fix M-3: subido de 3 → 5 para cubrir días con fallos de cuota extendidos.
+  const toHeal = missing.slice(0, 5);
   const healResults = await Promise.allSettled(
     toHeal.map(async (section) => {
       const botUrl = `${SITE_URL}/api/cron/bot?category=${section}`;
@@ -127,7 +128,7 @@ export async function GET(req) {
   }
 
   // Si quedan más, marcar para que el cron siguiente las cubra
-  const remaining = missing.slice(3);
+  const remaining = missing.slice(toHeal.length); // antes era .slice(3) — bug: toHeal puede ser hasta 5
   if (remaining.length > 0) {
     report.remaining = remaining;
   }
