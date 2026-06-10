@@ -1450,11 +1450,15 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
   }
 
   // === ESCUDO DE SEGURIDAD: DETECCIÓN DE HALLUCINACIÓN (Cruce de keywords) ===
+  // El bot escribe títulos ORIGINALES — no se puede exigir que coincidan con la fuente.
+  // En su lugar, verificamos que el TEMA (keywords del titular fuente) esté presente
+  // en el texto completo del artículo generado (título + excerpt + tags).
   const sourceKws = extractKeywords(newsTitle);
-  const aiKws = extractKeywords(articleData.title);
-  const overlap = semanticOverlap(sourceKws, aiKws);
+  const aiFullText = `${articleData.title} ${articleData.excerpt || ''} ${(articleData.tags || []).join(' ')}`;
+  const aiAllKws = extractKeywords(aiFullText);
+  const overlap = semanticOverlap(sourceKws, aiAllKws);
   if (overlap === 0 && sourceKws.size > 0) {
-    console.log(`[Bot] ⚠️ Validation falló: Alucinación de título.`);
+    console.log(`[Bot] ⚠️ Validation falló: Alucinación — sin keywords del tema fuente en el artículo generado.`);
     return null;
   }
 
