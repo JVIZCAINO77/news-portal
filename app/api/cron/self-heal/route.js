@@ -19,10 +19,10 @@ import { NextResponse }  from 'next/server';
 export const maxDuration = 55;
 export const dynamic     = 'force-dynamic';
 
-// Secciones que DEBEN tener artículo cada día
+// Secciones que DEBEN tener artículo cada día (meta: 3 artículos/día)
+// Prioridad: las 3 secciones de mayor tráfico del portal
 const REQUIRED_SECTIONS = [
-  'nacional', 'politica', 'economia', 'internacional', 'tecnologia',
-  'deportes', 'entretenimiento', 'salud', 'educacion', 'medio-ambiente', 'cultura',
+  'politica', 'deportes', 'internacional',
 ];
 
 const SITE_URL    = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.imperiopublico.com';
@@ -84,17 +84,15 @@ export async function GET(req) {
     await sendTelegram(
       `✅ <b>Imperio Público — Auto-Sanación</b>\n\n` +
       `📅 ${todayDR}\n` +
-      `🎉 Todas las ${REQUIRED_SECTIONS.length} secciones cubiertas. ¡Sistema perfecto!`
+      `🎉 Las 3 secciones prioritarias cubiertas. ¡Sistema perfecto!`
     );
     return NextResponse.json({ status: 'complete', ...report });
   }
 
   // Disparar bot para cada sección faltante EN PARALELO (Promise.allSettled)
-  // FIX CRÍTICO: antes era secuencial (45s × 3 = 135s > límite de 55s de Vercel).
-  // Ahora: hasta 5 secciones se disparan a la vez, 20s timeout cada una.
-  // 5 llamadas en paralelo de 20s = caben perfectamente en la ventana de 55s.
-  // Fix M-3: subido de 3 → 5 para cubrir días con fallos de cuota extendidos.
-  const toHeal = missing.slice(0, 5);
+  // Máximo 3 secciones en paralelo — alineado con la meta de 3 artículos/día.
+  // 3 llamadas en paralelo de 20s caben perfectamente en la ventana de 55s de Vercel.
+  const toHeal = missing.slice(0, 3);
   const healResults = await Promise.allSettled(
     toHeal.map(async (section) => {
       const botUrl = `${SITE_URL}/api/cron/bot?category=${section}`;

@@ -17,11 +17,11 @@ export const maxDuration = 55;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// Cron principal: 7:00 AM RD (11:00 UTC) — publica ~6 artículos de alto impacto.
-// Self-heal:      9:00 PM RD (01:00 UTC) — cubre las 11 secciones requeridas restantes.
-// Total objetivo: 12 artículos/día (coherente con getDailyTopArticles y REQUIRED_SECTIONS).
+// Cron principal: 7:00 AM RD (11:00 UTC) — publica 3 artículos de alto impacto.
+// Self-heal:      9:00 PM RD (01:00 UTC) — cubre las 3 secciones requeridas restantes.
+// Total objetivo: 3 artículos/día (meta editorial diaria).
 // Reset de cuotas Gemini: medianoche UTC (3:00 AM hora RD).
-const DAILY_LIMIT_GLOBAL = 12; // Techo diario: máximo 12 artículos en total
+const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos en total
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
 const MIN_CONTENT_LENGTH = 2500; // ~400 palabras — requerido por AdSense
@@ -1768,6 +1768,13 @@ export async function GET(request) {
         a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
       )
     );
+    // Títulos normalizados de los ÚLTIMOS 30 DÍAS — para dedup por entidades (alineado con ventana semántica)
+    const publishedTitlesMonth = new Set(
+      (publishedMonth || []).map(a =>
+        (a.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
+      ).filter(Boolean)
+    );
+
     // Pre-computar keywords de artículos de los ÚLTIMOS 30 DÍAS (ventana semántica ampliada)
     // Combina título + excerpt para mayor cobertura — detecta el mismo evento con distinto titular.
     const publishedKeywordSets = (publishedMonth || [])
@@ -1905,12 +1912,13 @@ export async function GET(request) {
       }
 
       // 4e. Deduplicación por ENTIDADES NOMBRADAS — detecta el mismo evento con distinto titular
+      // Ventana ampliada a 30 días (igual que la dedup semántica) para bloquear eventos recurrentes.
       // Si 2 artículos comparten 2+ entidades (países, personas, org.), son el mismo evento.
-      const entityDuplicate = publishedTitles && [...publishedTitles].find(
+      const entityDuplicate = [...publishedTitlesMonth].find(
         t => sharesCriticalEntities(item.title, t)
       );
       if (entityDuplicate) {
-        console.log(`[Bot] 🔁 Duplicado por ENTIDADES: "${item.title.slice(0, 60)}" cubre el mismo evento que "${entityDuplicate.slice(0, 50)}"`);
+        console.log(`[Bot] 🔁 Duplicado por ENTIDADES (30d): "${item.title.slice(0, 60)}" cubre el mismo evento que "${entityDuplicate.slice(0, 50)}"`);
         continue;
       }
 
@@ -2142,17 +2150,19 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     if (!aiSuccess) {
       // Guarda: si llevamos >25s, saltar OpenRouter — no hay tiempo suficiente
       if (Date.now() - startTime > TIME_LIMIT_OR_START) {
-        console.warn('[Bot] ⏱️ Tiempo global >25s, saltando OpenRouter para no causar timeout.');
+        console.warn('[Bot] ⏱️ Tiempo global >42s, saltando OpenRouter para no causar timeout.');
       } else {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando OpenRouter...');
       // ⚠️ Modelos verificados en openrouter.ai/models (junio 2026) — gratuitos disponibles
+      // ⚠️ Modelos verificados en openrouter.ai/models (junio 2026) — gratuitos disponibles.
+      // meta-llama va PRIMERO: confirmado operativo en diagnósticos.
       const FREE_MODELS_OR = [
-        'moonshotai/kimi-k2.6:free',             // ✅ 262k ctx — razonamiento fuerte
+        'meta-llama/llama-3.3-70b-instruct:free', // ✅ Confirmado operativo — prioridad 1
         'google/gemma-4-31b-it:free',             // ✅ 262k ctx — Google, buena calidad
         'google/gemma-4-26b-a4b-it:free',         // ✅ 262k ctx — alternativa Gemma 4
         'nvidia/nemotron-3-super-120b-a12b:free', // ✅ 1M ctx — NVIDIA grande
         'nvidia/nemotron-3-ultra-550b-a55b:free', // ✅ 1M ctx — NVIDIA ultra
-        'meta-llama/llama-3.3-70b-instruct:free', // ✅ fallback — puede tener rate limit
+        'moonshotai/kimi-k2:free',                // ⚡ 262k ctx — razonamiento fuerte
       ];
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
