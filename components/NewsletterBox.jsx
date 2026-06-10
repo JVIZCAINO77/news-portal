@@ -1,5 +1,5 @@
-﻿'use client';
-// components/NewsletterBox.jsx — Bloque de suscripción Imperio Diario
+'use client';
+// components/NewsletterBox.jsx -- Bloque de suscripcion Imperio Diario
 import { useState } from 'react';
 import { trackNewsletterSignup } from '@/lib/analytics';
 
@@ -36,9 +36,9 @@ export default function NewsletterBox({ variant = 'default' }) {
              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
            </svg>
         </div>
-        <h3 className="text-3xl font-black uppercase tracking-tighter mb-4 italic">¡Bienvenido al Imperio!</h3>
+        <h3 className="text-3xl font-black uppercase tracking-tighter mb-4 italic">!Bienvenido al Imperio!</h3>
         <p className="text-white/80 text-sm font-bold uppercase tracking-widest max-w-md mx-auto leading-relaxed">
-          Ya estás en nuestra lista VIP. El resumen de las 6:00 AM llegará mañana a tu correo.
+          Ya estas en nuestra lista VIP. El resumen de las 6:00 AM llegara manana a tu correo.
         </p>
       </div>
     );
@@ -56,16 +56,16 @@ export default function NewsletterBox({ variant = 'default' }) {
           Imperio Diario · Newsletter
         </span>
         <h2 className={`font-black text-white uppercase tracking-tighter mb-8 italic ${variant === 'compact' ? 'text-2xl leading-tight' : 'text-4xl md:text-6xl leading-[0.9]'}`}>
-          Mantente en el centro de la información
+          Mantente en el centro de la informacion
         </h2>
         <p className={`text-white/80 font-serif italic mb-12 max-w-2xl leading-relaxed ${variant === 'compact' ? 'text-sm' : 'text-lg md:text-xl'}`}>
-           Recibe cada mañana el resumen editorial con las 5 noticias que realmente importan hoy.
+           Recibe cada manana el resumen editorial con las 5 noticias que realmente importan hoy.
         </p>
 
         <form onSubmit={handleSubmit} className="w-full max-w-lg flex flex-col md:flex-row gap-4">
            <input 
              type="email" 
-             placeholder="Tu correo electrónico..."
+             placeholder="Tu correo electronico..."
              required
              value={email}
              onChange={(e) => setEmail(e.target.value)}
