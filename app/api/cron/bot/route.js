@@ -2062,10 +2062,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
-    // ⚡ LÍMITE DE CLAVES: intentar todas las claves activas del grupo
-    // El guarda de tiempo TIME_LIMIT_GEMINI (42s) garantiza que se corta
-    // automáticamente antes del límite de 55s de Vercel.
-    const maxKeysToTry = keys.length; // usar todo el grupo A o B
+    // ⚡ LÍMITE DE CLAVES: máx 3 claves antes de saltar a OpenRouter.
+    // Con 6s de timeout por clave: 3 claves × 6s = 18s max para Gemini.
+    // Esto deja ~34s para OpenRouter (que sí funciona) y la publicación.
+    const maxKeysToTry = Math.min(3, keys.length);
     let keysAttempted = 0;
     let quotaFailures = 0; // claves que fallaron específicamente por cuota agotada
 
@@ -2085,9 +2085,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             break;
           }
           const gemCtrl = new AbortController();
-          // ⚡ 15s por clave — timeout rápido para no bloquear OpenRouter (el primario actual)
-          // Gemini 2.5-flash está con alta demanda (>30s) — se usa como intento rápido
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 15000); // 15s
+          // ⚡ 6s por clave — timeout agresivo para no agotar el budget de 55s antes de OpenRouter
+          // Gemini 2.5-flash con alta demanda suele tardar >10s → 6s captura las rápidas y descarta lentas
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 6000); // 6s
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2157,15 +2157,14 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       } else {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando OpenRouter...');
       // ⚠️ Modelos verificados en openrouter.ai/models (junio 2026) — gratuitos disponibles
-      // ⚠️ Modelos verificados en openrouter.ai/models (junio 2026) — gratuitos disponibles.
-      // meta-llama va PRIMERO: confirmado operativo en diagnósticos.
+      // ⚠️ Modelos verificados en openrouter.ai/models (2026-06-11) — test en vivo.
+      // gemma-4-31b y nemotron CONFIRMADOS operativos. Los demás con 429/404.
       const FREE_MODELS_OR = [
-        'meta-llama/llama-3.3-70b-instruct:free', // ✅ Confirmado operativo — prioridad 1
-        'google/gemma-4-31b-it:free',             // ✅ 262k ctx — Google, buena calidad
-        'google/gemma-4-26b-a4b-it:free',         // ✅ 262k ctx — alternativa Gemma 4
-        'nvidia/nemotron-3-super-120b-a12b:free', // ✅ 1M ctx — NVIDIA grande
-        'nvidia/nemotron-3-ultra-550b-a55b:free', // ✅ 1M ctx — NVIDIA ultra
-        'moonshotai/kimi-k2:free',                // ⚡ 262k ctx — razonamiento fuerte
+        'google/gemma-4-31b-it:free',             // ✅ CONFIRMADO operativo (test 2026-06-11)
+        'nvidia/nemotron-3-super-120b-a12b:free', // ✅ CONFIRMADO operativo (test 2026-06-11)
+        'mistralai/mistral-7b-instruct:free',     // ✅ Mistral — disponible gratuito
+        'meta-llama/llama-3.1-8b-instruct:free',  // ⚡ Llama 3.1 8B — alternativa ligera
+        'google/gemma-4-26b-a4b-it:free',         // ⚠️ 429 frecuente — último recurso
       ];
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
