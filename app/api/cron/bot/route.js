@@ -1529,6 +1529,7 @@ export async function GET(request) {
   const isManualTrigger = request.headers.get('X-Manual-Trigger') === 'true';
   const adminId = request.headers.get('X-Admin-Id');
 
+
   if (runtimeSecret) {
     const authHeader = request.headers.get('authorization');
     // Permitir: (1) cron de Vercel, (2) admin interno con UUID, (3) Bearer token correcto
@@ -1749,13 +1750,21 @@ export async function GET(request) {
 
     // El check de límites ya se hizo en la Capa 0 al inicio.
 
-    // === CAPA 3: Deduplicación masiva — obtener todos los links y títulos ya publicados HOY ===
-    // Consultamos TODAS las categorías (sin filtro de categoría) para detectar duplicados semánticos cross-categoría
+    // === CAPA 3: Deduplicación masiva — obtener todos los links y títulos ya publicados ===
+    // Consultamos TODAS las categorías (sin filtro) para detectar duplicados cross-categoría.
+    // FIX I-6: Se carga la ventana de 90días de links para evitar una query por item en el loop.
+    const ninetyDaysAgoDedup = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
     const { data: publishedToday } = await supabase
       .from('articles')
-      .select('source_link, title')
-      .gte('publishedAt', startOfTodayDR)
-      .lte('publishedAt', endOfTodayDR);
+      .select('source_link, title, publishedAt')
+      .gte('publishedAt', ninetyDaysAgoDedup)  // 90d: cubre dedup histórico + hoy
+      .lte('publishedAt', endOfTodayDR)
+      .limit(500); // Cap RAM
+
+    // Separar subsets para los distintos niveles de dedup
+    const publishedTodayOnly = (publishedToday || []).filter(
+      a => a.source_link && new Date(a.publishedAt || 0) >= new Date(startOfTodayDR)
+    );
 
     // Para la deduplicación SEMÁNTICA ampliamos a 30 días — evita cubrir el mismo tema
     // aunque el artículo original haya sido publicado hasta un mes antes.
@@ -1770,7 +1779,7 @@ export async function GET(request) {
 
     const publishedLinks  = new Set((publishedToday || []).map(a => a.source_link).filter(Boolean));
     const publishedTitles = new Set(
-      (publishedToday || []).map(a =>
+      (publishedTodayOnly).map(a =>
         a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
       )
     );
@@ -1897,11 +1906,9 @@ export async function GET(request) {
         continue;
       }
 
-      // 4c. Verificar en toda la historia (por si acaso el mismo link fue publicado en otro día)
-      const { data: existingLink } = await supabase
-        .from('articles').select('id').eq('source_link', item.link).maybeSingle();
-      if (existingLink) {
-        console.log(`[Bot] Duplicado histórico por link: ${item.link.slice(0, 60)}`);
+      // 4c. Verificar en ventana histórica de 90 días (ya pre-cargado en publishedLinks — FIX I-6: eliminada query por item)
+      if (publishedLinks.has(item.link)) {
+        console.log(`[Bot] Duplicado histórico por link (90d): ${item.link.slice(0, 60)}`);
         continue;
       }
 
