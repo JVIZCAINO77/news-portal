@@ -1518,10 +1518,10 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 20000  : 120000; // 20s prod — intento rápido de Gemini
-  const TIME_LIMIT_OR_START = IS_VERCEL ? 22000  : 125000; // 22s prod — OpenRouter es el primario ahora
-  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 50000  : 200000; // por iteración OpenRouter
-  const TIME_LIMIT_POL      = IS_VERCEL ? 52000  : 210000; // antes de Pollinations
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 25000  : 120000; // 25s — intento Gemini (feeds+dedup ~20-25s)
+  const TIME_LIMIT_OR_START = IS_VERCEL ? 38000  : 125000; // 38s — OpenRouter después de feeds+dedup+Gemini
+  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 52000  : 200000; // 52s — límite por iteración OR
+  const TIME_LIMIT_POL      = IS_VERCEL ? 53000  : 210000; // 53s — Pollinations último recurso
   // Leer el secreto en runtime (no a nivel de módulo) para garantizar el valor correcto
   const runtimeSecret = process.env.CRON_SECRET;
   // Vercel inyecta este header en todos los cron jobs programados (mecanismo oficial)
