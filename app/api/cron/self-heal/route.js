@@ -97,7 +97,7 @@ export async function GET(req) {
     toHeal.map(async (section) => {
       const botUrl = `${SITE_URL}/api/cron/bot?category=${section}`;
       const ctrl   = new AbortController();
-      const timer  = setTimeout(() => ctrl.abort(), 20000); // 20s por sección
+      const timer  = setTimeout(() => ctrl.abort(), 30000); // 30s por sección — reduce falsos negativos en el reporte
       try {
         const res = await fetch(botUrl, {
           headers: {

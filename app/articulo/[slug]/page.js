@@ -330,6 +330,7 @@ export default async function ArticlePage({ params }) {
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <div className="absolute inset-0 bg-red-600 rounded-full scale-[1.03] opacity-0 group-hover:opacity-10 transition-opacity"></div>
                     {article.author_avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={article.author_avatar}
                         alt={article.author}

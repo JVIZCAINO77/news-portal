@@ -63,6 +63,7 @@ export default function UserForm() {
             className="relative w-24 h-24 rounded-full overflow-hidden border-4 border-dashed border-gray-200 hover:border-red-600 transition-all group bg-slate-50 flex items-center justify-center"
           >
             {avatarPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
             ) : (
               <svg className="w-8 h-8 text-gray-300 group-hover:text-red-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">

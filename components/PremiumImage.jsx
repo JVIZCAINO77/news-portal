@@ -178,6 +178,7 @@ export default function PremiumImage({
               ].join(', ')
             : undefined;
           return (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={currentSrc || fallback}
               alt={alt || 'Noticia'}

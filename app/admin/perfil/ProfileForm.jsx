@@ -51,6 +51,7 @@ export default function ProfileForm({ profile }) {
       <div className="flex flex-col md:flex-row gap-10 items-center mb-12 bg-slate-50 p-8 border border-gray-100">
         <div className="relative group">
           {preview ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img 
               src={preview} 
               alt="Preview" 
@@ -100,10 +101,11 @@ export default function ProfileForm({ profile }) {
         <div>
            <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400 block mb-3 italic">Correo Electrónico</label>
            <input 
-             type="email" 
-             value={profile?.email || ''} 
-             disabled
-             className="w-full bg-gray-50 border-0 border-b-2 border-gray-100 p-4 text-lg font-bold text-gray-400 cursor-not-allowed"
+             type="email"
+             name="email"
+             value={profile?.email || ''}
+             readOnly
+             className="w-full bg-gray-50 border-0 border-b-2 border-gray-100 p-4 text-lg font-bold text-gray-400 cursor-not-allowed select-none"
            />
            <p className="text-[9px] text-gray-300 mt-2">El correo es administrado por el equipo técnico.</p>
         </div>

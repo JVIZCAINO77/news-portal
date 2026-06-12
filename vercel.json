@@ -25,8 +25,12 @@
       "maxDuration": 5
     },
     "app/api/admin/**": {
-      "maxDuration": 20,
+      "maxDuration": 15,
       "memory": 128
+    },
+    "app/api/admin/post-social/route.js": {
+      "maxDuration": 45,
+      "memory": 256
     },
     "app/api/cron/fix-images/route.js": {
       "maxDuration": 55,

@@ -9,8 +9,8 @@ export const maxDuration = 30; // HAL-09: declarado aquí Y en vercel.json para 
 /**
  * API de Mantenimiento Automático para Imperio Público.
  * Objetivo: Mantener la base de datos esbelta y rápida.
- * Se ejecuta automáticamente cada 2 horas via selfcheck.yml.
- * También puede llamarse manualmente desde maintenance.yml.
+ * Llamada como fire-and-forget desde /api/cron/self-heal (01:00 UTC / 9 PM RD).
+ * También puede invocarse manualmente desde el panel de administración.
  */
 export async function GET(request) {
   // ── Guardia dual — igual que /api/cron/bot y /api/cron/self-heal ────────────

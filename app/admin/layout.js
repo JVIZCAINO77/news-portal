@@ -109,6 +109,7 @@ export default async function AdminLayout({ children }) {
         <div className="p-8 border-t border-white/10">
           <div className="flex items-center gap-3 mb-4">
             {profile?.avatar_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={profile.avatar_url}
                 alt={profile.full_name}

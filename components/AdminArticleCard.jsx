@@ -65,7 +65,7 @@ function SocialPublishButton({ articleId }) {
         <p className={`text-[8px] font-bold mt-1 text-center leading-tight ${
           status === 'success' ? 'text-green-600' : 'text-red-500'
         }`}>
-          {msg.slice(0, 60)}
+          {msg.slice(0, 120)}
         </p>
       )}
     </div>
@@ -87,6 +87,7 @@ function ArticleThumb({ image, title }) {
   if (!image || imgError) return placeholder;
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={image}
       alt={title || ''}

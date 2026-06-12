@@ -62,7 +62,8 @@ export default function EditArticlePage() {
     fetchArticle();
 
     return () => controller.abort();
-  }, [id]); // supabase y router son estables por render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]); // supabase y router son instancias estables — añadirlos causaría bucle infinito
 
   const handleUpdate = async (e) => {
     e.preventDefault();

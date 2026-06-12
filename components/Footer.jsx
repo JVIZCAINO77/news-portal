@@ -13,6 +13,7 @@ export default function Footer() {
               <Link href="/" className="mb-6">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="bg-white p-1.5 rounded-md shadow-sm flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/logo.png" alt="Logo Imperio Público" className="h-10 md:h-12 object-contain" />
                   </div>
                   <span className="text-2xl md:text-3xl font-black tracking-[-0.05em] text-white leading-none font-serif">

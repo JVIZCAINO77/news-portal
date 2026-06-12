@@ -218,7 +218,10 @@ export default function MegaMenu({ isOpen, onClose }) {
                 >
                   <span style={{fontSize:'26px',fontWeight:900,color:'#EEE',lineHeight:1,flexShrink:0,width:30,textAlign:'right',fontFamily:'Georgia,serif'}}>{String(i+1).padStart(2,'0')}</span>
                   <p style={{flex:1,fontSize:'12.5px',fontWeight:600,color:'#333',lineHeight:1.4,margin:0}} className="group-hover:text-red-600 transition-colors line-clamp-2">{art.title}</p>
-                  {art.image_url && <img src={art.image_url} alt="" style={{width:48,height:40,objectFit:'cover',borderRadius:6,flexShrink:0}}/>}
+                  {art.image_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={art.image_url} alt="" style={{width:48,height:40,objectFit:'cover',borderRadius:6,flexShrink:0}}/>
+                  )}
                 </Link>
               )) : Array.from({length:4},(_,i)=>(
                 <div key={i} style={{display:'flex',gap:12,padding:8}}>
@@ -257,6 +260,7 @@ export default function MegaMenu({ isOpen, onClose }) {
             {/* Branding card */}
             <div style={{background:'#111',borderRadius:12,padding:'10px 16px',display:'flex',alignItems:'center',gap:12,flexShrink:0}}>
               <div style={{width:38,height:38,background:'#FFF',borderRadius:'50%',overflow:'hidden',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/icon.png" alt="IP" style={{width:30,height:30,objectFit:'contain'}}/>
               </div>
               <div>

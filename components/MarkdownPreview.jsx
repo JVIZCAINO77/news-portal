@@ -27,6 +27,7 @@ export default function MarkdownPreview({ content, title, excerpt }) {
               return (
                 <figure key={i} className="my-8 -mx-4">
                   <div className="relative aspect-video w-full overflow-hidden bg-slate-100 border border-slate-200 shadow-lg">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={src} alt={alt} className="w-full h-full object-cover" />
                   </div>
                   {alt && (

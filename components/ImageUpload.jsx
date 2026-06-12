@@ -49,6 +49,7 @@ export default function ImageUpload({ value, onChange, label = "Imagen Destacada
       <div className="relative group">
         {value ? (
           <div className="relative aspect-video overflow-hidden border-2 border-slate-100 group-hover:border-red-600 transition-all">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={value} alt="Preview" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
               <label className="cursor-pointer bg-white text-black px-6 py-2 text-[10px] font-black uppercase tracking-wider hover:bg-red-600 hover:text-white transition-all">

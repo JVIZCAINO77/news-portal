@@ -61,12 +61,14 @@ export default function LoadMore({ initialOffset = 30 }) {
               {art.image && (
                 <div className="relative aspect-[16/9] overflow-hidden mb-4 bg-slate-900 border border-gray-100 shadow-md rounded-sm flex items-center justify-center group/img">
                   <div className="absolute inset-0 z-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={getDisplaySrc(art.image)} 
                       className="w-full h-full object-cover blur-2xl opacity-40" 
                       alt="" 
                     />
                   </div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img 
                     src={getDisplaySrc(art.image)} 
                     alt={art.title} 

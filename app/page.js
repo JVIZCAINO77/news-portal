@@ -233,7 +233,8 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-            {pool.slice(0, 5).map((art, idx) => (
+            {/* Fix O-3: slice(1,6) evita repetir pool[0] que ya es el artículo hero */}
+            {pool.slice(1, 6).map((art, idx) => (
               <Link key={art.id} href={`/articulo/${art.slug}`} className="group block">
                 <div className="relative mb-3 overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] rounded-sm">
                   <PremiumImage

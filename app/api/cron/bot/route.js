@@ -1647,15 +1647,17 @@ export async function GET(request) {
     return NextResponse.json({ message: 'Automatización pausada desde el panel de administración.' }, { status: 200 });
   }
 
+  // === FECHAS DE HOY EN RD — calculadas UNA SOLA VEZ, fuera de cualquier try-catch ===
+  // Sacarlas del try garantiza que todayDR siempre esté disponible aunque Supabase falle.
+  const todayDR = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Santo_Domingo',
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
+  const startOfTodayDR = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
+  const endOfTodayDR   = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
+
   // === CAPA 0: Early Exit si ya alcanzamos los límites ===
   try {
-    const todayDR = new Intl.DateTimeFormat('en-CA', {
-      timeZone: 'America/Santo_Domingo',
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    }).format(new Date());
-
-    const startOfTodayDR = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
-    const endOfTodayDR   = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
 
     // Check GLOBAL (Seguridad AdSense)
     const { count: totalToday } = await supabase
@@ -1668,7 +1670,7 @@ export async function GET(request) {
       return NextResponse.json({ message: `Límite GLOBAL diario alcanzado (${totalToday}/${DAILY_LIMIT_GLOBAL}).` }, { status: 200 });
     }
 
-    // Sin límite por categoría — solo el límite global de 12 aplica
+    // Sin límite por categoría — solo el límite global de 3 artículos/día aplica
 
     // Si pasamos el check, procedemos con el scraping pesado
     const parser = new Parser({
@@ -2079,9 +2081,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       for (const model of geminiModels) {
         try {
           console.log(`[Bot] 🔑 Gemini ...${key.slice(-6)} / ${model} (clave ${keysAttempted}/${maxKeysToTry})`);
-          // Guard estricto: >20s = salir YA para no chocar con el límite de 55s de Vercel
+          // Guard estricto: >TIME_LIMIT_GEMINI = salir YA para no chocar con el límite de 55s de Vercel
           if (Date.now() - startTime > TIME_LIMIT_GEMINI) {
-            console.warn('[Bot] ⏱️ Tiempo global >42s, abortando bucle Gemini para evitar timeout.');
+            console.warn(`[Bot] ⏱️ Tiempo Gemini >${TIME_LIMIT_GEMINI / 1000}s, abortando bucle Gemini para evitar timeout.`);
             break;
           }
           const gemCtrl = new AbortController();
@@ -2151,26 +2153,29 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // NOTA: Movido antes de Pollinations porque OpenRouter (~2s) es más rápido y confiable.
     // Pollinations se usa como último recurso por su latencia y disponibilidad variable.
     if (!aiSuccess) {
-      // Guarda: si llevamos >25s, saltar OpenRouter — no hay tiempo suficiente
+      // Guarda: si llevamos >TIME_LIMIT_OR_START, saltar OpenRouter — no hay tiempo suficiente
       if (Date.now() - startTime > TIME_LIMIT_OR_START) {
-        console.warn('[Bot] ⏱️ Tiempo global >42s, saltando OpenRouter para no causar timeout.');
+        console.warn(`[Bot] ⏱️ Tiempo >${TIME_LIMIT_OR_START / 1000}s, saltando OpenRouter para no causar timeout.`);
       } else {
       console.log('[Bot] ⚠️ Gemini sin cuota o validación fallida. Intentando OpenRouter...');
-      // ⚠️ Modelos verificados en openrouter.ai/models (junio 2026) — gratuitos disponibles
-      // ⚠️ Modelos verificados en openrouter.ai/models (2026-06-11) — test en vivo.
-      // gemma-4-31b y nemotron CONFIRMADOS operativos. Los demás con 429/404.
-      const FREE_MODELS_OR = [
-        'google/gemma-4-31b-it:free',             // ✅ CONFIRMADO operativo (test 2026-06-11)
-        'nvidia/nemotron-3-super-120b-a12b:free', // ✅ CONFIRMADO operativo (test 2026-06-11)
-        'mistralai/mistral-7b-instruct:free',     // ✅ Mistral — disponible gratuito
-        'meta-llama/llama-3.1-8b-instruct:free',  // ⚡ Llama 3.1 8B — alternativa ligera
-        'google/gemma-4-26b-a4b-it:free',         // ⚠️ 429 frecuente — último recurso
-      ];
+      // ⚠️ Lista de modelos gratuitos en OpenRouter — actualizar OPENROUTER_MODELS en Vercel
+      //    para cambiar sin redeploy: "modelo1,modelo2,modelo3"
+      //    Si la var no está, usa el fallback hardcodeado.
+      const FREE_MODELS_OR = process.env.OPENROUTER_MODELS
+        ? process.env.OPENROUTER_MODELS.split(',').map(m => m.trim()).filter(Boolean)
+        : [
+            'google/gemma-4-31b-it:free',             // ✅ CONFIRMADO operativo (test 2026-06-11)
+            'nvidia/nemotron-3-super-120b-a12b:free', // ✅ CONFIRMADO operativo (test 2026-06-11)
+            'mistralai/mistral-7b-instruct:free',     // ✅ Mistral — disponible gratuito
+            'meta-llama/llama-3.1-8b-instruct:free',  // ⚡ Llama 3.1 8B — alternativa ligera
+            'google/gemma-4-26b-a4b-it:free',         // ⚠️ 429 frecuente — último recurso
+          ];
+      console.log(`[Bot] 📋 OpenRouter modelos a intentar: ${FREE_MODELS_OR.length} (${process.env.OPENROUTER_MODELS ? 'desde ENV' : 'hardcoded'})`);
       for (const orModel of FREE_MODELS_OR) {
         if (aiSuccess) break;
-        // Guarda por iteración: si llevamos >44s, no iniciar más intentos
+        // Guarda por iteración: si llevamos >TIME_LIMIT_OR_ITER, no iniciar más intentos
         if (Date.now() - startTime > TIME_LIMIT_OR_ITER) {
-          console.warn('[Bot] ⏱️ Tiempo global >44s, abortando bucle OpenRouter.');
+          console.warn(`[Bot] ⏱️ Tiempo >${TIME_LIMIT_OR_ITER / 1000}s, abortando bucle OpenRouter.`);
           break;
         }
         try {
@@ -2227,9 +2232,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // PRIORIDAD 3: Pollinations AI (último recurso — latencia alta y disponibilidad variable)
     if (!aiSuccess) {
       console.log('[Bot] ⚠️ OpenRouter sin respuesta. Intentando Pollinations como último recurso...');
-      // Guarda: si llevamos >46s, saltar Pollinations — no hay tiempo
+      // Guarda: si llevamos >TIME_LIMIT_POL, saltar Pollinations — no hay tiempo
       if (Date.now() - startTime > TIME_LIMIT_POL) {
-        console.warn('[Bot] ⏱️ Tiempo global >46s, saltando Pollinations.');
+        console.warn(`[Bot] ⏱️ Tiempo >${TIME_LIMIT_POL / 1000}s, saltando Pollinations.`);
       } else
       try {
         const controller = new AbortController();

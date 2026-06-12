@@ -77,7 +77,7 @@ const nextConfig = {
               "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://partner.googleadservices.com https://tpc.googlesyndication.com https://www.gstatic.com https://va.vercel-scripts.com https://vitals.vercel-insights.com blob:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com data:",
-              "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://pollinations.ai https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net",
+              "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://pollinations.ai https://image.pollinations.ai https://www.google-analytics.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net",
               "connect-src 'self' https://*.supabase.co https://res.cloudinary.com https://api.cloudinary.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://graph.facebook.com https://vitals.vercel-insights.com https://va.vercel-scripts.com https://api.frankfurter.app",
               "frame-src 'self' https://pagead2.googlesyndication.com https://tpc.googlesyndication.com https://googleads.g.doubleclick.net https://bid.g.doubleclick.net",
               "child-src 'self' blob: https://pagead2.googlesyndication.com",

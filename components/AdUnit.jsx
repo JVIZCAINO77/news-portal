@@ -14,7 +14,7 @@ export default function AdUnit({ slot, format = 'rectangle', className = '' }) {
         (window.adsbygoogle = window.adsbygoogle || []).push({});
       }
     } catch (e) {}
-  }, [slot]);
+  }, [slot, isDev]);
 
   if (!SITE_CONFIG.showAds) return null;
   if (!finalSlot || finalSlot.startsWith('placeholder')) return null;
