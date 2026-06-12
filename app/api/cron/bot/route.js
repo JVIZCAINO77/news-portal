@@ -1766,16 +1766,15 @@ export async function GET(request) {
       a => a.source_link && new Date(a.publishedAt || 0) >= new Date(startOfTodayDR)
     );
 
-    // Para la deduplicación SEMÁNTICA ampliamos a 30 días — evita cubrir el mismo tema
-    // aunque el artículo original haya sido publicado hasta un mes antes.
-    // Subido de 7 → 30 días para bloquear temas recurrentes (Irán, petróleo, frontera, etc.)
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    // Para la deduplicación SEMÁNTICA usamos 7 días — detecta el mismo tema reciente
+    // sin acumular miles de palabras que bloquean cualquier noticia nueva.
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data: publishedMonth } = await supabase
       .from('articles')
       .select('title, excerpt')
-      .gte('publishedAt', thirtyDaysAgo)
+      .gte('publishedAt', sevenDaysAgo)
       .lte('publishedAt', endOfTodayDR)
-      .limit(400); // Cap RAM: evita cargar cientos de excerpts en memoria
+      .limit(200); // Cap RAM
 
     const publishedLinks  = new Set((publishedToday || []).map(a => a.source_link).filter(Boolean));
     const publishedTitles = new Set(
@@ -1783,33 +1782,30 @@ export async function GET(request) {
         a.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
       )
     );
-    // Títulos normalizados de los ÚLTIMOS 30 DÍAS — para dedup por entidades (alineado con ventana semántica)
+    // Títulos normalizados de HOY — para dedup por entidades (solo duplicados del día)
     const publishedTitlesMonth = new Set(
-      (publishedMonth || []).map(a =>
+      (publishedTodayOnly).map(a =>
         (a.title || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim()
       ).filter(Boolean)
     );
 
-    // Pre-computar keywords de artículos de los ÚLTIMOS 30 DÍAS (ventana semántica ampliada)
-    // Combina título + excerpt para mayor cobertura — detecta el mismo evento con distinto titular.
+    // Pre-computar keywords de los ÚLTIMOS 7 DÍAS — detecta el mismo evento con distinto titular.
     const publishedKeywordSets = (publishedMonth || [])
       .map(a => extractKeywords(`${a.title} ${a.excerpt || ''}`))
       .filter(s => s.size > 0);
 
-    // ─── POOL DE TEMAS YA CUBIERTOS (Últimos 30 días, cross-categoría) ────────────────────────
-    // Palabras genéricas excluidas para evitar falsos positivos.
+    // ─── POOL DE TEMAS YA CUBIERTOS HOY (cross-categoría) ───────────────────────────────────
+    // Solo de hoy — evitar que el pool de 30 días bloquee cualquier noticia nueva.
     const GENERIC_TOPIC_WORDS = new Set([
       'nuevo','nueva','nuevos','nuevas','gran','grande','primer','primera','tras',
       'sigue','tiene','dice','hace','llega','viene','sera','esta','estos','estas',
       'sobre','desde','hasta','entre','todos','todas','alguno','algunos','otros',
       'mundo','pais','paises','gobierno','presidente','nacional','local','hoy',
       'semana','meses','anos','dias','horas','tiempo','parte','lugar','caso',
-      // ⚠️ FIX: deben ser minúsculas — el texto ya está normalizado con toLowerCase()
       'santo','domingo','santiago','republica','dominicana',
     ]);
     const publishedTopicPool = new Set(
-      (publishedMonth || []).flatMap(a => {
-        // Incluir excerpt en el pool de temas para mayor cobertura
+      (publishedTodayOnly).flatMap(a => {
         const combined = `${a.title} ${a.excerpt || ''}`;
         const norm = combined.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
         return norm.split(/\s+/).filter(w =>
@@ -1935,16 +1931,15 @@ export async function GET(request) {
         continue;
       }
 
-      // 4f. Deduplicación por TEMA CROSS-CATEGORÍA — bloquea el mismo tema en cualquier sección
-      // Solo bloquea si hay 3+ palabras temáticas en común (evita falsos positivos al final del día
-      // cuando el pool de palabras ya es muy grande y bloquea artículos de temas distintos).
+      // 4f. Deduplicación por TEMA CROSS-CATEGORÍA — bloquea el mismo tema cubierto HOY
+      // Umbral: 5+ palabras en común (antes 3) — reduce falsos positivos.
       const candidateNorm = item.title.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9\s]/g, ' ').trim();
       const candidateTopicWords = candidateNorm.split(/\s+/).filter(w =>
         w.length > 5 && !GENERIC_TOPIC_WORDS.has(w) && !/^\d+$/.test(w)
       );
       const topicMatches = candidateTopicWords.filter(w => publishedTopicPool.has(w));
-      if (topicMatches.length >= 3) {
-        console.log(`[Bot] 🔁 Duplicado CROSS-CATEGORÍA (${topicMatches.length} palabras): "${item.title.slice(0, 60)}" → temas [${topicMatches.slice(0,3).join(', ')}] ya cubiertos hoy.`);
+      if (topicMatches.length >= 5) {
+        console.log(`[Bot] 🔁 Duplicado CROSS-CATEGORÍA HOY (${topicMatches.length} palabras): "${item.title.slice(0, 60)}" → [${topicMatches.slice(0,5).join(', ')}]`);
         continue;
       }
 
