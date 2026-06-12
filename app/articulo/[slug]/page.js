@@ -1,5 +1,5 @@
 // app/articulo/[slug]/page.js — Estructura Editorial SSR 2.0
-import { getArticleBySlug, getRelatedArticles } from '@/lib/serverData';
+import { getArticleBySlug, getRelatedArticles, getAllArticles } from '@/lib/serverData';
 import { sanitizeHtml, stripHtml } from '@/lib/sanitize'; // Fix C1 + I5
 import ReadingProgressBar from '@/components/ReadingProgressBar';
 // SocialShare eliminado por decisión editorial (panel flotante lateral)
@@ -17,6 +17,12 @@ import ViewCounter from '@/components/ViewCounter';
 import { notFound } from 'next/navigation';
 
 export const revalidate = 3600; // ISR: 1 hora — los artículos publicados no cambian. Ahorra CPU máximo.
+
+// C-2: Pre-render los 100 slugs más recientes en build para eliminar cold-starts
+export async function generateStaticParams() {
+  const articles = await getAllArticles();
+  return articles.slice(0, 100).map(a => ({ slug: a.slug }));
+}
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -53,7 +59,8 @@ export async function generateMetadata({ params }) {
       card: 'summary_large_image',
       title: article.title,
       description: article.excerpt,
-      images: [article.image],
+      // I-2: fallback a imagen OG dinámica si article.image es null
+      images: [article.image || `${SITE_CONFIG.url}/api/og?slug=${slug}`],
       site: SITE_CONFIG.twitterHandle,
     },
     alternates: {
@@ -75,7 +82,8 @@ export default async function ArticlePage({ params }) {
   if (!article) notFound();
 
   // Artículos relacionados: primero de la misma categoría, luego generales
-  const related = await getRelatedArticles(article.id, article.category, 6);
+  // I-4: pedir 9 para tener 6 únicos en sidebar y 3 distintos en sección inferior
+  const related = await getRelatedArticles(article.id, article.category, 9);
 
   const cleanText = (str) => {
     if (!str) return '';
@@ -104,7 +112,8 @@ export default async function ArticlePage({ params }) {
   const tagsList = parseTags(article.tags);
 
   const articleUrl = `${SITE_CONFIG.url}/articulo/${article.slug}`;
-  const wordCount = article.content ? article.content.split(/\s+/).length : 0;
+  // I-3: stripHtml para no contar tags HTML como palabras en el JSON-LD
+  const wordCount = article.content ? stripHtml(article.content).split(/\s+/).filter(Boolean).length : 0;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -204,7 +213,7 @@ export default async function ArticlePage({ params }) {
 
               <figure className="mb-10 group">
                 <PremiumImage
-                  src={article.image}
+                  src={article.image || '/images/placeholder-news.jpg'}
                   alt={article.imageAlt || article.title}
                   category={article.category}
                   containerClassName="w-full min-h-[300px] md:min-h-[500px] max-h-[85vh] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.3)] rounded-3xl border border-slate-100 group-hover:border-red-100 transition-colors"
@@ -274,9 +283,12 @@ export default async function ArticlePage({ params }) {
                         );
                       }
 
-                      const formattedText = p
-                        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
-                        .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
+                      // C-1: sanitizar el HTML inline generado por markdown antes de renderizar
+                      const formattedText = sanitizeHtml(
+                        p
+                          .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+                          .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>')
+                      );
 
                       return (
                         <div key={i} className="relative">
@@ -284,7 +296,8 @@ export default async function ArticlePage({ params }) {
                             className="paragraph-text"
                             dangerouslySetInnerHTML={{ __html: formattedText }}
                           />
-                          {i === 1 && <AdUnit format="in-article" slot="article_mid" className="my-6 py-4 border-y border-slate-100" />}
+                          {/* M-3: Ad en párrafo 3 — da más contexto antes de interrumpir */}
+                          {i === 2 && <AdUnit format="in-article" slot="article_mid" className="my-6 py-4 border-y border-slate-100" />}
                         </div>
                       );
                     })}
@@ -374,7 +387,8 @@ export default async function ArticlePage({ params }) {
               <div className="sticky top-32">
                 <h2 className="section-title w-full">Lo más reciente</h2>
                 <div className="space-y-8 mt-8">
-                  {related.map((a, idx) => (
+                  {/* I-4: primeros 6 para el sidebar */}
+                  {related.slice(0, 6).map((a, idx) => (
                     <Link key={a.id} href={`/articulo/${a.slug}`} className="group flex gap-5 items-start border-b border-slate-50 pb-6 last:border-0">
                       <span className="text-4xl font-black text-slate-100 font-serif group-hover:text-red-600 transition-colors leading-none">{idx + 1}</span>
                       <div>
@@ -451,7 +465,8 @@ export default async function ArticlePage({ params }) {
           <section className="mt-20 pt-10 border-t-4 border-black">
             <h2 className="text-4xl font-black uppercase tracking-tighter mb-10 italic">Más Noticias Relacionadas</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {related.slice(0, 3).map(a => (
+              {/* I-4: artículos 6-9, distintos a los del sidebar */}
+              {related.slice(6, 9).map(a => (
                 <ArticleCard key={a.id} article={a} variant="medium" className="bg-slate-50 p-6 border border-gray-100" />
               ))}
             </div>
