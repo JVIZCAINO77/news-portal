@@ -17,11 +17,11 @@ export const maxDuration = 55;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// Cron principal: 7:00 AM RD (11:00 UTC) — publica 3 artículos de alto impacto.
-// Self-heal:      9:00 PM RD (01:00 UTC) — cubre las 3 secciones requeridas restantes.
-// Total objetivo: 3 artículos/día (meta editorial diaria).
+// Cron principal: cada 2 horas (0 */2 * * *) — publica 1 artículo por ejecución.
+// Self-heal:      9:00 PM RD (01:00 UTC) — cobertura de respaldo.
+// Total objetivo: 12 artículos/día (1 cada 2 horas × 12 ejecuciones).
 // Reset de cuotas Gemini: medianoche UTC (3:00 AM hora RD).
-const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos en total
+const DAILY_LIMIT_GLOBAL = 12; // Techo diario: máximo 12 artículos (1 cada 2h)
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
 const MIN_CONTENT_LENGTH = 2500; // ~400 palabras — requerido por AdSense
