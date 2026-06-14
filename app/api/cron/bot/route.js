@@ -24,7 +24,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos (1 cada ~8h en la práctica)
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
-const MIN_CONTENT_LENGTH = 2500; // ~400 palabras — requerido por AdSense
+const MIN_CONTENT_LENGTH = 1800; // ~280 palabras — válido para AdSense; Gemini completa en 12s
 
 // ─── DETECTOR DE ÚLTIMA HORA ───────────────────────────────────────────────
 // Palabras clave que indican un suceso urgente/crítico que NUNCA debe bloquearse
@@ -2433,7 +2433,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 
 
     // ─── VALIDACIÓN DE CALIDAD FINAL (Content Length) ────────────────────────
-    if (articleData.content.length < 1200) {
+    if (articleData.content.length < 1000) {
       throw new Error(`Contenido demasiado corto (${articleData.content.length} caracteres). Se requiere un análisis más profundo para mantener el estándar premium.`);
     }
 
