@@ -2060,7 +2060,8 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // gemini-2.0-flash y gemini-2.0-flash-lite están en 429 RESOURCE_EXHAUSTED
     // de forma permanente → se eliminaron para no desperdiciar tiempo de iteración.
     const geminiModels = [
-      'gemini-2.5-flash', // ✅ ÚNICO con cuota disponible
+      'gemini-2.5-flash',      // Modelo principal
+      'gemini-2.5-flash-lite', // Fallback: menos potente pero más disponible
     ];
 
     let articleData = null;
@@ -2168,10 +2169,13 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       const FREE_MODELS_OR = process.env.OPENROUTER_MODELS
         ? process.env.OPENROUTER_MODELS.split(',').map(m => m.trim()).filter(Boolean)
         : [
+            'google/gemma-3-27b-it:free',              // Gemma 3 27B
             'google/gemma-4-31b-it:free',             // ✅ CONFIRMADO operativo (test 2026-06-11)
             'nvidia/nemotron-3-super-120b-a12b:free', // ✅ CONFIRMADO operativo (test 2026-06-11)
             'mistralai/mistral-7b-instruct:free',     // ✅ Mistral — disponible gratuito
             'meta-llama/llama-3.1-8b-instruct:free',  // ⚡ Llama 3.1 8B — alternativa ligera
+            'meta-llama/llama-3.3-70b-instruct:free', // Llama 3.3 70B
+            'deepseek/deepseek-r1-0528:free',         // DeepSeek R1
             'google/gemma-4-26b-a4b-it:free',         // ⚠️ 429 frecuente — último recurso
           ];
       console.log(`[Bot] 📋 OpenRouter modelos a intentar: ${FREE_MODELS_OR.length} (${process.env.OPENROUTER_MODELS ? 'desde ENV' : 'hardcoded'})`);
@@ -2186,7 +2190,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           const orModelName = (orModel.split('/')[1] || orModel).split(':')[0];
           console.log(`[Bot] Probando OpenRouter (${orModelName})...`);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s por modelo
+          const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s por modelo
           const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
