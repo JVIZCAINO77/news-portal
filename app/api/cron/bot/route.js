@@ -2060,8 +2060,8 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     // gemini-2.0-flash y gemini-2.0-flash-lite están en 429 RESOURCE_EXHAUSTED
     // de forma permanente → se eliminaron para no desperdiciar tiempo de iteración.
     const geminiModels = [
-      'gemini-2.5-flash',      // Modelo principal
-      'gemini-2.5-flash-lite', // Fallback: menos potente pero más disponible
+      'gemini-2.5-flash-lite', // ⚡ PRIMERO: 680ms, más rápido y disponible
+      'gemini-2.5-flash',      // Segundo: más potente pero ~12s de latencia
     ];
 
     let articleData = null;
@@ -2092,9 +2092,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             break;
           }
           const gemCtrl = new AbortController();
-          // ⚡ 12s por clave — suficiente para Gemini 2.5-flash bajo carga normal
-          // Feeds más rápidos (3s) liberan presupuesto de tiempo para el modelo
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 12000); // 12s
+          // ⚡ 16s por clave — gemini-2.5-flash tarda hasta 12-13s bajo carga
+          // gemini-2.5-flash-lite responde en ~700ms
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 16000); // 16s
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
