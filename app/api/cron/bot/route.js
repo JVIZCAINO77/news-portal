@@ -2069,10 +2069,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
-    // ⚡ LÍMITE DE CLAVES: máx 3 claves antes de saltar a OpenRouter.
-    // Con 6s de timeout por clave: 3 claves × 6s = 18s max para Gemini.
-    // Esto deja ~34s para OpenRouter (que sí funciona) y la publicación.
-    const maxKeysToTry = Math.min(3, keys.length);
+    // ⚡ LÍMITE DE CLAVES: máx 6 claves antes de saltar a OpenRouter.
+    // Con 12s de timeout por clave: 6 claves × 12s = 72s max para Gemini (sin paral.).
+    // En la práctica las claves exitosas responden en 5-10s.
+    const maxKeysToTry = Math.min(6, keys.length);
     let keysAttempted = 0;
     let quotaFailures = 0; // claves que fallaron específicamente por cuota agotada
 
@@ -2111,8 +2111,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             const isLeaked   = (data.error.message || '').toLowerCase().includes('leaked');
             const isBanned   = (data.error.message || '').toLowerCase().includes('banned');
 
+            // Alta demanda: NO marcar clave como muerta, pero contar el intento
+            const isHighDemand = (data.error.message || '').toLowerCase().includes('high demand');
+
             // Clave muerta → marcarla y saltar a la siguiente de inmediato
-            if (isQuota || isInvalid || isDenied || isLeaked || isBanned) {
+            if ((isQuota || isInvalid || isDenied || isLeaked || isBanned) && !isHighDemand) {
               const reason = isQuota ? 'cuota agotada' : isLeaked ? '⛔ leaked' : isBanned ? '⛔ banned' : 'inválida/denegada';
               console.log(`[Bot] ⚠️ Gemini ...${key.slice(-6)}: ${reason} → siguiente clave`);
               deadKeys.add(key);
@@ -2126,6 +2129,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
                 }
               }
               break;
+            }
+            if (isHighDemand) {
+              console.log(`[Bot] ⏳ Gemini ...${key.slice(-6)}: alta demanda → siguiente clave`);
+              // NO marcar como dead — la clave puede funcionar más tarde
+              break; // Saltar a siguiente clave del pool
             }
             if (isNotFound) {
               console.log(`[Bot] ⚠️ Modelo N/A: ${model} → siguiente modelo`);
@@ -2169,14 +2177,14 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       const FREE_MODELS_OR = process.env.OPENROUTER_MODELS
         ? process.env.OPENROUTER_MODELS.split(',').map(m => m.trim()).filter(Boolean)
         : [
-            'google/gemma-3-27b-it:free',              // Gemma 3 27B
-            'google/gemma-4-31b-it:free',             // ✅ CONFIRMADO operativo (test 2026-06-11)
-            'nvidia/nemotron-3-super-120b-a12b:free', // ✅ CONFIRMADO operativo (test 2026-06-11)
-            'mistralai/mistral-7b-instruct:free',     // ✅ Mistral — disponible gratuito
-            'meta-llama/llama-3.1-8b-instruct:free',  // ⚡ Llama 3.1 8B — alternativa ligera
-            'meta-llama/llama-3.3-70b-instruct:free', // Llama 3.3 70B
-            'deepseek/deepseek-r1-0528:free',         // DeepSeek R1
-            'google/gemma-4-26b-a4b-it:free',         // ⚠️ 429 frecuente — último recurso
+            // Verificados 2026-06-14: 429=disponible (rate limit), 404=no existe gratis
+            'google/gemma-4-31b-it:free',             // 429 rate limit
+            'nvidia/nemotron-3-super-120b-a12b:free', // 429 rate limit
+            'meta-llama/llama-3.3-70b-instruct:free', // 429 provider limit
+            'google/gemma-4-26b-a4b-it:free',         // 429 rate limit
+            'google/gemma-2-9b-it:free',              // Gemma 2 9B ligero
+            'qwen/qwen-2.5-7b-instruct:free',         // Qwen 2.5 7B
+            'microsoft/phi-3-mini-128k-instruct:free', // Phi-3 Mini
           ];
       console.log(`[Bot] 📋 OpenRouter modelos a intentar: ${FREE_MODELS_OR.length} (${process.env.OPENROUTER_MODELS ? 'desde ENV' : 'hardcoded'})`);
       for (const orModel of FREE_MODELS_OR) {
@@ -2227,8 +2235,15 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
                 console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió y validado.`);
                 articleData = parsed;
                 aiSuccess = true;
+              } else {
+                console.log(`[Bot] ⚠️ OpenRouter (${orModel}) respondió pero validación falló.`);
               }
+            } else {
+              console.log(`[Bot] ⚠️ OpenRouter (${orModel}) respondió pero texto vacío.`);
             }
+          } else {
+            const errBody = await orRes.text().catch(() => '');
+            console.log(`[Bot] ⚠️ OpenRouter (${orModel}) HTTP ${orRes.status}: ${errBody.slice(0, 120)}`);
           }
         } catch (orErr) {
           console.log(`[Bot] ⚠️ OpenRouter (${orModel}) falló: ${orErr.message?.slice(0, 60)}`);
