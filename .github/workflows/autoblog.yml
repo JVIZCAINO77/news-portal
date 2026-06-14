@@ -1,34 +1,23 @@
 name: 🤖 Auto-Blogger Diario — Imperio Público
 
 # ─────────────────────────────────────────────────────────────────────────────
-# ESTRUCTURA OFICIAL IMPERIO PÚBLICO — 12 artículos/día · 32 secciones en rotación
-# El bot rota por las 32 secciones del portal. Ciclo completo: ~3 días.
-# 07:00 AM → Política        07:30 AM → Policía
-# 08:00 AM → Deportes        08:30 AM → Tecnología
-# 09:00 AM → Sucesos         09:30 AM → Entretenimiento
-# 10:00 AM → Economía        10:30 AM → Internacional
-# 11:00 AM → Salud           11:30 AM → Cultura
-# 12:00 PM → Rotación #11    12:30 PM → Rotación #12
+# ESTRUCTURA OFICIAL IMPERIO PÚBLICO — 3 artículos/día · rotación automática
+# El bot rota por las secciones del portal usando lógica de 3 niveles.
 #
-# ✅ Los slots fijos cubren las 10 secciones principales siempre.
-# ✅ Los slots de rotación cubren las 22 secciones adicionales en orden.
+# 07:00 AM RD (11:00 UTC) → Artículo #1
+# 01:00 PM RD (17:00 UTC) → Artículo #2
+# 07:00 PM RD (23:00 UTC) → Artículo #3
+#
+# ✅ La categoría la elige el bot automáticamente (rotación inteligente).
+# ✅ DAILY_LIMIT_GLOBAL=3 garantiza que nunca se publiquen más de 3/día.
 # ✅ Cada job es 100% independiente — un fallo no bloquea los demás.
 # ─────────────────────────────────────────────────────────────────────────────
 
 on:
   schedule:
-    - cron: '0 11 * * *'    # 07:00 AM RD → Política
-    - cron: '30 11 * * *'   # 07:30 AM RD → Policía
-    - cron: '0 12 * * *'    # 08:00 AM RD → Deportes
-    - cron: '30 12 * * *'   # 08:30 AM RD → Tecnología
-    - cron: '0 13 * * *'    # 09:00 AM RD → Sucesos
-    - cron: '30 13 * * *'   # 09:30 AM RD → Entretenimiento
-    - cron: '0 14 * * *'    # 10:00 AM RD → Tendencias
-    - cron: '30 14 * * *'   # 10:30 AM RD → Economía
-    - cron: '0 15 * * *'    # 11:00 AM RD → Internacional
-    - cron: '30 15 * * *'   # 11:30 AM RD → Salud
-    - cron: '0 16 * * *'    # 12:00 PM RD → Cultura
-    - cron: '30 16 * * *'   # 12:30 PM RD → Rotación (artículo #12)
+    - cron: '0 11 * * *'    # 07:00 AM RD → Artículo #1
+    - cron: '0 17 * * *'    # 01:00 PM RD → Artículo #2
+    - cron: '0 23 * * *'    # 07:00 PM RD → Artículo #3
   workflow_dispatch:
     inputs:
       category:
@@ -36,124 +25,145 @@ on:
         required: false
         default: ''
 
+
 # ─── FUNCIÓN REUTILIZABLE: publica 1 artículo con reintentos ─────────────────
 # Cada job es COMPLETAMENTE INDEPENDIENTE — no hay `needs:` entre ellos.
 # Si uno falla, los demás siguen corriendo en su horario sin verse afectados.
 
 jobs:
-  # ─── 07:00 AM RD — Política ──────────────────────────────────────────────
-  politica:
+  # ─── 07:00 AM RD — Artículo #1 (rotación automática) ────────────────────
+  articulo-1:
     if: |
       (github.event_name == 'schedule' && github.event.schedule == '0 11 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'politica' || github.event.inputs.category == ''))
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.category == '')
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: 🏛️ Publicar — POLÍTICA (intento 1)
+      - name: 📰 Publicar — ARTÍCULO #1 (intento 1)
         id: intento1
         continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 POLÍTICA — intento 1 — $(date -u)"
+          echo "🚀 ARTÍCULO #1 — rotación automática — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 90 \
-            -X GET "$SITE_URL/api/cron/bot?category=politica" \
+            -X GET "$SITE_URL/api/cron/bot" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-      - name: 🏛️ Publicar — POLÍTICA (reintento 2 si falló)
+      - name: 📰 Publicar — ARTÍCULO #1 (reintento 2 si falló)
         if: steps.intento1.outcome == 'failure'
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🔄 POLÍTICA — reintento 2 — $(date -u)"
+          echo "🔄 ARTÍCULO #1 — reintento 2 — $(date -u)"
           sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 90 \
-            -X GET "$SITE_URL/api/cron/bot?category=politica" \
+            -X GET "$SITE_URL/api/cron/bot" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 07:30 AM RD — Policía ───────────────────────────────────────────────
-  policia:
+  # ─── 01:00 PM RD — Artículo #2 (rotación automática) ────────────────────
+  articulo-2:
     if: |
-      (github.event_name == 'schedule' && github.event.schedule == '30 11 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'policia' || github.event.inputs.category == ''))
+      (github.event_name == 'schedule' && github.event.schedule == '0 17 * * *')
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: 👮 Publicar — POLICÍA (intento 1)
+      - name: 📰 Publicar — ARTÍCULO #2 (intento 1)
         id: intento1
         continue-on-error: true
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 POLICÍA — intento 1 — $(date -u)"
+          echo "🚀 ARTÍCULO #2 — rotación automática — $(date -u)"
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 90 \
-            -X GET "$SITE_URL/api/cron/bot?category=policia" \
+            -X GET "$SITE_URL/api/cron/bot" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-      - name: 👮 Publicar — POLICÍA (reintento 2 si falló)
+      - name: 📰 Publicar — ARTÍCULO #2 (reintento 2 si falló)
         if: steps.intento1.outcome == 'failure'
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🔄 POLICÍA — reintento 2 — $(date -u)"
+          echo "🔄 ARTÍCULO #2 — reintento 2 — $(date -u)"
           sleep 30
           HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
             --max-time 90 \
-            -X GET "$SITE_URL/api/cron/bot?category=policia" \
+            -X GET "$SITE_URL/api/cron/bot" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-  # ─── 08:00 AM RD — Deportes ──────────────────────────────────────────────
+  # ─── 07:00 PM RD — Artículo #3 (rotación automática) ────────────────────
+  articulo-3:
+    if: |
+      (github.event_name == 'schedule' && github.event.schedule == '0 23 * * *')
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: 📰 Publicar — ARTÍCULO #3 (intento 1)
+        id: intento1
+        continue-on-error: true
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🚀 ARTÍCULO #3 — rotación automática — $(date -u)"
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+      - name: 📰 Publicar — ARTÍCULO #3 (reintento 2 si falló)
+        if: steps.intento1.outcome == 'failure'
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: "https://www.imperiopublico.com"
+        run: |
+          echo "🔄 ARTÍCULO #3 — reintento 2 — $(date -u)"
+          sleep 30
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
+            --max-time 90 \
+            -X GET "$SITE_URL/api/cron/bot" \
+            -H "Authorization: Bearer $CRON_SECRET")
+          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
+          [ "$HTTP" = "200" ] || exit 1
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # DISPARO MANUAL POR CATEGORÍA — Solo via workflow_dispatch
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  # ─── Manual — Deportes ───────────────────────────────────────────────────
   deportes:
-    if: |
-      (github.event_name == 'schedule' && github.event.schedule == '0 12 * * *') ||
-      (github.event_name == 'workflow_dispatch' && (github.event.inputs.category == 'deportes' || github.event.inputs.category == ''))
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.category == 'deportes'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
-      - name: ⚽ Publicar — DEPORTES (intento 1)
-        id: intento1
-        continue-on-error: true
+      - name: ⚽ Publicar — DEPORTES
         env:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           SITE_URL: "https://www.imperiopublico.com"
         run: |
-          echo "🚀 DEPORTES — intento 1 — $(date -u)"
-          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 90 \
+          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" --max-time 90 \
             -X GET "$SITE_URL/api/cron/bot?category=deportes" \
             -H "Authorization: Bearer $CRON_SECRET")
           echo "HTTP: $HTTP — $(cat /tmp/res.json)"
           [ "$HTTP" = "200" ] || exit 1
 
-      - name: ⚽ Publicar — DEPORTES (reintento 2 si falló)
-        if: steps.intento1.outcome == 'failure'
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
-          SITE_URL: "https://www.imperiopublico.com"
-        run: |
-          echo "🔄 DEPORTES — reintento 2 — $(date -u)"
-          sleep 30
-          HTTP=$(curl -s -o /tmp/res.json -w "%{http_code}" \
-            --max-time 90 \
-            -X GET "$SITE_URL/api/cron/bot?category=deportes" \
-            -H "Authorization: Bearer $CRON_SECRET")
-          echo "HTTP: $HTTP — $(cat /tmp/res.json)"
-          [ "$HTTP" = "200" ] || exit 1
 
   # ─── 08:30 AM RD — Tecnología ────────────────────────────────────────────
   tecnologia:

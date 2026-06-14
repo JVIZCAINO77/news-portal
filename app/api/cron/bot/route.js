@@ -19,9 +19,9 @@ const CRON_SECRET = process.env.CRON_SECRET;
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
 // Cron principal: cada 2 horas (0 */2 * * *) — publica 1 artículo por ejecución.
 // Self-heal:      9:00 PM RD (01:00 UTC) — cobertura de respaldo.
-// Total objetivo: 12 artículos/día (1 cada 2 horas × 12 ejecuciones).
+// Total objetivo: 3 artículos/día — el bot se detiene al llegar a este tope.
 // Reset de cuotas Gemini: medianoche UTC (3:00 AM hora RD).
-const DAILY_LIMIT_GLOBAL = 12; // Techo diario: máximo 12 artículos (1 cada 2h)
+const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos (1 cada ~8h en la práctica)
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
 const MIN_CONTENT_LENGTH = 2500; // ~400 palabras — requerido por AdSense
@@ -1518,8 +1518,8 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 25000  : 120000; // 25s — intento Gemini (feeds+dedup ~20-25s)
-  const TIME_LIMIT_OR_START = IS_VERCEL ? 38000  : 125000; // 38s — OpenRouter después de feeds+dedup+Gemini
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 30000  : 120000; // 30s — feeds rápidos (3s) + dedup + 1-2 intentos Gemini
+  const TIME_LIMIT_OR_START = IS_VERCEL ? 42000  : 125000; // 42s — OpenRouter después de feeds+dedup+Gemini
   const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 52000  : 200000; // 52s — límite por iteración OR
   const TIME_LIMIT_POL      = IS_VERCEL ? 53000  : 210000; // 53s — Pollinations último recurso
   // Leer el secreto en runtime (no a nivel de módulo) para garantizar el valor correcto
@@ -1644,7 +1644,9 @@ export async function GET(request) {
     .eq('key', 'automation_enabled')
     .maybeSingle();
 
-  if (botSetting?.value !== true) {
+  // Aceptar tanto boolean true como string "true" (Supabase puede devolver ambos según el cliente)
+  const automationEnabled = botSetting?.value === true || botSetting?.value === 'true';
+  if (!automationEnabled) {
     return NextResponse.json({ message: 'Automatización pausada desde el panel de administración.' }, { status: 200 });
   }
 
@@ -1689,10 +1691,10 @@ export async function GET(request) {
       return NextResponse.json({ message: `No hay feeds configurados para: ${categoryKey}` }, { status: 200 });
     }
 
-    // Fetch en paralelo — cada feed tiene un hard limit de 4.5s para no bloquear el resto
+    // Fetch en paralelo — cada feed tiene un hard limit de 3s para dejar más tiempo al AI
     const feedPromises = categoryFeeds.map(async (feedUrl) => {
       try {
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('feed-timeout')), 4500));
+        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('feed-timeout')), 3000));
         const feed = await Promise.race([parser.parseURL(feedUrl), timeout]);
         return feed.items || [];
       } catch (e) {
@@ -1710,10 +1712,10 @@ export async function GET(request) {
     }
 
 
-    // ⚡ CAP DE ITEMS: máximo 30 por ejecución — evita scoring lento en feeds grandes
-    if (pooledItems.length > 30) {
-      pooledItems = pooledItems.slice(0, 30);
-      console.log(`[Bot] ✂️ Pool recortado a 30 items para optimizar tiempo`);
+    // ⚡ CAP DE ITEMS: máximo 20 por ejecución — evita scoring lento en feeds grandes
+    if (pooledItems.length > 20) {
+      pooledItems = pooledItems.slice(0, 20);
+      console.log(`[Bot] ✂️ Pool recortado a 20 items para optimizar tiempo`);
     }
 
     // === CAPA 1: Pre-filtro por fecha — HOY primero, fallback a 36h si no hay candidatos ===
@@ -2089,9 +2091,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             break;
           }
           const gemCtrl = new AbortController();
-          // ⚡ 6s por clave — timeout agresivo para no agotar el budget de 55s antes de OpenRouter
-          // Gemini 2.5-flash con alta demanda suele tardar >10s → 6s captura las rápidas y descarta lentas
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 6000); // 6s
+          // ⚡ 12s por clave — suficiente para Gemini 2.5-flash bajo carga normal
+          // Feeds más rápidos (3s) liberan presupuesto de tiempo para el modelo
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 12000); // 12s
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
