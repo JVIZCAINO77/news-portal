@@ -1,7 +1,7 @@
 /**
  * /api/cron/self-heal — Auto-sanación editorial
  * ─────────────────────────────────────────────────────────────────
- * Se ejecuta a las 9 PM (hora RD / 1 AM UTC del día siguiente).
+ * Se ejecuta a las 12 PM (hora RD / 4 PM UTC).
  * Detecta qué secciones no tienen artículo HOY y dispara el bot
  * internamente para cada una. Garantía de cobertura total diaria.
  *
@@ -10,7 +10,8 @@
  *  2. Para cada sección vacía → llama a /api/cron/bot?category=X
  *  3. Reporta resultado por Telegram
  *
- * Programado: 0 1 * * *  (1 AM UTC = 9 PM RD, todos los días)
+ * Programado: 0 16 * * *  (4 PM UTC = 12 PM RD, todos los días)
+ * El cron del bot corre a las 8 AM RD → self-heal completa las 2-3 restantes al mediodía.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -20,10 +21,14 @@ export const maxDuration = 55;
 export const dynamic     = 'force-dynamic';
 
 // Secciones que DEBEN tener artículo cada día (meta: 3 artículos/día)
-// Prioridad: las 3 secciones de mayor tráfico del portal
+// El self-heal cubre hasta DAILY_LIMIT_GLOBAL secciones en paralelo.
+// Prioridad: las secciones de mayor tráfico e impacto editorial.
 const REQUIRED_SECTIONS = [
-  'politica', 'deportes', 'internacional',
+  'politica', 'deportes', 'internacional', 'sucesos', 'economia',
 ];
+
+// Límite diario global — coherente con el bot principal
+const DAILY_LIMIT_GLOBAL = 3;
 
 const SITE_URL    = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.imperiopublico.com';
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -62,42 +67,42 @@ export async function GET(req) {
   const startOfDay = new Date(`${todayDR}T00:00:00-04:00`).toISOString();
   const endOfDay   = new Date(`${todayDR}T23:59:59-04:00`).toISOString();
 
-  // Secciones ya cubiertas hoy
+  // Total de artículos publicados hoy (límite global)
+  const { count: totalToday } = await admin
+    .from('articles')
+    .select('*', { count: 'exact', head: true })
+    .gte('publishedAt', startOfDay)
+    .lte('publishedAt', endOfDay);
+
+  // Si ya se alcanzó el límite global, no hay nada que sanar
+  if ((totalToday ?? 0) >= DAILY_LIMIT_GLOBAL) {
+    await sendTelegram(
+      `✅ <b>Imperio Público — Auto-Sanación</b>\n\n` +
+      `📅 ${todayDR}\n` +
+      `🎉 Límite diario alcanzado (${totalToday}/${DAILY_LIMIT_GLOBAL} artículos). ¡Sin acción necesaria!`
+    );
+    return NextResponse.json({ status: 'complete', totalToday, limit: DAILY_LIMIT_GLOBAL });
+  }
+
+  // Categorías ya publicadas hoy (para saber qué secciones faltan)
   const { data: published } = await admin
     .from('articles')
     .select('category')
     .gte('publishedAt', startOfDay)
     .lte('publishedAt', endOfDay);
 
+  // Secciones ya cubiertas hoy
   const covered = new Set((published || []).map(a => a.category));
   const missing = REQUIRED_SECTIONS.filter(s => !covered.has(s));
 
-  const report = {
-    date:    todayDR,
-    covered: [...covered].filter(c => REQUIRED_SECTIONS.includes(c)),
-    missing,
-    healed:  [],
-    failed:  [],
-  };
-
-  if (missing.length === 0) {
-    await sendTelegram(
-      `✅ <b>Imperio Público — Auto-Sanación</b>\n\n` +
-      `📅 ${todayDR}\n` +
-      `🎉 Las 3 secciones prioritarias cubiertas. ¡Sistema perfecto!`
-    );
-    return NextResponse.json({ status: 'complete', ...report });
-  }
-
-  // Disparar bot para cada sección faltante EN PARALELO (Promise.allSettled)
-  // Máximo 3 secciones en paralelo — alineado con la meta de 3 artículos/día.
-  // 3 llamadas en paralelo de 20s caben perfectamente en la ventana de 55s de Vercel.
-  const toHeal = missing.slice(0, 3);
+  // Cuántos artículos más podemos publicar respetando el límite global
+  const canPublish = Math.max(0, DAILY_LIMIT_GLOBAL - (totalToday ?? 0));
+  const toHeal = missing.slice(0, canPublish);
   const healResults = await Promise.allSettled(
     toHeal.map(async (section) => {
       const botUrl = `${SITE_URL}/api/cron/bot?category=${section}`;
       const ctrl   = new AbortController();
-      const timer  = setTimeout(() => ctrl.abort(), 30000); // 30s por sección — reduce falsos negativos en el reporte
+      const timer  = setTimeout(() => ctrl.abort(), 30000);
       try {
         const res = await fetch(botUrl, {
           headers: {
@@ -116,39 +121,33 @@ export async function GET(req) {
     })
   );
 
+  const healed = [];
+  const failed = [];
+
   for (const result of healResults) {
     const val = result.value || { section: '?', ok: false, reason: result.reason?.message || 'rejected' };
-    if (val.ok) {
-      report.healed.push(val.section);
-    } else {
-      report.failed.push(`${val.section} (${val.reason})`);
-    }
+    if (val.ok) healed.push(val.section);
+    else         failed.push(`${val.section} (${val.reason})`);
   }
 
-  // Si quedan más, marcar para que el cron siguiente las cubra
-  const remaining = missing.slice(toHeal.length); // antes era .slice(3) — bug: toHeal puede ser hasta 5
-  if (remaining.length > 0) {
-    report.remaining = remaining;
-  }
+  const remaining = missing.slice(toHeal.length);
 
   // Reporte Telegram
-  const healedTxt  = report.healed.length  ? `✅ Reparadas: ${report.healed.join(', ')}` : '';
-  const failedTxt  = report.failed.length  ? `❌ Fallidas: ${report.failed.join(', ')}`  : '';
-  const remainTxt  = remaining.length       ? `⏳ Pendientes: ${remaining.join(', ')}`    : '';
-  const statusIcon = report.failed.length === 0 ? '🟢' : '🟡';
+  const healedTxt  = healed.length    ? `✅ Publicadas: ${healed.join(', ')}` : '';
+  const failedTxt  = failed.length    ? `❌ Fallidas: ${failed.join(', ')}`   : '';
+  const remainTxt  = remaining.length ? `⏳ Pendientes: ${remaining.join(', ')}` : '';
+  const statusIcon = failed.length === 0 ? '🟢' : '🟡';
 
   await sendTelegram(
-    `${statusIcon} <b>Imperio Público — Auto-Sanación</b>\n\n` +
+    `${statusIcon} <b>Imperio Público — Auto-Sanación (Mediodía)</b>\n\n` +
     `📅 ${todayDR}\n` +
-    `📋 Secciones cubiertas: ${report.covered.length}/${REQUIRED_SECTIONS.length}\n` +
-    `🔧 Faltaban: ${missing.join(', ')}\n\n` +
+    `📰 Artículos hoy: ${totalToday ?? 0}/${DAILY_LIMIT_GLOBAL}\n` +
+    `🔧 Secciones procesadas: ${toHeal.join(', ') || 'ninguna'}\n\n` +
     [healedTxt, failedTxt, remainTxt].filter(Boolean).join('\n')
   );
 
-  // ─── CLEANUP INTEGRADO (HAL-10) ───────────────────────────────────────────
-  // El cron de cleanup fue eliminado del plan Hobby (límite = 2 crons).
-  // Se lanza aquí como fire-and-forget: no bloquea la respuesta del self-heal.
-  // Se ejecuta cada noche junto con la auto-sanación (1 AM UTC / 9 PM RD).
+  // ─── CLEANUP INTEGRADO ───────────────────────────────────────────────────
+  // Se lanza como fire-and-forget junto con la auto-sanación del mediodía.
   fetch(`${SITE_URL}/api/cron/cleanup`, {
     headers: {
       'Authorization': `Bearer ${CRON_SECRET}`,
@@ -157,7 +156,12 @@ export async function GET(req) {
   }).catch(e => console.warn('[Self-heal] Cleanup fire-and-forget falló:', e.message));
 
   return NextResponse.json({
-    status: report.failed.length === 0 ? 'healed' : 'partial',
-    ...report,
+    status: failed.length === 0 ? 'healed' : 'partial',
+    date: todayDR,
+    totalToday,
+    limit: DAILY_LIMIT_GLOBAL,
+    healed,
+    failed,
+    remaining,
   });
 }

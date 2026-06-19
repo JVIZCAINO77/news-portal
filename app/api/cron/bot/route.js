@@ -2608,11 +2608,15 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     try {
       const articleUrl = `${SITE_CONFIG.url}/articulo/${slug}`;
       await notifyGoogleIndexing(articleUrl);
-      
-      // AUTO-POST EN REDES: Desactivado — el admin controla cuándo publicar en redes
-      // desde el panel de administración con el botón "📢 Publicar en Redes".
-      // Para reactivar el auto-post, descomentar la línea siguiente:
-      // await postToSocialMedia(newArticle);
+
+      // AUTO-POST EN REDES: Controlado por variable de entorno AUTO_POST_SOCIAL=true
+      // Para activar: añadir AUTO_POST_SOCIAL=true en Vercel Environment Variables.
+      // Para desactivar: eliminar la variable o establecerla en false.
+      if (process.env.AUTO_POST_SOCIAL === 'true') {
+        postToSocialMedia({ ...newArticle, id: insertedArticle.id }).catch(e =>
+          console.warn('[Bot] Auto-post en redes falló (no crítico):', e.message)
+        );
+      }
     } catch (indexErr) {
       console.warn('[Bot] No se pudo notificar a servicios externos:', indexErr.message);
     }

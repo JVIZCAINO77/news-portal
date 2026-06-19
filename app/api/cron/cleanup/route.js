@@ -38,20 +38,31 @@ export async function GET(request) {
       timestamp: new Date().toISOString()
     };
 
-    // Fix C3: loguear los artículos ANTES de borrarlos para auditoría
-    const ninetyDaysAgo = new Date();
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    // Guardia: no limpiar si hay menos de 200 artículos en la DB
+    const { count: totalCount } = await supabase
+      .from('articles')
+      .select('*', { count: 'exact', head: true });
+    
+    if ((totalCount ?? 0) < 200) {
+      console.log(`[Cleanup] Saltando: solo ${totalCount} artículos en DB (mínimo 200).`);
+      return NextResponse.json({ success: true, message: 'DB pequeña, sin limpieza.', report });
+    }
+
+    // Umbral más conservador: 180 días (en lugar de 90)
+    // Criterio más estricto: artículo debe estar SIN imagen Y SIN featured Y SIN trending
+    // Se elimina el criterio views=0 (un artículo sin vistas puede ser valioso)
+    const oneEightyDaysAgo = new Date();
+    oneEightyDaysAgo.setDate(oneEightyDaysAgo.getDate() - 180);
 
     // Primero: identificar qué se va a borrar
     const { data: toDelete } = await supabase
       .from('articles')
       .select('id, title, publishedAt')
-      .lt('publishedAt', ninetyDaysAgo.toISOString())
+      .lt('publishedAt', oneEightyDaysAgo.toISOString())
       .eq('featured', false)
       .eq('trending', false)
-      .or('image.is.null,image.eq.""')  // Fix M8: incluir imagen vacía además de NULL
-      .eq('views', 0)
-      .limit(100); // Techo de seguridad: borrar máx 100 a la vez
+      .or('image.is.null,image.eq.""')
+      .limit(50); // Techo más conservador: borrar máx 50 a la vez
 
     if (toDelete?.length) {
       console.log(`[Cleanup] 🗑️ Marcados para borrar (${toDelete.length}):`,
@@ -62,12 +73,11 @@ export async function GET(request) {
     const { count: deletedArticles, error: err1 } = await supabase
       .from('articles')
       .delete({ count: 'exact' })
-      .lt('publishedAt', ninetyDaysAgo.toISOString())
+      .lt('publishedAt', oneEightyDaysAgo.toISOString())
       .eq('featured', false)
       .eq('trending', false)
-      .or('image.is.null,image.eq.""')  // Fix M8
-      .eq('views', 0)
-      .limit(100);
+      .or('image.is.null,image.eq.""')
+      .limit(50);
 
     if (!err1) report.articlesDeleted = deletedArticles || 0;
 
