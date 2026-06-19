@@ -3,14 +3,19 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link';
 import AdminArticleCard from '@/components/AdminArticleCard';
-
-export const revalidate = 60; // ISR: revalidar cada 60s
 import { createClient } from '@supabase/supabase-js';
 
-export default async function AdminArticlesPage() {
+const PAGE_SIZE = 50;
+
+export default async function AdminArticlesPage({ searchParams }) {
   let articles = [];
   let isAdmin = false;
   let errorMsg = null;
+  let totalCount = 0;
+
+  const sp = await searchParams;
+  const currentPage = Math.max(1, parseInt(sp?.page || '1', 10));
+  const offset = (currentPage - 1) * PAGE_SIZE;
 
   try {
     // Auth via server client (cookies)
@@ -47,11 +52,20 @@ export default async function AdminArticlesPage() {
 
     isAdmin = profile?.role === 'admin';
 
+    // Obtener conteo total REAL de la DB (no limitado)
+    let countQuery = admin
+      .from('articles')
+      .select('*', { count: 'exact', head: true });
+    if (!isAdmin) countQuery = countQuery.eq('author_id', userId);
+    const { count } = await countQuery;
+    totalCount = count || 0;
+
+    // Página actual paginada
     let query = admin
       .from('articles')
       .select('id, slug, title, excerpt, image, category, author, publishedAt, featured, trending, author_id')
       .order('publishedAt', { ascending: false })
-      .limit(200);
+      .range(offset, offset + PAGE_SIZE - 1);
 
     if (!isAdmin) query = query.eq('author_id', userId);
 
@@ -73,6 +87,10 @@ export default async function AdminArticlesPage() {
     );
   }
 
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const hasPrev = currentPage > 1;
+  const hasNext = currentPage < totalPages;
+
   return (
     <div className="space-y-10">
 
@@ -82,8 +100,8 @@ export default async function AdminArticlesPage() {
           <h2 className="text-5xl font-black uppercase tracking-tighter italic">Gestión de Contenido</h2>
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mt-2">
             {isAdmin
-              ? `Administrando todo el portal · ${articles.length} artículos`
-              : `Tus artículos publicados (${articles.length})`}
+              ? `Administrando todo el portal · ${totalCount} artículos`
+              : `Tus artículos publicados (${totalCount})`}
           </p>
         </div>
         <Link
@@ -97,7 +115,7 @@ export default async function AdminArticlesPage() {
       {/* STATS */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total',      value: articles.length,                         color: 'bg-black text-white' },
+          { label: 'Total DB',   value: totalCount,                              color: 'bg-black text-white' },
           { label: 'Portada',    value: articles.filter(a => a.featured).length, color: 'bg-red-600 text-white' },
           { label: 'Impacto',    value: articles.filter(a => a.trending).length, color: 'bg-slate-800 text-white' },
           { label: 'Sin imagen', value: articles.filter(a => !a.image).length,   color: 'bg-amber-500 text-white' },
@@ -124,6 +142,57 @@ export default async function AdminArticlesPage() {
         </div>
       )}
 
+      {/* PAGINACIÓN */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between border-t border-slate-100 pt-8">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
+            Página {currentPage} de {totalPages} · {totalCount} artículos
+          </p>
+          <div className="flex items-center gap-3">
+            {hasPrev && (
+              <Link
+                href={`/admin/articulos?page=${currentPage - 1}`}
+                className="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] bg-white border border-slate-200 hover:bg-black hover:text-white transition-all"
+              >
+                ← Anterior
+              </Link>
+            )}
+            {/* Rango de páginas */}
+            <div className="flex gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let p;
+                if (totalPages <= 5) p = i + 1;
+                else if (currentPage <= 3) p = i + 1;
+                else if (currentPage >= totalPages - 2) p = totalPages - 4 + i;
+                else p = currentPage - 2 + i;
+                return (
+                  <Link
+                    key={p}
+                    href={`/admin/articulos?page=${p}`}
+                    className={`w-10 h-10 flex items-center justify-center text-[10px] font-black transition-all ${
+                      p === currentPage
+                        ? 'bg-black text-white'
+                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-900 hover:text-white'
+                    }`}
+                  >
+                    {p}
+                  </Link>
+                );
+              })}
+            </div>
+            {hasNext && (
+              <Link
+                href={`/admin/articulos?page=${currentPage + 1}`}
+                className="px-6 py-3 text-[10px] font-black uppercase tracking-[0.2em] bg-black text-white hover:bg-red-600 transition-all"
+              >
+                Siguiente →
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
+

@@ -102,7 +102,8 @@ export default function AdminArticleCard({ article, isAdmin }) {
   try {
     if (article.publishedAt) {
       date = new Date(article.publishedAt).toLocaleDateString('es-DO', {
-        day: '2-digit', month: 'short', year: '2-digit'
+        day: '2-digit', month: 'short', year: '2-digit',
+        timeZone: 'America/Santo_Domingo', // Fix: mostrar en hora RD (UTC-4), no UTC
       });
     }
   } catch (_) {}

@@ -191,7 +191,7 @@ export default async function AdminDashboardPage() {
               <div className="flex-1 min-w-0">
                 <h4 className="text-lg font-black text-black uppercase tracking-tight group-hover:text-red-600 transition-colors truncate">{a.title}</h4>
                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2">
-                  {a.author} — {new Date(a.publishedAt).toLocaleDateString('es-DO')}
+                  {a.author} — {new Date(a.publishedAt).toLocaleDateString('es-DO', { timeZone: 'America/Santo_Domingo' })}
                 </p>
               </div>
               <Link
