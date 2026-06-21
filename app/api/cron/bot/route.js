@@ -2155,14 +2155,15 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       const FREE_MODELS_OR = process.env.OPENROUTER_MODELS
         ? process.env.OPENROUTER_MODELS.split(',').map(m => m.trim()).filter(Boolean)
         : [
-            // Verificados 2026-06-14: 429=disponible (rate limit), 404=no existe gratis
-            'google/gemma-4-31b-it:free',             // 429 rate limit
-            'nvidia/nemotron-3-super-120b-a12b:free', // 429 rate limit
-            'meta-llama/llama-3.3-70b-instruct:free', // 429 provider limit
-            'google/gemma-4-26b-a4b-it:free',         // 429 rate limit
-            'google/gemma-2-9b-it:free',              // Gemma 2 9B ligero
-            'qwen/qwen-2.5-7b-instruct:free',         // Qwen 2.5 7B
-            'microsoft/phi-3-mini-128k-instruct:free', // Phi-3 Mini
+            // Verificados 2026-06-21: SOLO estos 2 responden OK en modo free
+            'google/gemma-4-31b-it:free',             // ✅ OK ~1.6s
+            'nvidia/nemotron-3-super-120b-a12b:free', // ✅ OK ~1.6s
+            // Los siguientes están en 404 o sin plan free activo (2026-06-21):
+            // 'meta-llama/llama-3.3-70b-instruct:free'  // 429
+            // 'google/gemma-4-26b-a4b-it:free'          // 404
+            // 'google/gemma-2-9b-it:free'               // 404
+            // 'qwen/qwen-2.5-7b-instruct:free'          // 404
+            // 'microsoft/phi-3-mini-128k-instruct:free' // 404
           ];
       console.log(`[Bot] 📋 OpenRouter modelos a intentar: ${FREE_MODELS_OR.length} (${process.env.OPENROUTER_MODELS ? 'desde ENV' : 'hardcoded'})`);
       for (const orModel of FREE_MODELS_OR) {
