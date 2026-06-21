@@ -2039,11 +2039,12 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
-    // ⚡ SKIP_GEMINI: variable de entorno para bypass de emergencia hacia OpenRouter.
-    // Activar en Vercel sin redeploy: SKIP_GEMINI=true
-    const SKIP_GEMINI = process.env.SKIP_GEMINI === 'true';
+    // ⚡ SKIP_GEMINI: bypass de Gemini cuando está lento/sin cuota.
+    // Hardcoded=true temporalmente (2026-06-21) — revertir cuando Gemini se estabilice.
+    // También se puede controlar por env: SKIP_GEMINI=true/false en Vercel sin redeploy.
+    const SKIP_GEMINI = process.env.SKIP_GEMINI !== 'false'; // true por defecto, false solo si se fuerza
     if (SKIP_GEMINI) {
-      console.log('[Bot] ⚡ SKIP_GEMINI=true — saltando Gemini, directo a OpenRouter.');
+      console.log('[Bot] ⚡ Gemini bypass activo — directo a OpenRouter (más rápido hoy).');
       geminiQuotaExhausted = true;
     }
 
