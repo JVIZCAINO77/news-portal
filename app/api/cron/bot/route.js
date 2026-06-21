@@ -2039,10 +2039,18 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
-    // ⚡ LÍMITE DE CLAVES: máx 3 claves antes de saltar a OpenRouter.
-    // Con 10s de timeout por clave: 3 claves × 10s = 30s max para Gemini.
-    // Deja 25s para OpenRouter + publicación dentro del límite de 55s de Vercel.
-    const maxKeysToTry = Math.min(3, keys.length);
+    // ⚡ SKIP_GEMINI: variable de entorno para bypass de emergencia hacia OpenRouter.
+    // Activar en Vercel sin redeploy: SKIP_GEMINI=true
+    const SKIP_GEMINI = process.env.SKIP_GEMINI === 'true';
+    if (SKIP_GEMINI) {
+      console.log('[Bot] ⚡ SKIP_GEMINI=true — saltando Gemini, directo a OpenRouter.');
+      geminiQuotaExhausted = true;
+    }
+
+    // ⚡ LÍMITE DE CLAVES: máx 2 claves antes de saltar a OpenRouter.
+    // Con 10s de timeout por clave: 2 claves × 10s = 20s max para Gemini.
+    // Deja 35s para OpenRouter + publicación dentro del límite de 55s de Vercel.
+    const maxKeysToTry = Math.min(2, keys.length);
     let keysAttempted = 0;
     let quotaFailures = 0; // claves que fallaron específicamente por cuota agotada
 
