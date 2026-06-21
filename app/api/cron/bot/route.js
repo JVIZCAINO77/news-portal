@@ -1488,7 +1488,7 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 15000  : 120000; // 15s — máx para Gemini; si falla, OpenRouter tiene 40s
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 25000  : 120000; // 25s — sube de 15s para dar margen a Gemini con prompt completo
   const TIME_LIMIT_OR_START = IS_VERCEL ? 42000  : 125000; // 42s — OpenRouter después de feeds+dedup+Gemini
   const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 50000  : 200000; // 50s — límite por iteración OR
   const TIME_LIMIT_POL      = IS_VERCEL ? 51000  : 210000; // 51s — Pollinations último recurso
@@ -2073,7 +2073,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           const gemCtrl = new AbortController();
           // ⚡ 16s por clave — gemini-2.5-flash tarda hasta 12-13s bajo carga
           // gemini-2.5-flash-lite responde en ~700ms
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 10000); // 10s — reducido de 16s para caber en 55s Vercel
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 22000); // 22s — gemini-2.5-flash-lite: ~700ms; flash: hasta 15s
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
