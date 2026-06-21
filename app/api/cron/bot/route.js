@@ -2040,11 +2040,11 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
     // ⚡ SKIP_GEMINI: bypass de Gemini cuando está lento/sin cuota.
-    // Hardcoded=true temporalmente (2026-06-21) — revertir cuando Gemini se estabilice.
-    // También se puede controlar por env: SKIP_GEMINI=true/false en Vercel sin redeploy.
-    const SKIP_GEMINI = process.env.SKIP_GEMINI !== 'false'; // true por defecto, false solo si se fuerza
+    // Controlar con env var en Vercel sin redeploy: SKIP_GEMINI=true o SKIP_GEMINI=false.
+    // Por defecto false — intenta Gemini primero (más rápido cuando funciona).
+    const SKIP_GEMINI = process.env.SKIP_GEMINI === 'true';
     if (SKIP_GEMINI) {
-      console.log('[Bot] ⚡ Gemini bypass activo — directo a OpenRouter (más rápido hoy).');
+      console.log('[Bot] ⚡ SKIP_GEMINI=true — saltando Gemini, directo a OpenRouter.');
       geminiQuotaExhausted = true;
     }
 
