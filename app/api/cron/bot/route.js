@@ -24,7 +24,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos (1 cada ~8h en la práctica)
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
-const MIN_CONTENT_LENGTH = 1800; // ~280 palabras — válido para AdSense; Gemini completa en 12s
+const MIN_CONTENT_LENGTH = 1100; // ~170 palabras — reducido para OR que es más lento generando texto largo
 
 // ─── DETECTOR DE ÚLTIMA HORA ───────────────────────────────────────────────
 // Palabras clave que indican un suceso urgente/crítico que NUNCA debe bloquearse
@@ -1965,14 +1965,14 @@ REGLAS EDITORIALES (CUMPLIMIENTO OBLIGATORIO):
 5. Usa **negritas** en datos clave, cifras, nombres importantes y declaraciones.
 6. Incluye al menos 2 citas o declaraciones (reales o reconstruidas con base en los hechos).
 7. TÍTULO: Original, atractivo, SEO-optimizado. Entre 55-75 caracteres. NO copies el título de la fuente.
-8. CONTENIDO: MÍNIMO 900 PALABRAS. El artículo debe ser exhaustivo, con contexto histórico, datos de respaldo, análisis de impacto local, comparaciones regionales si aplica, y perspectiva editorial.
+8. CONTENIDO: MÍNIMO 600 PALABRAS. Artículo completo con contexto, datos, análisis y perspectiva editorial.
 9. EXCERPT: Meta-descripción propia, atractiva y con keywords naturales. Máximo 160 caracteres.
-10. TAGS: Entre 4 y 6 etiquetas relevantes y específicas (no genéricas).
-11. PROHIBIDO: frases genéricas de IA ("En conclusión...", "Es importante destacar...", "Cabe mencionar...", "Sin lugar a dudas...").
+10. TAGS: Entre 3 y 5 etiquetas relevantes y específicas.
+11. PROHIBIDO: frases genéricas de IA ("En conclusión...", "Es importante destacar...", "Cabe mencionar...").
 12. Si la noticia es trivial o sin relevancia pública → responde exactamente: IRRELEVANTE
 
 Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
-{ "title": "<titular original>", "excerpt": "<gancho propio>", "content": "<artículo markdown original, mínimo 900 palabras>", "tags": ["Tag1", "Tag2", "Tag3", "Tag4"], "impact_level": "high|medium|low" }`;
+{ "title": "<titular original>", "excerpt": "<gancho propio>", "content": "<artículo markdown original, mínimo 600 palabras>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
 
     // ─── GEMINI PRO — ROTACIÓN DETERMINISTA POR SLOT ──────────────────────────
     // Plan: Gemini API Pro (sin límite diario real, límite por minuto por clave).
@@ -2178,7 +2178,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           const orModelName = (orModel.split('/')[1] || orModel).split(':')[0];
           console.log(`[Bot] Probando OpenRouter (${orModelName})...`);
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s por modelo
+          const timeoutId = setTimeout(() => controller.abort(), 35000); // 35s por modelo OR
           const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -2193,7 +2193,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
                 { role: 'system', content: 'Eres periodista profesional. Responde ÚNICAMENTE con JSON válido.' },
                 { role: 'user', content: prompt }
               ],
-              max_tokens: 2500,
+              max_tokens: 1500, // Reducido de 2500 — artículo válido en ~600 palabras, más rápido
             }),
             signal: controller.signal,
           });
