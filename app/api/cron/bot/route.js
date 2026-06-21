@@ -1488,10 +1488,10 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 30000  : 120000; // 30s — feeds rápidos (3s) + dedup + 1-2 intentos Gemini
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 22000  : 120000; // 22s — deja 33s libres para OpenRouter+publicar
   const TIME_LIMIT_OR_START = IS_VERCEL ? 42000  : 125000; // 42s — OpenRouter después de feeds+dedup+Gemini
-  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 52000  : 200000; // 52s — límite por iteración OR
-  const TIME_LIMIT_POL      = IS_VERCEL ? 53000  : 210000; // 53s — Pollinations último recurso
+  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 50000  : 200000; // 50s — límite por iteración OR
+  const TIME_LIMIT_POL      = IS_VERCEL ? 51000  : 210000; // 51s — Pollinations último recurso
   // Leer el secreto en runtime (no a nivel de módulo) para garantizar el valor correcto
   const runtimeSecret = process.env.CRON_SECRET;
   // Vercel inyecta este header en todos los cron jobs programados (mecanismo oficial)
@@ -2039,10 +2039,10 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const deadKeys = new Set(); // claves muertas en esta sesión (cuota/leaked/banned)
     let geminiQuotaExhausted = false; // ⚡ flag: si es true, salta TODO Gemini directo a OpenRouter
 
-    // ⚡ LÍMITE DE CLAVES: máx 6 claves antes de saltar a OpenRouter.
-    // Con 12s de timeout por clave: 6 claves × 12s = 72s max para Gemini (sin paral.).
-    // En la práctica las claves exitosas responden en 5-10s.
-    const maxKeysToTry = Math.min(6, keys.length);
+    // ⚡ LÍMITE DE CLAVES: máx 3 claves antes de saltar a OpenRouter.
+    // Con 10s de timeout por clave: 3 claves × 10s = 30s max para Gemini.
+    // Deja 25s para OpenRouter + publicación dentro del límite de 55s de Vercel.
+    const maxKeysToTry = Math.min(3, keys.length);
     let keysAttempted = 0;
     let quotaFailures = 0; // claves que fallaron específicamente por cuota agotada
 
@@ -2064,7 +2064,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
           const gemCtrl = new AbortController();
           // ⚡ 16s por clave — gemini-2.5-flash tarda hasta 12-13s bajo carga
           // gemini-2.5-flash-lite responde en ~700ms
-          const gemTimer = setTimeout(() => gemCtrl.abort(), 16000); // 16s
+          const gemTimer = setTimeout(() => gemCtrl.abort(), 10000); // 10s — reducido de 16s para caber en 55s Vercel
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
