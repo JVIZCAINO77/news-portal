@@ -2,8 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
 
   "crons": [
-    { "path": "/api/cron/bot",       "schedule": "0 12 * * *" },
-    { "path": "/api/cron/self-heal", "schedule": "0 16 * * *" }
+    { "path": "/api/cron/bot",       "schedule": "0 16 * * *" },
+    { "path": "/api/cron/self-heal", "schedule": "0 20 * * *" }
   ],
 
   "functions": {
@@ -23,6 +23,10 @@
     },
     "app/api/articles/view/route.js": {
       "maxDuration": 5
+    },
+    "app/api/cron/trigger/route.js": {
+      "maxDuration": 55,
+      "memory": 256
     },
     "app/api/admin/**": {
       "maxDuration": 15,
