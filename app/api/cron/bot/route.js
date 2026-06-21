@@ -24,7 +24,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos (1 cada ~8h en la práctica)
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
-const MIN_CONTENT_LENGTH = 1100; // ~170 palabras — reducido para OR que es más lento generando texto largo
+const MIN_CONTENT_LENGTH = 600; // Bajado temporalmente — OR/Gemini bajo presión generan contenido más corto
 
 // ─── DETECTOR DE ÚLTIMA HORA ───────────────────────────────────────────────
 // Palabras clave que indican un suceso urgente/crítico que NUNCA debe bloquearse
@@ -1437,11 +1437,11 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
 
   // ── GUARDIA ANTI-TRUNCADO ──────────────────────────────────
   // Acepta: punto, !, ?, comilla, cierre HTML (> o </tag>), paréntesis
-  // También acepta si el contenido tiene >900 chars (modelo libre con límite de tokens)
-  const endsClean = /[.!?"'>)\]\u00bb]\s*$|<\/[a-z]+>\s*$/si.test(articleData.content);
-  const isLongEnough = articleData.content.length > 900;
+  // También acepta si el contenido tiene >MIN_CONTENT_LENGTH chars (modelo libre con límite de tokens)
+  const endsClean = /[.!?"'>>)\]\u00bb]\s*$|<\/[a-z]+>\s*$/si.test(articleData.content);
+  const isLongEnough = articleData.content.length > MIN_CONTENT_LENGTH;
   if (!endsClean && !isLongEnough) {
-    console.log(`[Bot] ⚠️ Validation falló: Contenido parece truncado.`);
+    console.log(`[Bot] ⚠️ Validation falló: Contenido parece truncado (${articleData.content.length} chars).`);
     return null;
   }
 
