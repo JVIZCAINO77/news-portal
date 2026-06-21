@@ -198,7 +198,7 @@ const CATEGORIES = {
       'https://noticiassin.com/feed/?s=politica',
       // Complementarias
       'https://elnuevodiario.com.do/feed/',
-      'https://clavedigital.com.do/feed/',
+      // 'https://clavedigital.com.do/feed/', // TIMEOUT — eliminado 2026-06-21
       'https://eldia.com.do/feed/',
     ],
   },
@@ -1488,7 +1488,7 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 22000  : 120000; // 22s — deja 33s libres para OpenRouter+publicar
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 15000  : 120000; // 15s — máx para Gemini; si falla, OpenRouter tiene 40s
   const TIME_LIMIT_OR_START = IS_VERCEL ? 42000  : 125000; // 42s — OpenRouter después de feeds+dedup+Gemini
   const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 50000  : 200000; // 50s — límite por iteración OR
   const TIME_LIMIT_POL      = IS_VERCEL ? 51000  : 210000; // 51s — Pollinations último recurso
