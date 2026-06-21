@@ -193,8 +193,7 @@ const CATEGORIES = {
   politica: {
     slug: 'politica', author: 'Mesa Política', style: 'neutral, objetivo y analítico',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://noticiassin.com/feed/?s=politica',
       // Complementarias
@@ -216,8 +215,7 @@ const CATEGORIES = {
   sucesos: {
     slug: 'sucesos', author: 'Redacción de Sucesos', style: 'informativo, serio y cauteloso',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://noticiassin.com/feed/?s=sucesos',
       // Complementarias
@@ -229,8 +227,7 @@ const CATEGORIES = {
   policia: {
     slug: 'policia', author: 'Sección Policial', style: 'periodístico, policial y formal',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/?s=policia',
       'https://noticiassin.com/feed/',
       // Complementarias — cobertura policial/judicial
@@ -242,8 +239,7 @@ const CATEGORIES = {
     slug: 'deportes', author: 'Mesa Deportiva', style: 'analítico y pasional',
     feeds: [
       'https://www.diariolibre.com/rss/deportes.xml',
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/deportes/portada',
       // Complementarias
@@ -254,8 +250,7 @@ const CATEGORIES = {
   salud: {
     slug: 'salud', author: 'Sección de Salud y Bienestar', style: 'profesional, informativo y confiable',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://www.bbc.com/mundo/index.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
       // Nuevas fuentes de salud
@@ -269,9 +264,7 @@ const CATEGORIES = {
   cultura: {
     slug: 'cultura', author: 'Sección Cultural', style: 'elegante y descriptivo',
     feeds: [
-      'https://www.diariolibre.com/rss/revista.xml',
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+                  'https://almomento.net/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada',
       // Nuevas fuentes culturales
       'https://remolacha.net/feed/',
@@ -283,10 +276,8 @@ const CATEGORIES = {
   entretenimiento: {
     slug: 'entretenimiento', author: 'Sección Espectáculos', style: 'dinámico y ameno',
     feeds: [
-      'https://www.diariolibre.com/rss/revista.xml',
-      'https://remolacha.net/feed/',
-      'https://www.diariolibre.com/rss/portada.xml',
-      // Complementarias
+            'https://remolacha.net/feed/',
+            // Complementarias
       'https://z101digital.com/feed/',
       'https://elnuevodiario.com.do/feed/',
     ],
@@ -295,8 +286,7 @@ const CATEGORIES = {
     slug: 'tendencias', author: 'Mesa de Tendencias', style: 'ágil y moderno',
     feeds: [
       'https://remolacha.net/feed/',
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://www.bbc.com/mundo/index.xml',
+            'https://www.bbc.com/mundo/index.xml',
       'https://www.infobae.com/feeds/rss/tendencias.xml',
       // Nuevas fuentes de tendencias
       'https://www.france24.com/es/rss',
@@ -311,8 +301,7 @@ const CATEGORIES = {
   tecnologia: {
     slug: 'tecnologia', author: 'Redacción Tecnológica', style: 'informativo y vanguardista',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://www.bbc.com/mundo/index.xml',
+            'https://www.bbc.com/mundo/index.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/tecnologia/portada',
       'https://www.infobae.com/feeds/rss/tecno.xml',
       'https://www.france24.com/es/rss',
@@ -335,8 +324,7 @@ const CATEGORIES = {
   nacional: {
     slug: 'nacional', author: 'Redacción Nacional', style: 'periodístico objetivo y formal',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://elnuevodiario.com.do/feed/',
     ],
@@ -348,16 +336,14 @@ const CATEGORIES = {
       'https://www.bbc.com/mundo/index.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/clima-y-medio-ambiente/portada',
       'https://www.infobae.com/feeds/rss/tendencias.xml',
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://www.france24.com/es/rss',
+            'https://www.france24.com/es/rss',
     ],
   },
 
   opinion: {
     slug: 'opinion', author: 'Mesa Editorial', style: 'opinión, análisis profundo y periodismo de criterio',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/opinion/portada',
       'https://www.france24.com/es/rss',
       'https://elnuevodiario.com.do/feed/',
@@ -367,8 +353,7 @@ const CATEGORIES = {
   gobierno: {
     slug: 'gobierno', author: 'Redacción Gubernamental', style: 'formal, institucional y objetivo',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
@@ -378,8 +363,7 @@ const CATEGORIES = {
   justicia: {
     slug: 'justicia', author: 'Sección Judicial', style: 'riguroso, legal y objetivo',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
@@ -389,8 +373,7 @@ const CATEGORIES = {
   congreso: {
     slug: 'congreso', author: 'Redacción Legislativa', style: 'formal, legislativo e informativo',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
@@ -400,8 +383,7 @@ const CATEGORIES = {
   educacion: {
     slug: 'educacion', author: 'Sección Educación', style: 'informativo, formativo y esperanzador',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
       'https://elnuevodiario.com.do/feed/',
@@ -412,8 +394,7 @@ const CATEGORIES = {
   provincias: {
     slug: 'provincias', author: 'Corresponsalía Nacional', style: 'cercano, comunitario e informativo',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
@@ -425,9 +406,7 @@ const CATEGORIES = {
     slug: 'farandula', author: 'Sección Farándula', style: 'dinámico, ameno y entretenido',
     feeds: [
       'https://remolacha.net/feed/',
-      'https://www.diariolibre.com/rss/revista.xml',
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://z101digital.com/feed/',
+                  'https://z101digital.com/feed/',
       'https://elnuevodiario.com.do/feed/',
     ],
   },
@@ -436,8 +415,7 @@ const CATEGORIES = {
     slug: 'musica', author: 'Mesa Musical', style: 'apasionado, cultural y conectado con el público dominicano',
     feeds: [
       'https://remolacha.net/feed/',
-      'https://www.diariolibre.com/rss/revista.xml',
-      'https://www.infobae.com/feeds/rss/cultura.xml',
+            'https://www.infobae.com/feeds/rss/cultura.xml',
       'https://elnuevodiario.com.do/feed/',
       'https://z101digital.com/feed/',
     ],
@@ -447,8 +425,7 @@ const CATEGORIES = {
     slug: 'cine', author: 'Sección Cine y Streaming', style: 'crítico, descriptivo y accesible',
     feeds: [
       'https://remolacha.net/feed/',
-      'https://www.diariolibre.com/rss/revista.xml',
-      'https://www.infobae.com/feeds/rss/cultura.xml',
+            'https://www.infobae.com/feeds/rss/cultura.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/cultura/portada',
       'https://elnuevodiario.com.do/feed/',
     ],
@@ -460,8 +437,7 @@ const CATEGORIES = {
       'https://remolacha.net/feed/',
       'https://www.bbc.com/mundo/index.xml',
       'https://www.infobae.com/feeds/rss/tendencias.xml',
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://cnnespanol.cnn.com/feed/',
+            'https://cnnespanol.cnn.com/feed/',
     ],
   },
 
@@ -469,8 +445,7 @@ const CATEGORIES = {
     slug: 'moda', author: 'Sección Moda y Estilo', style: 'elegante, moderno y aspiracional',
     feeds: [
       'https://remolacha.net/feed/',
-      'https://www.diariolibre.com/rss/revista.xml',
-      'https://www.infobae.com/feeds/rss/tendencias.xml',
+            'https://www.infobae.com/feeds/rss/tendencias.xml',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
       'https://elnuevodiario.com.do/feed/',
     ],
@@ -479,8 +454,7 @@ const CATEGORIES = {
   gastronomia: {
     slug: 'gastronomia', author: 'Sección Gastronomía', style: 'sabroso, descriptivo y cultural',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/sociedad/portada',
       'https://www.bbc.com/mundo/index.xml',
       'https://remolacha.net/feed/',
@@ -490,8 +464,7 @@ const CATEGORIES = {
   turismo: {
     slug: 'turismo', author: 'Sección Turismo', style: 'descriptivo, atractivo y orientado a viajeros',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://elnuevodiario.com.do/feed/',
       'https://www.france24.com/es/rss',
@@ -502,8 +475,7 @@ const CATEGORIES = {
     slug: 'finanzas', author: 'Redacción Financiera', style: 'técnico pero accesible, orientado al ciudadano',
     feeds: [
       'https://www.diariolibre.com/rss/economia.xml',
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
       'https://www.infobae.com/feeds/rss/economia.xml',
     ],
@@ -512,8 +484,7 @@ const CATEGORIES = {
   emprendimiento: {
     slug: 'emprendimiento', author: 'Sección Emprendimiento', style: 'inspirador, práctico y motivacional',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/economia/portada',
       'https://www.infobae.com/feeds/rss/economia.xml',
       'https://cnnespanol.cnn.com/feed/',
@@ -534,8 +505,7 @@ const CATEGORIES = {
   haiti: {
     slug: 'haiti', author: 'Redacción Fronteriza', style: 'objetivo, contextualizado y sensible a la realidad binacional',
     feeds: [
-      'https://www.diariolibre.com/rss/portada.xml',
-      'https://almomento.net/feed/',
+            'https://almomento.net/feed/',
       'https://noticiassin.com/feed/',
       'https://www.france24.com/es/rss',
       'https://www.bbc.com/mundo/index.xml',
