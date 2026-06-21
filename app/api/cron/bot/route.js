@@ -1488,10 +1488,10 @@ export async function GET(request) {
     const startTime = Date.now();
   // En Vercel los límites de tiempo son estrictos (55s max). En local no hay límite.
   const IS_VERCEL = !!process.env.VERCEL;
-  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 25000  : 120000; // 25s — sube de 15s para dar margen a Gemini con prompt completo
-  const TIME_LIMIT_OR_START = IS_VERCEL ? 42000  : 125000; // 42s — OpenRouter después de feeds+dedup+Gemini
-  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 50000  : 200000; // 50s — límite por iteración OR
-  const TIME_LIMIT_POL      = IS_VERCEL ? 51000  : 210000; // 51s — Pollinations último recurso
+  const TIME_LIMIT_GEMINI   = IS_VERCEL ? 40000  : 120000; // 40s — presupuesto real para Gemini (8-15s genera + overhead Vercel)
+  const TIME_LIMIT_OR_START = IS_VERCEL ? 48000  : 125000; // 48s — solo si Gemini falla
+  const TIME_LIMIT_OR_ITER  = IS_VERCEL ? 52000  : 200000; // 52s — límite por iteración OR
+  const TIME_LIMIT_POL      = IS_VERCEL ? 53000  : 210000; // 53s — Pollinations último recurso
   // Leer el secreto en runtime (no a nivel de módulo) para garantizar el valor correcto
   const runtimeSecret = process.env.CRON_SECRET;
   // Vercel inyecta este header en todos los cron jobs programados (mecanismo oficial)
@@ -1835,7 +1835,7 @@ export async function GET(request) {
     let news = null;
     let isNewsBreaking = false;
     // ⚠️ FIX: 38s (antes 40s) — da margen claro antes del corte Gemini en 42s
-    const TIME_LIMIT_LOOP = IS_VERCEL ? 38000 : 180000;
+    const TIME_LIMIT_LOOP = IS_VERCEL ? 12000 : 180000; // 12s — selección rápida, deja 43s a Gemini+publicar
     for (const item of prioritizedItems) { 
         if (Date.now() - startTime > TIME_LIMIT_LOOP) {
                 console.warn("[Bot] Time safety limit reached, breaking prioritizedItems loop");
@@ -2048,10 +2048,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       geminiQuotaExhausted = true;
     }
 
-    // ⚡ LÍMITE DE CLAVES: máx 2 claves antes de saltar a OpenRouter.
-    // Con 10s de timeout por clave: 2 claves × 10s = 20s max para Gemini.
-    // Deja 35s para OpenRouter + publicación dentro del límite de 55s de Vercel.
-    const maxKeysToTry = Math.min(2, keys.length);
+    // ⚡ 1 CLAVE SOLO: con 25s de timeout = 25s max para Gemini.
+    // Gemini-2.5-flash-lite responde en 700ms-8s — 1 intento es suficiente.
+    const maxKeysToTry = Math.min(1, keys.length);
     let keysAttempted = 0;
     let quotaFailures = 0; // claves que fallaron específicamente por cuota agotada
 
