@@ -102,7 +102,7 @@ export async function GET(req) {
     toHeal.map(async (section) => {
       const botUrl = `${SITE_URL}/api/cron/bot?category=${section}`;
       const ctrl   = new AbortController();
-      const timer  = setTimeout(() => ctrl.abort(), 30000);
+      const timer  = setTimeout(() => ctrl.abort(), 50000);
       try {
         const res = await fetch(botUrl, {
           headers: {
