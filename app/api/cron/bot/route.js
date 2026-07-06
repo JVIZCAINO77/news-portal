@@ -24,7 +24,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
 const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos (1 cada ~8h en la práctica)
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
-const MIN_CONTENT_LENGTH = 600; // Bajado temporalmente — OR/Gemini bajo presión generan contenido más corto
+const MIN_CONTENT_LENGTH = 2800; // ~400 palabras mínimas — umbral AdSense de "contenido de valor" (Google exige profundidad real)
 
 // ─── DETECTOR DE ÚLTIMA HORA ───────────────────────────────────────────────
 // Palabras clave que indican un suceso urgente/crítico que NUNCA debe bloquearse
@@ -1321,7 +1321,7 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
         impact_level: extractStr('impact_level') || 'medium',
       };
 
-      if (recovered.title && recovered.content && recovered.content.length > 400) {
+      if (recovered.title && recovered.content && recovered.content.length > 1500) {
         articleData = recovered;
         console.log('[Bot] ✅ Recuperado JSON malformado via extracción campo-a-campo');
       }
@@ -1345,7 +1345,7 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
       lines.shift();
     }
     const content = lines.join('\n').trim();
-    if (content.length > 400) {
+    if (content.length > 1500) {
       articleData = {
         title,
         excerpt: content.slice(0, 155).replace(/\n/g, ' '),
@@ -1447,7 +1447,7 @@ function parseAndValidateAI(rawText, catSlug, newsSnippet, newsTitle) {
 
   // ── CANDADO DE LONGITUD MÍNIMA ─────────────────────────────
   if (articleData.content.length < MIN_CONTENT_LENGTH) {
-    console.log(`[Bot] ⚠️ Validation falló: Contenido muy corto (${articleData.content.length} chars).`);
+    console.log(`[Bot] ⚠️ Validation falló: Contenido muy corto (${articleData.content.length} chars < ${MIN_CONTENT_LENGTH} mínimo AdSense).`);
     return null;
   }
 
@@ -1932,7 +1932,7 @@ export async function GET(request) {
       .slice(0, 80);
     const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
-    // ─── PROMPT EDITORIAL — PERIODISMO ORIGINAL ─────────────────────────────
+    // ─── PROMPT EDITORIAL — PERIODISMO ORIGINAL + E-E-A-T PARA ADSENSE ────────
     const prompt = `Eres el redactor jefe de la sección "${cat.slug.toUpperCase()}" de **Imperio Público**, un medio digital dominicano de élite con estándares editoriales propios.
 
 --- REFERENCIA INFORMATIVA (solo para extraer los hechos) ---
@@ -1945,34 +1945,32 @@ Resumen de referencia: ${news.contentSnippet || 'Sin resumen disponible'}
 ⚠️ REGLA FUNDAMENTAL — LEY DE REDACCIÓN ORIGINAL:
 Tú NO copias. Tú NO traduces. Tú NO parafraseas directamente.
 Usas la información de la fuente ÚNICAMENTE para conocer los HECHOS.
-Luego escribes tu PROPIO artículo con:
-  • Tu PROPIA voz editorial (estilo Imperio Público)
-  • Tu PROPIA estructura narrativa
-  • Tu PROPIO ángulo y enfoque periodístico
-  • Tu PROPIO análisis e interpretación del impacto
+Luego escribes tu PROPIO artículo con voz editorial propia, estructura narrativa original, ángulo y enfoque periodístico únicos, y tu propio análisis del impacto.
 Si alguien compara tu artículo con la fuente original, deben leer como dos piezas completamente distintas.
 
 REGLAS EDITORIALES (CUMPLIMIENTO OBLIGATORIO):
 1. SECCIÓN: Enfoca el ángulo en "${cat.slug.toUpperCase()}". Estilo: ${cat.style}.
-2. IDIOMA: Español dominicano profesional, natural y fluido.
-3. Primer párrafo: impactante y denso en información — presenta QUIÉN, QUÉ, CUÁNDO, DÓNDE y POR QUÉ.
-4. ESTRUCTURA OBLIGATORIA — al menos 5 secciones con subtítulos (##):
-   - Contexto e antecedentes (¿qué llevó a este hecho?)
-   - Detalles del hecho (cifras, declaraciones, hechos verificados)
-   - Implicaciones y análisis (¿qué cambia a partir de esto?)
-   - Perspectiva ciudadana o regional (¿cómo afecta al dominicano de a pie?)
-   - Lo que viene (¿qué esperar en los próximos días o semanas?)
-5. Usa **negritas** en datos clave, cifras, nombres importantes y declaraciones.
-6. Incluye al menos 2 citas o declaraciones (reales o reconstruidas con base en los hechos).
-7. TÍTULO: Original, atractivo, SEO-optimizado. Entre 55-75 caracteres. NO copies el título de la fuente.
-8. CONTENIDO: MÍNIMO 600 PALABRAS. Artículo completo con contexto, datos, análisis y perspectiva editorial.
-9. EXCERPT: Meta-descripción propia, atractiva y con keywords naturales. Máximo 160 caracteres.
-10. TAGS: Entre 3 y 5 etiquetas relevantes y específicas.
-11. PROHIBIDO: frases genéricas de IA ("En conclusión...", "Es importante destacar...", "Cabe mencionar...").
-12. Si la noticia es trivial o sin relevancia pública → responde exactamente: IRRELEVANTE
+2. IDIOMA: Español dominicano profesional, natural y fluido. Sin anglicismos innecesarios.
+3. LONGITUD MÍNIMA OBLIGATORIA: **700 palabras** contadas. Si el artículo tiene menos de 700 palabras, NO es válido.
+4. PRIMER PÁRRAFO (lead): 3-4 oraciones densas en información — presenta QUIÉN, QUÉ, CUÁNDO, DÓNDE y POR QUÉ con datos concretos.
+5. ESTRUCTURA OBLIGATORIA — exactamente 5 subtítulos (##), cada sección con mínimo 2 párrafos:
+   ## Contexto y antecedentes  (¿qué situación previa llevó a este hecho? Mínimo 100 palabras)
+   ## Los hechos en detalle    (cifras precisas, cronología, declaraciones, fuentes. Mínimo 150 palabras)
+   ## Análisis e implicaciones (¿qué cambia? ¿por qué es relevante? Perspectiva experta. Mínimo 120 palabras)
+   ## Impacto en la ciudadanía (¿cómo afecta al dominicano de a pie? Casos concretos. Mínimo 100 palabras)
+   ## Lo que viene             (¿qué esperar en los próximos días o semanas? Mínimo 80 palabras)
+6. Usa **negritas** en datos clave, cifras, nombres importantes y declaraciones directas.
+7. Incluye al menos 2 citas directas en formato: *"Texto de la declaración"*, [Nombre/cargo].
+8. Agrega al menos 1 dato estadístico o cifra concreta por sección para dar credibilidad.
+9. TÍTULO: Original, atractivo, SEO-optimizado. Entre 55-75 caracteres. NO copies el título de la fuente. Sin clickbait vacío.
+10. EXCERPT: Meta-descripción propia y atractiva con las keywords principales. Máximo 160 caracteres. Debe invitar al clic.
+11. TAGS: Entre 4 y 6 etiquetas específicas y relevantes al tema (no categorías genéricas).
+12. PROHIBIDO ABSOLUTO: frases genéricas de IA ("En conclusión...", "Es importante destacar...", "Cabe mencionar...", "En resumen...", "Sin duda alguna...", "Vale la pena señalar...").
+13. PROHIBIDO: artículos que sean solo un resumen corto sin análisis. Google rechaza el contenido de bajo valor.
+14. Si la noticia es trivial, sin impacto real o sin suficiente información disponible → responde exactamente: IRRELEVANTE
 
 Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
-{ "title": "<titular original>", "excerpt": "<gancho propio>", "content": "<artículo markdown original, mínimo 600 palabras>", "tags": ["Tag1", "Tag2", "Tag3"], "impact_level": "high|medium|low" }`;
+{ "title": "<titular original 55-75 chars>", "excerpt": "<meta-descripción propia máx 160 chars>", "content": "<artículo markdown completo mínimo 700 palabras con 5 subtítulos ##>", "tags": ["Tag1", "Tag2", "Tag3", "Tag4"], "impact_level": "high|medium|low" }`;
 
     // ─── GEMINI PRO — ROTACIÓN DETERMINISTA POR SLOT ──────────────────────────
     // Plan: Gemini API Pro (sin límite diario real, límite por minuto por clave).
@@ -2192,7 +2190,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
                 { role: 'system', content: 'Eres periodista profesional. Responde ÚNICAMENTE con JSON válido.' },
                 { role: 'user', content: prompt }
               ],
-              max_tokens: 1500, // Reducido de 2500 — artículo válido en ~600 palabras, más rápido
+              max_tokens: 2200, // 700 palabras en español ≈ 1050 tokens + JSON overhead → 2200 suficiente
             }),
             signal: controller.signal,
           });
@@ -2431,8 +2429,9 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
 
 
     // ─── VALIDACIÓN DE CALIDAD FINAL (Content Length) ────────────────────────
-    if (articleData.content.length < 1000) {
-      throw new Error(`Contenido demasiado corto (${articleData.content.length} caracteres). Se requiere un análisis más profundo para mantener el estándar premium.`);
+    // 2800 chars ≈ 400 palabras mínimas → umbral AdSense "contenido de valor"
+    if (articleData.content.length < MIN_CONTENT_LENGTH) {
+      throw new Error(`Contenido demasiado corto (${articleData.content.length} caracteres, mínimo ${MIN_CONTENT_LENGTH}). Se requiere un análisis más profundo para mantener el estándar premium de AdSense.`);
     }
 
     // ─── BLINDAJE FINAL DE CATEGORÍA (pre-inserción) ─────────────────────────
