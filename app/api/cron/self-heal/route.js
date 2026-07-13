@@ -1,17 +1,18 @@
 /**
- * /api/cron/self-heal — Auto-sanación editorial
- * ─────────────────────────────────────────────────────────────────
- * Se ejecuta a las 12 PM (hora RD / 4 PM UTC).
+ * /api/cron/self-heal — Auto-sanación editorial (último recurso nocturno)
+ * ─────────────────────────────────────────────────────────────────────────
+ * Se ejecuta a las 7 PM RD (23:00 UTC).
  * Detecta qué secciones no tienen artículo HOY y dispara el bot
- * internamente para cada una. Garantía de cobertura total diaria.
+ * internamente para completar la cuota. Es el respaldo final de la jornada.
  *
  * Lógica:
- *  1. Consulta Supabase → ¿qué secciones ya tienen artículo hoy?
- *  2. Para cada sección vacía → llama a /api/cron/bot?category=X
- *  3. Reporta resultado por Telegram
+ *  1. Consulta Supabase → total de artículos publicados hoy
+ *  2. Si ya se alcanzó el límite global → sin acción
+ *  3. Para cada sección de alta prioridad vacía → llama a /api/cron/bot?category=X
+ *  4. Reporta resultado por Telegram
  *
- * Programado: 0 16 * * *  (4 PM UTC = 12 PM RD, todos los días)
- * El cron del bot corre a las 8 AM RD → self-heal completa las 2-3 restantes al mediodía.
+ * Programado: 0 23 * * *  (23:00 UTC = 7:00 PM RD, todos los días)
+ * El bot corre a las 10 AM, 1 PM y 4 PM RD → self-heal cubre lo que falte a las 7 PM.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -20,11 +21,12 @@ import { NextResponse }  from 'next/server';
 export const maxDuration = 55;
 export const dynamic     = 'force-dynamic';
 
-// Secciones que DEBEN tener artículo cada día (meta: 3 artículos/día)
-// El self-heal cubre hasta DAILY_LIMIT_GLOBAL secciones en paralelo.
-// Prioridad: las secciones de mayor tráfico e impacto editorial.
+// Secciones prioritarias para el self-heal nocturno.
+// El self-heal cubre hasta DAILY_LIMIT_GLOBAL artículos faltantes.
+// Orden de prioridad: secciones de mayor tráfico e impacto editorial.
 const REQUIRED_SECTIONS = [
-  'politica', 'deportes', 'internacional', 'sucesos', 'economia',
+  'politica', 'deportes', 'sucesos', 'economia', 'internacional',
+  'policia', 'salud', 'tecnologia', 'entretenimiento', 'cultura',
 ];
 
 // Límite diario global — coherente con el bot principal

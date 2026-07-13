@@ -26,7 +26,7 @@ export default function ServiceWidgets() {
     const controller = new AbortController();
     const fetchRates = async () => {
       try {
-        const res = await fetch('https://api.frankfurter.app/latest?from=USD&to=DOP,EUR', {
+        const res = await fetch('/api/exchange-rates', {
           signal: controller.signal,
         });
         if (!res.ok) return;

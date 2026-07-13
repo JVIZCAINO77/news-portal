@@ -1,8 +1,9 @@
 import { getLatestArticles } from '@/lib/serverData';
 import { NextResponse } from 'next/server';
 
-export const runtime = 'edge'; // Reducir CPU: Edge Runtime es más ligero que Node.js serverless
-// NOTA: NO usar force-dynamic — el CDN gestiona el caché con s-maxage=60 en los headers.
+// NOTA: NO usar force-dynamic — el CDN gestiona el caché con s-maxage=300 en los headers.
+// NOTA: Edge Runtime eliminado — @supabase/supabase-js usa APIs de Node.js (Buffer, crypto)
+//       que no están disponibles en Edge Runtime y causan errores silenciosos en producción.
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);

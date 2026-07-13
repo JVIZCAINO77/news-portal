@@ -17,14 +17,15 @@ export const maxDuration = 55;
 const CRON_SECRET = process.env.CRON_SECRET;
 
 // ─── LÍMITES DIARIOS ─────────────────────────────────────────────────────────
-// Cron principal: cada 2 horas (0 */2 * * *) — publica 1 artículo por ejecución.
-// Self-heal:      9:00 PM RD (01:00 UTC) — cobertura de respaldo.
+// Cron principal: 3 ejecuciones diarias (10 AM, 1 PM y 4 PM RD) — 1 artículo por ejecución.
+// Self-heal:      7:00 PM RD (23:00 UTC) — cobertura de respaldo nocturno.
 // Total objetivo: 3 artículos/día — el bot se detiene al llegar a este tope.
-// Reset de cuotas Gemini: medianoche UTC (3:00 AM hora RD).
-const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos (1 cada ~8h en la práctica)
+// Reset de cuotas Gemini: medianoche UTC (8:00 PM hora RD).
+const DAILY_LIMIT_GLOBAL = 3; // Techo diario: máximo 3 artículos
 
 // Longitud mínima del contenido generado. Contenido más corto = fallo detectado.
-const MIN_CONTENT_LENGTH = 2800; // ~400 palabras mínimas — umbral AdSense de "contenido de valor" (Google exige profundidad real)
+// ~400 palabras mínimas — umbral AdSense de "contenido de valor" (Google exige profundidad real)
+const MIN_CONTENT_LENGTH = 2800;
 
 // ─── DETECTOR DE ÚLTIMA HORA ───────────────────────────────────────────────
 // Palabras clave que indican un suceso urgente/crítico que NUNCA debe bloquearse
@@ -965,6 +966,9 @@ const TOPIC_ALLOWLIST = {
   ],
 
   // ── TENDENCIAS ───────────────────────────────────────────────────────────────
+  // Solo: viral, memes, lifestyle, fenómenos digitales, redes sociales, curiosidades
+  // NOTA: términos judiciales (sentencia, tribunal, caso) fueron removidos —
+  //       pertenecen a la sección 'justicia', no a tendencias.
   tendencias: [
     'viral','trending','tendencia','meme','lifestyle','moda','curiosidad',
     'tiktok','instagram','twitter','youtube','famoso','popular',
@@ -977,7 +981,6 @@ const TOPIC_ALLOWLIST = {
     'estudio revela','expertos','segun','nuevo','alerta',
     'consejo','recomiendan','descubren','mujer','hombre','familia',
     'comunidad','jovenes','ninos','personas','todo el mundo',
-    'sentencia','fallo','decisio','caso','demanda','tribunal',
   ],
 
   // ── ECONOMÍA ─────────────────────────────────────────────────────────────────
