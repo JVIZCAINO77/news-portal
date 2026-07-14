@@ -148,14 +148,45 @@ export async function GET(req) {
     [healedTxt, failedTxt, remainTxt].filter(Boolean).join('\n')
   );
 
-  // ─── CLEANUP INTEGRADO ───────────────────────────────────────────────────
-  // Se lanza como fire-and-forget junto con la auto-sanación del mediodía.
-  fetch(`${SITE_URL}/api/cron/cleanup`, {
-    headers: {
-      'Authorization': `Bearer ${CRON_SECRET}`,
-      'x-vercel-cron': '1',
-    },
-  }).catch(e => console.warn('[Self-heal] Cleanup fire-and-forget falló:', e.message));
+  // ─── CLEANUP INTEGRADO (inline — endpoint /api/cron/cleanup eliminado) ────
+  // Ejecutado como Promise asíncrona fire-and-forget para no bloquear la respuesta.
+  Promise.resolve().then(async () => {
+    try {
+      const { count: totalCount } = await admin
+        .from('articles')
+        .select('*', { count: 'exact', head: true });
+
+      if ((totalCount ?? 0) < 200) {
+        console.log(`[Cleanup] Saltando: solo ${totalCount} artículos en DB (mínimo 200).`);
+        return;
+      }
+
+      const oneEightyDaysAgo = new Date();
+      oneEightyDaysAgo.setDate(oneEightyDaysAgo.getDate() - 180);
+
+      const { count: deletedArticles } = await admin
+        .from('articles')
+        .delete({ count: 'exact' })
+        .lt('publishedAt', oneEightyDaysAgo.toISOString())
+        .eq('featured', false)
+        .eq('trending', false)
+        .or('image.is.null,image.eq.""')
+        .limit(50);
+
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setDate(oneMonthAgo.getDate() - 30);
+
+      const { count: deletedDrafts } = await admin
+        .from('articles')
+        .delete({ count: 'exact' })
+        .is('publishedAt', null)
+        .lt('created_at', oneMonthAgo.toISOString());
+
+      console.log(`[Cleanup] Completado: ${deletedArticles || 0} artículos viejos, ${deletedDrafts || 0} borradores eliminados.`);
+    } catch (e) {
+      console.warn('[Self-heal] Cleanup inline falló:', e.message);
+    }
+  });
 
   return NextResponse.json({
     status: failed.length === 0 ? 'healed' : 'partial',

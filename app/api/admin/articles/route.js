@@ -46,6 +46,49 @@ function makeSlug(title) {
     .replace(/(^-|-$)+/g, '');
 }
 
+// ── GET /api/admin/articles?trigger=bot&category=X → Disparo manual del bot ──
+// Reemplaza el endpoint eliminado /api/cron/trigger para cumplir límite de 12 funciones Hobby.
+export async function GET(request) {
+  const { searchParams } = new URL(request.url);
+  const trigger = searchParams.get('trigger');
+
+  if (trigger !== 'bot') {
+    return NextResponse.json({ error: 'Parámetro trigger inválido' }, { status: 400 });
+  }
+
+  try {
+    const cookieStore = await cookies();
+    const user = await getAuthUser(cookieStore);
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+    }
+
+    // Verificar rol admin
+    const admin = getAdminClient();
+    const { data: profile } = await admin.from('profiles').select('role').eq('id', user.id).single();
+    if (profile?.role !== 'admin') {
+      return NextResponse.json({ error: 'Solo los administradores pueden disparar el bot.' }, { status: 403 });
+    }
+
+    const category = searchParams.get('category') || 'politica';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || `https://${request.headers.get('host')}`;
+    const secret  = process.env.CRON_SECRET;
+
+    const botRes = await fetch(`${baseUrl}/api/cron/bot?category=${encodeURIComponent(category)}`, {
+      headers: {
+        'Authorization': `Bearer ${secret}`,
+        'x-vercel-cron': '1',
+      },
+    });
+
+    const result = await botRes.json().catch(() => ({}));
+    return NextResponse.json({ triggered: true, category, result, status: botRes.status });
+
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}
+
 // ── POST /api/admin/articles → Crear artículo ────────────────────────────────
 export async function POST(request) {
   try {

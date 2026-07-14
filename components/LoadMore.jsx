@@ -23,7 +23,7 @@ export default function LoadMore({ initialOffset = 30 }) {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/articles/paginated?limit=12&offset=${offset}`);
+      const res = await fetch(`/api/articles/latest?limit=12&offset=${offset}`);
       const newArticles = await res.json();
 
       if (newArticles.length < 12) {

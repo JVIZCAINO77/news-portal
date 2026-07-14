@@ -51,10 +51,8 @@ export default function AgentsDashboard({ botEnabled }) {
     setResults(prev => ({ ...prev, [category]: null }));
 
     try {
-      const res = await fetch('/api/cron/trigger', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ category }),
+      const res = await fetch(`/api/admin/articles?trigger=bot&category=${encodeURIComponent(category)}`, {
+        method: 'GET',
       });
 
       // Protección: si la respuesta no es JSON válido (ej: error 500 de Vercel)

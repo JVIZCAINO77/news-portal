@@ -13,50 +13,40 @@
       "maxDuration": 55,
       "memory": 512
     },
+    "app/api/cron/self-heal/route.js": {
+      "maxDuration": 55
+    },
     "app/api/og/route.js": {
       "maxDuration": 10,
       "memory": 512
     },
     "app/api/articles/latest/route.js": {
-      "maxDuration": 8
-    },
-    "app/api/articles/paginated/route.js": {
-      "maxDuration": 8
+      "maxDuration": 10
     },
     "app/api/articles/view/route.js": {
       "maxDuration": 5
     },
-    "app/api/cron/trigger/route.js": {
+    "app/api/admin/articles/route.js": {
       "maxDuration": 55,
       "memory": 256
-    },
-    "app/api/admin/**": {
-      "maxDuration": 15,
-      "memory": 128
     },
     "app/api/admin/post-social/route.js": {
       "maxDuration": 45,
       "memory": 256
     },
-    "app/api/cron/fix-images/route.js": {
-      "maxDuration": 55,
+    "app/api/admin/repair-proxy/route.js": {
+      "maxDuration": 30,
       "memory": 256
+    },
+    "app/api/admin/refresh-fb-token/route.js": {
+      "maxDuration": 30
     },
     "app/api/internalize-image/route.js": {
       "maxDuration": 30,
       "memory": 256
     },
-    "app/api/cron/refresh-fb-token/route.js": {
-      "maxDuration": 30
-    },
-    "app/api/cron/self-heal/route.js": {
-      "maxDuration": 55
-    },
-    "app/api/cron/cleanup/route.js": {
-      "maxDuration": 30
-    },
-    "app/api/health/route.js": {
-      "maxDuration": 15
+    "app/api/newsletter/subscribe/route.js": {
+      "maxDuration": 10
     }
   },
 
