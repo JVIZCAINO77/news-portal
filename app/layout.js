@@ -66,8 +66,8 @@ export const metadata = {
     title: SITE_CONFIG.name,
   },
   other: {
-    // Verificación de cuenta Google AdSense
-    'google-adsense-account': SITE_CONFIG.publisherId,
+    // Verificación de cuenta Google AdSense — DEBE usar el formato completo 'ca-pub-XXXXX'
+    'google-adsense-account': SITE_CONFIG.adsenseId,
   },
 };
 
@@ -83,6 +83,13 @@ export default function RootLayout({ children }) {
       <head>
         {/* Forzar modo claro antes de que React hidrate — evita el flash negro */}
         <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.remove('dark');localStorage.removeItem('theme');` }} />
+
+        {/* ── Google AdSense — debe estar en el <head> estático para que el verificador lo encuentre ── */}
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE_CONFIG.adsenseId}`}
+          crossOrigin="anonymous"
+        />
 
         {/* ── Preconnect: SOLO los 2 dominios más críticos para LCP ── */}
         {/* Más de 2 preconnects compiten por ancho de banda y degradan el LCP en móvil */}
@@ -174,13 +181,7 @@ export default function RootLayout({ children }) {
             `,
           }}
         />
-        {/* Google AdSense — fuera de <head> para que strategy=lazyOnload funcione correctamente */}
-        <Script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${SITE_CONFIG.adsenseId}`}
-          crossOrigin="anonymous"
-          strategy="lazyOnload"
-        />
+        {/* Google AdSense — el script ya está en el <head> estático arriba */}
       </body>
     </html>
   );
