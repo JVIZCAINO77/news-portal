@@ -1659,31 +1659,72 @@ export async function GET(request) {
     // ─── FUENTES DEDICADAS POR CATEGORÍA ────────────────────────────────────────
     // Cada categoría usa SOLO sus feeds específicos. Nunca se mezclan fuentes de
     // otras secciones. Esto garantiza que deportes no recibe noticias de política, etc.
-    const categoryFeeds = cat.feeds || [];
-    if (categoryFeeds.length === 0) {
-      return NextResponse.json({ message: `No hay feeds configurados para: ${categoryKey}` }, { status: 200 });
+    //
+    // FALLBACK DE CATEGORÍA: si los feeds de la categoría elegida están vacíos,
+    // el bot prueba automáticamente con la siguiente categoría disponible en la
+    // rotación (hasta 5 intentos) en lugar de rendirse sin publicar nada.
+
+    // Helper para cargar feeds de una categoría
+    async function fetchPoolForCategory(catKey) {
+      const catDef = CATEGORIES[catKey];
+      if (!catDef) return [];
+      const feeds = catDef.feeds || [];
+      if (feeds.length === 0) return [];
+      const promises = feeds.map(async (feedUrl) => {
+        try {
+          const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('feed-timeout')), 3000));
+          const feed = await Promise.race([parser.parseURL(feedUrl), timeout]);
+          return feed.items || [];
+        } catch (e) {
+          console.warn(`[Bot] Feed falló (${feedUrl.slice(0, 50)}): ${e.message}`);
+          return [];
+        }
+      });
+      const fetched = await Promise.all(promises);
+      return fetched.flat();
     }
 
-    // Fetch en paralelo — cada feed tiene un hard limit de 3s para dejar más tiempo al AI
-    const feedPromises = categoryFeeds.map(async (feedUrl) => {
-      try {
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('feed-timeout')), 3000));
-        const feed = await Promise.race([parser.parseURL(feedUrl), timeout]);
-        return feed.items || [];
-      } catch (e) {
-        console.warn(`[Bot] Feed falló (${feedUrl.slice(0, 50)}): ${e.message}`);
-        return [];
-      }
-    });
-
-    const results = await Promise.all(feedPromises);
-    let pooledItems = results.flat();
-    console.log(`[Bot] ${pooledItems.length} ítems totales de ${categoryFeeds.length} feeds dedicados para "${cat.slug}"`);
+    // Intentar cargar feeds — con fallback automático a la siguiente categoría
+    let pooledItems = await fetchPoolForCategory(categoryKey);
+    console.log(`[Bot] ${pooledItems.length} ítems totales de feeds para "${categoryKey}"`);
 
     if (pooledItems.length === 0) {
-      return NextResponse.json({ message: `Sin noticias disponibles en las fuentes para: ${categoryKey}` }, { status: 200 });
+      // Construir lista de candidatos alternativos (sin la categoría actual ni las ya cubiertas hoy)
+      const coveredTodaySet = new Set(
+        (await supabase.from('articles').select('category').gte('publishedAt', startOfTodayDR))
+          .data?.map(a => a.category) || []
+      );
+      const fallbackCandidates = ROTATION_ORDER.filter(
+        c => c !== categoryKey && !coveredTodaySet.has(c) && CATEGORIES[c]
+      );
+      // Priorizar Tier 1 dentro de los candidatos
+      const TIER1 = ['politica','policia','deportes','tecnologia','sucesos','entretenimiento','economia','internacional','salud','cultura'];
+      const orderedCandidates = [
+        ...fallbackCandidates.filter(c => TIER1.includes(c)),
+        ...fallbackCandidates.filter(c => !TIER1.includes(c)),
+      ];
+      console.log(`[Bot] ⚠️ Feeds vacíos para "${categoryKey}" — probando fallback en: ${orderedCandidates.slice(0, 5).join(', ')}`);
+
+      let fallbackFound = false;
+      for (const fallbackKey of orderedCandidates.slice(0, 5)) {
+        pooledItems = await fetchPoolForCategory(fallbackKey);
+        if (pooledItems.length > 0) {
+          console.log(`[Bot] ✅ Fallback exitoso → usando categoría "${fallbackKey}" (${pooledItems.length} ítems)`);
+          categoryKey = fallbackKey;
+          fallbackFound = true;
+          break;
+        }
+        console.log(`[Bot] ❌ "${fallbackKey}" también vacía — continuando...`);
+      }
+
+      if (!fallbackFound) {
+        return NextResponse.json({ message: `Sin noticias disponibles en ninguna categoría (${[categoryKey, ...orderedCandidates.slice(0,5)].join(', ')})` }, { status: 200 });
+      }
     }
 
+
+    // Re-resolver cat en caso de que categoryKey haya cambiado por fallback
+    const catResolved = CATEGORIES[categoryKey] || cat;
 
     // ⚡ CAP DE ITEMS: máximo 20 por ejecución — evita scoring lento en feeds grandes
     if (pooledItems.length > 20) {
@@ -1858,8 +1899,8 @@ export async function GET(request) {
       } catch (_) { /* URL inválida — dejar pasar, el filtro de link exacto lo capturará */ }
 
       // 4a. VALIDACIÓN TEMÁTICA — descartar si el ítem no es apto para esta sección
-      if (!isOnTopicForCategory(item, cat.slug)) {
-        console.log(`[Bot] ⛔ Fuera de sección [${cat.slug.toUpperCase()}]: "${item.title.slice(0, 65)}"`);
+      if (!isOnTopicForCategory(item, catResolved.slug)) {
+        console.log(`[Bot] ⛔ Fuera de sección [${catResolved.slug.toUpperCase()}]: "${item.title.slice(0, 65)}"`);
         continue;
       }
 
@@ -1936,11 +1977,11 @@ export async function GET(request) {
     const slug = `${baseSlug}-${Date.now().toString().slice(-6)}`;
 
     // ─── PROMPT EDITORIAL — PERIODISMO ORIGINAL + E-E-A-T PARA ADSENSE ────────
-    const prompt = `Eres el redactor jefe de la sección "${cat.slug.toUpperCase()}" de **Imperio Público**, un medio digital dominicano de élite con estándares editoriales propios.
+    const prompt = `Eres el redactor jefe de la sección "${catResolved.slug.toUpperCase()}" de **Imperio Público**, un medio digital dominicano de élite con estándares editoriales propios.
 
 --- REFERENCIA INFORMATIVA (solo para extraer los hechos) ---
 Fecha: ${todayDR}
-SECCIÓN: ${cat.slug.toUpperCase()}
+SECCIÓN: ${catResolved.slug.toUpperCase()}
 Titular de referencia: ${news.title}
 Resumen de referencia: ${news.contentSnippet || 'Sin resumen disponible'}
 --------------------------------------------------------------
@@ -1952,7 +1993,7 @@ Luego escribes tu PROPIO artículo con voz editorial propia, estructura narrativ
 Si alguien compara tu artículo con la fuente original, deben leer como dos piezas completamente distintas.
 
 REGLAS EDITORIALES (CUMPLIMIENTO OBLIGATORIO):
-1. SECCIÓN: Enfoca el ángulo en "${cat.slug.toUpperCase()}". Estilo: ${cat.style}.
+1. SECCIÓN: Enfoca el ángulo en "${catResolved.slug.toUpperCase()}". Estilo: ${catResolved.style}.
 2. IDIOMA: Español dominicano profesional, natural y fluido. Sin anglicismos innecesarios.
 3. LONGITUD MÍNIMA OBLIGATORIA: **700 palabras** contadas. Si el artículo tiene menos de 700 palabras, NO es válido.
 4. PRIMER PÁRRAFO (lead): 3-4 oraciones densas en información — presenta QUIÉN, QUÉ, CUÁNDO, DÓNDE y POR QUÉ con datos concretos.
@@ -2122,7 +2163,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
             continue;
           }
           const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-          const parsed = parseAndValidateAI(text, cat.slug, news.contentSnippet, news.title);
+          const parsed = parseAndValidateAI(text, catResolved.slug, news.contentSnippet, news.title);
           if (parsed) {
             console.log(`[Bot] ✅ Gemini éxito y validado: ...${key.slice(-6)} / ${model}`);
             articleData = parsed;
@@ -2210,7 +2251,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
               console.log(`[Bot] ⚠️ OpenRouter (${orModel}) devolvió texto plano: ${rawText.slice(0, 80)}`);
             }
             if (orText) {
-              const parsed = parseAndValidateAI(orText, cat.slug, news.contentSnippet, news.title);
+              const parsed = parseAndValidateAI(orText, catResolved.slug, news.contentSnippet, news.title);
               if (parsed) {
                 console.log(`[Bot] ✅ OpenRouter (${orModel}) respondió y validado.`);
                 articleData = parsed;
@@ -2258,7 +2299,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         clearTimeout(timeoutId);
         if (polRes.ok) {
           const txt = await polRes.text();
-          const parsed = parseAndValidateAI(txt, cat.slug, news.contentSnippet, news.title);
+          const parsed = parseAndValidateAI(txt, catResolved.slug, news.contentSnippet, news.title);
           if (parsed) {
             console.log('[Bot] ✅ Pollinations respondió y validado correctamente.');
             articleData = parsed;
@@ -2399,7 +2440,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         console.log(`[Bot] ETAPA-2 Sin imagen fuente. Generando imagen editorial por IA...`);
       }
       const topicTags   = Array.isArray(articleData.tags) ? articleData.tags.join(', ') : '';
-      const visualPrompt = `high-end editorial news photography for article: "${articleData.title.slice(0, 120)}". Topics: ${topicTags || articleData.category}. Category: ${cat.slug}. Professional journalistic style, cinematic dramatic lighting, photorealistic, 8k, wide angle shot, 16:9 aspect ratio. NO TEXT, NO LETTERS, NO LOGOS, NO SIGNS.`;
+      const visualPrompt = `high-end editorial news photography for article: "${articleData.title.slice(0, 120)}". Topics: ${topicTags || articleData.category}. Category: ${catResolved.slug}. Professional journalistic style, cinematic dramatic lighting, photorealistic, 8k, wide angle shot, 16:9 aspect ratio. NO TEXT, NO LETTERS, NO LOGOS, NO SIGNS.`;
       const seed1        = Date.now();
       const polUrl1      = `https://image.pollinations.ai/prompt/${encodeURIComponent(visualPrompt)}?width=1280&height=720&nologo=true&enhance=true&seed=${seed1}`;
 
@@ -2411,7 +2452,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     if (!finalImageUrl || !finalImageUrl.includes('cloudinary.com')) {
       console.warn(`[Bot] ETAPA-3 Segundo intento de imagen IA con seed alternativo...`);
       const seed2        = Date.now() + Math.floor(Math.random() * 999999);
-      const altPrompt    = `dramatic editorial photograph for news article about ${cat.slug}: "${articleData.title.slice(0, 80)}". Professional press photography, high contrast, real world scene, photorealistic. NO TEXT.`;
+      const altPrompt    = `dramatic editorial photograph for news article about ${catResolved.slug}: "${articleData.title.slice(0, 80)}". Professional press photography, high contrast, real world scene, photorealistic. NO TEXT.`;
       const polUrl2      = `https://image.pollinations.ai/prompt/${encodeURIComponent(altPrompt)}?width=1280&height=720&nologo=true&seed=${seed2}`;
       finalImageUrl      = await internalizeImage(polUrl2, 2);
     }
@@ -2471,7 +2512,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
     const MIN_CAT_SCORE = 1; // Al menos 1 keyword de la sección debe estar presente
     const normFinal = (s) => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const aiTextFinal = normFinal(`${articleData.title} ${articleData.excerpt || ''} ${(articleData.tags || []).join(' ')}`);
-    const guardSlug = cat.slug;
+    const guardSlug = catResolved.slug;
     const guardKws = CAT_GUARD_KEYWORDS[guardSlug] || [];
     const guardBlock = CAT_GUARD_BLOCKLIST[guardSlug] || [];
 
@@ -2548,7 +2589,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         .slice(0, 5)
         .map(w => { const s = String(w || ''); return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : ''; })
         .filter(Boolean);
-      cleanedTags = [cat.slug.charAt(0).toUpperCase() + cat.slug.slice(1), ...titleWords];
+      cleanedTags = [catResolved.slug.charAt(0).toUpperCase() + catResolved.slug.slice(1), ...titleWords];
     }
 
     // REGLA CRÍTICA: La categoría SIEMPRE es la del agente que disparó el bot.
@@ -2559,8 +2600,8 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       excerpt: articleData.excerpt || articleData.title,
       content: articleData.content,
       tags: cleanedTags.length > 0 ? cleanedTags : null,
-      category: cat.slug,   // ← SIEMPRE la sección del agente, sin excepción
-      author: cat.author,   // ← SIEMPRE el autor de la sección
+      category: catResolved.slug,   // ← SIEMPRE la sección del agente, sin excepción
+      author: catResolved.author,   // ← SIEMPRE el autor de la sección
       image: finalImageUrl,
       imageAlt: articleData.title,
       source_link: news.link,
@@ -2602,7 +2643,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
       console.warn('[Bot] No se pudo notificar a servicios externos:', indexErr.message);
     }
 
-    console.log(`[Bot] ✅ Artículo publicado en sección "${cat.slug}": "${articleData.title.slice(0, 60)}"`);
+    console.log(`[Bot] ✅ Artículo publicado en sección "${catResolved.slug}": "${articleData.title.slice(0, 60)}"`);
     return NextResponse.json({
       success: true,
       message: '¡Noticia publicada con éxito!',
@@ -2610,7 +2651,7 @@ Responde EXCLUSIVAMENTE con JSON válido (sin markdown, sin texto adicional):
         id: insertedArticle.id,
         title: insertedArticle.title,
         slug,
-        category: cat.slug,
+        category: catResolved.slug,
       },
     }, { status: 200 });
 
