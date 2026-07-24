@@ -575,13 +575,21 @@ const TOPIC_BLOCKLIST = {
 
   // ── POLICÍA ──────────────────────────────────────────────────────────────────
   // Solo: operativos, arrestos, investigaciones, crimen, seguridad ciudadana
-  // Bloquear: farándula, deportes, economía, geopolítica internacional
+  // Bloquear: farándula, deportes, economía, geopolítica internacional, política electoral
   policia: [
     'actor','actriz','cantante','concierto','farandula','espectaculo','influencer',
     'beisbol','jonron','mlb','nba','gol','futbol','baloncesto','deporte','atleta',
     'pib','inflacion','exportacion','importacion','banco','dolar baja','dolar sube',
     'trump','putin','rusia','ucrania','china','israel','iran','guerra','otan',
     'ataque militar','bombardeo','geopolitica',
+    // Términos electorales/políticos que NO deben caer en policía
+    'tse','tribunal superior electoral','jce','elecciones','consulta interna',
+    'partido politico','pld','prm','fuerza del pueblo','leonel','danilo',
+    'senado dominicano','camara de diputados','legislacion','proyecto de ley',
+    'reforma constitucional','decreto presidencial','campaña electoral',
+    // Términos corporativos/empresariales
+    'banco bhd','banreservas','banco popular','superintendencia','aniversario',
+    'lanzamiento','campana publicitaria','campaña corporativa',
   ],
 
   // ── DEPORTES ─────────────────────────────────────────────────────────────────
@@ -922,12 +930,15 @@ const TOPIC_ALLOWLIST = {
   ],
 
   // ── POLICÍA ──────────────────────────────────────────────────────────────────
+  // NOTA: palabras ambiguas (tribunal, fiscal, investigacion) se eliminaron del allowlist
+  // ya que también aplican a política/justicia — se exige match en TÍTULO solamente.
   policia: [
     'policia','operativo','arresto','arrestado','detenido','allanamiento',
-    'investigacion','crimen','delito','tribunal','juez','fiscal',
-    'dicrim','dncd','pn','fiscalia','abogado','condena',
-    'homicidio','asesinato','robo','asalto','banda','capturado','imputado',
-    'seguridad ciudadana','drogas','narcotráfico','carcel','preso',
+    'crimen','delito','dicrim','dncd','pn','condena',
+    'homicidio','asesinato','robo','asalto','banda criminal','capturado','imputado',
+    'seguridad ciudadana','drogas','narcotrafico','carcel','preso',
+    'tiroteo','disparo','bala','arma de fuego','sicario','fugitivo',
+    'policia nacional','agentes','patrulla','registro','decomiso',
   ],
 
   // ── DEPORTES ─────────────────────────────────────────────────────────────────
@@ -1244,8 +1255,28 @@ const TOPIC_ALLOWLIST = {
  * BLINDAJE ESTRICTO (Estructura Oficial Imperio Público):
  *   (1) NINGUNA palabra del BLOCKLIST puede aparecer en título+snippet.
  *   (2) El TÍTULO debe contener al menos 1 palabra del ALLOWLIST de la sección.
- *       Excepción: "noticias" acepta también 2+ hits en el snippet (es la sección general).
+ *
+ * Secciones ESTRICTAS: solo aceptan hit en TÍTULO (no en snippet).
+ * Esto previene que noticias políticas/judiciales caigan en "policia" porque
+ * el snippet menciona "fiscal" o "tribunal" en contexto no policial.
+ *
+ * Secciones FLEXIBLES: aceptan hit en título O snippet (para secciones amplias
+ * como tendencias, salud, cultura donde el tema puede estar en el cuerpo).
  */
+
+// Secciones que exigen match en el TÍTULO (no basta el snippet)
+const STRICT_MATCH_CATEGORIES = new Set([
+  'policia',       // Noticias policiales deben tener keywords policiales en el titular
+  'deportes',      // Deportes: si no está en el titular, no es deporte
+  'tecnologia',    // Tech debe estar en el titular
+  'entretenimiento', // Farándula/shows: titular debe mencionarlo
+  'farandula',     // Igual
+  'musica',        // Igual
+  'cine',          // Igual
+  'moda',          // Igual
+  'virales',       // Igual
+]);
+
 function isOnTopicForCategory(item, categorySlug) {
   const blocklist = TOPIC_BLOCKLIST[categorySlug] || [];
   const allowlist = TOPIC_ALLOWLIST[categorySlug] || [];
@@ -1260,13 +1291,17 @@ function isOnTopicForCategory(item, categorySlug) {
   // 2. Sin ALLOWLIST definido → sin restricción
   if (allowlist.length === 0) return true;
 
-  // 3. Aceptar si hay hit en TÍTULO o en SNIPPET
-  //    El blocklist garantiza que el contenido no sea de otra sección.
-  //    No es necesario exigir el hit solo en el título — muchas noticias
-  //    válidas describen el tema en el cuerpo/snippet, no en el titular.
+  // 3. Para secciones ESTRICTAS: solo aceptar hit en TÍTULO
+  //    Para secciones FLEXIBLES: aceptar hit en título O snippet
   const titleHit   = allowlist.some(w => titleOnly.includes(norm(w)));
-  const snippetHit = allowlist.some(w => text.includes(norm(w)));
 
+  if (STRICT_MATCH_CATEGORIES.has(categorySlug)) {
+    // Exigir que el titular confirme la sección — evita colisiones con política/justicia
+    return titleHit;
+  }
+
+  // Secciones flexibles: el tema puede estar en el cuerpo del ítem
+  const snippetHit = allowlist.some(w => text.includes(norm(w)));
   return titleHit || snippetHit;
 }
 
